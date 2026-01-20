@@ -9,7 +9,7 @@ interface Message {
   content: string;
 }
 
-const API_URL = "/api/chat";
+const BACKEND_URL = "https://delta-80ht.onrender.com";
 
 export default function ChatDemo() {
   const [messages, setMessages] = useState<Message[]>([
@@ -58,7 +58,7 @@ export default function ChatDemo() {
 
     try {
       const userId = generateUserId();
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${BACKEND_URL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,6 +70,7 @@ export default function ChatDemo() {
       });
 
       if (!response.ok) {
+        console.error("Backend responded with", response.status);
         throw new Error("Failed to get response");
       }
 
@@ -83,6 +84,7 @@ export default function ChatDemo() {
 
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
+      console.error("Chat backend connection failed:", error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
