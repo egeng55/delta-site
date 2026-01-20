@@ -4,7 +4,7 @@ import { motion, type Variants } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 // Different page transition variants
-const pageVariants = {
+const pageVariants: Record<string, Variants> = {
   // Circular reveal from center
   circleReveal: {
     initial: {
@@ -16,7 +16,7 @@ const pageVariants = {
       clipPath: "circle(150% at 50% 50%)",
       transition: {
         duration: 0.7,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeInOut",
       },
     },
     exit: {
@@ -24,7 +24,7 @@ const pageVariants = {
       clipPath: "circle(0% at 50% 50%)",
       transition: {
         duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeInOut",
       },
     },
   },
@@ -40,7 +40,7 @@ const pageVariants = {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeInOut",
       },
     },
     exit: {
@@ -48,7 +48,7 @@ const pageVariants = {
       y: -50,
       transition: {
         duration: 0.4,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeInOut",
       },
     },
   },
@@ -66,7 +66,7 @@ const pageVariants = {
       filter: "blur(0px)",
       transition: {
         duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeInOut",
       },
     },
     exit: {
@@ -75,7 +75,7 @@ const pageVariants = {
       filter: "blur(10px)",
       transition: {
         duration: 0.4,
-        ease: [0.22, 1, 0.36, 1],
+        ease: "easeInOut",
       },
     },
   },
@@ -124,7 +124,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           scaleY: 0,
           transition: {
             duration: 0.6,
-            ease: [0.22, 1, 0.36, 1],
+            ease: "easeInOut",
             delay: 0.2,
           }
         }}
