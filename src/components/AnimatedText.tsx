@@ -43,7 +43,7 @@ export function AnimatedText({
               y: 0,
               transition: {
                 duration: 0.4,
-                ease: [0.22, 1, 0.36, 1],
+                ease: "easeInOut",
               },
             },
           }}
@@ -92,7 +92,7 @@ export function AnimatedWords({
               rotateX: 0,
               transition: {
                 duration: 0.5,
-                ease: [0.22, 1, 0.36, 1],
+                ease: "easeInOut",
               },
             },
           }}
