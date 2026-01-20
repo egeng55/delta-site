@@ -81,7 +81,6 @@ const pageVariants: Record<string, Variants> = {
   },
 };
 
-// Overlay animation for dramatic effect
 const overlayVariants: Variants = {
   initial: { scaleY: 0 },
   animate: {
