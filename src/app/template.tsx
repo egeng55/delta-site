@@ -82,19 +82,18 @@ const pageVariants: Record<string, Variants> = {
 };
 
 const overlayVariants: Variants = {
-  initial: { scaleY: 0 },
+  initial: { scaleY: 1 },
   animate: {
-    scaleY: 1,
+    scaleY: 0,
     transition: {
-      duration: 0.8,
+      duration: 0.25,
       ease: easeInOut,
-      delay: 0.2,
     },
   },
   exit: {
     scaleY: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.25,
       ease: easeInOut,
     },
   },

@@ -101,22 +101,13 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, amount: 0.6 }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-12 relative z-10"
+            className="text-center mb-8 relative z-10"
           >
-            <motion.span
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: false, amount: 0.6 }}
-              transition={{ delay: 0.1 }}
-              className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20 mb-6"
-            >
-              Try Delta Now — No Sign Up Required
-            </motion.span>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.6 }}
-              transition={{ delay: 0.15, duration: 0.5 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
               className="text-4xl md:text-6xl font-bold mb-4"
             >
               Your AI Health
@@ -127,7 +118,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: false, amount: 0.6 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.15 }}
               className="text-muted text-lg max-w-xl mx-auto"
             >
               Ask Delta anything about nutrition, fitness, sleep, or building healthy habits.

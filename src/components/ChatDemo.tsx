@@ -9,7 +9,7 @@ interface Message {
   content: string;
 }
 
-const DEMO_API_URL = process.env.NEXT_PUBLIC_DELTA_API_URL || "https://delta-80ht.onrender.com";
+const API_URL = "/api/chat";
 
 export default function ChatDemo() {
   const [messages, setMessages] = useState<Message[]>([
@@ -58,7 +58,7 @@ export default function ChatDemo() {
 
     try {
       const userId = generateUserId();
-      const response = await fetch(`${DEMO_API_URL}/chat`, {
+      const response = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,11 +109,8 @@ export default function ChatDemo() {
       transition={{ duration: 0.5, ease: easeOut }}
       className="w-full max-w-3xl mx-auto"
     >
-      <div className="bg-background rounded-3xl overflow-hidden">
-        <div
-          ref={messagesContainerRef}
-          className="h-[400px] overflow-y-auto p-6 space-y-4"
-        >
+      <div className="flex flex-col max-h-[420px] w-full overflow-hidden rounded-xl bg-background">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
           <AnimatePresence initial={false}>
             {messages.map((message) => (
               <motion.div
@@ -166,7 +163,7 @@ export default function ChatDemo() {
         </div>
 
         {/* Input */}
-        <div className="p-4">
+        <div className="border-t border-border px-4 py-3 bg-background">
           <div className="flex items-end gap-3">
             <textarea
               ref={inputRef}
