@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, easeInOut, easeOut, linear } from "framer-motion";
+import { motion, easeInOut, easeOut } from "framer-motion";
 
 interface AnimatedTextProps {
   text: string;
@@ -278,7 +278,7 @@ export function GradientText({ text, className = "" }: GradientTextProps) {
       transition={{
         duration: 5,
         repeat: Infinity,
-        ease: linear,
+        ease: easeInOut,
       }}
     >
       {text}

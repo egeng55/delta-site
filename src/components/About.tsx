@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, linear } from "framer-motion";
+import { motion, useScroll, useTransform, easeInOut } from "framer-motion";
 import { useRef } from "react";
 
 export default function About() {
@@ -100,14 +100,14 @@ export default function About() {
               animate={{
                 rotate: [0, 360],
               }}
-              transition={{ duration: 20, repeat: Infinity, ease: linear }}
+              transition={{ duration: 20, repeat: Infinity, ease: easeInOut }}
               className="absolute -top-8 -right-8 w-32 h-32 border border-primary/20 rounded-full"
             />
             <motion.div
               animate={{
                 rotate: [360, 0],
               }}
-              transition={{ duration: 25, repeat: Infinity, ease: linear }}
+              transition={{ duration: 25, repeat: Infinity, ease: easeInOut }}
               className="absolute -bottom-4 -left-4 w-24 h-24 border border-accent/20 rounded-full"
             />
           </motion.div>

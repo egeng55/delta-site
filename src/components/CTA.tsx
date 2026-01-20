@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, easeInOut, linear } from "framer-motion";
+import { motion, easeInOut } from "framer-motion";
 
 export default function CTA() {
   return (
@@ -15,7 +15,7 @@ export default function CTA() {
           y: [0, -50, 0],
           rotate: [0, 180, 360],
         }}
-        transition={{ duration: 20, repeat: Infinity, ease: linear }}
+        transition={{ duration: 20, repeat: Infinity, ease: easeInOut }}
         className="absolute top-10 left-10 w-64 h-64 border border-white/10 rounded-full"
       />
       <motion.div
@@ -24,7 +24,7 @@ export default function CTA() {
           y: [0, 80, 0],
           rotate: [360, 180, 0],
         }}
-        transition={{ duration: 25, repeat: Infinity, ease: linear }}
+        transition={{ duration: 25, repeat: Infinity, ease: easeInOut }}
         className="absolute bottom-10 right-10 w-48 h-48 border border-white/10 rounded-full"
       />
       <motion.div
