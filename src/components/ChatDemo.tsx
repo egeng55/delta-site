@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 
 interface Message {
@@ -106,7 +106,7 @@ export default function ChatDemo() {
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: false, amount: 0.3 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: easeOut }}
       className="w-full max-w-3xl mx-auto"
     >
       <div className="bg-background rounded-3xl overflow-hidden">

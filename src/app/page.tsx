@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeInOut, linear } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import ChatDemo from "@/components/ChatDemo";
 import Footer from "@/components/Footer";
@@ -78,7 +78,7 @@ export default function Home() {
             transition={{
               duration: 8,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: easeInOut,
             }}
             className="absolute top-1/4 -right-32 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
           />
@@ -90,7 +90,7 @@ export default function Home() {
             transition={{
               duration: 10,
               repeat: Infinity,
-              ease: "easeInOut",
+              ease: easeInOut,
             }}
             className="absolute bottom-1/4 -left-32 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
           />
@@ -149,7 +149,7 @@ export default function Home() {
           >
             <motion.div
               animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: easeInOut }}
               className="w-6 h-10 border-2 border-muted/30 rounded-full flex justify-center pt-2"
             >
               <motion.div className="w-1.5 h-1.5 bg-primary rounded-full" />
@@ -305,12 +305,12 @@ export default function Home() {
                   {/* Decorative elements */}
                   <motion.div
                     animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 20, repeat: Infinity, ease: linear }}
                     className="absolute -top-8 -right-8 w-32 h-32 border border-primary/20 rounded-full"
                   />
                   <motion.div
                     animate={{ rotate: [360, 0] }}
-                    transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 25, repeat: Infinity, ease: linear }}
                     className="absolute -bottom-4 -left-4 w-24 h-24 border border-accent/20 rounded-full"
                   />
                 </div>
@@ -367,7 +367,7 @@ export default function Home() {
               y: [0, -50, 0],
               rotate: [0, 180, 360],
             }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 20, repeat: Infinity, ease: linear }}
             className="absolute top-10 left-10 w-64 h-64 border border-white/10 rounded-full"
           />
           <motion.div
@@ -376,7 +376,7 @@ export default function Home() {
               y: [0, 80, 0],
               rotate: [360, 180, 0],
             }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 25, repeat: Infinity, ease: linear }}
             className="absolute bottom-10 right-10 w-48 h-48 border border-white/10 rounded-full"
           />
 

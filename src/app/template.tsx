@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { motion, type Variants, easeInOut } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 // Different page transition variants
@@ -16,7 +16,7 @@ const pageVariants: Record<string, Variants> = {
       clipPath: "circle(150% at 50% 50%)",
       transition: {
         duration: 0.7,
-        ease: "easeInOut",
+        ease: easeInOut,
       },
     },
     exit: {
@@ -24,7 +24,7 @@ const pageVariants: Record<string, Variants> = {
       clipPath: "circle(0% at 50% 50%)",
       transition: {
         duration: 0.5,
-        ease: "easeInOut",
+        ease: easeInOut,
       },
     },
   },
@@ -40,7 +40,7 @@ const pageVariants: Record<string, Variants> = {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: "easeInOut",
+        ease: easeInOut,
       },
     },
     exit: {
@@ -48,7 +48,7 @@ const pageVariants: Record<string, Variants> = {
       y: -50,
       transition: {
         duration: 0.4,
-        ease: "easeInOut",
+        ease: easeInOut,
       },
     },
   },
@@ -66,7 +66,7 @@ const pageVariants: Record<string, Variants> = {
       filter: "blur(0px)",
       transition: {
         duration: 0.5,
-        ease: "easeInOut",
+        ease: easeInOut,
       },
     },
     exit: {
@@ -75,7 +75,7 @@ const pageVariants: Record<string, Variants> = {
       filter: "blur(10px)",
       transition: {
         duration: 0.4,
-        ease: "easeInOut",
+        ease: easeInOut,
       },
     },
   },
@@ -87,7 +87,7 @@ const overlayVariants: Variants = {
     scaleY: 1,
     transition: {
       duration: 0.8,
-      ease: "easeInOut",
+      ease: easeInOut,
       delay: 0.2,
     },
   },
@@ -95,7 +95,7 @@ const overlayVariants: Variants = {
     scaleY: 0,
     transition: {
       duration: 0.6,
-      ease: "easeInOut",
+      ease: easeInOut,
     },
   },
 };
@@ -123,7 +123,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           scaleY: 0,
           transition: {
             duration: 0.6,
-            ease: "easeInOut",
+            ease: easeInOut,
             delay: 0.2,
           }
         }}

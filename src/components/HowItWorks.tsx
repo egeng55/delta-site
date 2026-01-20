@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { useRef } from "react";
 import { useInView } from "framer-motion";
 
@@ -65,7 +65,7 @@ export default function HowItWorks() {
           <motion.div
             initial={{ scaleY: 0 }}
             animate={isInView ? { scaleY: 1 } : { scaleY: 0 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+            transition={{ duration: 1.5, ease: easeOut }}
             className="absolute left-[39px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary via-accent to-primary origin-top hidden md:block"
           />
 
@@ -78,7 +78,7 @@ export default function HowItWorks() {
                 transition={{
                   duration: 0.45,
                   delay: index * 0.2,
-                  ease: "easeOut",
+                  ease: easeOut,
                 }}
                 className="flex gap-8 items-start"
               >

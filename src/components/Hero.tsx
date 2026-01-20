@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeInOut } from "framer-motion";
 
 export default function Hero() {
   return (
@@ -17,7 +17,7 @@ export default function Hero() {
         transition={{
           duration: 8,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: easeInOut,
         }}
         className="absolute top-1/4 -right-32 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
       />
@@ -29,7 +29,7 @@ export default function Hero() {
         transition={{
           duration: 10,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: easeInOut,
         }}
         className="absolute bottom-1/4 -left-32 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
       />
@@ -118,7 +118,7 @@ export default function Hero() {
                 duration: 4 + i,
                 repeat: Infinity,
                 delay: i * 0.5,
-                ease: "easeInOut",
+                ease: easeInOut,
               }}
               className="absolute w-2 h-2 rounded-full bg-primary/40"
               style={{
@@ -139,7 +139,7 @@ export default function Hero() {
       >
         <motion.div
           animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: easeInOut }}
           className="w-6 h-10 border-2 border-muted/30 rounded-full flex justify-center pt-2"
         >
           <motion.div className="w-1.5 h-1.5 bg-primary rounded-full" />

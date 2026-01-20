@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, easeOut } from "framer-motion";
 import { useRef, ReactNode } from "react";
 
 interface ScrollSectionProps {
@@ -93,7 +93,7 @@ export function ScrollReveal({
       initial={getInitialPosition()}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
       viewport={{ once: false, margin: "-100px", amount: 0.3 }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      transition={{ duration: 0.5, delay, ease: easeOut }}
       className={className}
     >
       {children}
@@ -112,7 +112,7 @@ export function PageTransition({ children }: PageTransitionProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: easeOut }}
     >
       {children}
     </motion.div>
@@ -166,7 +166,7 @@ export function StaggerItem({ children, className = "" }: StaggerItemProps) {
         visible: {
           opacity: 1,
           y: 0,
-          transition: { duration: 0.45, ease: "easeOut" },
+          transition: { duration: 0.45, ease: easeOut },
         },
       }}
       className={className}

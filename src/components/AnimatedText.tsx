@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeInOut, easeOut, linear } from "framer-motion";
 
 interface AnimatedTextProps {
   text: string;
@@ -43,7 +43,7 @@ export function AnimatedText({
               y: 0,
               transition: {
                 duration: 0.4,
-                ease: "easeInOut",
+                ease: easeInOut,
               },
             },
           }}
@@ -92,7 +92,7 @@ export function AnimatedWords({
               rotateX: 0,
               transition: {
                 duration: 0.5,
-                ease: "easeInOut",
+                ease: easeInOut,
               },
             },
           }}
@@ -159,7 +159,7 @@ function Counter({ from, to, duration }: { from: number; to: number; duration: n
           count: to
         }}
         viewport={{ once: false, amount: 0.4 }}
-        transition={{ duration, ease: "easeOut" }}
+        transition={{ duration, ease: easeOut }}
       >
         {/* Use a callback to render the count */}
         <CountDisplay from={from} to={to} duration={duration} />
@@ -278,7 +278,7 @@ export function GradientText({ text, className = "" }: GradientTextProps) {
       transition={{
         duration: 5,
         repeat: Infinity,
-        ease: "linear",
+        ease: linear,
       }}
     >
       {text}

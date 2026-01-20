@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeInOut } from "framer-motion";
 import { useEffect, useState } from "react";
 
 interface Particle {
@@ -52,7 +52,7 @@ export default function FloatingParticles({ count = 20 }: { count?: number }) {
             duration: particle.duration,
             delay: particle.delay,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: easeInOut,
           }}
         />
       ))}

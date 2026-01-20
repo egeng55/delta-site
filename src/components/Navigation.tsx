@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, easeInOut } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -92,7 +92,7 @@ export default function Navigation() {
           >
             <motion.div
               whileHover={{ rotate: 180 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
+              transition={{ duration: 0.5, ease: easeInOut }}
               className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/25 animate-pulse-glow"
             >
               <span className="text-white font-bold text-lg">δ</span>

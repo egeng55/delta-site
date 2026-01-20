@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants, easeInOut } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
 
@@ -53,14 +53,14 @@ const containerVariants = {
   },
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 18 },
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.45,
-      ease: "easeOut",
+      duration: 0.6,
+      ease: easeInOut,
     },
   },
 };
