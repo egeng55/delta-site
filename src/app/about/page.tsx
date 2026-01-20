@@ -12,22 +12,25 @@ export default function AboutPage() {
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.45 }}
+          transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto px-8 mb-20"
         >
           <motion.span
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.1 }}
             className="text-primary font-medium text-sm tracking-wider uppercase"
           >
             About Us
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
             className="text-5xl md:text-6xl font-bold mt-4 mb-6"
           >
             Making Health
@@ -36,8 +39,9 @@ export default function AboutPage() {
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.2 }}
             className="text-muted text-lg leading-relaxed"
           >
             We believe everyone deserves access to personalized health guidance.
@@ -51,8 +55,8 @@ export default function AboutPage() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="p-8 bg-card rounded-3xl border border-border"
+            viewport={{ once: false, amount: 0.4 }}
+            className="p-8 bg-card rounded-3xl"
           >
             <h2 className="text-2xl font-bold mb-6">Our Story</h2>
             <div className="space-y-4 text-muted leading-relaxed">
@@ -81,8 +85,8 @@ export default function AboutPage() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="p-8 bg-gradient-to-br from-primary/10 to-transparent rounded-3xl border border-primary/20"
+              viewport={{ once: false, amount: 0.4 }}
+              className="p-8 bg-gradient-to-br from-primary/10 to-transparent rounded-3xl"
             >
               <h3 className="text-xl font-bold mb-4">Our Mission</h3>
               <p className="text-muted leading-relaxed">
@@ -93,8 +97,8 @@ export default function AboutPage() {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="p-8 bg-gradient-to-br from-accent/10 to-transparent rounded-3xl border border-accent/20"
+              viewport={{ once: false, amount: 0.4 }}
+              className="p-8 bg-gradient-to-br from-accent/10 to-transparent rounded-3xl"
             >
               <h3 className="text-xl font-bold mb-4">Our Vision</h3>
               <p className="text-muted leading-relaxed">
@@ -109,7 +113,7 @@ export default function AboutPage() {
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.4 }}
           className="max-w-4xl mx-auto px-8"
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 p-8 bg-card rounded-3xl border border-border">
@@ -123,7 +127,7 @@ export default function AboutPage() {
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ once: false, amount: 0.4 }}
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >

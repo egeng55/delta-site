@@ -64,7 +64,7 @@ export default function Navigation() {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-      hour12: false,
+      hour12: true,
     });
 
     const updateTime = () => setEtTime(formatter.format(new Date()));
@@ -83,9 +83,6 @@ export default function Navigation() {
     <>
       {/* Logo - Fixed top left */}
       <motion.div
-        initial={{ opacity: 0, y: -20, scale: 0.8 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="fixed left-8 top-8 z-50"
       >
         <Link href="/">
@@ -106,22 +103,12 @@ export default function Navigation() {
 
       {/* Nav items - Fixed left, vertically centered */}
       <motion.nav
-        initial={{ x: -30, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
         className="fixed left-8 top-1/2 -translate-y-1/2 z-50"
       >
         <ul className="flex flex-col gap-3">
-          {navItems.map((item, index) => (
+          {navItems.map((item) => (
             <motion.li
               key={item.label}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{
-                delay: 0.3 + index * 0.08,
-                duration: 0.5,
-                ease: [0.22, 1, 0.36, 1],
-              }}
             >
               <MagneticLink href={item.href} isActive={isActive(item.href)}>
                 <motion.span
@@ -146,10 +133,7 @@ export default function Navigation() {
 
       {/* Auth buttons - Fixed top right */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed right-8 top-8 z-50 flex flex-col items-end gap-2"
+        className="fixed right-8 top-8 z-50 flex flex-col items-end gap-3"
       >
         <div className="flex items-center gap-4">
           {user ? (
@@ -182,7 +166,7 @@ export default function Navigation() {
             </>
           )}
         </div>
-        <span className="text-xs text-muted leading-none">
+        <span className="text-xs text-muted leading-none pt-1 pr-1">
           ET {etTime || "—"}
         </span>
       </motion.div>

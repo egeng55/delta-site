@@ -98,22 +98,25 @@ export default function Home() {
           {/* Header content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.6 }}
+            transition={{ duration: 0.5 }}
             className="text-center mb-12 relative z-10"
           >
             <motion.span
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.6 }}
+              transition={{ delay: 0.1 }}
               className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20 mb-6"
             >
               Try Delta Now — No Sign Up Required
             </motion.span>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.6 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
               className="text-4xl md:text-6xl font-bold mb-4"
             >
               Your AI Health
@@ -122,8 +125,9 @@ export default function Home() {
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.6 }}
+              transition={{ delay: 0.2 }}
               className="text-muted text-lg max-w-xl mx-auto"
             >
               Ask Delta anything about nutrition, fitness, sleep, or building healthy habits.
@@ -138,8 +142,9 @@ export default function Home() {
           {/* Scroll indicator */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5, duration: 0.8 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.8 }}
+            transition={{ delay: 0.5, duration: 0.6 }}
             className="absolute bottom-8 left-1/2 -translate-x-1/2"
           >
             <motion.div

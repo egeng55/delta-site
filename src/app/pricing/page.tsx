@@ -80,22 +80,25 @@ export default function PricingPage() {
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.45 }}
+          transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto px-8 mb-16"
         >
           <motion.span
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.1 }}
             className="text-primary font-medium text-sm tracking-wider uppercase"
           >
             Pricing
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
             className="text-5xl md:text-6xl font-bold mt-4 mb-6"
           >
             Simple, Transparent
@@ -104,8 +107,9 @@ export default function PricingPage() {
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.2 }}
             className="text-muted text-lg"
           >
             Choose the plan that fits your needs. All plans include a 14-day free trial.
@@ -114,8 +118,9 @@ export default function PricingPage() {
           {/* Billing toggle */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.25 }}
             className="flex items-center justify-center gap-4 mt-8"
           >
             <span className={billingCycle === "monthly" ? "text-foreground" : "text-muted"}>
@@ -145,8 +150,9 @@ export default function PricingPage() {
               <motion.div
                 key={tier.name}
                 initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.1, duration: 0.6 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.35 }}
+                transition={{ delay: 0.15 + index * 0.08, duration: 0.5 }}
                 whileHover={{ y: -8 }}
                 className={`relative p-8 rounded-3xl border ${
                   tier.highlighted
@@ -192,8 +198,9 @@ export default function PricingPage() {
                     <motion.li
                       key={feature}
                       initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + index * 0.1 + i * 0.05 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: false, amount: 0.35 }}
+                      transition={{ delay: 0.25 + index * 0.05 + i * 0.03 }}
                       className="flex items-start gap-3 text-sm"
                     >
                       <svg
@@ -222,7 +229,7 @@ export default function PricingPage() {
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false, amount: 0.4 }}
           className="max-w-3xl mx-auto px-8"
         >
           <h2 className="text-3xl font-bold text-center mb-12">
@@ -234,8 +241,8 @@ export default function PricingPage() {
                 key={faq.question}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                viewport={{ once: false, amount: 0.4 }}
+                transition={{ delay: index * 0.08 }}
                 className="p-6 bg-card rounded-2xl border border-border"
               >
                 <h3 className="font-semibold mb-2">{faq.question}</h3>

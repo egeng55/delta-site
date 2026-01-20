@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 // Different page transition variants
@@ -82,23 +82,21 @@ const pageVariants = {
 };
 
 // Overlay animation for dramatic effect
-const overlayVariants = {
-  initial: {
-    scaleY: 1,
-  },
+const overlayVariants: Variants = {
+  initial: { scaleY: 0 },
   animate: {
-    scaleY: 0,
+    scaleY: 1,
     transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-      delay: 0.1,
+      duration: 0.8,
+      ease: "easeInOut",
+      delay: 0.2,
     },
   },
   exit: {
-    scaleY: 1,
+    scaleY: 0,
     transition: {
-      duration: 0.4,
-      ease: [0.22, 1, 0.36, 1],
+      duration: 0.6,
+      ease: "easeInOut",
     },
   },
 };

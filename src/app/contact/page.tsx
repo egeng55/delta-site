@@ -24,7 +24,7 @@ const contactMethods = [
     icon: "location",
     title: "Office",
     description: "Come say hello",
-    value: "San Francisco, CA",
+    value: "Ann Arbor, Michigan",
     href: "#",
   },
 ];
@@ -51,30 +51,34 @@ export default function ContactPage() {
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.45 }}
+          transition={{ duration: 0.5 }}
           className="text-center max-w-3xl mx-auto px-8 mb-16"
         >
           <motion.span
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.1 }}
             className="text-primary font-medium text-sm tracking-wider uppercase"
           >
             Contact
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.15, duration: 0.5 }}
             className="text-5xl md:text-6xl font-bold mt-4 mb-6"
           >
             Get in <span className="text-primary">Touch</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.45 }}
+            transition={{ delay: 0.2 }}
             className="text-muted text-lg"
           >
             Have a question, feedback, or just want to say hi? We'd love to hear from you.
@@ -89,8 +93,9 @@ export default function ContactPage() {
                 key={method.title}
                 href={method.href}
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 + index * 0.1 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.35 }}
+                transition={{ delay: 0.1 + index * 0.08 }}
                 whileHover={{ y: -4 }}
                 className="p-6 bg-card rounded-2xl border border-border hover:border-primary/30 transition-colors group"
               >
@@ -124,8 +129,9 @@ export default function ContactPage() {
         <div className="max-w-2xl mx-auto px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.35 }}
+            transition={{ delay: 0.2 }}
             className="p-8 bg-card rounded-3xl border border-border"
           >
             {submitted ? (

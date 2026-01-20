@@ -72,7 +72,7 @@ const sections = [
   },
   {
     title: "Contact Us",
-    content: "If you have questions about this Privacy Policy or our data practices, please contact us at privacy@delta.health or write to us at: Delta Health, Inc., 123 Health Street, San Francisco, CA 94102.",
+    content: "If you have questions about this Privacy Policy or our data practices, please contact us at privacy@delta.health or write to us at: Delta Health, Inc., Ann Arbor, Michigan.",
   },
 ];
 
