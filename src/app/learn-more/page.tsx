@@ -74,7 +74,7 @@ export default function LearnMorePage() {
           src="/images/hero/aerial-glaciers.jpg"
           alt="Premium features"
           overlayOpacity={78}
-          gradient="both"
+
           priority
           className="min-h-[55vh] flex items-center justify-center"
         >
@@ -147,7 +147,7 @@ export default function LearnMorePage() {
           src="/images/hero/ocean-mountains.jpg"
           alt="How it works"
           overlayOpacity={88}
-          gradient="both"
+
           className="py-20"
         >
           <div className="max-w-4xl mx-auto px-8">
@@ -206,7 +206,7 @@ export default function LearnMorePage() {
           src="/images/hero/sunset-shore.jpg"
           alt="Get started"
           overlayOpacity={85}
-          gradient="both"
+
           className="py-20"
         >
           <motion.div

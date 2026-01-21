@@ -83,7 +83,7 @@ export default function PricingPage() {
           src="/images/hero/coastal-wildflowers.jpg"
           alt="Pricing"
           overlayOpacity={80}
-          gradient="both"
+
           priority
           className="min-h-[50vh] flex items-center justify-center"
         >
@@ -235,14 +235,8 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* FAQs with Background */}
-        <ImageBackground
-          src="/images/hero/misty-village.jpg"
-          alt="FAQs"
-          overlayOpacity={90}
-          gradient="both"
-          className="py-20"
-        >
+        {/* FAQs */}
+        <div className="py-20 bg-card/30">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -260,7 +254,7 @@ export default function PricingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: false, amount: 0.4 }}
                   transition={{ delay: index * 0.08 }}
-                  className="p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-border"
+                  className="p-6 bg-card rounded-2xl border border-border"
                 >
                   <h3 className="font-semibold mb-2">{faq.question}</h3>
                   <p className="text-muted text-sm">{faq.answer}</p>
@@ -268,7 +262,7 @@ export default function PricingPage() {
               ))}
             </div>
           </motion.div>
-        </ImageBackground>
+        </div>
       </main>
       <Footer />
     </>

@@ -45,7 +45,7 @@ export default function TeamPage() {
           src="/images/hero/mountain-moon.jpg"
           alt="Our team"
           overlayOpacity={75}
-          gradient="both"
+
           priority
           className="min-h-[55vh] flex items-center justify-center"
         >
@@ -122,7 +122,7 @@ export default function TeamPage() {
           src="/images/hero/waterfall-stones.jpg"
           alt="Our values"
           overlayOpacity={88}
-          gradient="both"
+
           className="py-20"
         >
           <div className="max-w-6xl mx-auto px-8">

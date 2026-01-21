@@ -102,7 +102,7 @@ export default function ContactPage() {
           src="/images/hero/orange-sunset.jpg"
           alt="Contact us"
           overlayOpacity={75}
-          gradient="both"
+
           priority
           className="min-h-[50vh] flex items-center justify-center"
         >
@@ -183,22 +183,15 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Contact form with subtle background */}
-        <ImageBackground
-          src="/images/hero/rocky-beach.jpg"
-          alt="Contact form"
-          overlayOpacity={90}
-          gradient="both"
-          blur
-          className="py-20"
-        >
+        {/* Contact form */}
+        <div className="py-20 bg-card/30">
           <div className="max-w-2xl mx-auto px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false, amount: 0.35 }}
               transition={{ delay: 0.2 }}
-              className="p-8 bg-card/90 backdrop-blur-sm rounded-3xl border border-border"
+              className="p-8 bg-card rounded-3xl border border-border"
             >
               {status === "success" ? (
                 <motion.div
@@ -310,7 +303,7 @@ export default function ContactPage() {
               )}
             </motion.div>
           </div>
-        </ImageBackground>
+        </div>
       </main>
       <Footer />
     </>

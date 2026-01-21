@@ -102,7 +102,7 @@ export default function BusinessPage() {
           src="/images/hero/aerial-glaciers.jpg"
           alt="Delta for Business"
           overlayOpacity={80}
-          gradient="both"
+
           priority
           className="min-h-[70vh] flex items-center justify-center"
         >
@@ -189,7 +189,7 @@ export default function BusinessPage() {
           src="/images/hero/ocean-mountains.jpg"
           alt="Architecture"
           overlayOpacity={92}
-          gradient="both"
+
           className="py-24"
         >
           <div className="max-w-5xl mx-auto px-8">

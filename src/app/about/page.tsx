@@ -15,7 +15,7 @@ export default function AboutPage() {
           src="/images/hero/river-blooms.jpg"
           alt="About Delta"
           overlayOpacity={75}
-          gradient="both"
+
           priority
           className="min-h-[60vh] flex items-center justify-center"
         >
@@ -90,7 +90,7 @@ export default function AboutPage() {
           src="/images/hero/willow-water.jpg"
           alt="Our mission"
           overlayOpacity={88}
-          gradient="both"
+
           className="py-20"
         >
           <div className="max-w-4xl mx-auto px-8">
