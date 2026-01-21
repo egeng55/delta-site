@@ -281,7 +281,7 @@ export default function Navigation() {
                     <Link
                       href="/signup"
                       onClick={handleNavClick}
-                      className="px-4 py-2 bg-primary text-white text-sm rounded-full font-medium transition-colors hover:bg-primary-dark text-center"
+                      className="text-sm font-medium text-muted hover:text-foreground transition-colors"
                     >
                       Sign up
                     </Link>
