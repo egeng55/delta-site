@@ -11,6 +11,7 @@ const footerLinks = {
   ],
   Company: [
     { label: "About", href: "/#about" },
+    { label: "Research", href: "/research" },
     { label: "Team", href: "/team" },
     { label: "Careers", href: "/team" },
   ],
@@ -34,13 +35,13 @@ export default function Footer() {
           {/* Brand */}
           <div className="min-w-[200px] flex-1">
             <Link href="/" className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl overflow-hidden">
+              <div className="w-9 h-9">
                 <Image
                   src="/delta-logo.svg"
                   alt="Delta"
                   width={36}
                   height={36}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
               <span className="text-lg font-bold">Delta</span>

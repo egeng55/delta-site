@@ -10,6 +10,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 const navItems = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
+  { label: "Research", href: "/research" },
   { label: "Pricing", href: "/pricing" },
   { label: "Team", href: "/team" },
   { label: "Contact", href: "/contact" },
@@ -142,14 +143,14 @@ export default function Navigation() {
             <motion.div
               whileHover={{ rotate: 180 }}
               transition={{ duration: 0.5, ease: easeInOut }}
-              className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/25 animate-pulse-glow"
+              className="w-10 h-10 shadow-lg shadow-primary/25 animate-pulse-glow"
             >
               <Image
                 src="/delta-logo.svg"
                 alt="Delta"
                 width={40}
                 height={40}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 priority
               />
             </motion.div>
@@ -199,7 +200,7 @@ export default function Navigation() {
                 animate={{ opacity: 1 }}
                 className="text-sm text-muted"
               >
-                Hi, <span className="text-foreground font-medium">{user.name.split(" ")[0]}</span>
+                Hi, <span className="text-foreground font-medium">{user.name?.split(" ")[0] || "there"}</span>
               </motion.span>
               <button
                 onClick={logout}
@@ -268,7 +269,7 @@ export default function Navigation() {
                 {user ? (
                   <div className="space-y-2">
                     <p className="text-xs text-muted">
-                      Hi, <span className="text-foreground font-medium">{user.name.split(" ")[0]}</span>
+                      Hi, <span className="text-foreground font-medium">{user.name?.split(" ")[0] || "there"}</span>
                     </p>
                     <button
                       onClick={() => { logout(); handleNavClick(); }}

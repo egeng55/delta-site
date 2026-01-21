@@ -1,105 +1,270 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import { User, Session, AuthError } from "@supabase/supabase-js";
+import { supabase, Profile, Subscription, isDeveloperEmail } from "@/lib/supabase";
 
-interface User {
+interface AuthUser {
   id: string;
-  name: string;
   email: string;
+  name: string | null;
+  role: 'user' | 'developer' | 'admin';
+}
+
+interface AccessInfo {
+  hasPremiumAccess: boolean;
+  plan: string;
+  status: string;
+  expiresAt: string | null;
+  isDeveloper: boolean;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
+  session: Session | null;
+  profile: Profile | null;
+  subscription: Subscription | null;
+  access: AccessInfo | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (name: string, email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+  updatePassword: (password: string) => Promise<{ success: boolean; error?: string }>;
+  refreshAccess: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [access, setAccess] = useState<AccessInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for existing session on mount
-    const storedUser = localStorage.getItem("delta-current-user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        localStorage.removeItem("delta-current-user");
-      }
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
+  // Fetch profile and subscription data
+  const fetchUserData = useCallback(async (userId: string, userEmail: string) => {
     try {
-      const users = JSON.parse(localStorage.getItem("delta-users") || "[]");
-      const foundUser = users.find(
-        (u: any) => u.email === email && u.password === password
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileError);
+      }
+
+      // Fetch subscription
+      const { data: subData, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (subError && subError.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', subError);
+      }
+
+      const fetchedProfile = profileData as Profile | null;
+      const fetchedSubscription = subData as Subscription | null;
+
+      setProfile(fetchedProfile);
+      setSubscription(fetchedSubscription);
+
+      // Calculate access
+      const isDev = isDeveloperEmail(userEmail) || fetchedProfile?.role === 'developer' || fetchedProfile?.role === 'admin';
+      const hasPremium = isDev || (
+        fetchedSubscription?.status === 'active' &&
+        fetchedSubscription?.plan !== 'free' &&
+        new Date(fetchedSubscription?.current_period_end || 0) > new Date()
       );
 
-      if (!foundUser) {
-        return false;
-      }
+      setAccess({
+        hasPremiumAccess: hasPremium,
+        plan: fetchedSubscription?.plan || 'free',
+        status: fetchedSubscription?.status || 'active',
+        expiresAt: fetchedSubscription?.current_period_end || null,
+        isDeveloper: isDev,
+      });
 
-      const sessionUser = {
-        id: foundUser.id,
-        name: foundUser.name,
-        email: foundUser.email,
-      };
-
-      localStorage.setItem("delta-current-user", JSON.stringify(sessionUser));
-      setUser(sessionUser);
-      return true;
-    } catch (e) {
-      return false;
+      // Set user with profile data
+      setUser({
+        id: userId,
+        email: userEmail,
+        name: fetchedProfile?.name || userEmail.split('@')[0],
+        role: fetchedProfile?.role || (isDeveloperEmail(userEmail) ? 'developer' : 'user'),
+      });
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
-  };
+  }, []);
 
-  const signup = async (name: string, email: string, password: string): Promise<boolean> => {
-    try {
-      const users = JSON.parse(localStorage.getItem("delta-users") || "[]");
+  // Initialize auth state
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
 
-      if (users.find((u: any) => u.email === email)) {
-        return false;
+        if (currentSession?.user) {
+          setSession(currentSession);
+          await fetchUserData(currentSession.user.id, currentSession.user.email || '');
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      const newUser = {
-        id: Date.now().toString(),
-        name,
+    initAuth();
+
+    // Listen for auth changes
+    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setSession(newSession);
+
+        if (newSession?.user) {
+          await fetchUserData(newSession.user.id, newSession.user.email || '');
+        } else {
+          setUser(null);
+          setProfile(null);
+          setSubscription(null);
+          setAccess(null);
+        }
+
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      authSubscription.unsubscribe();
+    };
+  }, [fetchUserData]);
+
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        createdAt: new Date().toISOString(),
-      };
+      });
 
-      users.push(newUser);
-      localStorage.setItem("delta-users", JSON.stringify(users));
+      if (error) {
+        return { success: false, error: error.message };
+      }
 
-      const sessionUser = {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-      };
+      if (data.session) {
+        setSession(data.session);
+        await fetchUserData(data.user.id, data.user.email || '');
+      }
 
-      localStorage.setItem("delta-current-user", JSON.stringify(sessionUser));
-      setUser(sessionUser);
-      return true;
-    } catch (e) {
-      return false;
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("delta-current-user");
-    setUser(null);
+  const signup = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        return { success: true, error: 'Please check your email to confirm your account.' };
+      }
+
+      if (data.session) {
+        setSession(data.session);
+        await fetchUserData(data.user!.id, data.user!.email || '');
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setSubscription(null);
+      setAccess(null);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  const resetPassword = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  };
+
+  const updatePassword = async (password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  };
+
+  const refreshAccess = async (): Promise<void> => {
+    if (session?.user) {
+      await fetchUserData(session.user.id, session.user.email || '');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{
+      user,
+      session,
+      profile,
+      subscription,
+      access,
+      isLoading,
+      login,
+      signup,
+      logout,
+      resetPassword,
+      updatePassword,
+      refreshAccess,
+    }}>
       {children}
     </AuthContext.Provider>
   );
