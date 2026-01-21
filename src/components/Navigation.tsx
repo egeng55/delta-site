@@ -208,13 +208,15 @@ export default function Navigation() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-muted"
-              >
-                Hi, <span className="text-foreground font-medium">{user.name?.split(" ")[0] || "there"}</span>
-              </motion.span>
+              <Link href="/account">
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-muted hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Hi, <span className="text-foreground font-medium">{user.name?.split(" ")[0] || "there"}</span>
+                </motion.span>
+              </Link>
               <button
                 onClick={logout}
                 className="text-sm font-medium text-muted hover:text-foreground transition-colors"
@@ -281,9 +283,13 @@ export default function Navigation() {
               <div className="border-t border-border py-2 px-4">
                 {user ? (
                   <div className="space-y-2">
-                    <p className="text-xs text-muted">
+                    <Link
+                      href="/account"
+                      onClick={handleNavClick}
+                      className="text-xs text-muted hover:text-foreground transition-colors block"
+                    >
                       Hi, <span className="text-foreground font-medium">{user.name?.split(" ")[0] || "there"}</span>
-                    </p>
+                    </Link>
                     <button
                       onClick={() => { logout(); handleNavClick(); }}
                       className="text-sm font-medium text-muted hover:text-foreground transition-colors"
