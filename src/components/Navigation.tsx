@@ -144,7 +144,7 @@ export default function Navigation() {
             <motion.div
               whileHover={{ rotate: 180 }}
               transition={{ duration: 0.5, ease: easeInOut }}
-              className="w-10 h-10 shadow-lg shadow-primary/25 animate-pulse-glow"
+              className="w-10 h-10"
             >
               <Image
                 src="/delta-logo.svg"
