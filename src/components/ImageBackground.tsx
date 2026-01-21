@@ -11,8 +11,6 @@ export interface ImageBackgroundProps {
   overlayOpacity?: number;
   /** Gradient direction */
   gradient?: "top" | "bottom" | "both" | "radial" | "none";
-  /** Additional overlay color (uses theme background by default) */
-  overlayColor?: string;
   /** Whether to blur the image */
   blur?: boolean;
   /** Priority loading for above-fold images */
@@ -26,89 +24,75 @@ export interface ImageBackgroundProps {
 /**
  * Reusable image background component with customizable overlay and gradient.
  * This pattern can be used for user-customizable backgrounds in the app.
- *
- * Configuration options:
- * - overlayOpacity: 0-100 (default 70)
- * - gradient: "top" | "bottom" | "both" | "radial" | "none"
- * - blur: adds subtle blur to image
  */
 export default function ImageBackground({
   src,
   alt = "Background",
   overlayOpacity = 70,
   gradient = "both",
-  overlayColor,
   blur = false,
   priority = false,
   className = "",
   children,
 }: ImageBackgroundProps) {
-  // Calculate opacity as decimal
-  const opacity = overlayOpacity / 100;
+  // Convert opacity to tailwind-compatible value
+  const opacityClass = Math.round(overlayOpacity / 5) * 5; // Round to nearest 5
 
-  // Generate gradient class based on direction
-  const getGradientClass = () => {
-    const baseColor = overlayColor || "var(--background)";
+  // Generate gradient overlay based on direction
+  const getOverlayClasses = () => {
+    const baseOpacity = opacityClass;
+    const midOpacity = Math.round(baseOpacity * 0.7);
 
     switch (gradient) {
-      case "top":
-        return `bg-gradient-to-b from-[${baseColor}] to-transparent`;
-      case "bottom":
-        return `bg-gradient-to-t from-[${baseColor}] to-transparent`;
       case "both":
-        return ""; // We'll use a custom gradient for both
+        return ""; // Use inline style for complex gradient
+      case "top":
+        return `bg-gradient-to-b from-background/${baseOpacity} via-background/${midOpacity} to-transparent`;
+      case "bottom":
+        return `bg-gradient-to-t from-background/${baseOpacity} via-background/${midOpacity} to-transparent`;
       case "radial":
-        return ""; // Custom radial gradient
+        return ""; // Use inline style
       case "none":
-        return "";
+        return `bg-background/${baseOpacity}`;
       default:
         return "";
     }
   };
 
-  // Generate inline style for complex gradients
-  const getGradientStyle = (): React.CSSProperties => {
+  // For complex gradients, use inline styles with rgba
+  const getOverlayStyle = (): React.CSSProperties | undefined => {
+    // Dark theme base color (near black)
+    const darkColor = "10, 10, 15"; // RGB values for #0a0a0f
+
+    const opacity = overlayOpacity / 100;
+    const midOpacity = opacity * 0.65;
+    const lowOpacity = opacity * 0.5;
+
     switch (gradient) {
       case "both":
         return {
           background: `linear-gradient(to bottom,
-            hsl(var(--background) / ${opacity}) 0%,
-            hsl(var(--background) / ${opacity * 0.6}) 30%,
-            hsl(var(--background) / ${opacity * 0.6}) 70%,
-            hsl(var(--background) / ${opacity}) 100%
-          )`,
-        };
-      case "top":
-        return {
-          background: `linear-gradient(to bottom,
-            hsl(var(--background) / ${opacity}) 0%,
-            hsl(var(--background) / ${opacity * 0.3}) 50%,
-            transparent 100%
-          )`,
-        };
-      case "bottom":
-        return {
-          background: `linear-gradient(to top,
-            hsl(var(--background) / ${opacity}) 0%,
-            hsl(var(--background) / ${opacity * 0.3}) 50%,
-            transparent 100%
+            rgba(${darkColor}, ${opacity}) 0%,
+            rgba(${darkColor}, ${midOpacity}) 25%,
+            rgba(${darkColor}, ${lowOpacity}) 50%,
+            rgba(${darkColor}, ${midOpacity}) 75%,
+            rgba(${darkColor}, ${opacity}) 100%
           )`,
         };
       case "radial":
         return {
           background: `radial-gradient(ellipse at center,
-            hsl(var(--background) / ${opacity * 0.4}) 0%,
-            hsl(var(--background) / ${opacity}) 100%
+            rgba(${darkColor}, ${lowOpacity}) 0%,
+            rgba(${darkColor}, ${opacity}) 100%
           )`,
         };
-      case "none":
-        return {
-          backgroundColor: `hsl(var(--background) / ${opacity})`,
-        };
       default:
-        return {};
+        return undefined;
     }
   };
+
+  const overlayStyle = getOverlayStyle();
+  const overlayClasses = getOverlayClasses();
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -120,13 +104,14 @@ export default function ImageBackground({
           fill
           className={`object-cover ${blur ? "blur-sm scale-105" : ""}`}
           priority={priority}
+          sizes="100vw"
         />
       </div>
 
       {/* Overlay with gradient */}
       <div
-        className="absolute inset-0"
-        style={getGradientStyle()}
+        className={`absolute inset-0 ${overlayClasses}`}
+        style={overlayStyle}
       />
 
       {/* Content */}
@@ -141,7 +126,6 @@ export default function ImageBackground({
 
 /**
  * Preset configurations for common use cases
- * These can be used as starting points for user customization in the app
  */
 export const backgroundPresets = {
   hero: {
@@ -153,17 +137,9 @@ export const backgroundPresets = {
     overlayOpacity: 85,
     gradient: "both" as const,
   },
-  card: {
-    overlayOpacity: 90,
-    gradient: "bottom" as const,
-  },
   subtle: {
     overlayOpacity: 92,
     gradient: "radial" as const,
     blur: true,
-  },
-  dark: {
-    overlayOpacity: 80,
-    gradient: "both" as const,
   },
 };

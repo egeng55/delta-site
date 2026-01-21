@@ -99,9 +99,9 @@ export default function ContactPage() {
       <main className="min-h-screen">
         {/* Hero with Background Image */}
         <ImageBackground
-          src="/images/hero/rocky-beach.jpg"
+          src="/images/hero/orange-sunset.jpg"
           alt="Contact us"
-          overlayOpacity={78}
+          overlayOpacity={75}
           gradient="both"
           priority
           className="min-h-[50vh] flex items-center justify-center"
@@ -185,9 +185,9 @@ export default function ContactPage() {
 
         {/* Contact form with subtle background */}
         <ImageBackground
-          src="/images/hero/orange-sunset.jpg"
+          src="/images/hero/rocky-beach.jpg"
           alt="Contact form"
-          overlayOpacity={92}
+          overlayOpacity={90}
           gradient="both"
           blur
           className="py-20"
