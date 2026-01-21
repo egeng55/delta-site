@@ -2,6 +2,7 @@
 
 import Footer from "@/components/Footer";
 import Navigation from "@/components/Navigation";
+import ImageBackground from "@/components/ImageBackground";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -67,49 +68,58 @@ export default function LearnMorePage() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen pt-32 pb-20">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.45 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-3xl mx-auto px-8 mb-20"
+      <main className="min-h-screen">
+        {/* Hero with Background Image */}
+        <ImageBackground
+          src="/images/hero/aerial-glaciers.jpg"
+          alt="Premium features"
+          overlayOpacity={78}
+          gradient="both"
+          priority
+          className="min-h-[55vh] flex items-center justify-center"
         >
-          <motion.span
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.1 }}
-            className="text-primary font-medium text-sm tracking-wider uppercase"
-          >
-            Premium Features
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.15, duration: 0.5 }}
-            className="text-5xl md:text-6xl font-bold mt-4 mb-6"
+            transition={{ duration: 0.5 }}
+            className="text-center max-w-3xl mx-auto px-8 pt-32 pb-16"
           >
-            Unlock Your Full
-            <br />
-            <span className="text-primary">Health Potential</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.2 }}
-            className="text-muted text-lg leading-relaxed"
-          >
-            Delta Premium gives you access to advanced features designed to help you
-            achieve your health goals faster and more effectively.
-          </motion.p>
-        </motion.div>
+            <motion.span
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.1 }}
+              className="text-primary font-medium text-sm tracking-wider uppercase"
+            >
+              Premium Features
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="text-5xl md:text-6xl font-bold mt-4 mb-6"
+            >
+              Unlock Your Full
+              <br />
+              <span className="text-primary">Health Potential</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.2 }}
+              className="text-muted text-lg leading-relaxed"
+            >
+              Delta Premium gives you access to advanced features designed to help you
+              achieve your health goals faster and more effectively.
+            </motion.p>
+          </motion.div>
+        </ImageBackground>
 
         {/* Features Grid */}
-        <div className="max-w-5xl mx-auto px-8 mb-20">
+        <div className="max-w-5xl mx-auto px-8 py-20">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
               <motion.div
@@ -132,65 +142,79 @@ export default function LearnMorePage() {
           </div>
         </div>
 
-        {/* How It Works */}
-        <div className="max-w-4xl mx-auto px-8 mb-20">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.4 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold mb-4">How Delta Works</h2>
-            <p className="text-muted max-w-2xl mx-auto">
-              Delta learns from your conversations and health data to provide increasingly
-              personalized guidance over time.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "1",
-                title: "Track Naturally",
-                description: "Just chat with Delta about your meals, workouts, sleep, and how you're feeling. No tedious manual logging required.",
-              },
-              {
-                step: "2",
-                title: "Build Context",
-                description: "Delta remembers everything and builds a comprehensive understanding of your health patterns, goals, and preferences.",
-              },
-              {
-                step: "3",
-                title: "Get Insights",
-                description: "Receive personalized insights, recommendations, and coaching based on your unique health profile.",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.4 }}
-                transition={{ delay: index * 0.15 }}
-                className="text-center"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">
-                  {item.step}
-                </div>
-                <h3 className="font-semibold mb-2">{item.title}</h3>
-                <p className="text-muted text-sm">{item.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: false, amount: 0.4 }}
-          className="max-w-3xl mx-auto px-8"
+        {/* How It Works with Background */}
+        <ImageBackground
+          src="/images/hero/ocean-mountains.jpg"
+          alt="How it works"
+          overlayOpacity={88}
+          gradient="both"
+          className="py-20"
         >
-          <div className="p-8 md:p-12 bg-gradient-to-br from-primary/10 via-accent/5 to-transparent rounded-3xl text-center">
+          <div className="max-w-4xl mx-auto px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.4 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl font-bold mb-4">How Delta Works</h2>
+              <p className="text-muted max-w-2xl mx-auto">
+                Delta learns from your conversations and health data to provide increasingly
+                personalized guidance over time.
+              </p>
+            </motion.div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  step: "1",
+                  title: "Track Naturally",
+                  description: "Just chat with Delta about your meals, workouts, sleep, and how you're feeling. No tedious manual logging required.",
+                },
+                {
+                  step: "2",
+                  title: "Build Context",
+                  description: "Delta remembers everything and builds a comprehensive understanding of your health patterns, goals, and preferences.",
+                },
+                {
+                  step: "3",
+                  title: "Get Insights",
+                  description: "Receive personalized insights, recommendations, and coaching based on your unique health profile.",
+                },
+              ].map((item, index) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.4 }}
+                  transition={{ delay: index * 0.15 }}
+                  className="text-center p-6 bg-card/60 backdrop-blur-sm rounded-2xl"
+                >
+                  <div className="w-12 h-12 rounded-full bg-primary text-white font-bold text-xl flex items-center justify-center mx-auto mb-4">
+                    {item.step}
+                  </div>
+                  <h3 className="font-semibold mb-2">{item.title}</h3>
+                  <p className="text-muted text-sm">{item.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </ImageBackground>
+
+        {/* CTA with Background */}
+        <ImageBackground
+          src="/images/hero/sunset-shore.jpg"
+          alt="Get started"
+          overlayOpacity={85}
+          gradient="both"
+          className="py-20"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.4 }}
+            className="max-w-3xl mx-auto px-8 text-center"
+          >
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
               Ready to Transform Your Health?
             </h2>
@@ -216,14 +240,14 @@ export default function LearnMorePage() {
                 <motion.span
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-xl font-medium hover:bg-card transition-colors"
+                  className="flex items-center justify-center gap-2 px-6 py-3 border border-white/20 bg-white/10 backdrop-blur-sm rounded-xl font-medium hover:bg-white/20 transition-colors"
                 >
                   Create Free Account
                 </motion.span>
               </Link>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </ImageBackground>
       </main>
       <Footer />
     </>

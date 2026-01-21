@@ -60,7 +60,7 @@ export default function ResearchPage() {
           {/* Background Image */}
           <div className="absolute inset-0">
             <Image
-              src="/images/hero/mountain-moon.jpg"
+              src="/images/hero/lake-sunset.jpg"
               alt="Research background"
               fill
               className="object-cover"
@@ -130,7 +130,7 @@ export default function ResearchPage() {
                 </div>
                 <div className="relative h-[400px] rounded-3xl overflow-hidden">
                   <Image
-                    src="/images/hero/river-blooms.jpg"
+                    src="/images/hero/aerial-ice.jpg"
                     alt="Nature and science"
                     fill
                     className="object-cover"

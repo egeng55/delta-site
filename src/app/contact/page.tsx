@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import ImageBackground from "@/components/ImageBackground";
 
 const API_BASE_URL = "https://delta-80ht.onrender.com";
 
@@ -95,46 +96,55 @@ export default function ContactPage() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen pt-32 pb-20">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.45 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-3xl mx-auto px-8 mb-16"
+      <main className="min-h-screen">
+        {/* Hero with Background Image */}
+        <ImageBackground
+          src="/images/hero/rocky-beach.jpg"
+          alt="Contact us"
+          overlayOpacity={78}
+          gradient="both"
+          priority
+          className="min-h-[50vh] flex items-center justify-center"
         >
-          <motion.span
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.1 }}
-            className="text-primary font-medium text-sm tracking-wider uppercase"
-          >
-            Contact
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.15, duration: 0.5 }}
-            className="text-5xl md:text-6xl font-bold mt-4 mb-6"
+            transition={{ duration: 0.5 }}
+            className="text-center max-w-3xl mx-auto px-8 pt-32 pb-16"
           >
-            Get in <span className="text-primary">Touch</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.2 }}
-            className="text-muted text-lg"
-          >
-            Have a question, feedback, or just want to say hi? We'd love to hear from you.
-          </motion.p>
-        </motion.div>
+            <motion.span
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.1 }}
+              className="text-primary font-medium text-sm tracking-wider uppercase"
+            >
+              Contact
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="text-5xl md:text-6xl font-bold mt-4 mb-6"
+            >
+              Get in <span className="text-primary">Touch</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.2 }}
+              className="text-muted text-lg"
+            >
+              Have a question, feedback, or just want to say hi? We'd love to hear from you.
+            </motion.p>
+          </motion.div>
+        </ImageBackground>
 
         {/* Contact methods */}
-        <div className="max-w-5xl mx-auto px-8 mb-16">
+        <div className="max-w-5xl mx-auto px-8 py-16">
           <div className="grid md:grid-cols-3 gap-6">
             {contactMethods.map((method, index) => (
               <motion.a
@@ -173,125 +183,134 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* Contact form */}
-        <div className="max-w-2xl mx-auto px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.35 }}
-            transition={{ delay: 0.2 }}
-            className="p-8 bg-card rounded-3xl border border-border"
-          >
-            {status === "success" ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-12"
-              >
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold mb-2">Message Sent!</h3>
-                <p className="text-muted mb-6">We'll get back to you as soon as possible.</p>
-                <button
-                  onClick={() => setStatus("idle")}
-                  className="text-primary font-medium hover:underline"
+        {/* Contact form with subtle background */}
+        <ImageBackground
+          src="/images/hero/orange-sunset.jpg"
+          alt="Contact form"
+          overlayOpacity={92}
+          gradient="both"
+          blur
+          className="py-20"
+        >
+          <div className="max-w-2xl mx-auto px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.35 }}
+              transition={{ delay: 0.2 }}
+              className="p-8 bg-card/90 backdrop-blur-sm rounded-3xl border border-border"
+            >
+              {status === "success" ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12"
                 >
-                  Send another message
-                </button>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Message Sent!</h3>
+                  <p className="text-muted mb-6">We'll get back to you as soon as possible.</p>
+                  <button
+                    onClick={() => setStatus("idle")}
+                    className="text-primary font-medium hover:underline"
+                  >
+                    Send another message
+                  </button>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Name</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors"
+                        placeholder="Your name"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Email</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors"
+                        placeholder="you@example.com"
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-sm font-medium mb-2">Name</label>
+                    <label className="block text-sm font-medium mb-2">Subject</label>
                     <input
                       type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors"
-                      placeholder="Your name"
+                      placeholder="How can we help?"
                       required
+                      maxLength={200}
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors"
-                      placeholder="you@example.com"
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="block text-sm font-medium">Message</label>
+                      <span className="text-xs text-muted">{formData.message.length}/5000</span>
+                    </div>
+                    <textarea
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      rows={5}
+                      className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors resize-none"
+                      placeholder="Tell us more... (minimum 10 characters)"
                       required
+                      minLength={10}
+                      maxLength={5000}
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Subject</label>
-                  <input
-                    type="text"
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors"
-                    placeholder="How can we help?"
-                    required
-                    maxLength={200}
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="block text-sm font-medium">Message</label>
-                    <span className="text-xs text-muted">{formData.message.length}/5000</span>
-                  </div>
-                  <textarea
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    rows={5}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors resize-none"
-                    placeholder="Tell us more... (minimum 10 characters)"
-                    required
-                    minLength={10}
-                    maxLength={5000}
-                  />
-                </div>
-
-                {status === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm"
-                  >
-                    {errorMessage}
-                  </motion.div>
-                )}
-
-                <motion.button
-                  type="submit"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={status === "loading"}
-                  className="w-full py-4 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-medium shadow-lg shadow-primary/25 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {status === "loading" ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Sending...
-                    </>
-                  ) : (
-                    "Send Message"
+                  {status === "error" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm"
+                    >
+                      {errorMessage}
+                    </motion.div>
                   )}
-                </motion.button>
-              </form>
-            )}
-          </motion.div>
-        </div>
+
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    disabled={status === "loading"}
+                    className="w-full py-4 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-medium shadow-lg shadow-primary/25 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {status === "loading" ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      "Send Message"
+                    )}
+                  </motion.button>
+                </form>
+              )}
+            </motion.div>
+          </div>
+        </ImageBackground>
       </main>
       <Footer />
     </>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import ImageBackground from "@/components/ImageBackground";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,10 +54,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-8">
+    <div className="min-h-screen flex items-center justify-center px-8 relative">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}

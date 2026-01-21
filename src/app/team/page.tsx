@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import ImageBackground from "@/components/ImageBackground";
 
 const team = [
   {
@@ -38,47 +39,56 @@ export default function TeamPage() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen pt-32 pb-20">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.45 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-3xl mx-auto px-8 mb-20"
+      <main className="min-h-screen">
+        {/* Hero with Background Image */}
+        <ImageBackground
+          src="/images/hero/mountain-moon.jpg"
+          alt="Our team"
+          overlayOpacity={75}
+          gradient="both"
+          priority
+          className="min-h-[55vh] flex items-center justify-center"
         >
-          <motion.span
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.1 }}
-            className="text-primary font-medium text-sm tracking-wider uppercase"
-          >
-            Founders
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.15, duration: 0.5 }}
-            className="text-5xl md:text-6xl font-bold mt-4 mb-6"
+            transition={{ duration: 0.5 }}
+            className="text-center max-w-3xl mx-auto px-8 pt-32 pb-16"
           >
-            Meet the <span className="text-primary">Founders</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.2 }}
-            className="text-muted text-lg"
-          >
-            Delta is built by Eric Geng and Rahib Malik from the University of Michigan,
-            focused on making health guidance personal and accessible.
-          </motion.p>
-        </motion.div>
+            <motion.span
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.1 }}
+              className="text-primary font-medium text-sm tracking-wider uppercase"
+            >
+              Founders
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="text-5xl md:text-6xl font-bold mt-4 mb-6"
+            >
+              Meet the <span className="text-primary">Founders</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.2 }}
+              className="text-muted text-lg"
+            >
+              Delta is built by Eric Geng and Rahib Malik from the University of Michigan,
+              focused on making health guidance personal and accessible.
+            </motion.p>
+          </motion.div>
+        </ImageBackground>
 
         {/* Team grid */}
-        <div className="max-w-6xl mx-auto px-8 mb-32">
+        <div className="max-w-6xl mx-auto px-8 py-20">
           <div className="grid sm:grid-cols-2 gap-8">
             {team.map((member, index) => (
               <motion.div
@@ -107,33 +117,67 @@ export default function TeamPage() {
           </div>
         </div>
 
-        {/* Values section */}
-        <div className="max-w-6xl mx-auto px-8 mb-20">
-          <motion.h2
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.35 }}
-            className="text-3xl font-bold text-center mb-12"
-          >
-            Our Values
-          </motion.h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value, index) => (
-              <motion.div
-                key={value.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.35 }}
-                transition={{ delay: index * 0.1 }}
-                className="p-6 bg-card rounded-2xl border border-border"
-              >
-                <h3 className="font-semibold mb-2">{value.title}</h3>
-                <p className="text-muted text-sm">{value.description}</p>
-              </motion.div>
-            ))}
+        {/* Values section with Background */}
+        <ImageBackground
+          src="/images/hero/waterfall-stones.jpg"
+          alt="Our values"
+          overlayOpacity={88}
+          gradient="both"
+          className="py-20"
+        >
+          <div className="max-w-6xl mx-auto px-8">
+            <motion.h2
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.35 }}
+              className="text-3xl font-bold text-center mb-12"
+            >
+              Our Values
+            </motion.h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {values.map((value, index) => (
+                <motion.div
+                  key={value.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.35 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-border"
+                >
+                  <h3 className="font-semibold mb-2">{value.title}</h3>
+                  <p className="text-muted text-sm">{value.description}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
+        </ImageBackground>
 
+        {/* Join us CTA */}
+        <div className="py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.4 }}
+            className="max-w-3xl mx-auto px-8 text-center"
+          >
+            <h2 className="text-3xl font-bold mb-4">Join Our Journey</h2>
+            <p className="text-muted mb-8">
+              We're always looking for passionate people who want to make a difference
+              in how people approach their health.
+            </p>
+            <motion.a
+              href="/contact"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-xl font-medium shadow-lg shadow-primary/25"
+            >
+              Get in Touch
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </motion.a>
+          </motion.div>
+        </div>
       </main>
       <Footer />
     </>

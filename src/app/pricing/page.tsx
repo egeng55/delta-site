@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import ImageBackground from "@/components/ImageBackground";
 
 const tiers = [
   {
@@ -76,75 +77,84 @@ export default function PricingPage() {
   return (
     <>
       <Navigation />
-      <main className="min-h-screen pt-32 pb-20">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.45 }}
-          transition={{ duration: 0.5 }}
-          className="text-center max-w-3xl mx-auto px-8 mb-16"
+      <main className="min-h-screen">
+        {/* Hero with Background Image */}
+        <ImageBackground
+          src="/images/hero/coastal-wildflowers.jpg"
+          alt="Pricing"
+          overlayOpacity={80}
+          gradient="both"
+          priority
+          className="min-h-[50vh] flex items-center justify-center"
         >
-          <motion.span
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.1 }}
-            className="text-primary font-medium text-sm tracking-wider uppercase"
-          >
-            Pricing
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.15, duration: 0.5 }}
-            className="text-5xl md:text-6xl font-bold mt-4 mb-6"
-          >
-            Simple, Transparent
-            <br />
-            <span className="text-primary">Pricing</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.2 }}
-            className="text-muted text-lg"
-          >
-            Choose the plan that fits your needs. All plans include a 14-day free trial.
-          </motion.p>
-
-          {/* Billing toggle */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, amount: 0.45 }}
-            transition={{ delay: 0.25 }}
-            className="flex items-center justify-center gap-4 mt-8"
+            transition={{ duration: 0.5 }}
+            className="text-center max-w-3xl mx-auto px-8 pt-32 pb-16"
           >
-            <span className={billingCycle === "monthly" ? "text-foreground" : "text-muted"}>
-              Monthly
-            </span>
-            <button
-              onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
-              className="relative w-14 h-8 bg-border rounded-full p-1 transition-colors"
+            <motion.span
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.1 }}
+              className="text-primary font-medium text-sm tracking-wider uppercase"
             >
-              <motion.div
-                animate={{ x: billingCycle === "yearly" ? 24 : 0 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="w-6 h-6 bg-primary rounded-full"
-              />
-            </button>
-            <span className={billingCycle === "yearly" ? "text-foreground" : "text-muted"}>
-              Yearly
-              <span className="ml-2 text-xs text-primary font-medium">Save 20%</span>
-            </span>
+              Pricing
+            </motion.span>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="text-5xl md:text-6xl font-bold mt-4 mb-6"
+            >
+              Simple, Transparent
+              <br />
+              <span className="text-primary">Pricing</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.2 }}
+              className="text-muted text-lg"
+            >
+              Choose the plan that fits your needs. All plans include a 14-day free trial.
+            </motion.p>
+
+            {/* Billing toggle */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={{ delay: 0.25 }}
+              className="flex items-center justify-center gap-4 mt-8"
+            >
+              <span className={billingCycle === "monthly" ? "text-foreground" : "text-muted"}>
+                Monthly
+              </span>
+              <button
+                onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
+                className="relative w-14 h-8 bg-border rounded-full p-1 transition-colors"
+              >
+                <motion.div
+                  animate={{ x: billingCycle === "yearly" ? 24 : 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="w-6 h-6 bg-primary rounded-full"
+                />
+              </button>
+              <span className={billingCycle === "yearly" ? "text-foreground" : "text-muted"}>
+                Yearly
+                <span className="ml-2 text-xs text-primary font-medium">Save 20%</span>
+              </span>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </ImageBackground>
 
         {/* Pricing cards */}
-        <div className="max-w-6xl mx-auto px-8 mb-32">
+        <div className="max-w-6xl mx-auto px-8 py-20">
           <div className="grid md:grid-cols-3 gap-8">
             {tiers.map((tier, index) => (
               <motion.div
@@ -225,32 +235,40 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* FAQs */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: false, amount: 0.4 }}
-          className="max-w-3xl mx-auto px-8"
+        {/* FAQs with Background */}
+        <ImageBackground
+          src="/images/hero/misty-village.jpg"
+          alt="FAQs"
+          overlayOpacity={90}
+          gradient="both"
+          className="py-20"
         >
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-6">
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={faq.question}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, amount: 0.4 }}
-                transition={{ delay: index * 0.08 }}
-                className="p-6 bg-card rounded-2xl border border-border"
-              >
-                <h3 className="font-semibold mb-2">{faq.question}</h3>
-                <p className="text-muted text-sm">{faq.answer}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: false, amount: 0.4 }}
+            className="max-w-3xl mx-auto px-8"
+          >
+            <h2 className="text-3xl font-bold text-center mb-12">
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-6">
+              {faqs.map((faq, index) => (
+                <motion.div
+                  key={faq.question}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.4 }}
+                  transition={{ delay: index * 0.08 }}
+                  className="p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-border"
+                >
+                  <h3 className="font-semibold mb-2">{faq.question}</h3>
+                  <p className="text-muted text-sm">{faq.answer}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </ImageBackground>
       </main>
       <Footer />
     </>
