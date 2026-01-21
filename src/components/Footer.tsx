@@ -28,10 +28,10 @@ export default function Footer() {
   return (
     <footer className="py-12 border-t border-border">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Mobile: 2x2 grid for links, Desktop: 5 columns */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-10">
-          {/* Brand - full width on mobile, first column on desktop */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1 mb-4 lg:mb-0">
+        {/* Flexible layout - wraps based on available space */}
+        <div className="flex flex-wrap gap-x-12 gap-y-8 mb-10">
+          {/* Brand */}
+          <div className="min-w-[200px] flex-1">
             <Link href="/" className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <span className="text-white font-bold">δ</span>
@@ -43,9 +43,9 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Links - 2x2 grid on mobile */}
+          {/* Links - flex and wrap naturally */}
           {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
+            <div key={category} className="min-w-[120px]">
               <h4 className="font-semibold text-sm mb-3">{category}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (
