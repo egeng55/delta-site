@@ -5,25 +5,27 @@ import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
+const API_BASE_URL = "https://delta-80ht.onrender.com";
+
 const contactMethods = [
   {
     icon: "email",
     title: "Email Us",
-    description: "We'll respond within 24 hours",
-    value: "hello@delta.health",
-    href: "mailto:hello@delta.health",
+    description: "We'll respond within 24-48 hours",
+    value: "eric@egeng.co",
+    href: "mailto:eric@egeng.co",
   },
   {
     icon: "chat",
-    title: "Live Chat",
-    description: "Available Mon-Fri, 9am-5pm PT",
-    value: "Start a conversation",
+    title: "In-App Support",
+    description: "Contact us directly from the app",
+    value: "Settings > Contact Support",
     href: "#",
   },
   {
     icon: "location",
-    title: "Office",
-    description: "Come say hello",
+    title: "Location",
+    description: "Where we're based",
     value: "Ann Arbor, Michigan",
     href: "#",
   },
@@ -36,12 +38,58 @@ export default function ContactPage() {
     subject: "",
     message: "",
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    setSubmitted(true);
+    setStatus("loading");
+    setErrorMessage("");
+
+    // Validate message length
+    if (formData.message.trim().length < 10) {
+      setStatus("error");
+      setErrorMessage("Please enter at least 10 characters in your message.");
+      return;
+    }
+
+    try {
+      // Generate anonymous user ID for web submissions
+      const webUserId = `web-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+      const response = await fetch(`${API_BASE_URL}/support/submit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: webUserId,
+          subject: formData.subject,
+          message: formData.message,
+          user_email: formData.email,
+          metadata: {
+            name: formData.name,
+            source: "website",
+            page: "/contact",
+          },
+        }),
+      });
+
+      if (response.ok) {
+        setStatus("success");
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else if (response.status === 429) {
+        setStatus("error");
+        setErrorMessage("Too many requests. Please wait a moment before trying again.");
+      } else {
+        const data = await response.json().catch(() => ({}));
+        setStatus("error");
+        setErrorMessage(data.detail || "Failed to send message. Please try again.");
+      }
+    } catch {
+      setStatus("error");
+      setErrorMessage("Could not connect to the server. Please try again later.");
+    }
   };
 
   return (
@@ -134,7 +182,7 @@ export default function ContactPage() {
             transition={{ delay: 0.2 }}
             className="p-8 bg-card rounded-3xl border border-border"
           >
-            {submitted ? (
+            {status === "success" ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -146,7 +194,13 @@ export default function ContactPage() {
                   </svg>
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Message Sent!</h3>
-                <p className="text-muted">We'll get back to you as soon as possible.</p>
+                <p className="text-muted mb-6">We'll get back to you as soon as possible.</p>
+                <button
+                  onClick={() => setStatus("idle")}
+                  className="text-primary font-medium hover:underline"
+                >
+                  Send another message
+                </button>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -184,28 +238,55 @@ export default function ContactPage() {
                     className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors"
                     placeholder="How can we help?"
                     required
+                    maxLength={200}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Message</label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-medium">Message</label>
+                    <span className="text-xs text-muted">{formData.message.length}/5000</span>
+                  </div>
                   <textarea
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     rows={5}
                     className="w-full px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:border-primary transition-colors resize-none"
-                    placeholder="Tell us more..."
+                    placeholder="Tell us more... (minimum 10 characters)"
                     required
+                    minLength={10}
+                    maxLength={5000}
                   />
                 </div>
+
+                {status === "error" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm"
+                  >
+                    {errorMessage}
+                  </motion.div>
+                )}
 
                 <motion.button
                   type="submit"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-4 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-medium shadow-lg shadow-primary/25"
+                  disabled={status === "loading"}
+                  className="w-full py-4 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl font-medium shadow-lg shadow-primary/25 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Send Message
+                  {status === "loading" ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Message"
+                  )}
                 </motion.button>
               </form>
             )}
