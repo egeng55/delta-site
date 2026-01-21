@@ -20,14 +20,25 @@ export function createSupabaseBrowserClient() {
 // Simple client for direct usage
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Database types
+// Database types - must match Supabase schema exactly
 export interface Profile {
   id: string;
   email: string;
   name: string | null;
+  username: string | null;
+  age: number | null;
+  gender: 'male' | 'female' | 'non-binary' | 'other' | null;
   role: 'user' | 'developer' | 'admin';
   created_at: string;
   updated_at: string;
+}
+
+// Fields that users can update on their profile
+export interface ProfileUpdate {
+  name?: string | null;
+  username?: string | null;
+  age?: number | null;
+  gender?: 'male' | 'female' | 'non-binary' | 'other' | null;
 }
 
 export interface Subscription {

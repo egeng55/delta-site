@@ -2,14 +2,13 @@
 
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
+import { DELTA_API_URL, fetchWithRetry, isLikelyRenderColdStart } from "@/lib/api";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
 }
-
-const BACKEND_URL = "https://delta-80ht.onrender.com";
 
 export default function ChatDemo() {
   const [messages, setMessages] = useState<Message[]>([
@@ -58,7 +57,7 @@ export default function ChatDemo() {
 
     try {
       const userId = generateUserId();
-      const response = await fetch(`${BACKEND_URL}/chat`, {
+      const response = await fetchWithRetry(`${DELTA_API_URL}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +70,7 @@ export default function ChatDemo() {
 
       if (!response.ok) {
         console.error("Backend responded with", response.status);
-        throw new Error("Failed to get response");
+        throw new Error(`Backend error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -85,10 +84,17 @@ export default function ChatDemo() {
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("Chat backend connection failed:", error);
+
+      // Provide more helpful error message for cold starts
+      const isColdStart = isLikelyRenderColdStart(error);
+      const errorContent = isColdStart
+        ? "The server is waking up (this can take up to 30 seconds on first request). Please try again in a moment."
+        : "I'm having trouble connecting right now. Please try again in a moment.";
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I'm having trouble connecting right now. Please try again in a moment.",
+        content: errorContent,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

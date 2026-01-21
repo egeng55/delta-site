@@ -5,8 +5,7 @@ import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ImageBackground from "@/components/ImageBackground";
-
-const API_BASE_URL = "https://delta-80ht.onrender.com";
+import { DELTA_API_URL } from "@/lib/api";
 
 const contactMethods = [
   {
@@ -58,7 +57,7 @@ export default function ContactPage() {
       // Generate anonymous user ID for web submissions
       const webUserId = `web-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-      const response = await fetch(`${API_BASE_URL}/support/submit`, {
+      const response = await fetch(`${DELTA_API_URL}/support/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

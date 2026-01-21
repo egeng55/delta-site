@@ -2,12 +2,13 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
-import { supabase, Profile, Subscription, isDeveloperEmail } from "@/lib/supabase";
+import { supabase, Profile, ProfileUpdate, Subscription, isDeveloperEmail } from "@/lib/supabase";
 
 interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  username: string | null;
   role: 'user' | 'developer' | 'admin';
 }
 
@@ -31,6 +32,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (password: string) => Promise<{ success: boolean; error?: string }>;
+  updateProfile: (updates: ProfileUpdate) => Promise<{ success: boolean; error?: string }>;
   refreshAccess: () => Promise<void>;
 }
 
@@ -95,7 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser({
         id: userId,
         email: userEmail,
-        name: fetchedProfile?.name || userEmail.split('@')[0],
+        name: fetchedProfile?.name || null,
+        username: fetchedProfile?.username || userEmail.split('@')[0],
         role: fetchedProfile?.role || (isDeveloperEmail(userEmail) ? 'developer' : 'user'),
       });
     } catch (error) {
@@ -244,6 +247,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateProfile = async (updates: ProfileUpdate): Promise<{ success: boolean; error?: string }> => {
+    if (!session?.user) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    try {
+      // Filter out undefined values to avoid sending them to Supabase
+      const cleanUpdates: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(updates)) {
+        if (value !== undefined) {
+          cleanUpdates[key] = value;
+        }
+      }
+
+      if (Object.keys(cleanUpdates).length === 0) {
+        return { success: false, error: 'No updates provided' };
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(cleanUpdates)
+        .eq('id', session.user.id);
+
+      if (error) {
+        console.error('Profile update error:', error);
+        return { success: false, error: error.message };
+      }
+
+      // Refresh user data after update
+      await fetchUserData(session.user.id, session.user.email || '');
+
+      return { success: true };
+    } catch (error) {
+      console.error('Profile update exception:', error);
+      return { success: false, error: 'An unexpected error occurred' };
+    }
+  };
+
   const refreshAccess = async (): Promise<void> => {
     if (session?.user) {
       await fetchUserData(session.user.id, session.user.email || '');
@@ -263,6 +304,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       resetPassword,
       updatePassword,
+      updateProfile,
       refreshAccess,
     }}>
       {children}
