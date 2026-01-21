@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import ImageBackground from "@/components/ImageBackground";
 
 const tiers = [
   {
@@ -78,21 +77,14 @@ export default function PricingPage() {
     <>
       <Navigation />
       <main className="min-h-screen">
-        {/* Hero with Background Image */}
-        <ImageBackground
-          src="/images/hero/coastal-wildflowers.jpg"
-          alt="Pricing"
-          overlay="medium"
-
-          priority
-          className="min-h-[50vh] flex items-center justify-center"
-        >
+        {/* Hero */}
+        <section className="pt-32 pb-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false, amount: 0.45 }}
             transition={{ duration: 0.5 }}
-            className="text-center max-w-3xl mx-auto px-8 pt-32 pb-16"
+            className="text-center max-w-3xl mx-auto px-8"
           >
             <motion.span
               initial={{ opacity: 0 }}
@@ -151,7 +143,7 @@ export default function PricingPage() {
               </span>
             </motion.div>
           </motion.div>
-        </ImageBackground>
+        </section>
 
         {/* Pricing cards */}
         <div className="max-w-6xl mx-auto px-8 py-20">
