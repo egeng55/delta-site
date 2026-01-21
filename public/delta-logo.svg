@@ -9,6 +9,9 @@
 <g filter="url(#filter2_d_0_1)">
 <path d="M259.449 216.309C271.256 197.923 298.128 197.923 309.935 216.309L392.282 344.539C405.104 364.505 390.767 390.75 367.039 390.75H202.346C178.617 390.75 164.281 364.506 177.102 344.539L259.449 216.309Z" fill="url(#paint1_linear_0_1)"/>
 </g>
+<g filter="url(#filter3_d_0_1)">
+<path d="M259.289 280.439C271.05 261.717 298.334 261.717 310.096 280.439L330.733 313.292C343.284 333.271 328.923 359.25 305.33 359.25H264.055C240.461 359.25 226.101 333.271 238.651 313.292L259.289 280.439Z" fill="url(#paint2_linear_0_1)"/>
+</g>
 <defs>
 <filter id="filter0_d_0_1" x="0" y="0" width="570.384" height="503" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
@@ -40,11 +43,25 @@
 <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape"/>
 </filter>
+<filter id="filter3_d_0_1" x="230.007" y="266.398" width="109.371" height="100.852" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="2"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape"/>
+</filter>
 <linearGradient id="paint0_linear_0_1" x1="284.692" y1="87" x2="284.692" y2="553" gradientUnits="userSpaceOnUse">
 <stop stop-color="#0E0B2B"/>
 <stop offset="1" stop-color="#2D2491"/>
 </linearGradient>
 <linearGradient id="paint1_linear_0_1" x1="284.692" y1="177" x2="284.692" y2="462" gradientUnits="userSpaceOnUse">
+<stop offset="0.139423" stop-color="#0E0B2B"/>
+<stop offset="0.4375" stop-color="#2D2491"/>
+</linearGradient>
+<linearGradient id="paint2_linear_0_1" x1="284.692" y1="240" x2="284.692" y2="399" gradientUnits="userSpaceOnUse">
 <stop offset="0.139423" stop-color="#0E0B2B"/>
 <stop offset="0.4375" stop-color="#2D2491"/>
 </linearGradient>
