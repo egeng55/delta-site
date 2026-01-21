@@ -101,7 +101,7 @@ export default function BusinessPage() {
         <ImageBackground
           src="/images/hero/aerial-glaciers.jpg"
           alt="Delta for Business"
-          overlayOpacity={80}
+          overlay="medium"
 
           priority
           className="min-h-[70vh] flex items-center justify-center"
@@ -188,7 +188,7 @@ export default function BusinessPage() {
         <ImageBackground
           src="/images/hero/ocean-mountains.jpg"
           alt="Architecture"
-          overlayOpacity={92}
+          overlay="heavy"
 
           className="py-24"
         >

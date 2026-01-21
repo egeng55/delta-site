@@ -14,7 +14,7 @@ export default function AboutPage() {
         <ImageBackground
           src="/images/hero/river-blooms.jpg"
           alt="About Delta"
-          overlayOpacity={75}
+          overlay="medium"
 
           priority
           className="min-h-[60vh] flex items-center justify-center"
@@ -89,7 +89,7 @@ export default function AboutPage() {
         <ImageBackground
           src="/images/hero/willow-water.jpg"
           alt="Our mission"
-          overlayOpacity={88}
+          overlay="heavy"
 
           className="py-20"
         >

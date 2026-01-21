@@ -73,7 +73,7 @@ export default function LearnMorePage() {
         <ImageBackground
           src="/images/hero/aerial-glaciers.jpg"
           alt="Premium features"
-          overlayOpacity={78}
+          overlay="medium"
 
           priority
           className="min-h-[55vh] flex items-center justify-center"
@@ -146,7 +146,7 @@ export default function LearnMorePage() {
         <ImageBackground
           src="/images/hero/ocean-mountains.jpg"
           alt="How it works"
-          overlayOpacity={88}
+          overlay="heavy"
 
           className="py-20"
         >
@@ -205,7 +205,7 @@ export default function LearnMorePage() {
         <ImageBackground
           src="/images/hero/sunset-shore.jpg"
           alt="Get started"
-          overlayOpacity={85}
+          overlay="heavy"
 
           className="py-20"
         >

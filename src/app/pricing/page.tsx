@@ -82,7 +82,7 @@ export default function PricingPage() {
         <ImageBackground
           src="/images/hero/coastal-wildflowers.jpg"
           alt="Pricing"
-          overlayOpacity={80}
+          overlay="medium"
 
           priority
           className="min-h-[50vh] flex items-center justify-center"

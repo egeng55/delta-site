@@ -101,7 +101,7 @@ export default function ContactPage() {
         <ImageBackground
           src="/images/hero/orange-sunset.jpg"
           alt="Contact us"
-          overlayOpacity={75}
+          overlay="medium"
 
           priority
           className="min-h-[50vh] flex items-center justify-center"

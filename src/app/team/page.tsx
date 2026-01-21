@@ -44,7 +44,7 @@ export default function TeamPage() {
         <ImageBackground
           src="/images/hero/mountain-moon.jpg"
           alt="Our team"
-          overlayOpacity={75}
+          overlay="medium"
 
           priority
           className="min-h-[55vh] flex items-center justify-center"
@@ -121,7 +121,7 @@ export default function TeamPage() {
         <ImageBackground
           src="/images/hero/waterfall-stones.jpg"
           alt="Our values"
-          overlayOpacity={88}
+          overlay="heavy"
 
           className="py-20"
         >
