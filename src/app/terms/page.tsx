@@ -7,7 +7,21 @@ const sections = [
   },
   {
     title: "Description of Service",
-    content: "Delta provides an AI-powered health intelligence platform that offers personalized health guidance, tracking, and insights. Our service is intended for informational purposes only and should not be considered medical advice. Always consult with qualified healthcare providers for medical decisions.",
+    content: (
+      <div className="space-y-4">
+        <p>Delta provides an AI-powered health intelligence platform that offers:</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li>Personalized health and fitness guidance through conversational AI</li>
+          <li>Automatic parsing and organization of wellness data from chat</li>
+          <li>Trend analysis with derivative calculations (momentum, direction, stability)</li>
+          <li>AI-generated personalized workout recommendations</li>
+          <li>Goal setting and progress tracking</li>
+          <li>Calendar view of logged data</li>
+          <li>Data export in PDF, CSV, and JSON formats</li>
+        </ul>
+        <p className="text-sm text-gray-400 mt-2">Our service is intended for informational purposes only and should not be considered medical advice. Always consult with qualified healthcare providers for medical decisions.</p>
+      </div>
+    ),
   },
   {
     title: "User Accounts",
@@ -43,7 +57,38 @@ const sections = [
   },
   {
     title: "Health Disclaimer",
-    content: "Delta is not a medical device and is not intended to diagnose, treat, cure, or prevent any disease or health condition. The information provided through our service is for general informational purposes only. You should not rely on this information as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.",
+    content: (
+      <div className="space-y-4">
+        <p className="font-semibold text-red-400">Delta is NOT a medical device and is NOT intended to diagnose, treat, cure, or prevent any disease or health condition.</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li>Delta provides general wellness information only</li>
+          <li>Trend indicators (↑ ↓ →) show relative patterns, NOT medical assessments</li>
+          <li>"Physiological momentum" and similar metrics are wellness observations, NOT diagnoses</li>
+          <li>AI-generated workout recommendations should be adapted to your fitness level</li>
+          <li>Always consult professionals before starting new exercise programs</li>
+        </ul>
+        <p>You should not rely on this information as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+      </div>
+    ),
+  },
+  {
+    title: "AI-Generated Content",
+    content: (
+      <div className="space-y-4">
+        <p>Delta uses artificial intelligence to:</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li>Parse and organize information from your conversations</li>
+          <li>Generate personalized workout recommendations</li>
+          <li>Calculate trend indicators and pattern analysis</li>
+          <li>Produce weekly wellness assessments</li>
+        </ul>
+        <p>You understand that AI-generated content may not always be accurate and should not be relied upon for health decisions without professional consultation.</p>
+      </div>
+    ),
+  },
+  {
+    title: "Data and Exports",
+    content: "Data logged through chat is parsed and stored as derived metrics. You may export your data at any time via Settings in PDF, CSV, or JSON format. Exports contain derived metrics only, not raw biometric data. You own your data and may delete it at any time.",
   },
   {
     title: "Subscription and Billing",

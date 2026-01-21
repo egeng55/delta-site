@@ -3,6 +3,7 @@
 import { motion, useMotionValue, useSpring, easeInOut, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useRef, useState, useCallback } from "react";
 
@@ -141,9 +142,16 @@ export default function Navigation() {
             <motion.div
               whileHover={{ rotate: 180 }}
               transition={{ duration: 0.5, ease: easeInOut }}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/25 animate-pulse-glow"
+              className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/25 animate-pulse-glow"
             >
-              <span className="text-white font-bold text-lg">δ</span>
+              <Image
+                src="/delta-logo.svg"
+                alt="Delta"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+                priority
+              />
             </motion.div>
           </motion.div>
         </Link>

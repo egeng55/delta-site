@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
@@ -86,9 +87,15 @@ export default function SignUpPage() {
           <motion.div
             whileHover={{ rotate: 180 }}
             transition={{ duration: 0.4 }}
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center"
+            className="w-12 h-12 rounded-xl overflow-hidden"
           >
-            <span className="text-white font-bold text-xl">δ</span>
+            <Image
+              src="/delta-logo.svg"
+              alt="Delta"
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+            />
           </motion.div>
           <span className="text-2xl font-bold">Delta</span>
         </Link>

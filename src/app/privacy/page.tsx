@@ -12,10 +12,19 @@ const sections = [
         <p>We collect information that you provide directly to us, including:</p>
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li><strong>Account Information:</strong> Name, email address, and password when you create an account</li>
-          <li><strong>Health Information:</strong> Weight, height, fitness goals, dietary preferences, and other health-related data you choose to share</li>
+          <li><strong>Health Information:</strong> Fitness goals, dietary preferences, sleep patterns, energy levels, stress ratings, and other wellness data you share through chat</li>
           <li><strong>Usage Data:</strong> Information about how you interact with our services, including conversation history</li>
           <li><strong>Device Information:</strong> Device type, operating system, and unique device identifiers</li>
+          <li><strong>Goal Information:</strong> Personal wellness goals you set within the app</li>
         </ul>
+        <p className="mt-4 font-medium">Information We Derive:</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong>Daily Logs:</strong> Sleep hours, energy ratings, stress levels automatically parsed from chat</li>
+          <li><strong>Trend Data:</strong> Direction and momentum of wellness metrics over time</li>
+          <li><strong>Pattern Analysis:</strong> Correlations between activities and outcomes</li>
+          <li><strong>Goal Progress:</strong> Tracking toward your stated objectives</li>
+        </ul>
+        <p className="mt-2 text-sm text-gray-400">Note: We only store derived metrics (ratings, trends), NOT raw biometric sensor data.</p>
       </div>
     ),
   },
@@ -27,10 +36,37 @@ const sections = [
         <ul className="list-disc list-inside space-y-2 ml-4">
           <li>Provide, maintain, and improve our services</li>
           <li>Personalize your experience and provide tailored health guidance</li>
+          <li>Calculate trend analysis and derivative metrics showing your progress</li>
+          <li>Generate personalized AI workout recommendations</li>
+          <li>Create exportable PDF, CSV, or JSON reports of your insights</li>
+          <li>Detect patterns and correlations in your wellness data</li>
           <li>Communicate with you about updates, features, and support</li>
           <li>Analyze usage patterns to improve our AI and recommendations</li>
           <li>Protect against fraudulent or unauthorized activity</li>
         </ul>
+      </div>
+    ),
+  },
+  {
+    title: "Data Processing",
+    content: (
+      <div className="space-y-4">
+        <p><strong>Derivative Calculations:</strong> We process your data to calculate first-order trends (improving, declining, stable), stability metrics, recovery patterns, and composite wellness momentum. These calculations produce qualitative insights, not medical assessments.</p>
+        <p><strong>AI-Powered Features:</strong> Workout recommendations are generated using AI based on your goals and history. Weekly assessments summarize your progress. All AI outputs include appropriate wellness disclaimers.</p>
+      </div>
+    ),
+  },
+  {
+    title: "Data Export",
+    content: (
+      <div className="space-y-4">
+        <p>You can export your data at any time in three formats:</p>
+        <ul className="list-disc list-inside space-y-2 ml-4">
+          <li><strong>PDF:</strong> Human-readable summary with trend indicators and insights</li>
+          <li><strong>CSV:</strong> Derived metrics only (ratings, binary indicators)</li>
+          <li><strong>JSON:</strong> Structured data for technical use</li>
+        </ul>
+        <p className="text-sm text-gray-400">Exports contain ONLY derived metrics, NOT raw sensor data or biometrics.</p>
       </div>
     ),
   },

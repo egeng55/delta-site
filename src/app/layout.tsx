@@ -14,11 +14,19 @@ export const metadata: Metadata = {
   description:
     "Your AI-powered health companion that learns your patterns, understands your goals, and provides personalized guidance for lasting results.",
   keywords: ["health", "AI", "fitness", "wellness", "personal trainer", "nutrition"],
+  icons: {
+    icon: [
+      { url: "/delta-logo.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png" },
+    ],
+    apple: "/icon.png",
+  },
   openGraph: {
     title: "Delta - AI Health Intelligence",
     description:
       "Transform your health journey with AI that understands you.",
     type: "website",
+    images: ["/icon.png"],
   },
 };
 

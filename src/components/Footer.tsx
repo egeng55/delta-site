@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 const footerLinks = {
   Product: [
@@ -33,8 +34,14 @@ export default function Footer() {
           {/* Brand */}
           <div className="min-w-[200px] flex-1">
             <Link href="/" className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <span className="text-white font-bold">δ</span>
+              <div className="w-9 h-9 rounded-xl overflow-hidden">
+                <Image
+                  src="/delta-logo.svg"
+                  alt="Delta"
+                  width={36}
+                  height={36}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="text-lg font-bold">Delta</span>
             </Link>

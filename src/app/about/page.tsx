@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import Navigation from "@/components/Navigation";
+import { motion } from "framer-motion";
 
 export default function AboutPage() {
   return (
@@ -61,19 +61,15 @@ export default function AboutPage() {
             <h2 className="text-2xl font-bold mb-6">Our Story</h2>
             <div className="space-y-4 text-muted leading-relaxed">
               <p>
-                Delta started with a simple observation: traditional health apps treat
-                everyone the same. They give you generic advice, rigid tracking systems,
-                and one-size-fits-all goals. But health is deeply personal.
+                Delta started from a personal constraint, not a market thesis. 
+                While working in China at Geely Auto International’s global AI research center on vision transformers, I was training seriously as a lifter in an environment that wasn’t built for it. The cafeteria food was optimized for a typical local diet, not high-protein intake. To meet my nutrition needs, I walked daily to KFC and Starbucks, manually stripping chicken skin to control fat and piecing together meals through trial and error. I ran several kilometers each day to a small hotel gym because I didn’t have a car, adapting my training to whatever equipment was available.
               </p>
               <p>
-                We founded Delta to change that. By combining advanced AI with a
-                conversational interface, we created a health companion that actually
-                understands you—your patterns, your preferences, your life.
+                I relied heavily on ChatGPT and search to manage nutrition, training, and recovery—but I kept running into the same fundamental problems. ChatGPT had no persistent memory. It forgot my goals, my diet, and my constraints unless I re-explained them. Its context window broke continuity. It had no real sense of time, so daily macros and patterns drifted. Long conversations degraded, hallucinations crept in, and restarting sessions meant rebuilding state from scratch. 
+                That friction revealed the real problem: health intelligence can’t live inside a stateless chatbot or generic search tool. It needs persistent memory, temporal awareness, and the ability to reason over patterns across days, weeks, and months without being reminded.
               </p>
               <p>
-                Our team includes engineers from Google and Spotify, doctors from Stanford,
-                and designers from Apple. We're united by a belief that technology should
-                adapt to people, not the other way around.
+                Delta was born as a dedicated health intelligence system—one that maintains continuity, understands personal constraints, tracks change over time, and generates insights from real patterns rather than one-off prompts. Not a generic health app, and not a chatbot wrapper, but a system designed from the ground up to support real life as it happens.
               </p>
             </div>
           </motion.div>
