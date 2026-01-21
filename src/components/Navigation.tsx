@@ -3,9 +3,29 @@
 import { motion, useMotionValue, useSpring, easeInOut, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useRef, useState, useCallback } from "react";
+
+function DeltaLogo({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M229.211 20C240.758 0 269.626 0 281.173 20L482.32 368C493.867 388 479.434 413 456.339 413H54.0447C30.9507 413 16.517 388 28.064 368L229.211 20Z" fill="#0E0B2B"/>
+      <path d="M231.809 21.5C242.12 3.6407 267.778 3.50083 278.329 21.0811L278.575 21.5L479.722 369.5C490.115 387.5 477.124 410 456.34 410H54.0447C33.4225 410 20.4733 387.85 30.4226 369.923L30.6619 369.5L231.809 21.5Z" stroke="white" strokeWidth="6"/>
+      <path d="M229.147 113.486C240.863 94.459 268.522 94.459 280.238 113.486L411.741 326.77C424.049 346.758 409.669 372.5 386.195 372.5H123.189C99.7155 372.5 85.3356 346.758 97.6433 326.77L229.147 113.486Z" fill="url(#paint0_linear_nav)"/>
+      <path d="M229.449 186.309C241.256 167.923 268.128 167.923 279.935 186.309L352.282 298.539C365.104 318.505 350.767 344.75 327.039 344.75H182.346C158.617 344.75 144.281 318.506 157.102 298.539L229.449 186.309Z" fill="url(#paint1_linear_nav)"/>
+      <defs>
+        <linearGradient id="paint0_linear_nav" x1="254.692" y1="72" x2="254.692" y2="489" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#0E0B2B"/>
+          <stop offset="1" stopColor="#2D2491"/>
+        </linearGradient>
+        <linearGradient id="paint1_linear_nav" x1="254.692" y1="147" x2="254.692" y2="416" gradientUnits="userSpaceOnUse">
+          <stop offset="0.139423" stopColor="#0E0B2B"/>
+          <stop offset="0.4375" stopColor="#2D2491"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -144,16 +164,8 @@ export default function Navigation() {
             <motion.div
               whileHover={{ rotate: 180 }}
               transition={{ duration: 0.5, ease: easeInOut }}
-              className="w-10 h-10"
             >
-              <Image
-                src="/delta-logo.svg"
-                alt="Delta"
-                width={40}
-                height={40}
-                className="w-full h-full object-contain"
-                priority
-              />
+              <DeltaLogo className="w-10 h-10" />
             </motion.div>
           </motion.div>
         </Link>
