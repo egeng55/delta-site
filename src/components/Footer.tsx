@@ -31,10 +31,10 @@ export default function Footer() {
   return (
     <footer className="py-12 border-t border-border">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Flexible layout - wraps based on available space */}
-        <div className="flex flex-wrap gap-x-12 gap-y-8 mb-10">
-          {/* Brand */}
-          <div className="min-w-[200px] flex-1">
+        {/* Grid layout - stacks on mobile, spreads on desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 mb-10">
+          {/* Brand - full width on mobile */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 mb-3">
               <div className="w-9 h-9">
                 <Image
@@ -47,14 +47,14 @@ export default function Footer() {
               </div>
               <span className="text-lg font-bold">Delta</span>
             </Link>
-            <p className="text-muted text-sm leading-relaxed">
+            <p className="text-muted text-sm leading-relaxed max-w-xs">
               Your AI-powered health intelligence companion.
             </p>
           </div>
 
-          {/* Links - flex and wrap naturally */}
+          {/* Links */}
           {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category} className="min-w-[120px]">
+            <div key={category}>
               <h4 className="font-semibold text-sm mb-3">{category}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (

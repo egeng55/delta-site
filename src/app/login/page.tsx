@@ -79,7 +79,14 @@ export default function LoginPage() {
               className="w-full h-full object-cover"
             />
           </motion.div>
-          <span className="text-2xl font-bold">Delta</span>
+          <span
+            className="text-3xl font-extralight tracking-widest uppercase"
+            style={{
+              textShadow: '0 0 10px rgba(255, 107, 107, 0.6), 0 0 30px rgba(255, 107, 107, 0.4), 0 0 50px rgba(255, 107, 107, 0.2)'
+            }}
+          >
+            Delta
+          </span>
         </Link>
 
         {/* Form card */}

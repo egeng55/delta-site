@@ -40,7 +40,10 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <AuthProvider>
           <GlobalEffects />
-          {children}
+          {/* Add left padding on large screens for side nav */}
+          <div className="lg:pl-[140px]">
+            {children}
+          </div>
         </AuthProvider>
       </body>
     </html>
