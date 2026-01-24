@@ -1,16 +1,10 @@
-"use client";
-
 import type { ReactNode } from "react";
-import { AuthProvider } from "@/context/AuthContext";
-import GlobalEffects from "@/components/GlobalEffects";
+import AuthLayoutClient from "./AuthLayoutClient";
+
+// Force dynamic rendering for all auth pages - they require authentication
+export const dynamic = "force-dynamic";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
-  return (
-    <AuthProvider>
-      <GlobalEffects />
-      <div className="lg:pl-[140px]">
-        {children}
-      </div>
-    </AuthProvider>
-  );
+  return <AuthLayoutClient>{children}</AuthLayoutClient>;
 }
+

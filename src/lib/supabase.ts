@@ -9,16 +9,39 @@ import { createClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 
 // Supabase credentials from environment variables
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Use empty strings as fallback for build-time (will fail at runtime if not set)
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
+
+// Check if Supabase is configured
+const isSupabaseConfigured = SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== '';
 
 // Browser client for client-side usage
 export function createSupabaseBrowserClient() {
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase environment variables are not configured');
+  }
   return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-// Simple client for direct usage
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Lazy-initialized client to avoid build-time errors
+let _supabase: ReturnType<typeof createClient> | null = null;
+
+export function getSupabase() {
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase environment variables are not configured');
+  }
+  if (_supabase === null) {
+    _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return _supabase;
+}
+
+// Simple client for direct usage (legacy - prefer getSupabase())
+// Only create if configured to avoid build errors
+export const supabase = isSupabaseConfigured
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : (null as unknown as ReturnType<typeof createClient>);
 
 // Database types - must match Supabase schema exactly
 export interface Profile {
