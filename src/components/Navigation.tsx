@@ -176,9 +176,9 @@ export default function Navigation() {
         </Link>
       </motion.div>
 
-      {/* Desktop Nav - Fixed left, vertically centered (hidden on mobile/tablet) */}
+      {/* Desktop Nav - Fixed left, vertically centered (hidden until xl screens) */}
       <motion.nav
-        className="fixed left-8 top-1/2 -translate-y-1/2 z-50 hidden lg:block"
+        className="fixed left-8 top-1/2 -translate-y-1/2 z-50 hidden xl:block"
       >
         <ul className="flex flex-col gap-3">
           {navItems.map((item) => (
@@ -206,9 +206,9 @@ export default function Navigation() {
         </ul>
       </motion.nav>
 
-      {/* Desktop Auth buttons - Fixed top right (hidden on mobile/tablet) */}
+      {/* Desktop Auth buttons - Fixed top right (hidden until xl screens) */}
       <motion.div
-        className="fixed right-8 top-8 z-50 hidden lg:flex flex-col items-end gap-3"
+        className="fixed right-8 top-8 z-50 hidden xl:flex flex-col items-end gap-3"
       >
         <div className="flex items-center gap-4">
           {user ? (
@@ -248,8 +248,8 @@ export default function Navigation() {
         </span>
       </motion.div>
 
-      {/* Mobile/Tablet Menu Button - Fixed top right (visible below lg screens) */}
-      <div ref={menuRef} className="lg:hidden fixed right-4 top-4 z-50">
+      {/* Mobile/Tablet Menu Button - Fixed top right (visible below xl screens) */}
+      <div ref={menuRef} className="xl:hidden fixed right-4 top-4 z-50">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center"
