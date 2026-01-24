@@ -8,9 +8,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 
-// Same Supabase project as mobile app
-const SUPABASE_URL = 'https://fhbfaoowwnzzynhbgcms.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoYmZhb293d256enluaGJnY21zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5NTQxOTcsImV4cCI6MjA4NDUzMDE5N30.tLvdwDBL9ftVq-xb2C9UCm4MXb8r2owNMlSL_G_iM8k';
+// Supabase credentials from environment variables
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Browser client for client-side usage
 export function createSupabaseBrowserClient() {
