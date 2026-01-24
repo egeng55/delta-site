@@ -1,10 +1,37 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { motion, easeInOut } from "framer-motion";
 import Navigation from "@/components/Navigation";
-import ChatDemo from "@/components/ChatDemo";
-import Footer from "@/components/Footer";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollSection";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+// Lazy load Footer since it's always below the fold
+const Footer = dynamic(() => import("@/components/Footer"), {
+  loading: () => <div className="h-64 bg-card" />,
+});
+
+const ChatDemo = dynamic(() => import("@/components/ChatDemo"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full max-w-3xl h-[320px] rounded-xl border border-border bg-card/50 animate-pulse" />
+  ),
+});
+
+// Wrapped ChatDemo with error boundary
+function ChatDemoWithErrorBoundary() {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="w-full max-w-3xl h-[320px] rounded-xl border border-border bg-card/50 flex items-center justify-center">
+          <p className="text-muted text-sm">Chat demo unavailable. Please refresh the page.</p>
+        </div>
+      }
+    >
+      <ChatDemo />
+    </ErrorBoundary>
+  );
+}
 
 const features = [
   {
@@ -127,7 +154,7 @@ export default function Home() {
 
           {/* Chat interface */}
           <div className="w-full max-w-3xl relative z-10">
-            <ChatDemo />
+            <ChatDemoWithErrorBoundary />
           </div>
 
           {/* Scroll indicator */}
