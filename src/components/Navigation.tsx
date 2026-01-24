@@ -4,9 +4,9 @@ import { motion, useMotionValue, useSpring, easeInOut, AnimatePresence } from "f
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, memo } from "react";
 
-function DeltaLogo({ className }: { className?: string }) {
+const DeltaLogo = memo(function DeltaLogo({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M229.211 20C240.758 0 269.626 0 281.173 20L482.32 368C493.867 388 479.434 413 456.339 413H54.0447C30.9507 413 16.517 388 28.064 368L229.211 20Z" fill="#0E0B2B"/>
@@ -25,7 +25,7 @@ function DeltaLogo({ className }: { className?: string }) {
       </defs>
     </svg>
   );
-}
+});
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -37,7 +37,7 @@ const navItems = [
   { label: "Contact", href: "/contact" },
 ];
 
-function MagneticLink({ href, children, isActive }: { href: string; children: React.ReactNode; isActive: boolean }) {
+const MagneticLink = memo(function MagneticLink({ href, children, isActive }: { href: string; children: React.ReactNode; isActive: boolean }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -74,10 +74,10 @@ function MagneticLink({ href, children, isActive }: { href: string; children: Re
       </motion.span>
     </Link>
   );
-}
+});
 
 // Hamburger icon component
-function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
+const HamburgerIcon = memo(function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
   return (
     <div className="w-5 h-4 relative flex flex-col justify-between">
       <motion.span
@@ -97,7 +97,7 @@ function HamburgerIcon({ isOpen }: { isOpen: boolean }) {
       />
     </div>
   );
-}
+});
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -106,26 +106,31 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // Update time every minute instead of every second to reduce re-renders
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("en-US", {
       timeZone: "America/New_York",
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
       hour12: true,
     });
 
     const updateTime = () => setEtTime(formatter.format(new Date()));
 
     updateTime();
-    const interval = setInterval(updateTime, 1000);
+    // Update every 60 seconds instead of every 1 second (60x fewer re-renders)
+    const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, []);
 
   // Close menu on route change
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+    if (mobileMenuOpen) {
+      // Close open menus when route changes (intentional state update inside effect)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMobileMenuOpen(false);
+    }
+  }, [pathname, mobileMenuOpen]);
 
   // Close menu on outside click
   useEffect(() => {

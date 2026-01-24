@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
-import { User, Session, AuthError } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
 import { supabase, Profile, ProfileUpdate, Subscription, isDeveloperEmail } from "@/lib/supabase";
 
 interface AuthUser {
@@ -38,7 +38,12 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+interface AuthProviderProps {
+  children: ReactNode;
+  enableAuth?: boolean;
+}
+
+export function AuthProvider({ children, enableAuth = true }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -49,30 +54,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetch profile and subscription data
   const fetchUserData = useCallback(async (userId: string, userEmail: string) => {
     try {
-      // Fetch profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      // Fetch profile and subscription in parallel for better performance
+      const [profileResult, subResult] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', userId).single(),
+        supabase.from('subscriptions').select('*').eq('user_id', userId).single(),
+      ]);
 
-      if (profileError && profileError.code !== 'PGRST116') {
-        console.error('Error fetching profile:', profileError);
+      if (profileResult.error && profileResult.error.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileResult.error);
       }
 
-      // Fetch subscription
-      const { data: subData, error: subError } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (subError && subError.code !== 'PGRST116') {
-        console.error('Error fetching subscription:', subError);
+      if (subResult.error && subResult.error.code !== 'PGRST116') {
+        console.error('Error fetching subscription:', subResult.error);
       }
 
-      const fetchedProfile = profileData as Profile | null;
-      const fetchedSubscription = subData as Subscription | null;
+      const fetchedProfile = profileResult.data as Profile | null;
+      const fetchedSubscription = subResult.data as Subscription | null;
 
       setProfile(fetchedProfile);
       setSubscription(fetchedSubscription);
@@ -108,6 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize auth state
   useEffect(() => {
+    if (!enableAuth) {
+      setIsLoading(false);
+      return;
+    }
+
     const initAuth = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
@@ -146,9 +148,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       authSubscription.unsubscribe();
     };
-  }, [fetchUserData]);
+  }, [fetchUserData, enableAuth]);
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    if (!enableAuth) {
+      return { success: false, error: 'Auth disabled in this context' };
+    }
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -165,12 +170,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
   const signup = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    if (!enableAuth) {
+      return { success: false, error: 'Auth disabled in this context' };
+    }
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -197,12 +205,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
   const logout = async (): Promise<void> => {
+    if (!enableAuth) {
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setSubscription(null);
+      setAccess(null);
+      return;
+    }
     try {
       await supabase.auth.signOut();
       setUser(null);
@@ -216,6 +232,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    if (!enableAuth) {
+      return { success: false, error: 'Auth disabled in this context' };
+    }
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -226,12 +245,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
   const updatePassword = async (password: string): Promise<{ success: boolean; error?: string }> => {
+    if (!enableAuth) {
+      return { success: false, error: 'Auth disabled in this context' };
+    }
     try {
       const { error } = await supabase.auth.updateUser({
         password,
@@ -242,12 +264,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
 
   const updateProfile = async (updates: ProfileUpdate): Promise<{ success: boolean; error?: string }> => {
+    if (!enableAuth) {
+      return { success: false, error: 'Auth disabled in this context' };
+    }
     if (!session?.user) {
       return { success: false, error: 'Not authenticated' };
     }
@@ -286,6 +311,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshAccess = async (): Promise<void> => {
+    if (!enableAuth) {
+      return;
+    }
     if (session?.user) {
       await fetchUserData(session.user.id, session.user.email || '');
     }

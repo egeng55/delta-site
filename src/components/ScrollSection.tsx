@@ -1,14 +1,13 @@
 "use client";
 
 import { motion, useScroll, useTransform, easeOut } from "framer-motion";
-import { useRef, ReactNode } from "react";
+import { useRef, ReactNode, memo } from "react";
 
 interface ScrollSectionProps {
   children: ReactNode;
   className?: string;
   id?: string;
   animation?: "fade" | "slide-up" | "slide-left" | "slide-right" | "scale" | "parallax";
-  delay?: number;
 }
 
 export default function ScrollSection({
@@ -16,7 +15,6 @@ export default function ScrollSection({
   className = "",
   id,
   animation = "fade",
-  delay = 0,
 }: ScrollSectionProps) {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
@@ -152,13 +150,13 @@ export function StaggerContainer({
   );
 }
 
-// Individual stagger item
+// Individual stagger item (memoized for performance in lists)
 interface StaggerItemProps {
   children: ReactNode;
   className?: string;
 }
 
-export function StaggerItem({ children, className = "" }: StaggerItemProps) {
+export const StaggerItem = memo(function StaggerItem({ children, className = "" }: StaggerItemProps) {
   return (
     <motion.div
       variants={{
@@ -174,4 +172,4 @@ export function StaggerItem({ children, className = "" }: StaggerItemProps) {
       {children}
     </motion.div>
   );
-}
+});

@@ -151,11 +151,11 @@ function Counter({ from, to, duration }: { from: number; to: number; duration: n
     >
       <motion.span
         initial={{
-          // @ts-ignore - custom property for counting
+          // @ts-expect-error Custom motion value used for counting
           count: from
         }}
         whileInView={{
-          // @ts-ignore
+          // @ts-expect-error Custom motion value used for counting
           count: to
         }}
         viewport={{ once: false, amount: 0.4 }}
@@ -186,16 +186,6 @@ function CountDisplay({ from, to, duration }: { from: number; to: number; durati
       }
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          animationFrame = requestAnimationFrame(animate);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    // Start immediately for simplicity
     animationFrame = requestAnimationFrame(animate);
 
     return () => {
