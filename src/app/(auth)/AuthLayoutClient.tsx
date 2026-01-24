@@ -8,7 +8,7 @@ export default function AuthLayoutClient({ children }: { children: ReactNode }) 
   return (
     <AuthProvider>
       <GlobalEffects />
-      <div className="lg:pl-[140px]">
+      <div className="w-full">
         {children}
       </div>
     </AuthProvider>

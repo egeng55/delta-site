@@ -8,7 +8,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
     <AuthProvider enableAuth={false}>
       <GlobalEffects />
-      <div className="lg:pl-[140px]">
+      <div className="w-full">
         {children}
       </div>
     </AuthProvider>
