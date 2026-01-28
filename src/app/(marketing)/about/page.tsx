@@ -131,12 +131,9 @@ export default function AboutPage() {
             viewport={{ once: false, amount: 0.4 }}
             className="max-w-4xl mx-auto px-8"
           >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 p-8 bg-card rounded-3xl border border-border">
+            <div className="flex justify-center gap-8 p-8 bg-card rounded-3xl border border-border">
               {[
-                { value: "10k+", label: "Active Users" },
-                { value: "500k+", label: "Conversations" },
-                { value: "95%", label: "Satisfaction" },
-                { value: "2023", label: "Founded" },
+                { value: "2026", label: "Founded" },
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}

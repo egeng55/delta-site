@@ -354,11 +354,9 @@ export default function Home() {
                   </p>
 
                   {/* Stats */}
-                  <div className="grid grid-cols-3 gap-8">
+                  <div className="flex justify-center gap-8">
                     {[
-                      { value: "10k+", label: "Active Users" },
-                      { value: "95%", label: "Satisfaction" },
-                      { value: "24/7", label: "Support" },
+                      { value: "2026", label: "Founded" },
                     ].map((stat) => (
                       <div key={stat.label}>
                         <div className="text-3xl font-bold text-primary">
