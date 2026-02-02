@@ -6,7 +6,11 @@
  */
 
 // Delta Backend API (deployed on Render)
-export const DELTA_API_URL = process.env.NEXT_PUBLIC_DELTA_API_URL || 'https://delta-80ht.onrender.com';
+const _url = process.env.NEXT_PUBLIC_DELTA_API_URL;
+if (!_url && process.env.NODE_ENV === 'production') {
+  throw new Error('NEXT_PUBLIC_DELTA_API_URL environment variable is required in production');
+}
+export const DELTA_API_URL = _url ?? 'http://localhost:8000';
 
 // Timeout for initial requests (Render free tier may need to wake up)
 export const API_COLD_START_TIMEOUT = 30000; // 30 seconds for cold start

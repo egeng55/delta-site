@@ -263,8 +263,10 @@ export default function AccountPage() {
                 Keep subscription
               </button>
               <button
-                onClick={() => {
-                  // TODO: Implement cancellation
+                onClick={async () => {
+                  // TODO: Implement subscription cancellation via Stripe API.
+                  // Should call POST /subscription/{userId}/cancel on the backend,
+                  // then refreshAccess() to update the UI. For now, just close modal.
                   setShowCancelModal(false);
                 }}
                 className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors"

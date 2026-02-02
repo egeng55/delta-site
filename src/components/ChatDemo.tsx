@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
-import { DELTA_API_URL, fetchWithRetry, isLikelyRenderColdStart } from "@/lib/api";
+import { fetchWithRetry, isLikelyRenderColdStart } from "@/lib/api";
 
 interface Message {
   id: string;
@@ -42,8 +42,24 @@ export default function ChatDemo() {
     return newId;
   };
 
+  const MAX_DEMO_MESSAGES = 10;
+
+  const userMessageCount = messages.filter(m => m.role === "user").length;
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (userMessageCount >= MAX_DEMO_MESSAGES) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: "assistant",
+          content: "You've reached the demo message limit. Sign up for the full Delta experience!",
+        },
+      ]);
+      return;
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -57,7 +73,7 @@ export default function ChatDemo() {
 
     try {
       const userId = generateUserId();
-      const response = await fetchWithRetry(`${DELTA_API_URL}/chat`, {
+      const response = await fetchWithRetry(`/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -188,6 +204,7 @@ export default function ChatDemo() {
               whileTap={{ scale: 0.95 }}
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
+              aria-label="Send message"
               className="p-3 bg-primary text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary-dark transition-colors"
             >
               <svg

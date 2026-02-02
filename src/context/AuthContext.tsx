@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { Session } from "@supabase/supabase-js";
-import { supabase, Profile, ProfileUpdate, Subscription, isDeveloperEmail } from "@/lib/supabase";
+import { getSupabase, Profile, ProfileUpdate, Subscription, isDeveloperEmail } from "@/lib/supabase";
 
 interface AuthUser {
   id: string;
@@ -56,8 +56,8 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
     try {
       // Fetch profile and subscription in parallel for better performance
       const [profileResult, subResult] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', userId).single(),
-        supabase.from('subscriptions').select('*').eq('user_id', userId).single(),
+        getSupabase().from('profiles').select('*').eq('id', userId).single(),
+        getSupabase().from('subscriptions').select('*').eq('user_id', userId).single(),
       ]);
 
       if (profileResult.error && profileResult.error.code !== 'PGRST116') {
@@ -112,7 +112,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
 
     const initAuth = async () => {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        const { data: { session: currentSession } } = await getSupabase().auth.getSession();
 
         if (currentSession?.user) {
           setSession(currentSession);
@@ -128,7 +128,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
     initAuth();
 
     // Listen for auth changes
-    const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription: authSubscription } } = getSupabase().auth.onAuthStateChange(
       async (event, newSession) => {
         setSession(newSession);
 
@@ -155,7 +155,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
       return { success: false, error: 'Auth disabled in this context' };
     }
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await getSupabase().auth.signInWithPassword({
         email,
         password,
       });
@@ -180,7 +180,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
       return { success: false, error: 'Auth disabled in this context' };
     }
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await getSupabase().auth.signUp({
         email,
         password,
         options: {
@@ -220,7 +220,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
       return;
     }
     try {
-      await supabase.auth.signOut();
+      await getSupabase().auth.signOut();
       setUser(null);
       setSession(null);
       setProfile(null);
@@ -236,7 +236,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
       return { success: false, error: 'Auth disabled in this context' };
     }
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await getSupabase().auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -255,7 +255,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
       return { success: false, error: 'Auth disabled in this context' };
     }
     try {
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await getSupabase().auth.updateUser({
         password,
       });
 
@@ -290,7 +290,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
         return { success: false, error: 'No updates provided' };
       }
 
-      const { error } = await supabase
+      const { error } = await getSupabase()
         .from('profiles')
         .update(cleanUpdates)
         .eq('id', session.user.id);

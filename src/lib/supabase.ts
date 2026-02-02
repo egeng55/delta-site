@@ -37,12 +37,6 @@ export function getSupabase() {
   return _supabase;
 }
 
-// Simple client for direct usage (legacy - prefer getSupabase())
-// Only create if configured to avoid build errors
-export const supabase = isSupabaseConfigured
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : (null as unknown as ReturnType<typeof createClient>);
-
 // Database types - must match Supabase schema exactly
 export interface Profile {
   id: string;
@@ -77,8 +71,11 @@ export interface Subscription {
   stripe_subscription_id: string | null;
 }
 
-// Developer emails that bypass subscription checks
-export const DEVELOPER_EMAILS = ['egeng@umich.edu', 'eric@egeng.co'];
+// Developer emails that bypass subscription checks - sourced from env
+const devEmailsRaw = process.env.NEXT_PUBLIC_DEVELOPER_EMAILS ?? '';
+export const DEVELOPER_EMAILS: string[] = devEmailsRaw
+  ? devEmailsRaw.split(',').map(e => e.trim().toLowerCase())
+  : [];
 
 // Check if an email has developer access
 export function isDeveloperEmail(email: string | null | undefined): boolean {

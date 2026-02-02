@@ -4,11 +4,12 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, user, isLoading: authLoading, access } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
@@ -17,17 +18,33 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Validate redirect param: must start with / and not contain // or protocol schemes
+  const getValidRedirect = (): string | null => {
+    const redirect = searchParams.get("redirect");
+    if (
+      redirect &&
+      redirect.startsWith("/") &&
+      !redirect.includes("//") &&
+      !redirect.match(/^\/.*https?:/i)
+    ) {
+      return redirect;
+    }
+    return null;
+  };
+
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      // Route based on subscription status
-      if (access?.hasPremiumAccess) {
+      const validRedirect = getValidRedirect();
+      if (validRedirect) {
+        router.push(validRedirect);
+      } else if (access?.hasPremiumAccess) {
         router.push("/dashboard");
       } else {
         router.push("/pricing");
       }
     }
-  }, [user, authLoading, access, router]);
+  }, [user, authLoading, access, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
