@@ -1,5 +1,20 @@
 import type { NextConfig } from "next";
 
+function getDeltaApiOrigin() {
+  if (!process.env.NEXT_PUBLIC_DELTA_API_URL) return null;
+  try {
+    return new URL(process.env.NEXT_PUBLIC_DELTA_API_URL).origin;
+  } catch {
+    return null;
+  }
+}
+
+const deltaApiOrigin = getDeltaApiOrigin();
+const connectSrc = ["'self'", "https://*.supabase.co", "https://delta-80ht.onrender.com"];
+if (deltaApiOrigin && !connectSrc.includes(deltaApiOrigin)) {
+  connectSrc.push(deltaApiOrigin);
+}
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -12,7 +27,7 @@ const nextConfig: NextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           {
             key: 'Content-Security-Policy-Report-Only',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://delta-80ht.onrender.com; font-src 'self' data:; frame-ancestors 'none'",
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; connect-src ${connectSrc.join(" ")}; font-src 'self' data:; frame-ancestors 'none'`,
           },
         ],
       },
