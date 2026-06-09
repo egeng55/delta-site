@@ -260,6 +260,20 @@ type BehavioralDashboard = {
   system_status?: Record<string, string>;
 };
 
+type BedroomStatusResponse = {
+  user_id?: string;
+  error?: string;
+  detail?: string;
+  runtime_status?: RuntimeStatus | null;
+  late_caffeine_state?: BehavioralLoopState | null;
+  status_snapshot_late_caffeine_state?: BehavioralLoopState | null;
+  state_provenance?: StateProvenance;
+  status_snapshot_state_provenance?: StateProvenance;
+  persisted_state_status?: PersistedStateStatus;
+  recent_events?: EventRow[];
+  recent_interventions?: Intervention[];
+};
+
 const samplePrompts = [
   "I drank a Monster at 10 PM.",
   "I had coffee around 8 PM.",
@@ -407,17 +421,18 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const localDemoAllowed = process.env.NEXT_PUBLIC_DELTA_LOCAL_DEMO === "true";
   const isLocalDemo = localDemoAllowed && searchParams.get("localDemo") === "1";
+  const localDemoUserId = isLocalDemo ? searchParams.get("userId") || "eric-demo" : null;
   const activeUser = useMemo(() => {
     if (user) return user;
     if (!isLocalDemo) return null;
     return {
-      id: "eric-demo",
+      id: localDemoUserId || "eric-demo",
       email: "local-demo@delta.dev",
       name: "Local Demo",
       username: "local-demo",
       role: "developer" as const,
     };
-  }, [user, isLocalDemo]);
+  }, [user, isLocalDemo, localDemoUserId]);
   const hasDashboardAccess = Boolean(access?.hasPremiumAccess || isLocalDemo);
 
   useEffect(() => {
@@ -453,7 +468,7 @@ export default function DashboardPage() {
     }
   }, [activeUser, authHeaders]);
 
-  const buildLocalDemoDashboard = useCallback((status: RuntimeStatus | null, backendAvailable: boolean): BehavioralDashboard => ({
+  const buildLocalDemoDashboard = useCallback((status: RuntimeStatus | null, backendAvailable: boolean, response?: BedroomStatusResponse): BehavioralDashboard => ({
     user_id: activeUser?.id || "eric-demo",
     live_audio_state: {
       status: status?.pipeline_stage || (backendAvailable ? "idle" : "backend_unavailable"),
@@ -463,11 +478,13 @@ export default function DashboardPage() {
       speaker: status ? "user" : undefined,
       observation_count: status?.extracted_events?.length || (status?.last_detected_event ? 1 : 0),
     },
-    recent_events: status?.extracted_events || (status?.last_detected_event ? [status.last_detected_event] : []),
+    recent_events: response?.recent_events || status?.extracted_events || (status?.last_detected_event ? [status.last_detected_event] : []),
     memory_writes: [],
-    interventions: status?.decision ? [status.decision] : status?.last_intervention_decision ? [status.last_intervention_decision] : [],
+    interventions: response?.recent_interventions || (status?.decision ? [status.decision] : status?.last_intervention_decision ? [status.last_intervention_decision] : []),
     feedback_learning: undefined,
-    behavioral_loop: status?.behavioral_loop,
+    behavioral_loop: response?.late_caffeine_state
+      ? { ...(status?.behavioral_loop || {}), late_caffeine: response.late_caffeine_state }
+      : status?.behavioral_loop,
     runtime_status: status || {
       user_id: activeUser?.id || "eric-demo",
       mode: "dry-run",
@@ -522,6 +539,9 @@ export default function DashboardPage() {
           runtime_status: data.runtime_status || current.runtime_status,
           recent_events: data.recent_events || current.recent_events,
           interventions: data.recent_interventions || current.interventions,
+          behavioral_loop: data.late_caffeine_state
+            ? { ...(current.behavioral_loop || {}), late_caffeine: data.late_caffeine_state }
+            : current.behavioral_loop,
           system_status: { ...(current.system_status || {}), backend: isLocalDemo ? "connected" : current.system_status?.backend || "connected" },
         };
       });
@@ -550,11 +570,11 @@ export default function DashboardPage() {
     try {
       if (isLocalDemo) {
         const statusResponse = await fetchLocalDemoStatus();
-        const statusData = await statusResponse.json();
+        const statusData: BedroomStatusResponse = await statusResponse.json();
         if (!statusResponse.ok) throw new Error(statusData.error || statusData.detail || "Status request failed");
         const status = statusData.runtime_status || null;
         setRuntimeStatus(status);
-        setDashboard(buildLocalDemoDashboard(status, true));
+        setDashboard(buildLocalDemoDashboard(status, true, statusData));
         return;
       }
       const [dashboardResponse, statusResponse] = await Promise.all([
@@ -784,6 +804,11 @@ export default function DashboardPage() {
     loopStatePersistence === "simulated";
   const loopStateFreshness = stateProvenance?.freshness || (isStatusStale ? "stale" : statusAgeSeconds === undefined || statusAgeSeconds === null ? "unknown" : "fresh");
   const lastFeedbackForState = loopMetrics?.last_outcome || lateCaffeineLoop?.last_outcome || feedbackLabel;
+  const hasBackoffLearning = !loopStateIsSimulated && (
+    ["too_much", "not_useful", "dont_mention_again"].includes(String(lastFeedbackForState)) ||
+    Number(stateAdaptation.reduction_level || 0) > 0 ||
+    Boolean(stateAdaptation.suppress_until)
+  );
   const latestStage = liveStatus?.current_stage || liveStatus?.pipeline_stage || "unknown";
   const finalStatus = liveStatus?.final_status || "unknown";
   const eventDetails = objectRecord(lastDetectedEvent?.details);
@@ -1648,6 +1673,11 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </div>
+            )}
+            {hasBackoffLearning && (
+              <p className="mt-3 rounded-md border border-primary/30 bg-primary/10 p-3 text-sm leading-6 text-primary">
+                Delta learned to back off: persisted feedback shows this late-caffeine intervention should be softer, less frequent, or temporarily suppressed.
+              </p>
             )}
             <div className="mt-3 grid gap-3 md:grid-cols-3">
               <div className="rounded-md border border-border p-3">

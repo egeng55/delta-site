@@ -34,6 +34,8 @@ const proven = [
   "Scripted late-caffeine dry-runs",
   "Dashboard-connected dry-runs",
   "Typed live fallback through the same loop",
+  "Real spoken microphone dry-run has been validated once locally",
+  "Supabase persisted late-caffeine feedback works for controlled scripted tests",
   "State inspection, feedback preview, and local demo reset",
   "Side-effect gates for database writes, notifications, and TTS",
   "Ambient and non-user input can be filtered without creating a fake behavioral event",
@@ -42,13 +44,14 @@ const proven = [
 
 const partiallyProven = [
   "Real microphone device access and device listing work locally.",
+  "Real spoken-input transcription is validated once in local dry-run, not yet reliability-tested.",
   "Live dry-run mode can process a user-provided live observation through typed fallback.",
-  "Supabase persisted state is labeled separately, but persisted learning was not read successfully in this environment.",
+  "Dashboard and mobile read-only surfaces can show persisted Supabase state separately from simulated status.",
 ];
 
 const notProven = [
-  "Real spoken-input transcription has not been fully validated by the user speaking into the microphone.",
-  "Persisted Supabase learning was not verified locally because persisted state was unreachable in this environment.",
+  "Repeated real spoken-input reliability across environments has not been validated.",
+  "Live microphone input plus persisted learning in the same run has not been tested.",
   "Notifications and TTS are intentionally gated and have not been run as real side effects.",
   "Delta currently proves one behavioral domain: late caffeine. It is not a multi-domain Behavioral OS yet.",
 ];

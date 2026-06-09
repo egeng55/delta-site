@@ -14,8 +14,10 @@ describe("Behavioral OS demo page", () => {
     expect(source).toContain("Not yet proven");
     expect(source).toContain("A narrow product demo, not a production claim");
     expect(source).toContain("Delta can stay silent on ambient input");
-    expect(source).toContain("Real spoken-input transcription has not been fully validated");
-    expect(source).toContain("Persisted Supabase learning was not verified locally");
+    expect(source).toContain("Real spoken-input transcription is validated once in local dry-run");
+    expect(source).toContain("Repeated real spoken-input reliability across environments has not been validated");
+    expect(source).toContain("Supabase persisted late-caffeine feedback works for controlled scripted tests");
+    expect(source).toContain("Live microphone input plus persisted learning in the same run has not been tested");
     expect(source).toContain("one behavioral domain: late caffeine");
     expect(source).toContain("State provenance matters");
     expect(source).toContain("Feedback UX");

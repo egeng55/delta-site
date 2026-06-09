@@ -15,8 +15,12 @@ describe("Bedroom Copilot dashboard live mic fields", () => {
     expect(source).toContain("Late-Caffeine State Inspector");
     expect(source).toContain("State Source");
     expect(source).toContain("state_persistence");
+    expect(source).toContain("localDemoUserId");
+    expect(source).toContain('searchParams.get("userId")');
+    expect(source).toContain("status_snapshot_late_caffeine_state");
     expect(source).toContain("Simulated dry-run learning");
     expect(source).toContain("Supabase persisted state");
+    expect(source).toContain("Delta learned to back off");
     expect(source).toContain("Delta Bedroom Copilot / Behavioral OS");
     expect(source).toContain("Pipeline Timeline");
     expect(source).toContain("Scenario Runner");
