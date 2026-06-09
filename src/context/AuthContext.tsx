@@ -292,7 +292,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
 
       const { error } = await getSupabase()
         .from('profiles')
-        .update(cleanUpdates)
+        .update(cleanUpdates as never)
         .eq('id', session.user.id);
 
       if (error) {
