@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DELTA_API_URL } from "@/lib/api";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
+import { getSystemReadiness, type ReadinessStatus, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 import {
   OS_CONSOLE_FALLBACK,
   OS_CONSOLE_LIVE_TTS_COMMAND,
@@ -102,6 +103,15 @@ const statusStyles: Record<ProofStatus, string> = {
   "not built": "border-slate-500/30 bg-slate-500/10 text-slate-600 dark:text-slate-300",
 };
 
+const readinessStyles: Record<ReadinessStatus, string> = {
+  ready: "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400",
+  unavailable: "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400",
+  not_checked: "border-slate-500/30 bg-slate-500/10 text-slate-600 dark:text-slate-300",
+  terminal_only: "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  not_built: "border-slate-500/30 bg-slate-500/10 text-slate-600 dark:text-slate-300",
+  fallback: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+};
+
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
@@ -191,6 +201,14 @@ function StatusChip({ status }: { status: ProofStatus }) {
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[status]}`}>
       {status}
+    </span>
+  );
+}
+
+function ReadinessChip({ status, label }: { status: ReadinessStatus; label?: string }) {
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${readinessStyles[status]}`}>
+      {label || status.replace("_", " ")}
     </span>
   );
 }
@@ -450,6 +468,192 @@ function BehavioralStateCard({
   );
 }
 
+function readinessState(condition: boolean | undefined, fallback: ReadinessStatus = "unavailable"): ReadinessStatus {
+  if (condition === true) return "ready";
+  if (condition === false) return fallback;
+  return "not_checked";
+}
+
+function ReadinessRow({
+  label,
+  detail,
+  status,
+}: {
+  label: string;
+  detail: string;
+  status: ReadinessStatus;
+}) {
+  return (
+    <div className="flex flex-col gap-2 border-t border-border py-3 sm:flex-row sm:items-start sm:justify-between">
+      <div>
+        <p className="text-sm font-semibold">{label}</p>
+        <p className="mt-1 text-sm leading-6 text-muted">{detail}</p>
+      </div>
+      <ReadinessChip status={status} />
+    </div>
+  );
+}
+
+function LiveSystemReadiness({
+  readiness,
+  loadState,
+  error,
+  lastCheckedAt,
+  onRefresh,
+}: {
+  readiness: SystemReadinessResponse | null;
+  loadState: "checking" | "ready" | "fallback";
+  error: string;
+  lastCheckedAt: string;
+  onRefresh: () => void;
+}) {
+  const backendStatus = readiness ? readinessState(readiness.backend.reachable) : loadState === "fallback" ? "fallback" : "not_checked";
+  const supabaseStatus = readiness ? readinessState(readiness.supabase.reachable) : loadState === "fallback" ? "fallback" : "not_checked";
+  const schemaStatus = readiness
+    ? readiness.supabase.schema_status === "behavioral_os_ready"
+      ? "ready"
+      : "unavailable"
+    : loadState === "fallback"
+      ? "fallback"
+      : "not_checked";
+  const conversationStatus = readiness ? readinessState(readiness.conversation.api_available && readiness.conversation.read_only) : "not_checked";
+  const proofUserStatus = readiness ? readinessState(readiness.proof_user.state_readable) : "not_checked";
+  const statusJsonStatus = readiness
+    ? readiness.status_json.available
+      ? readiness.status_json.freshness === "fresh"
+        ? "ready"
+        : "not_checked"
+      : "unavailable"
+    : "not_checked";
+
+  return (
+    <section className="rounded-lg border border-border bg-card p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-wide text-primary">Live System Readiness</p>
+          <h2 className="mt-2 text-2xl font-semibold">Can Delta run safely right now?</h2>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Read-only checks only. This panel does not record audio, run TTS, send notifications, or write memory.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onRefresh}
+          disabled={loadState === "checking"}
+          className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loadState === "checking" ? "Checking" : "Refresh readiness"}
+        </button>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
+        <ReadinessChip status={backendStatus} label={`backend ${backendStatus.replace("_", " ")}`} />
+        <ReadinessChip status={supabaseStatus} label={`supabase ${supabaseStatus.replace("_", " ")}`} />
+        <ReadinessChip status={schemaStatus} label={`schema ${schemaStatus.replace("_", " ")}`} />
+        <ReadinessChip status={conversationStatus} label={`conversation ${conversationStatus.replace("_", " ")}`} />
+      </div>
+
+      <p className="mt-3 text-xs text-muted">Last checked: {lastCheckedAt}</p>
+      {error && (
+        <p className="mt-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+
+      <div className="mt-5 grid gap-6 lg:grid-cols-2">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Connected services</p>
+          <ReadinessRow
+            label="Backend"
+            detail={readiness ? `Status: ${readiness.backend.status}.` : "Backend readiness has not been checked yet."}
+            status={backendStatus}
+          />
+          <ReadinessRow
+            label="Supabase"
+            detail={
+              readiness
+                ? `Configured: ${readiness.supabase.configured ? "yes" : "no"}. Reachable: ${readiness.supabase.reachable ? "yes" : "no"}.`
+                : "Supabase readiness has not been checked yet."
+            }
+            status={supabaseStatus}
+          />
+          <ReadinessRow
+            label="Behavioral OS schema"
+            detail={readiness ? `Schema status: ${readiness.supabase.schema_status}.` : "Schema readiness has not been checked yet."}
+            status={schemaStatus}
+          />
+          <ReadinessRow
+            label="Conversation API"
+            detail={
+              readiness
+                ? `Typed API: ${readiness.conversation.api_available ? "available" : "unavailable"}. Read-only: ${readiness.conversation.read_only ? "yes" : "no"}.`
+                : "Conversation API readiness has not been checked yet."
+            }
+            status={conversationStatus}
+          />
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Proof user and local runtime</p>
+          <ReadinessRow
+            label="Proof user state"
+            detail={
+              readiness && readiness.proof_user.state_readable
+                ? `Readable for ${readiness.proof_user.user_id}: ${readiness.proof_user.last_outcome || "unknown"}, ${readiness.proof_user.tone || "unknown"} tone, cooldown ${readiness.proof_user.cooldown_minutes ?? "unknown"}, success ${readiness.proof_user.success_rate ?? "unknown"}.`
+                : readiness
+                  ? readiness.proof_user.reason || "Proof user state is unavailable."
+                  : "Proof user has not been checked yet."
+            }
+            status={proofUserStatus}
+          />
+          <ReadinessRow
+            label="Status JSON"
+            detail={
+              readiness
+                ? `${readiness.status_json.freshness}; ${readiness.status_json.path || "no path reported"}.`
+                : "Local status JSON has not been checked yet."
+            }
+            status={statusJsonStatus}
+          />
+          <ReadinessRow
+            label="Mic/TTS/notification checks"
+            detail="Available from local terminal commands only; the web endpoint does not record, speak, or notify."
+            status="terminal_only"
+          />
+          <ReadinessRow
+            label="Browser voice controls"
+            detail="Browser mic, browser TTS, wake word, and always-on mode are not built."
+            status="not_built"
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <ReadinessRow
+          label="Side effects default"
+          detail={readiness ? readiness.safety.side_effects_default : "disabled"}
+          status="ready"
+        />
+        <ReadinessRow
+          label="Memory writes default"
+          detail={readiness ? readiness.safety.memory_writes_default : "disabled"}
+          status="ready"
+        />
+        <ReadinessRow
+          label="Explicit confirmation"
+          detail={readiness?.safety.requires_explicit_confirmation ? "Required for real side effects." : "Not checked."}
+          status={readiness?.safety.requires_explicit_confirmation ? "ready" : "not_checked"}
+        />
+        <ReadinessRow
+          label="Low-quality audio"
+          detail={readiness?.safety.low_quality_audio_gated ? "Gated before persistence." : "Not checked."}
+          status={readiness?.safety.low_quality_audio_gated ? "ready" : "not_checked"}
+        />
+      </div>
+    </section>
+  );
+}
+
 function VoiceRuntimeCard({ items }: { items: OSConsoleFixture["voiceRuntime"] }) {
   return (
     <section className="rounded-lg border border-border bg-card p-5">
@@ -587,6 +791,10 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
   const [lastConversationResponse, setLastConversationResponse] = useState<ConversationTurnResponse | null>(null);
   const [conversationSessionId, setConversationSessionId] = useState<string | null>(null);
   const [lastRefreshedAt, setLastRefreshedAt] = useState("not refreshed");
+  const [readiness, setReadiness] = useState<SystemReadinessResponse | null>(null);
+  const [readinessLoadState, setReadinessLoadState] = useState<"checking" | "ready" | "fallback">("checking");
+  const [readinessError, setReadinessError] = useState("");
+  const [readinessCheckedAt, setReadinessCheckedAt] = useState("not checked");
 
   const loadStatus = useCallback(async (signal?: AbortSignal) => {
     setLoadState("checking");
@@ -625,6 +833,26 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
       controller.abort();
     };
   }, [loadStatus]);
+
+  const loadReadiness = useCallback(async () => {
+    setReadinessLoadState("checking");
+    setReadinessError("");
+    try {
+      const result = await getSystemReadiness();
+      setReadiness(result);
+      setReadinessLoadState("ready");
+    } catch (err) {
+      setReadiness(null);
+      setReadinessLoadState("fallback");
+      setReadinessError(err instanceof Error ? err.message : "System readiness unavailable.");
+    } finally {
+      setReadinessCheckedAt(new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }));
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadReadiness();
+  }, [loadReadiness]);
 
   const dataSourceLabel = useMemo(() => {
     if (loadState === "checking") return "Checking local backend. Fallback data is ready if unavailable.";
@@ -678,6 +906,18 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
     setPrompt(value);
   };
 
+  const commandCards = useMemo(() => {
+    if (readiness?.backend.reachable) {
+      return [
+        COMMAND_CENTER_COMMANDS[2],
+        COMMAND_CENTER_COMMANDS[1],
+        COMMAND_CENTER_COMMANDS[0],
+        COMMAND_CENTER_COMMANDS[3],
+      ];
+    }
+    return COMMAND_CENTER_COMMANDS;
+  }, [readiness]);
+
   return (
     <main className="min-h-screen bg-background">
       <HeroStatus environment={consoleData.environment} />
@@ -705,6 +945,13 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
           />
         </div>
 
+        <LiveSystemReadiness
+          readiness={readiness}
+          loadState={readinessLoadState}
+          error={readinessError}
+          lastCheckedAt={readinessCheckedAt}
+          onRefresh={() => void loadReadiness()}
+        />
         <VoiceRuntimeCard items={consoleData.voiceRuntime} />
         <RecentInterventions items={consoleData.recentInterventions} />
         <SafetyGates items={consoleData.safetyGates} />
@@ -714,7 +961,7 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
           <p className="text-sm font-medium uppercase tracking-wide text-primary">Next Safe Action</p>
           <h2 className="mt-2 text-2xl font-semibold">Run and validate the command center locally</h2>
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
-            {COMMAND_CENTER_COMMANDS.map((command) => (
+            {commandCards.map((command) => (
               <CommandCard key={command.title} {...command} />
             ))}
           </div>

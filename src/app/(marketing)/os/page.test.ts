@@ -26,6 +26,11 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("Speak response pending validation");
     expect(consoleSource).toContain("Clear session");
     expect(consoleSource).toContain("Refresh OS State");
+    expect(consoleSource).toContain("Live System Readiness");
+    expect(consoleSource).toContain("Refresh readiness");
+    expect(consoleSource).toContain("Can Delta run safely right now?");
+    expect(consoleSource).toContain("terminal_only");
+    expect(consoleSource).toContain("Browser voice controls");
     expect(consoleSource).toContain("Start backend");
     expect(consoleSource).toContain("Validate typed conversation API");
     expect(consoleSource).toContain("no automatic memory writes");

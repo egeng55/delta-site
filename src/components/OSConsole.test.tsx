@@ -3,12 +3,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import OSConsole from "./OSConsole";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
+import { getSystemReadiness, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 
 jest.mock("@/lib/conversationApi", () => ({
   askDeltaConversation: jest.fn(),
 }));
 
+jest.mock("@/lib/systemReadinessApi", () => ({
+  getSystemReadiness: jest.fn(),
+}));
+
 const mockAskDeltaConversation = askDeltaConversation as jest.MockedFunction<typeof askDeltaConversation>;
+const mockGetSystemReadiness = getSystemReadiness as jest.MockedFunction<typeof getSystemReadiness>;
 
 function conversationTurn(overrides: Partial<ConversationTurnResponse> = {}): ConversationTurnResponse {
   return {
@@ -63,11 +69,80 @@ function backendStatusResponse(): Response {
   } as Response;
 }
 
+function readinessResponse(overrides: Partial<SystemReadinessResponse> = {}): SystemReadinessResponse {
+  return {
+    backend: {
+      reachable: true,
+      status: "ok",
+      service: "delta-backend",
+    },
+    supabase: {
+      configured: true,
+      reachable: true,
+      status: "reachable",
+      schema_status: "behavioral_os_ready",
+      tables: {
+        behavioral_loop_state: { readable: true, status: "readable" },
+      },
+    },
+    conversation: {
+      api_available: true,
+      read_only: true,
+      input_mode: "typed",
+      tts: false,
+      notification: false,
+      live_mic: false,
+      memory_writes: false,
+    },
+    proof_user: {
+      user_id: "eric-demo-live-notification-test",
+      state_readable: true,
+      state_source: "supabase",
+      last_outcome: "good_call",
+      cooldown_minutes: 105,
+      tone: "concise",
+      success_rate: 1,
+    },
+    local_runtime: {
+      mic_check_available: true,
+      mic_check_status: "terminal_only",
+      tts_check_available: true,
+      tts_check_status: "terminal_only",
+      notification_check_available: true,
+      notification_check_status: "terminal_only",
+      tts_enabled_effective: false,
+      desktop_notifications_enabled_effective: false,
+      live_mic_from_web: false,
+      browser_tts_from_web: false,
+      always_on: false,
+      wake_word: false,
+    },
+    status_json: {
+      available: true,
+      freshness: "fresh",
+      path: "/tmp/bedroom_copilot_status.json",
+      status_age_seconds: 1,
+      updated_at: "2026-06-16T12:00:00Z",
+    },
+    safety: {
+      side_effects_default: "disabled",
+      memory_writes_default: "disabled",
+      requires_explicit_confirmation: true,
+      low_quality_audio_gated: true,
+      web_voice_controls_enabled: false,
+    },
+    generated_at: "2026-06-16T12:00:00Z",
+    ...overrides,
+  };
+}
+
 describe("OSConsole command center", () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
     mockAskDeltaConversation.mockReset();
+    mockGetSystemReadiness.mockReset();
+    mockGetSystemReadiness.mockImplementation(() => new Promise<SystemReadinessResponse>(() => undefined));
     global.fetch = jest.fn(
       () => new Promise<Response>(() => undefined),
     ) as jest.MockedFunction<typeof fetch>;
@@ -86,6 +161,19 @@ describe("OSConsole command center", () => {
     expect(screen.getByRole("button", { name: "Speak response pending validation" })).toBeDisabled();
     expect(screen.getAllByText("read-only API").length).toBeGreaterThan(0);
     expect(screen.getByText("no automatic memory writes")).toBeInTheDocument();
+  });
+
+  it("renders successful live system readiness", async () => {
+    mockGetSystemReadiness.mockResolvedValue(readinessResponse());
+
+    render(<OSConsole />);
+
+    expect(screen.getByText("Can Delta run safely right now?")).toBeInTheDocument();
+    expect(await screen.findByText("backend ready")).toBeInTheDocument();
+    expect(screen.getByText("supabase ready")).toBeInTheDocument();
+    expect(screen.getByText("schema ready")).toBeInTheDocument();
+    expect(screen.getByText("conversation ready")).toBeInTheDocument();
+    expect(screen.getByText(/Readable for eric-demo-live-notification-test: good_call, concise tone, cooldown 105/)).toBeInTheDocument();
   });
 
   it("keeps previous messages when sending multiple questions", async () => {
@@ -206,6 +294,23 @@ describe("OSConsole command center", () => {
     expect(screen.getByText("Source: Supabase persisted state. Simulated: no.")).toBeInTheDocument();
   });
 
+  it("refreshes system readiness without calling the conversation API", async () => {
+    const user = userEvent.setup();
+    mockGetSystemReadiness.mockResolvedValue(readinessResponse());
+
+    render(<OSConsole />);
+
+    await waitFor(() => {
+      expect(mockGetSystemReadiness).toHaveBeenCalledTimes(1);
+    });
+    await user.click(await screen.findByRole("button", { name: "Refresh readiness" }));
+
+    await waitFor(() => {
+      expect(mockGetSystemReadiness).toHaveBeenCalledTimes(2);
+    });
+    expect(mockAskDeltaConversation).not.toHaveBeenCalled();
+  });
+
   it("keeps fallback status labeling honest when status fetch fails", async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error("backend offline")) as jest.MockedFunction<typeof fetch>;
 
@@ -216,6 +321,27 @@ describe("OSConsole command center", () => {
         exact: false,
       }),
     ).toBeInTheDocument();
+  });
+
+  it("shows readiness unavailable when backend readiness fails", async () => {
+    mockGetSystemReadiness.mockRejectedValue(new Error("readiness backend unavailable"));
+
+    render(<OSConsole />);
+
+    expect(await screen.findByText("readiness backend unavailable")).toBeInTheDocument();
+    expect(screen.getByText("backend fallback")).toBeInTheDocument();
+  });
+
+  it("keeps browser voice, wake word, and always-on marked not built", async () => {
+    mockGetSystemReadiness.mockResolvedValue(readinessResponse());
+
+    render(<OSConsole />);
+
+    expect(await screen.findByText("Browser voice controls")).toBeInTheDocument();
+    expect(screen.getAllByText("not built").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Browser mic, browser TTS, wake word, and always-on mode are not built/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Speak response pending validation" })).toBeDisabled();
   });
 
   it("renders command cards for local validation", () => {
