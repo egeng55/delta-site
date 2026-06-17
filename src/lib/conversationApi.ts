@@ -3,6 +3,7 @@ import { DELTA_API_URL, fetchWithRetry } from "./api";
 export type ConversationTurnRequest = {
   userId: string;
   message: string;
+  sessionId?: string;
 };
 
 export type ConversationTurnResponse = {
@@ -25,6 +26,7 @@ export type ConversationTurnResponse = {
 export async function askDeltaConversation({
   userId,
   message,
+  sessionId,
 }: ConversationTurnRequest): Promise<ConversationTurnResponse> {
   const response = await fetchWithRetry(
     `${DELTA_API_URL}/conversation/turn`,
@@ -35,6 +37,7 @@ export async function askDeltaConversation({
         user_id: userId,
         message,
         read_only: true,
+        ...(sessionId ? { session_id: sessionId } : {}),
       }),
     },
     0,

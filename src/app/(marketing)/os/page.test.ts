@@ -24,6 +24,10 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("askDeltaConversation");
     expect(consoleSource).toContain("Voice input coming soon");
     expect(consoleSource).toContain("Speak response pending validation");
+    expect(consoleSource).toContain("Clear session");
+    expect(consoleSource).toContain("Refresh OS State");
+    expect(consoleSource).toContain("Start backend");
+    expect(consoleSource).toContain("Validate typed conversation API");
     expect(consoleSource).toContain("no automatic memory writes");
     expect(consoleSource).toContain("no always-on listening");
     expect(consoleSource).toContain("Backend conversation unavailable");

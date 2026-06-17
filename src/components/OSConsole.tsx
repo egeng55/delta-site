@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DELTA_API_URL } from "@/lib/api";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
 import {
   OS_CONSOLE_FALLBACK,
+  OS_CONSOLE_LIVE_TTS_COMMAND,
   OS_CONSOLE_USER_ID,
   type ConsoleBehavioralState,
+  type ConsoleCommand,
   type ConsoleEnvironment,
   type OSConsoleFixture,
   type ProofStatus,
@@ -22,10 +24,76 @@ type BackendStatusPayload = {
 };
 
 type ConversationDisplayTurn = {
-  role: "user" | "delta";
+  id: string;
+  role: "user" | "delta" | "system";
   content: string;
+  orderLabel: string;
   metadata?: ConversationTurnResponse;
 };
+
+const SUGGESTED_PROMPTS = [
+  "What did you learn about late caffeine?",
+  "What would you do if I drank a Monster at 10 PM?",
+  "Can you talk like Jarvis yet?",
+  "Why did you notify me?",
+  "What is still not built?",
+];
+
+const COMMAND_CENTER_COMMANDS: ConsoleCommand[] = [
+  {
+    title: "Start backend",
+    detail: "Runs the local API used by the OS Console. This does not start mic, TTS, notification, or writes by itself.",
+    command:
+      "cd /Users/egeng/delta-backend\nset -a; source .env; set +a\n.venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000",
+  },
+  {
+    title: "Start site",
+    detail: "Runs the local web console at http://127.0.0.1:3000/os.",
+    command: "cd /Users/egeng/delta-site\nnpm run dev -- --hostname 127.0.0.1 --port 3000",
+  },
+  {
+    title: "Validate typed conversation API",
+    detail: "Calls the read-only typed endpoint directly. It reads state only and does not run delivery.",
+    command:
+      "curl -s -X POST http://127.0.0.1:8000/conversation/turn \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"user_id\":\"eric-demo-live-notification-test\",\"message\":\"what did you learn about late caffeine?\",\"read_only\":true}'",
+  },
+  {
+    title: "Pending live + TTS validation",
+    detail: "Local terminal only, not web UI. Run only when spoken output is explicitly approved.",
+    command: OS_CONSOLE_LIVE_TTS_COMMAND,
+  },
+];
+
+function turnId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function initialConversationTurns(): ConversationDisplayTurn[] {
+  return [
+    {
+      id: "initial-delta",
+      role: "delta",
+      orderLabel: "Ready",
+      content:
+        "Ask a typed, read-only question. Delta will answer through the local backend conversation runtime when it is available.",
+    },
+  ];
+}
+
+function makeTurn(
+  role: ConversationDisplayTurn["role"],
+  content: string,
+  order: number,
+  metadata?: ConversationTurnResponse,
+): ConversationDisplayTurn {
+  return {
+    id: turnId(),
+    role,
+    content,
+    orderLabel: role === "system" ? "System" : `Turn ${order}`,
+    metadata,
+  };
+}
 
 const statusStyles: Record<ProofStatus, string> = {
   proven: "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400",
@@ -182,16 +250,18 @@ function ConversationShell({
   prompt,
   setPrompt,
   onAsk,
+  onClear,
+  onSuggestedPrompt,
   isAsking,
-  error,
   lastResponse,
 }: {
   turns: ConversationDisplayTurn[];
   prompt: string;
   setPrompt: (value: string) => void;
-  onAsk: () => void;
+  onAsk: () => void | Promise<void>;
+  onClear: () => void;
+  onSuggestedPrompt: (value: string) => void;
   isAsking: boolean;
-  error: string;
   lastResponse: ConversationTurnResponse | null;
 }) {
   const canAsk = prompt.trim().length > 0 && !isAsking;
@@ -207,21 +277,60 @@ function ConversationShell({
           read-only API
         </span>
       </div>
-      <div className="mt-5 space-y-3">
+      <div className="mt-5 flex flex-wrap gap-2">
+        {SUGGESTED_PROMPTS.map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            onClick={() => onSuggestedPrompt(suggestion)}
+            className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors hover:bg-background"
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
+      <div className="mt-5 max-h-[32rem] space-y-3 overflow-y-auto pr-1">
         {turns.map((turn, index) => (
           <div
-            key={`${turn.role}-${index}-${turn.content.slice(0, 18)}`}
+            key={turn.id}
             className={
               turn.role === "user"
                 ? "max-w-[82%] rounded-lg bg-background px-4 py-3 text-sm leading-6 text-muted"
-                : "ml-auto max-w-[86%] rounded-lg bg-primary px-4 py-3 text-sm leading-6 text-white"
+                : turn.role === "system"
+                  ? "max-w-[88%] rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300"
+                  : "ml-auto max-w-[86%] rounded-lg bg-primary px-4 py-3 text-sm leading-6 text-white"
             }
           >
-            {turn.content}
+            <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide opacity-80">
+              <span>{turn.role === "delta" ? "Delta" : turn.role}</span>
+              <span>{turn.orderLabel || `Turn ${index + 1}`}</span>
+            </div>
+            <p>{turn.content}</p>
+            {turn.metadata && (
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                <span className="rounded-full border border-white/30 px-2 py-1">read-only</span>
+                <span className="rounded-full border border-white/30 px-2 py-1">
+                  no writes: {String(!turn.metadata.memory_writes)}
+                </span>
+                <span className="rounded-full border border-white/30 px-2 py-1">
+                  no TTS: {String(!turn.metadata.tts)}
+                </span>
+                <span className="rounded-full border border-white/30 px-2 py-1">
+                  no notification: {String(!turn.metadata.notification)}
+                </span>
+                <span className="rounded-full border border-white/30 px-2 py-1">
+                  state: {turn.metadata.state_source}
+                </span>
+                <span className="rounded-full border border-white/30 px-2 py-1">
+                  intent: {turn.metadata.intent}
+                </span>
+              </div>
+            )}
           </div>
         ))}
         {isAsking && (
           <div className="ml-auto max-w-[86%] rounded-lg border border-border bg-background px-4 py-3 text-sm leading-6 text-muted">
+            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Delta</div>
             Reading Behavioral OS state...
           </div>
         )}
@@ -230,7 +339,7 @@ function ConversationShell({
         className="mt-5"
         onSubmit={(event) => {
           event.preventDefault();
-          if (canAsk) onAsk();
+          if (canAsk) void onAsk();
         }}
       >
         <div className="rounded-md border border-border p-3">
@@ -241,6 +350,12 @@ function ConversationShell({
             id="delta-os-input"
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                if (canAsk) void onAsk();
+              }
+            }}
             className="mt-2 min-h-20 w-full resize-none bg-transparent text-sm leading-6 text-muted outline-none"
           />
         </div>
@@ -258,13 +373,15 @@ function ConversationShell({
           <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
             Speak response pending validation
           </button>
+          <button
+            type="button"
+            onClick={onClear}
+            className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-background"
+          >
+            Clear session
+          </button>
         </div>
       </form>
-      {error && (
-        <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-600 dark:text-red-400">
-          {error}
-        </div>
-      )}
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
         <span className="rounded-full border border-border px-3 py-1">read-only API</span>
         <span className="rounded-full border border-border px-3 py-1">no automatic memory writes</span>
@@ -286,14 +403,37 @@ function ConversationShell({
   );
 }
 
-function BehavioralStateCard({ state }: { state: ConsoleBehavioralState }) {
+function BehavioralStateCard({
+  state,
+  onRefresh,
+  isRefreshing,
+  lastRefreshedAt,
+}: {
+  state: ConsoleBehavioralState;
+  onRefresh: () => void;
+  isRefreshing: boolean;
+  lastRefreshedAt: string;
+}) {
   return (
     <section className="rounded-lg border border-border bg-card p-5">
-      <p className="text-sm font-medium uppercase tracking-wide text-primary">Behavioral State</p>
-      <h2 className="mt-2 text-2xl font-semibold">Late-caffeine loop</h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-wide text-primary">Behavioral State</p>
+          <h2 className="mt-2 text-2xl font-semibold">Late-caffeine loop</h2>
+        </div>
+        <button
+          type="button"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isRefreshing ? "Refreshing" : "Refresh OS State"}
+        </button>
+      </div>
       <p className="mt-2 text-sm leading-6 text-muted">
         Source: {state.stateSource}. Simulated: {state.stateIsSimulated ? "yes" : "no"}.
       </p>
+      <p className="mt-1 text-xs text-muted">Last refreshed: {lastRefreshedAt}</p>
       <div className="mt-5 grid gap-x-6 sm:grid-cols-2">
         <Metric label="Last outcome" value={state.lastOutcome} />
         <Metric label="Tone" value={state.tone} />
@@ -442,53 +582,49 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
   const [consoleData, setConsoleData] = useState<OSConsoleFixture>(OS_CONSOLE_FALLBACK);
   const [loadState, setLoadState] = useState<"checking" | "backend" | "fallback">("checking");
   const [prompt, setPrompt] = useState("what did you learn about late caffeine?");
-  const [conversationTurns, setConversationTurns] = useState<ConversationDisplayTurn[]>([
-    {
-      role: "delta",
-      content:
-        "Ask a typed, read-only question. Delta will answer through the local backend conversation runtime when it is available.",
-    },
-  ]);
-  const [conversationError, setConversationError] = useState("");
+  const [conversationTurns, setConversationTurns] = useState<ConversationDisplayTurn[]>(initialConversationTurns);
   const [isAskingDelta, setIsAskingDelta] = useState(false);
   const [lastConversationResponse, setLastConversationResponse] = useState<ConversationTurnResponse | null>(null);
+  const [conversationSessionId, setConversationSessionId] = useState<string | null>(null);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState("not refreshed");
+
+  const loadStatus = useCallback(async (signal?: AbortSignal) => {
+    setLoadState("checking");
+    try {
+      const response = await fetch(`${DELTA_API_URL}/bedroom-copilot/${userId}/status`, {
+        signal,
+      });
+      if (!response.ok) throw new Error("backend status unavailable");
+      const payload = await response.json() as BackendStatusPayload;
+      setConsoleData(mapBackendToConsole(payload));
+      setLoadState("backend");
+    } catch {
+      setConsoleData({
+        ...OS_CONSOLE_FALLBACK,
+        environment: {
+          ...OS_CONSOLE_FALLBACK.environment,
+          backend: "unavailable",
+          environment: "local",
+          lastUpdated: "fallback fixture",
+          dataSource: "fallback",
+        },
+      });
+      setLoadState("fallback");
+    } finally {
+      setLastRefreshedAt(new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }));
+    }
+  }, [userId]);
 
   useEffect(() => {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), 2200);
 
-    async function loadStatus() {
-      try {
-        const response = await fetch(`${DELTA_API_URL}/bedroom-copilot/${userId}/status`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error("backend status unavailable");
-        const payload = await response.json() as BackendStatusPayload;
-        setConsoleData(mapBackendToConsole(payload));
-        setLoadState("backend");
-      } catch {
-        setConsoleData({
-          ...OS_CONSOLE_FALLBACK,
-          environment: {
-            ...OS_CONSOLE_FALLBACK.environment,
-            backend: "unavailable",
-            environment: "local",
-            lastUpdated: "fallback fixture",
-            dataSource: "fallback",
-          },
-        });
-        setLoadState("fallback");
-      } finally {
-        window.clearTimeout(timeoutId);
-      }
-    }
-
-    void loadStatus();
+    void loadStatus(controller.signal).finally(() => window.clearTimeout(timeoutId));
     return () => {
       window.clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [userId]);
+  }, [loadStatus]);
 
   const dataSourceLabel = useMemo(() => {
     if (loadState === "checking") return "Checking local backend. Fallback data is ready if unavailable.";
@@ -496,28 +632,50 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
     return "Showing labeled fallback fixture because the backend is unavailable.";
   }, [loadState]);
 
-  const askDelta = async () => {
-    const message = prompt.trim();
+  const askDelta = async (messageOverride?: string) => {
+    const message = (messageOverride ?? prompt).trim();
     if (!message) return;
-    setConversationError("");
     setIsAskingDelta(true);
-    setConversationTurns((current) => [...current, { role: "user", content: message }]);
+    setPrompt("");
+    setConversationTurns((current) => [
+      ...current,
+      makeTurn("user", message, current.filter((turn) => turn.role === "user").length + 1),
+    ]);
     try {
-      const result = await askDeltaConversation({ userId, message });
+      const result = await askDeltaConversation({
+        userId,
+        message,
+        ...(conversationSessionId ? { sessionId: conversationSessionId } : {}),
+      });
+      setConversationSessionId(result.session_id);
       setLastConversationResponse(result);
       setConversationTurns((current) => [
         ...current,
-        { role: "delta", content: result.response, metadata: result },
+        makeTurn("delta", result.response, current.filter((turn) => turn.role === "delta").length + 1, result),
       ]);
     } catch (err) {
-      setConversationError(
+      const errorMessage =
         err instanceof Error
           ? `Backend conversation unavailable: ${err.message}`
-          : "Backend conversation unavailable.",
-      );
+          : "Backend conversation unavailable.";
+      setConversationTurns((current) => [
+        ...current,
+        makeTurn("system", errorMessage, current.filter((turn) => turn.role === "system").length + 1),
+      ]);
     } finally {
       setIsAskingDelta(false);
     }
+  };
+
+  const clearConversation = () => {
+    setConversationTurns(initialConversationTurns());
+    setConversationSessionId(null);
+    setLastConversationResponse(null);
+    setPrompt("what did you learn about late caffeine?");
+  };
+
+  const chooseSuggestedPrompt = (value: string) => {
+    setPrompt(value);
   };
 
   return (
@@ -534,11 +692,17 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
             prompt={prompt}
             setPrompt={setPrompt}
             onAsk={askDelta}
+            onClear={clearConversation}
+            onSuggestedPrompt={chooseSuggestedPrompt}
             isAsking={isAskingDelta}
-            error={conversationError}
             lastResponse={lastConversationResponse}
           />
-          <BehavioralStateCard state={consoleData.behavioralState} />
+          <BehavioralStateCard
+            state={consoleData.behavioralState}
+            onRefresh={() => void loadStatus()}
+            isRefreshing={loadState === "checking"}
+            lastRefreshedAt={lastRefreshedAt}
+          />
         </div>
 
         <VoiceRuntimeCard items={consoleData.voiceRuntime} />
@@ -548,10 +712,11 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
 
         <section>
           <p className="text-sm font-medium uppercase tracking-wide text-primary">Next Safe Action</p>
-          <h2 className="mt-2 text-2xl font-semibold">Run the next validation from the CLI</h2>
+          <h2 className="mt-2 text-2xl font-semibold">Run and validate the command center locally</h2>
           <div className="mt-5 grid gap-5 lg:grid-cols-2">
-            <CommandCard {...consoleData.nextSafeAction} />
-            <CommandCard {...consoleData.followUpAction} />
+            {COMMAND_CENTER_COMMANDS.map((command) => (
+              <CommandCard key={command.title} {...command} />
+            ))}
           </div>
         </section>
       </div>

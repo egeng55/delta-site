@@ -10,32 +10,60 @@ jest.mock("@/lib/conversationApi", () => ({
 
 const mockAskDeltaConversation = askDeltaConversation as jest.MockedFunction<typeof askDeltaConversation>;
 
-const successfulTurn: ConversationTurnResponse = {
-  session_id: "session-1",
-  user_id: "eric-demo-live-notification-test",
-  input_mode: "typed",
-  message: "what did you learn about late caffeine?",
-  response:
-    "Your latest late-caffeine feedback was good_call. Delta kept the tone concise with a 105-minute cooldown and a 1.0 success rate.",
-  intent: "state_inquiry",
-  read_only: true,
-  memory_writes: false,
-  notification: false,
-  tts: false,
-  side_effect_status: "none",
-  state_source: "supabase",
-  metadata: {
+function conversationTurn(overrides: Partial<ConversationTurnResponse> = {}): ConversationTurnResponse {
+  return {
+    session_id: "session-1",
+    user_id: "eric-demo-live-notification-test",
     input_mode: "typed",
+    message: "what did you learn about late caffeine?",
+    response:
+      "Your latest late-caffeine feedback was good_call. Delta kept the tone concise with a 105-minute cooldown and a 1.0 success rate.",
+    intent: "state_inquiry",
+    read_only: true,
     memory_writes: false,
     notification: false,
-    tts_enabled: false,
-  },
-  context_summary: {
+    tts: false,
+    side_effect_status: "none",
     state_source: "supabase",
-  },
-};
+    metadata: {
+      input_mode: "typed",
+      memory_writes: false,
+      notification: false,
+      tts_enabled: false,
+    },
+    context_summary: {
+      state_source: "supabase",
+    },
+    ...overrides,
+  };
+}
 
-describe("OSConsole conversation panel", () => {
+function backendStatusResponse(): Response {
+  return {
+    ok: true,
+    json: async () => ({
+      runtime_status: {
+        updated_at: "2026-06-16T12:00:00Z",
+      },
+      persisted_state_status: {
+        status: "reachable",
+      },
+      late_caffeine_state: {
+        last_outcome: "good_call",
+        success_rate: 1,
+        adaptation: {
+          tone: "concise",
+          cooldown_minutes: 105,
+        },
+        metrics: {
+          interventions_delivered: 1,
+        },
+      },
+    }),
+  } as Response;
+}
+
+describe("OSConsole command center", () => {
   const originalFetch = global.fetch;
 
   beforeEach(() => {
@@ -60,9 +88,17 @@ describe("OSConsole conversation panel", () => {
     expect(screen.getByText("no automatic memory writes")).toBeInTheDocument();
   });
 
-  it("calls the conversation backend and renders a successful response", async () => {
+  it("keeps previous messages when sending multiple questions", async () => {
     const user = userEvent.setup();
-    mockAskDeltaConversation.mockResolvedValue(successfulTurn);
+    mockAskDeltaConversation
+      .mockResolvedValueOnce(conversationTurn())
+      .mockResolvedValueOnce(
+        conversationTurn({
+          message: "what would you do if I drank a Monster at 10 PM?",
+          response: "I would classify a Monster at 10 PM as late caffeine and likely recommend making it the last one.",
+          intent: "hypothetical_policy",
+        }),
+      );
 
     render(<OSConsole />);
 
@@ -71,21 +107,22 @@ describe("OSConsole conversation panel", () => {
     await user.type(prompt, "what did you learn about late caffeine?");
     await user.click(screen.getByRole("button", { name: "Ask Delta" }));
 
-    await waitFor(() => {
-      expect(mockAskDeltaConversation).toHaveBeenCalledWith({
-        userId: "eric-demo-live-notification-test",
-        message: "what did you learn about late caffeine?",
-      });
-    });
-
     expect(await screen.findByText(/105-minute cooldown/)).toBeInTheDocument();
-    expect(screen.getByText("state source: supabase")).toBeInTheDocument();
-    expect(screen.getByText("memory writes: false")).toBeInTheDocument();
-    expect(screen.getByText("TTS: false")).toBeInTheDocument();
-    expect(screen.getByText("notification: false")).toBeInTheDocument();
+
+    await user.type(prompt, "what would you do if I drank a Monster at 10 PM?");
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+
+    expect(await screen.findByText(/likely recommend making it the last one/)).toBeInTheDocument();
+    expect(screen.getByText("what did you learn about late caffeine?")).toBeInTheDocument();
+    expect(screen.getByText("what would you do if I drank a Monster at 10 PM?")).toBeInTheDocument();
+    expect(mockAskDeltaConversation).toHaveBeenLastCalledWith({
+      userId: "eric-demo-live-notification-test",
+      message: "what would you do if I drank a Monster at 10 PM?",
+      sessionId: "session-1",
+    });
   });
 
-  it("shows a loading state while the backend request is pending", async () => {
+  it("shows loading state while the backend request is pending", async () => {
     const user = userEvent.setup();
     mockAskDeltaConversation.mockImplementation(() => new Promise<ConversationTurnResponse>(() => undefined));
 
@@ -97,7 +134,7 @@ describe("OSConsole conversation panel", () => {
     expect(screen.getByRole("button", { name: "Asking Delta" })).toBeDisabled();
   });
 
-  it("shows backend errors without faking a successful conversation", async () => {
+  it("appends backend errors as local system messages", async () => {
     const user = userEvent.setup();
     mockAskDeltaConversation.mockRejectedValue(new Error("Conversation backend unavailable"));
 
@@ -111,6 +148,64 @@ describe("OSConsole conversation panel", () => {
     expect(screen.queryByText(/105-minute cooldown/)).not.toBeInTheDocument();
   });
 
+  it("clears only the local browser session", async () => {
+    const user = userEvent.setup();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    expect(await screen.findByText(/105-minute cooldown/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Clear session" }));
+
+    expect(screen.queryByText(/105-minute cooldown/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Ask a typed, read-only question/)).toBeInTheDocument();
+  });
+
+  it("lets suggested prompts populate the input", async () => {
+    const user = userEvent.setup();
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Can you talk like Jarvis yet?" }));
+
+    expect(screen.getByLabelText("Ask Delta prompt")).toHaveValue("Can you talk like Jarvis yet?");
+  });
+
+  it("shows assistant metadata chips for read-only responses", async () => {
+    const user = userEvent.setup();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+
+    expect(await screen.findByText("intent: state_inquiry")).toBeInTheDocument();
+    expect(screen.getByText("state: supabase")).toBeInTheDocument();
+    expect(screen.getByText("no writes: true")).toBeInTheDocument();
+    expect(screen.getByText("no TTS: true")).toBeInTheDocument();
+    expect(screen.getByText("no notification: true")).toBeInTheDocument();
+  });
+
+  it("refreshes OS state from the read-only status endpoint", async () => {
+    const user = userEvent.setup();
+    const fetchMock = jest.fn().mockResolvedValue(backendStatusResponse()) as jest.MockedFunction<typeof fetch>;
+    global.fetch = fetchMock;
+
+    render(<OSConsole />);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+    await user.click(await screen.findByRole("button", { name: "Refresh OS State" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+    expect(screen.getByText("Source: Supabase persisted state. Simulated: no.")).toBeInTheDocument();
+  });
+
   it("keeps fallback status labeling honest when status fetch fails", async () => {
     global.fetch = jest.fn().mockRejectedValue(new Error("backend offline")) as jest.MockedFunction<typeof fetch>;
 
@@ -121,5 +216,17 @@ describe("OSConsole conversation panel", () => {
         exact: false,
       }),
     ).toBeInTheDocument();
+  });
+
+  it("renders command cards for local validation", () => {
+    render(<OSConsole />);
+
+    expect(screen.getByText("Start backend")).toBeInTheDocument();
+    expect(screen.getByText("Start site")).toBeInTheDocument();
+    expect(screen.getByText("Validate typed conversation API")).toBeInTheDocument();
+    expect(screen.getByText("Pending live + TTS validation")).toBeInTheDocument();
+    expect(screen.getByText(/uvicorn api_server:app/)).toBeInTheDocument();
+    expect(screen.getByText(/conversation\/turn/)).toBeInTheDocument();
+    expect(screen.getAllByText(/ENABLE_LOCAL_TTS=true/).length).toBeGreaterThan(0);
   });
 });
