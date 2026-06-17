@@ -19,6 +19,46 @@ listening, wake word, automatic memory writes, or Supabase mutations. Browser
 speech playback uses `window.speechSynthesis` only after the user clicks Speak.
 Browser mic remains disabled/coming soon.
 
+## Delta OS Desktop Shell
+
+Phase 49 adds a local Mac desktop shell foundation for the OS Console. The shell
+uses Electron because Tauri is blocked in this environment without Rust/Cargo.
+It loads the existing local console URL:
+
+```text
+http://127.0.0.1:3000/os
+```
+
+The shell does not bundle or auto-start the backend/site yet. If the console is
+unavailable, it shows a local fallback page with copyable commands to start the
+backend and site, plus Refresh and Open in Browser actions.
+
+Development flow:
+
+```bash
+cd /Users/egeng/delta-backend
+set -a; source .env; set +a
+.venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000
+```
+
+```bash
+cd /Users/egeng/delta-site
+npm run dev -- --hostname 127.0.0.1 --port 3000
+npm run desktop:dev
+```
+
+Desktop safety checks:
+
+```bash
+npm run desktop:check
+npm run desktop:smoke
+```
+
+The desktop shell blocks runtime permission requests and does not record audio,
+run TTS, send notifications, write memory, mutate Supabase, create a wake word,
+or run an always-on listener. It is not signed, notarized, packaged, or App
+Store-ready.
+
 ## Getting Started
 
 First, run the development server:
