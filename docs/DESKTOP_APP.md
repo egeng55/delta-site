@@ -15,6 +15,14 @@ details are grouped behind collapsible sections. The redesign does not add
 microphone, TTS, notification, memory-write, wake-word, or background-listener
 capabilities.
 
+Phase 52 adds usability and explainability on top of that layout. `/os` now has
+separate Chat, State, Readiness, Proof, and Developer views, keeps Chat as the
+default view, presents Behavioral OS state in plain English before raw fields,
+and answers visible state-term questions such as `good_call`, cooldown,
+suppression, persisted state, intent, delivered count, and success rate without
+requiring users to decode implementation labels. Developer commands and proof
+metadata remain available, but they are secondary to normal conversation.
+
 You can override that URL for local development:
 
 ```bash

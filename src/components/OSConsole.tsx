@@ -55,8 +55,19 @@ type FollowUpAction = {
   kind: "ask" | "refresh_readiness" | "copy_backend";
 };
 
+type ConsoleView = "chat" | "state" | "readiness" | "proof" | "developer";
+
+const CONSOLE_VIEWS: Array<{ id: ConsoleView; label: string; detail: string }> = [
+  { id: "chat", label: "Chat", detail: "Ask Delta questions in read-only mode." },
+  { id: "state", label: "State", detail: "Understand the current Behavioral OS rule." },
+  { id: "readiness", label: "Readiness", detail: "Check what can run safely right now." },
+  { id: "proof", label: "Proof", detail: "Review validated capabilities and safety gates." },
+  { id: "developer", label: "Developer", detail: "Copy local commands and audit metadata." },
+];
+
 const SUGGESTED_PROMPTS = [
   "What did you learn about late caffeine?",
+  "What does good_call mean?",
   "What would you do if I drank a Monster at 10 PM?",
   "Can you talk like Jarvis yet?",
   "Why did you notify me?",
@@ -278,6 +289,172 @@ function timeLabel(value: unknown) {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function normalizeForMatch(value: string) {
+  return value.toLowerCase().replace(/[`'"]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function outcomeSummary(outcome: string) {
+  if (outcome === "good_call") return "Delta judged the last late-caffeine guidance as useful or appropriate.";
+  if (outcome === "too_much") return "The last guidance was marked as too much, so Delta should soften or back off.";
+  if (outcome === "remind_earlier") return "The last feedback asked Delta to intervene earlier next time.";
+  if (outcome === "dont_mention_again") return "Delta was told not to bring up this pattern again.";
+  if (!outcome || outcome === "unknown") return "Delta does not have a clear outcome for the latest late-caffeine guidance yet.";
+  return `Delta recorded the latest outcome as ${outcome}.`;
+}
+
+function toneSummary(tone: string) {
+  if (tone === "concise") return "Delta should keep the wording short and direct.";
+  if (tone === "soft") return "Delta should use a softer, lower-pressure tone.";
+  if (tone === "direct") return "Delta can use a direct reminder.";
+  return "Delta has not translated this tone into a plain-language rule yet.";
+}
+
+function cooldownSummary(minutes: string) {
+  const value = Number(minutes);
+  if (Number.isFinite(value) && value > 0) {
+    return `Delta would wait ${value} minutes before giving another similar late-caffeine nudge.`;
+  }
+  return "Delta does not currently have a meaningful cooldown window for this pattern.";
+}
+
+function suppressionSummary(suppression: string) {
+  if (!suppression || suppression === "not active") return "Delta is not currently suppressing this late-caffeine pattern.";
+  return `Delta is currently suppressing this pattern: ${suppression}.`;
+}
+
+function successRateSummary(successRate: string) {
+  const value = Number(successRate);
+  if (Number.isFinite(value)) {
+    const percent = Math.round(value * 100);
+    return `So far, ${percent}% of recorded feedback for this pattern has been positive.`;
+  }
+  return "Delta does not have enough usable feedback to calculate a clear success rate.";
+}
+
+function deliveredCountSummary(deliveredCount: string) {
+  const value = Number(deliveredCount);
+  if (Number.isFinite(value)) {
+    return `Delta has recorded ${value} delivered intervention${value === 1 ? "" : "s"} for this pattern.`;
+  }
+  return "Delta does not have a clear delivered-count value for this pattern.";
+}
+
+function sourceSummary(source: string) {
+  if (source === "Supabase persisted state") return "This state was loaded from saved read-only system data.";
+  if (source === "fallback demo fixture") return "This is labeled fallback data, not a live persisted read.";
+  if (source === "unavailable") return "Saved state is not currently available for this user.";
+  if (source === "persisted" || source === "supabase") return "This answer used saved read-only system data.";
+  return `This state source is ${source}.`;
+}
+
+function intentSummary(intent: string) {
+  if (!intent || intent === "none yet") return "Delta has not classified an intent yet.";
+  if (intent === "unknown") return "Delta could not confidently classify the user’s intent for that message.";
+  if (intent === "state_inquiry") return "Delta understood the message as a question about saved Behavioral OS state.";
+  if (intent === "capability_inquiry") return "Delta understood the message as a question about what is currently built.";
+  if (intent === "hypothetical_policy") return "Delta understood the message as a hypothetical policy question.";
+  if (intent === "clarification") return "Delta answered a plain-English clarification about a visible console term.";
+  return `Delta classified the message as ${intent}.`;
+}
+
+function stateInterpretation(state: ConsoleBehavioralState) {
+  return {
+    pattern: "Late caffeine",
+    summary: `${outcomeSummary(state.lastOutcome)} ${toneSummary(state.tone)} ${cooldownSummary(state.cooldownMinutes)}`,
+    currentRule: `${toneSummary(state.tone)} ${cooldownSummary(state.cooldownMinutes)} ${suppressionSummary(state.suppression)}`,
+    why: state.learnedRuleSummary || outcomeSummary(state.lastOutcome),
+    safety: "This console is only reading and explaining saved state. It is not writing memory, sending notifications, or starting voice input.",
+    source: sourceSummary(state.stateSource),
+    suppression: suppressionSummary(state.suppression),
+    successRate: successRateSummary(state.successRate),
+    deliveredCount: deliveredCountSummary(state.deliveredCount),
+  };
+}
+
+function readOnlyMetadata(message: string, stateSource: string, intent = "clarification"): ConversationTurnResponse {
+  return {
+    session_id: "local-explainability",
+    user_id: OS_CONSOLE_USER_ID,
+    input_mode: "typed",
+    message,
+    response: "",
+    intent,
+    read_only: true,
+    memory_writes: false,
+    notification: false,
+    tts: false,
+    side_effect_status: "none",
+    state_source: stateSource,
+    metadata: {
+      input_mode: "typed",
+      memory_writes: false,
+      notification: false,
+      tts_enabled: false,
+    },
+    context_summary: {
+      state_source: stateSource,
+    },
+  };
+}
+
+function localClarificationResponse(message: string, state: ConsoleBehavioralState, latestIntent: string): ConversationTurnResponse | null {
+  const normalized = normalizeForMatch(message);
+  const source = state.stateSource === "Supabase persisted state" ? "persisted" : state.stateSource === "fallback demo fixture" ? "fallback" : "unavailable";
+  const base = readOnlyMetadata(message, source);
+  const ending = "No write, notification, TTS, mic capture, or memory mutation happened.";
+  const asksMeaning = normalized.includes("what does")
+    || normalized.includes("what is")
+    || normalized.includes("what do")
+    || normalized.includes("mean")
+    || normalized.includes("meaning")
+    || normalized.includes("explain");
+  const asksWhyState = normalized.includes("why is") || normalized.includes("why does");
+
+  if ((normalized.includes("good_call") || normalized.includes("good call")) && asksMeaning) {
+    return {
+      ...base,
+      response: `good_call means the previous late-caffeine guidance was judged useful or appropriate. In the current state, the latest outcome is good_call, so Delta kept the guidance concise and is using a ${state.cooldownMinutes}-minute cooldown. ${ending}`,
+    };
+  }
+  if (normalized.includes("cooldown") && asksMeaning) {
+    return {
+      ...base,
+      response: `Cooldown is the waiting period before Delta would give another similar nudge. Here it means Delta would wait ${state.cooldownMinutes} minutes before another late-caffeine reminder. ${ending}`,
+    };
+  }
+  if ((normalized.includes("suppression") || normalized.includes("suppress")) && (asksMeaning || asksWhyState)) {
+    return {
+      ...base,
+      response: `${suppressionSummary(state.suppression)} Suppression is stronger than cooldown: it means Delta should avoid this pattern for a period instead of merely waiting between nudges. ${ending}`,
+    };
+  }
+  if ((normalized.includes("persisted state") || normalized.includes("persisted") || normalized.includes("saved state")) && asksMeaning) {
+    return {
+      ...base,
+      response: `${sourceSummary(state.stateSource)} In this console, persisted state is read-only; showing it does not create or update Supabase rows. ${ending}`,
+    };
+  }
+  if (normalized.includes("intent") && (asksMeaning || asksWhyState)) {
+    return {
+      ...base,
+      response: `${intentSummary(latestIntent)} Intent is Delta’s rough route for a message, such as state question, capability question, hypothetical policy question, or clarification. ${ending}`,
+    };
+  }
+  if ((normalized.includes("delivered count") || normalized.includes("delivered")) && asksMeaning) {
+    return {
+      ...base,
+      response: `${deliveredCountSummary(state.deliveredCount)} It is a count of recorded interventions for this pattern, not a command to deliver anything now. ${ending}`,
+    };
+  }
+  if (normalized.includes("success rate") && asksMeaning) {
+    return {
+      ...base,
+      response: `${successRateSummary(state.successRate)} It is based on recorded feedback for this pattern and is shown here read-only. ${ending}`,
+    };
+  }
+  return null;
 }
 
 function mapBackendToConsole(payload: BackendStatusPayload): OSConsoleFixture {
@@ -696,14 +873,16 @@ function ConversationShell({
             </div>
             <p>{turn.content}</p>
             {turn.metadata && (
-              <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-white/80">
-                <span>read-only</span>
-                <span>no writes: {String(!turn.metadata.memory_writes)}</span>
-                <span>no TTS: {String(!turn.metadata.tts)}</span>
-                <span>no notification: {String(!turn.metadata.notification)}</span>
-                <span>state: {turn.metadata.state_source}</span>
-                <span>intent: {turn.metadata.intent}</span>
-              </div>
+              <details className="mt-3 rounded-md border border-white/20 bg-white/10 p-2 text-xs text-white/85">
+                <summary className="cursor-pointer font-medium">Read-only response</summary>
+                <div className="mt-2 grid gap-1 sm:grid-cols-2">
+                  <span>No memory writes</span>
+                  <span>No TTS</span>
+                  <span>No notification</span>
+                  <span>{sourceSummary(turn.metadata.state_source)}</span>
+                  <span>{intentSummary(turn.metadata.intent)}</span>
+                </div>
+              </details>
             )}
           </div>
         ))}
@@ -804,11 +983,13 @@ function BehavioralStateCard({
   isRefreshing: boolean;
   lastRefreshedAt: string;
 }) {
+  const interpretation = stateInterpretation(state);
+
   return (
     <SectionCard
       eyebrow="Behavioral State"
-      title="Late-caffeine loop"
-      description={`Source: ${state.stateSource}. Simulated: ${state.stateIsSimulated ? "yes" : "no"}.`}
+      title={interpretation.pattern}
+      description={interpretation.summary}
       action={
         <button
           type="button"
@@ -820,19 +1001,36 @@ function BehavioralStateCard({
         </button>
       }
     >
-      <p className="mt-1 text-xs text-muted">Last refreshed: {lastRefreshedAt}</p>
-      <div className="mt-4 grid gap-x-5 sm:grid-cols-2 xl:grid-cols-1">
-        <Metric label="Last outcome" value={state.lastOutcome} />
-        <Metric label="Tone" value={state.tone} />
-        <Metric label="Cooldown" value={`${state.cooldownMinutes} minutes`} />
-        <Metric label="Success rate" value={state.successRate} />
-        <Metric label="Delivered count" value={state.deliveredCount} />
-        <Metric label="Current cooldown" value={state.currentCooldown} />
-        <Metric label="Suppression" value={state.suppression} />
+      <div className="mt-4 space-y-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Current rule</p>
+          <p className="mt-1 text-sm leading-6 text-foreground">{interpretation.currentRule}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Why this rule</p>
+          <p className="mt-1 text-sm leading-6 text-muted">{interpretation.why}</p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Safety status</p>
+          <p className="mt-1 text-sm leading-6 text-muted">{interpretation.safety}</p>
+        </div>
+        <p className="rounded-md border border-border/80 bg-background/50 p-3 text-sm leading-6 text-muted">
+          {interpretation.source} Last refreshed: {lastRefreshedAt}.
+        </p>
       </div>
-      <p className="mt-4 rounded-md border border-border p-3 text-sm leading-6 text-muted">
-        {state.learnedRuleSummary}
-      </p>
+      <details className="mt-4 rounded-md border border-border/80 bg-background/40 p-3">
+        <summary className="cursor-pointer text-sm font-semibold">View raw state details</summary>
+        <div className="mt-3 grid gap-x-5 sm:grid-cols-2 xl:grid-cols-1">
+          <Metric label="Last outcome" value={state.lastOutcome} />
+          <Metric label="Tone" value={state.tone} />
+          <Metric label="Cooldown" value={`${state.cooldownMinutes} minutes`} />
+          <Metric label="Success rate" value={state.successRate} />
+          <Metric label="Delivered count" value={state.deliveredCount} />
+          <Metric label="Current cooldown" value={state.currentCooldown} />
+          <Metric label="Suppression" value={state.suppression} />
+          <Metric label="Simulated" value={state.stateIsSimulated ? "yes" : "no"} />
+        </div>
+      </details>
     </SectionCard>
   );
 }
@@ -1231,6 +1429,7 @@ export default function OSConsole({
   const [clipboardMessage, setClipboardMessage] = useState("");
   const [resolvedSpeechControls, setResolvedSpeechControls] = useState<BrowserSpeechControls | null>(null);
   const [browserTtsStatus, setBrowserTtsStatus] = useState<BrowserSpeechStatus>("checking");
+  const [activeView, setActiveView] = useState<ConsoleView>("chat");
 
   const loadStatus = useCallback(async (signal?: AbortSignal) => {
     setLoadState("checking");
@@ -1363,6 +1562,21 @@ export default function OSConsole({
       makeTurn("user", message, current.filter((turn) => turn.role === "user").length + 1),
     ]);
     try {
+      const localResponse = localClarificationResponse(message, consoleData.behavioralState, lastConversationResponse?.intent || "none yet");
+      if (localResponse) {
+        const result = {
+          ...localResponse,
+          user_id: userId,
+          session_id: conversationSessionId || "local-explainability",
+        };
+        setConversationSessionId(result.session_id);
+        setLastConversationResponse(result);
+        setConversationTurns((current) => [
+          ...current,
+          makeTurn("delta", result.response, current.filter((turn) => turn.role === "delta").length + 1, result),
+        ]);
+        return;
+      }
       const result = await askDeltaConversation({
         userId,
         message,
@@ -1565,6 +1779,29 @@ export default function OSConsole({
     },
   ];
 
+  const visibleViews = (
+    <div className="mx-auto max-w-7xl px-6 pt-5">
+      <div className="flex flex-wrap gap-2 rounded-lg border border-border/80 bg-card/70 p-2">
+        {CONSOLE_VIEWS.map((view) => (
+          <button
+            key={view.id}
+            type="button"
+            onClick={() => setActiveView(view.id)}
+            className={`rounded-md px-3 py-2 text-left text-sm transition-colors ${
+              activeView === view.id
+                ? "bg-primary text-white"
+                : "text-muted hover:bg-background hover:text-foreground"
+            }`}
+            aria-pressed={activeView === view.id}
+          >
+            <span className="block font-semibold">{view.label}</span>
+            <span className="hidden text-xs opacity-80 sm:block">{view.detail}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <main className="min-h-screen bg-background">
       <CommandPalette
@@ -1579,14 +1816,15 @@ export default function OSConsole({
         onOpenPalette={() => setCommandPaletteOpen(true)}
         onRefreshReadiness={() => void loadReadiness()}
       />
+      {visibleViews}
       <div className="mx-auto max-w-7xl space-y-6 px-6 py-6">
         <SafetyStrip browserTtsStatus={browserTtsStatus} />
         <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300">
           {dataSourceLabel} Typed Ask Delta is wired to the read-only backend conversation runtime; voice input stays disabled and browser speech preview is user-triggered only.
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="space-y-6">
+        {activeView === "chat" && (
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
             <ConversationShell
               turns={conversationTurns}
               prompt={prompt}
@@ -1604,25 +1842,50 @@ export default function OSConsole({
               lastResponse={lastConversationResponse}
             />
 
-            <CollapsibleSection
-              title="Developer Commands"
-              description="Terminal commands stay available, but they are no longer the primary workspace."
-            >
-              <div className="grid gap-4 lg:grid-cols-2">
-                {commandCards.map((command) => (
-                  <CommandCard key={command.title} {...command} />
-                ))}
-              </div>
-            </CollapsibleSection>
+            <aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
+              <BehavioralStateCard
+                state={consoleData.behavioralState}
+                onRefresh={() => void loadStatus()}
+                isRefreshing={loadState === "checking"}
+                lastRefreshedAt={lastRefreshedAt}
+              />
+              <LiveSystemReadiness
+                readiness={readiness}
+                loadState={readinessLoadState}
+                error={readinessError}
+                lastCheckedAt={readinessCheckedAt}
+                onRefresh={() => void loadReadiness()}
+              />
+            </aside>
           </div>
+        )}
 
-          <aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
+        {activeView === "state" && (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
             <BehavioralStateCard
               state={consoleData.behavioralState}
               onRefresh={() => void loadStatus()}
               isRefreshing={loadState === "checking"}
               lastRefreshedAt={lastRefreshedAt}
             />
+            <SectionCard
+              eyebrow="Plain-English Glossary"
+              title="What the labels mean"
+              description="These terms are displayed read-only. They do not trigger memory writes or delivery."
+            >
+              <div className="mt-4 space-y-3 text-sm leading-6 text-muted">
+                <p><span className="font-semibold text-foreground">good_call:</span> previous guidance was judged useful or appropriate.</p>
+                <p><span className="font-semibold text-foreground">Cooldown:</span> how long Delta would wait before another similar nudge.</p>
+                <p><span className="font-semibold text-foreground">Suppression:</span> whether Delta should avoid this pattern entirely for a period.</p>
+                <p><span className="font-semibold text-foreground">Success rate:</span> how often recorded feedback has been positive for this pattern.</p>
+                <p><span className="font-semibold text-foreground">Persisted state:</span> saved system data loaded read-only into the console.</p>
+              </div>
+            </SectionCard>
+          </div>
+        )}
+
+        {activeView === "readiness" && (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
             <LiveSystemReadiness
               readiness={readiness}
               loadState={readinessLoadState}
@@ -1630,27 +1893,58 @@ export default function OSConsole({
               lastCheckedAt={readinessCheckedAt}
               onRefresh={() => void loadReadiness()}
             />
+            <SafetyGates items={consoleData.safetyGates} />
+          </div>
+        )}
+
+        {activeView === "proof" && (
+          <div className="space-y-6">
+            <ProofLadder items={consoleData.proofLadder} />
+            <RecentInterventions items={consoleData.recentInterventions} />
+            <VoiceRuntimeCard items={consoleData.voiceRuntime} />
+          </div>
+        )}
+
+        {activeView === "developer" && (
+          <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+            <div className="space-y-6">
+              <CollapsibleSection
+                title="Developer Commands"
+                description="Terminal commands stay available, but they are separate from the normal chat flow."
+                defaultOpen
+              >
+                <div className="grid gap-4">
+                  {commandCards.map((command) => (
+                    <CommandCard key={command.title} {...command} />
+                  ))}
+                </div>
+              </CollapsibleSection>
+              <RecommendedNextStepCard command={recommendedCommand} />
+            </div>
+            <div className="space-y-6">
+              <SectionCard
+                eyebrow="Response Metadata"
+                title="Latest details"
+                description="Raw route details stay here for audit instead of under every message."
+              >
+                <div className="mt-4 grid gap-3 text-sm leading-6 text-muted sm:grid-cols-2">
+                  <p><span className="font-semibold text-foreground">Intent:</span> {intentSummary(lastConversationResponse?.intent || "none yet")}</p>
+                  <p><span className="font-semibold text-foreground">State source:</span> {sourceSummary(lastConversationResponse?.state_source || "pending")}</p>
+                  <p><span className="font-semibold text-foreground">Writes:</span> {lastConversationResponse?.memory_writes ? "would write" : "none"}</p>
+                  <p><span className="font-semibold text-foreground">Notification:</span> {lastConversationResponse?.notification ? "enabled" : "disabled"}</p>
+                  <p><span className="font-semibold text-foreground">TTS:</span> {lastConversationResponse?.tts ? "enabled" : "disabled"}</p>
+                  <p><span className="font-semibold text-foreground">Side effects:</span> {lastConversationResponse?.side_effect_status || "none"}</p>
+                </div>
+              </SectionCard>
             <SessionSummaryCard
               summary={sessionSummary}
               clipboardMessage={clipboardMessage}
               onCopySummary={() => void copyText(sessionSummaryMarkdown, "Session summary")}
               onCopyProofReport={() => void copyText(proofReport, "Proof report")}
             />
-            <RecommendedNextStepCard command={recommendedCommand} />
-          </aside>
-        </div>
-
-        <CollapsibleSection
-          title="Proof, Safety, and Runtime Details"
-          description="Detailed proof data remains available for review without crowding the main conversation workspace."
-        >
-          <div className="space-y-6">
-            <VoiceRuntimeCard items={consoleData.voiceRuntime} />
-            <SafetyGates items={consoleData.safetyGates} />
-            <ProofLadder items={consoleData.proofLadder} />
-            <RecentInterventions items={consoleData.recentInterventions} />
+            </div>
           </div>
-        </CollapsibleSection>
+        )}
       </div>
     </main>
   );
