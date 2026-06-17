@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import OSConsole from "./OSConsole";
+import type { BrowserSpeechControls } from "@/lib/browserSpeech";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
 import { getSystemReadiness, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 
@@ -136,6 +137,15 @@ function readinessResponse(overrides: Partial<SystemReadinessResponse> = {}): Sy
   };
 }
 
+function browserSpeechControls(overrides: Partial<BrowserSpeechControls> = {}): BrowserSpeechControls {
+  return {
+    available: true,
+    speak: jest.fn(() => "speaking"),
+    cancel: jest.fn(() => "cancelled"),
+    ...overrides,
+  };
+}
+
 describe("OSConsole command center", () => {
   const originalFetch = global.fetch;
   const clipboardWriteText = jest.fn<Promise<void>, [string]>();
@@ -167,13 +177,13 @@ describe("OSConsole command center", () => {
     global.fetch = originalFetch;
   });
 
-  it("renders enabled typed input while voice and speech controls remain disabled", () => {
-    render(<OSConsole clipboardWriter={clipboardWriteText} />);
+  it("renders enabled typed input while voice input remains disabled and speech waits for a response", () => {
+    render(<OSConsole clipboardWriter={clipboardWriteText} speechControls={browserSpeechControls()} />);
 
     expect(screen.getByLabelText("Ask Delta prompt")).toBeEnabled();
     expect(screen.getByRole("button", { name: "Ask Delta" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Speak response pending validation" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Speak response" })).toBeDisabled();
     expect(screen.getAllByText("read-only API").length).toBeGreaterThan(0);
     expect(screen.getByText("no automatic memory writes")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Command Palette" })).toBeInTheDocument();
@@ -229,11 +239,12 @@ describe("OSConsole command center", () => {
   it("opens and closes the command palette", async () => {
     const user = userEvent.setup();
 
-    render(<OSConsole />);
+    render(<OSConsole speechControls={browserSpeechControls()} />);
 
     await user.click(screen.getByRole("button", { name: "Command Palette" }));
     const dialog = screen.getByRole("dialog", { name: "Delta command palette" });
     expect(within(dialog).getByText("Ask: What did you learn about late caffeine?")).toBeInTheDocument();
+    expect(within(dialog).getByText("Speak latest Delta response").closest("button")).toBeDisabled();
 
     await user.click(within(dialog).getByRole("button", { name: "Close" }));
 
@@ -311,6 +322,36 @@ describe("OSConsole command center", () => {
       expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("uvicorn api_server:app"));
     });
     expect(screen.getByText("Backend start command copied.")).toBeInTheDocument();
+  });
+
+  it("command palette can speak the latest Delta response with browser TTS", async () => {
+    const user = userEvent.setup();
+    const speech = browserSpeechControls();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole speechControls={speech} />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    expect(await screen.findByText(/105-minute cooldown/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Command Palette" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Delta command palette" })).getByText("Speak latest Delta response"));
+
+    expect(speech.speak).toHaveBeenCalledWith(expect.stringContaining("105-minute cooldown"), expect.any(Object));
+  });
+
+  it("command palette can stop browser speech playback", async () => {
+    const user = userEvent.setup();
+    const speech = browserSpeechControls();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole speechControls={speech} />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    await user.click(await screen.findByRole("button", { name: "Speak response" }));
+    await user.click(screen.getByRole("button", { name: "Command Palette" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Delta command palette" })).getByText("Stop speaking"));
+
+    expect(speech.cancel).toHaveBeenCalled();
   });
 
   it("shows loading state while the backend request is pending", async () => {
@@ -404,6 +445,76 @@ describe("OSConsole command center", () => {
     expect(screen.getByText("no writes: true")).toBeInTheDocument();
     expect(screen.getByText("no TTS: true")).toBeInTheDocument();
     expect(screen.getByText("no notification: true")).toBeInTheDocument();
+  });
+
+  it("enables browser TTS after an assistant response and speaks the latest response", async () => {
+    const user = userEvent.setup();
+    const speech = browserSpeechControls();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole speechControls={speech} />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    expect(await screen.findByText(/105-minute cooldown/)).toBeInTheDocument();
+
+    const speakButton = screen.getByRole("button", { name: "Speak response" });
+    expect(speakButton).toBeEnabled();
+    await user.click(speakButton);
+
+    expect(speech.speak).toHaveBeenCalledWith(
+      expect.stringContaining("105-minute cooldown"),
+      expect.objectContaining({
+        onStart: expect.any(Function),
+        onEnd: expect.any(Function),
+        onError: expect.any(Function),
+      }),
+    );
+    expect(screen.getByText("browser TTS: speaking")).toBeInTheDocument();
+  });
+
+  it("stops browser TTS playback", async () => {
+    const user = userEvent.setup();
+    const speech = browserSpeechControls();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole speechControls={speech} />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    await user.click(await screen.findByRole("button", { name: "Speak response" }));
+    await user.click(screen.getByRole("button", { name: "Stop speaking" }));
+
+    expect(speech.cancel).toHaveBeenCalled();
+    expect(screen.getByText("browser TTS: cancelled")).toBeInTheDocument();
+  });
+
+  it("shows unavailable browser TTS label when speech synthesis is unavailable", async () => {
+    const user = userEvent.setup();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole speechControls={browserSpeechControls({ available: false })} />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+
+    expect(await screen.findByRole("button", { name: "Browser TTS unavailable" })).toBeDisabled();
+    expect(screen.getByText("browser TTS: unavailable")).toBeInTheDocument();
+  });
+
+  it("browser TTS does not call the backend conversation API again or change transcript", async () => {
+    const user = userEvent.setup();
+    const speech = browserSpeechControls();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole speechControls={speech} />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    expect(await screen.findByText(/105-minute cooldown/)).toBeInTheDocument();
+    mockAskDeltaConversation.mockClear();
+
+    await user.click(screen.getByRole("button", { name: "Speak response" }));
+
+    expect(mockAskDeltaConversation).not.toHaveBeenCalled();
+    expect(screen.getAllByText(/105-minute cooldown/).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
   });
 
   it("updates local session summary after multiple turns", async () => {
@@ -529,16 +640,16 @@ describe("OSConsole command center", () => {
     expect(await screen.findByText("Try a typed read-only OS Console question")).toBeInTheDocument();
   });
 
-  it("keeps browser voice, wake word, and always-on marked not built", async () => {
+  it("keeps browser voice input, wake word, and always-on marked not built", async () => {
     mockGetSystemReadiness.mockResolvedValue(readinessResponse());
 
     render(<OSConsole />);
 
-    expect(await screen.findByText("Browser voice controls")).toBeInTheDocument();
+    expect(await screen.findByText("Browser voice input")).toBeInTheDocument();
     expect(screen.getAllByText("not built").length).toBeGreaterThan(0);
-    expect(screen.getByText(/Browser mic, browser TTS, wake word, and always-on mode are not built/)).toBeInTheDocument();
+    expect(screen.getByText(/Browser mic, wake word, and always-on mode are not built/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Speak response pending validation" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Browser TTS unavailable" })).toBeDisabled();
   });
 
   it("renders command cards for local validation", () => {

@@ -23,7 +23,10 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("read-only API");
     expect(consoleSource).toContain("askDeltaConversation");
     expect(consoleSource).toContain("Voice input coming soon");
-    expect(consoleSource).toContain("Speak response pending validation");
+    expect(consoleSource).toContain("Speak response");
+    expect(consoleSource).toContain("Browser TTS unavailable");
+    expect(consoleSource).toContain("local browser playback only");
+    expect(consoleSource).toContain("no backend TTS");
     expect(consoleSource).toContain("Clear session");
     expect(consoleSource).toContain("Command Palette");
     expect(consoleSource).toContain("Session Intelligence");
@@ -35,7 +38,7 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("Refresh readiness");
     expect(consoleSource).toContain("Can Delta run safely right now?");
     expect(consoleSource).toContain("terminal_only");
-    expect(consoleSource).toContain("Browser voice controls");
+    expect(consoleSource).toContain("Browser voice input");
     expect(consoleSource).toContain("Start backend");
     expect(consoleSource).toContain("Validate typed conversation API");
     expect(consoleSource).toContain("no automatic memory writes");

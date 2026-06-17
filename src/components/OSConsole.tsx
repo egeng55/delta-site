@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DELTA_API_URL } from "@/lib/api";
+import { createBrowserSpeechControls, type BrowserSpeechStatus } from "@/lib/browserSpeech";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
 import { getSystemReadiness, type ReadinessStatus, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 import {
@@ -189,8 +190,10 @@ function buildProofReportMarkdown({
     `- Side effects default: ${readiness?.safety.side_effects_default || "disabled"}`,
     `- Memory writes default: ${readiness?.safety.memory_writes_default || "disabled"}`,
     `- Explicit confirmation required: ${readiness?.safety.requires_explicit_confirmation ? "yes" : "not checked"}`,
+    "- Browser TTS preview: user-triggered local browser playback only",
+    "- Backend local TTS: not called from /os",
     "- Browser mic: not built",
-    "- Browser TTS: not built",
+    "- Browser TTS autoplay/background mode: not built",
     "- Wake word: not built",
     "- Always-on listening: not built",
     "",
@@ -556,6 +559,10 @@ function ConversationShell({
   onSuggestedPrompt,
   followUps,
   onFollowUp,
+  onSpeakLatest,
+  onStopSpeaking,
+  browserTtsAvailable,
+  browserTtsStatus,
   isAsking,
   lastResponse,
 }: {
@@ -567,10 +574,15 @@ function ConversationShell({
   onSuggestedPrompt: (value: string) => void;
   followUps: FollowUpAction[];
   onFollowUp: (action: FollowUpAction) => void | Promise<void>;
+  onSpeakLatest: () => void;
+  onStopSpeaking: () => void;
+  browserTtsAvailable: boolean;
+  browserTtsStatus: BrowserSpeechStatus;
   isAsking: boolean;
   lastResponse: ConversationTurnResponse | null;
 }) {
   const canAsk = prompt.trim().length > 0 && !isAsking;
+  const canSpeak = Boolean(lastResponse?.response) && browserTtsAvailable && browserTtsStatus !== "speaking";
 
   return (
     <section className="rounded-lg border border-border bg-card p-5">
@@ -677,9 +689,24 @@ function ConversationShell({
           <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
             Voice input coming soon
           </button>
-          <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
-            Speak response pending validation
-          </button>
+          {browserTtsStatus === "speaking" ? (
+            <button
+              type="button"
+              onClick={onStopSpeaking}
+              className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-background"
+            >
+              Stop speaking
+            </button>
+          ) : (
+            <button
+              type="button"
+              disabled={!canSpeak}
+              onClick={onSpeakLatest}
+              className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {browserTtsAvailable ? "Speak response" : "Browser TTS unavailable"}
+            </button>
+          )}
           <button
             type="button"
             onClick={onClear}
@@ -698,6 +725,11 @@ function ConversationShell({
         <span className="rounded-full border border-border px-3 py-1">
           TTS: {lastResponse?.tts ? "enabled" : "false"}
         </span>
+        <span className="rounded-full border border-border px-3 py-1">
+          browser TTS: {browserTtsStatus}
+        </span>
+        <span className="rounded-full border border-border px-3 py-1">local browser playback only</span>
+        <span className="rounded-full border border-border px-3 py-1">no backend TTS</span>
         <span className="rounded-full border border-border px-3 py-1">
           notification: {lastResponse?.notification ? "enabled" : "false"}
         </span>
@@ -910,8 +942,8 @@ function LiveSystemReadiness({
             status="terminal_only"
           />
           <ReadinessRow
-            label="Browser voice controls"
-            detail="Browser mic, browser TTS, wake word, and always-on mode are not built."
+            label="Browser voice input"
+            detail="Browser mic, wake word, and always-on mode are not built. Browser TTS preview is user-triggered playback only."
             status="not_built"
           />
         </div>
@@ -1074,9 +1106,11 @@ function HeroStatus({ environment }: { environment: ConsoleEnvironment }) {
 export default function OSConsole({
   userId = OS_CONSOLE_USER_ID,
   clipboardWriter,
+  speechControls = createBrowserSpeechControls(),
 }: {
   userId?: string;
   clipboardWriter?: (value: string) => Promise<void>;
+  speechControls?: ReturnType<typeof createBrowserSpeechControls>;
 }) {
   const [consoleData, setConsoleData] = useState<OSConsoleFixture>(OS_CONSOLE_FALLBACK);
   const [loadState, setLoadState] = useState<"checking" | "backend" | "fallback">("checking");
@@ -1092,6 +1126,9 @@ export default function OSConsole({
   const [readinessCheckedAt, setReadinessCheckedAt] = useState("not checked");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [clipboardMessage, setClipboardMessage] = useState("");
+  const [browserTtsStatus, setBrowserTtsStatus] = useState<BrowserSpeechStatus>(
+    speechControls.available ? "idle" : "unavailable",
+  );
 
   const loadStatus = useCallback(async (signal?: AbortSignal) => {
     setLoadState("checking");
@@ -1176,6 +1213,24 @@ export default function OSConsole({
     await clipboard.writeText(value);
     setClipboardMessage(`${label} copied.`);
   }, [clipboardWriter]);
+
+  const speakLatestResponse = useCallback(() => {
+    if (!lastConversationResponse?.response || !speechControls.available) {
+      setBrowserTtsStatus("unavailable");
+      return;
+    }
+    const status = speechControls.speak(lastConversationResponse.response, {
+      onStart: () => setBrowserTtsStatus("speaking"),
+      onEnd: () => setBrowserTtsStatus("finished"),
+      onError: () => setBrowserTtsStatus("failed"),
+    });
+    setBrowserTtsStatus(status);
+  }, [lastConversationResponse, speechControls]);
+
+  const stopSpeaking = useCallback(() => {
+    const status = speechControls.cancel();
+    setBrowserTtsStatus(status);
+  }, [speechControls]);
 
   const dataSourceLabel = useMemo(() => {
     if (loadState === "checking") return "Checking local backend. Fallback data is ready if unavailable.";
@@ -1362,6 +1417,20 @@ export default function OSConsole({
       run: () => copyText(COMMAND_CENTER_COMMANDS[3].command, "Live + TTS validation command"),
     },
     {
+      id: "speak-latest-response",
+      title: "Speak latest Delta response",
+      detail: "Uses browser speechSynthesis only. No backend TTS, notification, or writes.",
+      run: speakLatestResponse,
+      disabled: !lastConversationResponse || !speechControls.available,
+    },
+    {
+      id: "stop-speaking",
+      title: "Stop speaking",
+      detail: "Cancels current browser speech playback.",
+      run: stopSpeaking,
+      disabled: !speechControls.available || browserTtsStatus !== "speaking",
+    },
+    {
       id: "clear-session",
       title: "Clear chat session",
       detail: "Clears browser-local chat state only.",
@@ -1391,7 +1460,7 @@ export default function OSConsole({
       <HeroStatus environment={consoleData.environment} />
       <div className="mx-auto max-w-7xl space-y-8 px-6 py-8">
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300">
-          {dataSourceLabel} Typed Ask Delta is wired to the read-only backend conversation runtime; voice and speech controls stay disabled until separately validated for the web UI.
+          {dataSourceLabel} Typed Ask Delta is wired to the read-only backend conversation runtime; voice input stays disabled and browser speech preview is user-triggered only.
         </div>
         <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -1417,6 +1486,10 @@ export default function OSConsole({
             onSuggestedPrompt={chooseSuggestedPrompt}
             followUps={followUps}
             onFollowUp={runFollowUp}
+            onSpeakLatest={speakLatestResponse}
+            onStopSpeaking={stopSpeaking}
+            browserTtsAvailable={speechControls.available}
+            browserTtsStatus={browserTtsStatus}
             isAsking={isAskingDelta}
             lastResponse={lastConversationResponse}
           />
