@@ -32,6 +32,28 @@ type ConversationDisplayTurn = {
   metadata?: ConversationTurnResponse;
 };
 
+type LocalSessionSummary = {
+  userTurns: number;
+  assistantTurns: number;
+  errorTurns: number;
+  latestIntent: string;
+  latestStateSource: string;
+  allTurnsReadOnly: boolean;
+};
+
+type CommandPaletteAction = {
+  id: string;
+  title: string;
+  detail: string;
+  run: () => void | Promise<void>;
+  disabled?: boolean;
+};
+
+type FollowUpAction = {
+  label: string;
+  kind: "ask" | "refresh_readiness" | "copy_backend";
+};
+
 const SUGGESTED_PROMPTS = [
   "What did you learn about late caffeine?",
   "What would you do if I drank a Monster at 10 PM?",
@@ -94,6 +116,126 @@ function makeTurn(
     orderLabel: role === "system" ? "System" : `Turn ${order}`,
     metadata,
   };
+}
+
+function summarizeSession(turns: ConversationDisplayTurn[], lastResponse: ConversationTurnResponse | null): LocalSessionSummary {
+  const assistantResponses = turns.filter((turn) => turn.role === "delta" && turn.metadata);
+  const errorTurns = turns.filter((turn) => turn.role === "system").length;
+  return {
+    userTurns: turns.filter((turn) => turn.role === "user").length,
+    assistantTurns: assistantResponses.length,
+    errorTurns,
+    latestIntent: lastResponse?.intent || "none yet",
+    latestStateSource: lastResponse?.state_source || "pending",
+    allTurnsReadOnly: assistantResponses.every((turn) => turn.metadata?.read_only === true && turn.metadata.memory_writes === false),
+  };
+}
+
+function buildSessionSummaryMarkdown(summary: LocalSessionSummary): string {
+  return [
+    "# Delta OS Local Session Summary",
+    "",
+    `- User turns: ${summary.userTurns}`,
+    `- Assistant turns: ${summary.assistantTurns}`,
+    `- Error turns: ${summary.errorTurns}`,
+    `- Latest intent: ${summary.latestIntent}`,
+    `- Latest state source: ${summary.latestStateSource}`,
+    `- All assistant turns read-only: ${summary.allTurnsReadOnly ? "yes" : "no"}`,
+    "",
+    "This summary is browser-local UI state only. It is not written to Delta memory or Supabase.",
+  ].join("\n");
+}
+
+function buildProofReportMarkdown({
+  readiness,
+  readinessLoadState,
+  consoleData,
+  sessionSummary,
+}: {
+  readiness: SystemReadinessResponse | null;
+  readinessLoadState: "checking" | "ready" | "fallback";
+  consoleData: OSConsoleFixture;
+  sessionSummary: LocalSessionSummary;
+}) {
+  const proven = consoleData.proofLadder.filter((item) => item.status === "proven").map((item) => item.label);
+  const pending = consoleData.proofLadder.filter((item) => item.status !== "proven").map((item) => `${item.label}: ${item.status}`);
+  const readinessLabel = readiness ? "live read-only readiness" : `${readinessLoadState} readiness`;
+  return [
+    "# Delta OS Proof Report",
+    "",
+    `Generated locally from /os state at ${new Date().toLocaleString()}.`,
+    `Readiness source: ${readinessLabel}.`,
+    "",
+    "## Backend Readiness",
+    `- Backend: ${readiness ? readiness.backend.status : "unavailable or not checked"}`,
+    `- Supabase: ${readiness ? readiness.supabase.status : "unavailable or not checked"}`,
+    `- Behavioral OS schema: ${readiness ? readiness.supabase.schema_status : "unavailable or not checked"}`,
+    "",
+    "## Proof User State",
+    `- User: ${readiness?.proof_user.user_id || consoleData.userId}`,
+    `- Readable: ${readiness?.proof_user.state_readable ? "yes" : "no or fallback"}`,
+    `- Last outcome: ${readiness?.proof_user.last_outcome || consoleData.behavioralState.lastOutcome}`,
+    `- Tone: ${readiness?.proof_user.tone || consoleData.behavioralState.tone}`,
+    `- Cooldown minutes: ${readiness?.proof_user.cooldown_minutes ?? consoleData.behavioralState.cooldownMinutes}`,
+    `- Success rate: ${readiness?.proof_user.success_rate ?? consoleData.behavioralState.successRate}`,
+    "",
+    "## Proven Capabilities",
+    ...proven.map((item) => `- ${item}`),
+    "",
+    "## Pending Or Not Built",
+    ...pending.map((item) => `- ${item}`),
+    "",
+    "## Safety Posture",
+    `- Side effects default: ${readiness?.safety.side_effects_default || "disabled"}`,
+    `- Memory writes default: ${readiness?.safety.memory_writes_default || "disabled"}`,
+    `- Explicit confirmation required: ${readiness?.safety.requires_explicit_confirmation ? "yes" : "not checked"}`,
+    "- Browser mic: not built",
+    "- Browser TTS: not built",
+    "- Wake word: not built",
+    "- Always-on listening: not built",
+    "",
+    "## Local Chat Session",
+    `- User turns: ${sessionSummary.userTurns}`,
+    `- Assistant turns: ${sessionSummary.assistantTurns}`,
+    `- Latest intent: ${sessionSummary.latestIntent}`,
+    "",
+    "This report is generated locally from read-only OS Console state. It does not prove production readiness.",
+  ].join("\n");
+}
+
+function followUpsForResponse(lastResponse: ConversationTurnResponse | null, latestSystemError: string | null): FollowUpAction[] {
+  if (latestSystemError) {
+    return [
+      { label: "Copy backend start command", kind: "copy_backend" },
+      { label: "Refresh readiness", kind: "refresh_readiness" },
+    ];
+  }
+  if (!lastResponse) return [];
+  if (lastResponse.intent === "state_inquiry") {
+    return [
+      { label: "Why did Delta lower the cooldown?", kind: "ask" },
+      { label: "What would happen if I said this was annoying?", kind: "ask" },
+      { label: "Show me the proof ladder.", kind: "ask" },
+    ];
+  }
+  if (lastResponse.intent === "capability_inquiry") {
+    return [
+      { label: "What is still not built?", kind: "ask" },
+      { label: "What is the safest next validation?", kind: "ask" },
+      { label: "Can you explain the voice pipeline?", kind: "ask" },
+    ];
+  }
+  if (lastResponse.intent === "hypothetical_policy") {
+    return [
+      { label: "Would you stay silent if cooldown is active?", kind: "ask" },
+      { label: "What feedback would make Delta back off?", kind: "ask" },
+      { label: "Why would you notify me?", kind: "ask" },
+    ];
+  }
+  return [
+    { label: "What did you learn about late caffeine?", kind: "ask" },
+    { label: "Can you talk like Jarvis yet?", kind: "ask" },
+  ];
 }
 
 const statusStyles: Record<ProofStatus, string> = {
@@ -263,6 +405,148 @@ function CommandCard({ title, detail, command }: { title: string; detail: string
   );
 }
 
+function CommandPalette({
+  open,
+  actions,
+  onClose,
+}: {
+  open: boolean;
+  actions: CommandPaletteAction[];
+  onClose: () => void;
+}) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-background/80 px-4 py-8 backdrop-blur">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Delta command palette"
+        className="mx-auto max-w-2xl rounded-lg border border-border bg-card shadow-xl"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-border p-4">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-wide text-primary">Command Palette</p>
+            <h2 className="mt-1 text-xl font-semibold">Run local read-only console actions</h2>
+            <p className="mt-1 text-sm text-muted">No palette action starts mic, TTS, notification, or memory writes.</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
+          >
+            Close
+          </button>
+        </div>
+        <div className="max-h-[32rem] overflow-y-auto p-3">
+          {actions.map((action) => (
+            <button
+              key={action.id}
+              type="button"
+              disabled={action.disabled}
+              onClick={async () => {
+                await action.run();
+                onClose();
+              }}
+              className="block w-full rounded-md px-3 py-3 text-left transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <span className="text-sm font-semibold">{action.title}</span>
+              <span className="mt-1 block text-sm leading-6 text-muted">{action.detail}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FollowUpSuggestions({
+  items,
+  onRun,
+}: {
+  items: FollowUpAction[];
+  onRun: (action: FollowUpAction) => void | Promise<void>;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <div className="mt-4 rounded-md border border-border bg-background p-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted">Suggested follow-ups</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {items.map((item) => (
+          <button
+            key={`${item.kind}-${item.label}`}
+            type="button"
+            onClick={() => void onRun(item)}
+            className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors hover:bg-card"
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SessionSummaryCard({
+  summary,
+  clipboardMessage,
+  onCopySummary,
+  onCopyProofReport,
+}: {
+  summary: LocalSessionSummary;
+  clipboardMessage: string;
+  onCopySummary: () => void;
+  onCopyProofReport: () => void;
+}) {
+  return (
+    <section className="rounded-lg border border-border bg-card p-5">
+      <p className="text-sm font-medium uppercase tracking-wide text-primary">Session Intelligence</p>
+      <h2 className="mt-2 text-2xl font-semibold">Local session summary</h2>
+      <p className="mt-2 text-sm leading-6 text-muted">
+        This summarizes browser-local chat state only. It is not written to memory or Supabase.
+      </p>
+      <div className="mt-5 grid gap-x-6 sm:grid-cols-2">
+        <Metric label="User turns" value={String(summary.userTurns)} />
+        <Metric label="Assistant turns" value={String(summary.assistantTurns)} />
+        <Metric label="Latest intent" value={summary.latestIntent} />
+        <Metric label="Latest state source" value={summary.latestStateSource} />
+        <Metric label="Read-only turns" value={summary.allTurnsReadOnly ? "yes" : "no"} />
+        <Metric label="Errors" value={String(summary.errorTurns)} />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={onCopySummary}
+          className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
+        >
+          Copy current session summary
+        </button>
+        <button
+          type="button"
+          onClick={onCopyProofReport}
+          className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
+        >
+          Copy Proof Report
+        </button>
+      </div>
+      {clipboardMessage && <p className="mt-3 text-sm text-muted">{clipboardMessage}</p>}
+    </section>
+  );
+}
+
+function RecommendedNextStepCard({ command }: { command: ConsoleCommand }) {
+  return (
+    <section className="rounded-lg border border-border bg-card p-5">
+      <p className="text-sm font-medium uppercase tracking-wide text-primary">Recommended Next Step</p>
+      <h2 className="mt-2 text-2xl font-semibold">{command.title}</h2>
+      <p className="mt-2 text-sm leading-6 text-muted">{command.detail}</p>
+      <pre className="mt-4 overflow-x-auto rounded-md border border-border bg-background p-4 text-xs leading-5 text-muted">
+        <code>{command.command}</code>
+      </pre>
+    </section>
+  );
+}
+
 function ConversationShell({
   turns,
   prompt,
@@ -270,6 +554,8 @@ function ConversationShell({
   onAsk,
   onClear,
   onSuggestedPrompt,
+  followUps,
+  onFollowUp,
   isAsking,
   lastResponse,
 }: {
@@ -279,6 +565,8 @@ function ConversationShell({
   onAsk: () => void | Promise<void>;
   onClear: () => void;
   onSuggestedPrompt: (value: string) => void;
+  followUps: FollowUpAction[];
+  onFollowUp: (action: FollowUpAction) => void | Promise<void>;
   isAsking: boolean;
   lastResponse: ConversationTurnResponse | null;
 }) {
@@ -353,6 +641,7 @@ function ConversationShell({
           </div>
         )}
       </div>
+      <FollowUpSuggestions items={followUps} onRun={onFollowUp} />
       <form
         className="mt-5"
         onSubmit={(event) => {
@@ -782,7 +1071,13 @@ function HeroStatus({ environment }: { environment: ConsoleEnvironment }) {
   );
 }
 
-export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: string }) {
+export default function OSConsole({
+  userId = OS_CONSOLE_USER_ID,
+  clipboardWriter,
+}: {
+  userId?: string;
+  clipboardWriter?: (value: string) => Promise<void>;
+}) {
   const [consoleData, setConsoleData] = useState<OSConsoleFixture>(OS_CONSOLE_FALLBACK);
   const [loadState, setLoadState] = useState<"checking" | "backend" | "fallback">("checking");
   const [prompt, setPrompt] = useState("what did you learn about late caffeine?");
@@ -795,6 +1090,8 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
   const [readinessLoadState, setReadinessLoadState] = useState<"checking" | "ready" | "fallback">("checking");
   const [readinessError, setReadinessError] = useState("");
   const [readinessCheckedAt, setReadinessCheckedAt] = useState("not checked");
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [clipboardMessage, setClipboardMessage] = useState("");
 
   const loadStatus = useCallback(async (signal?: AbortSignal) => {
     setLoadState("checking");
@@ -854,6 +1151,32 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
     void loadReadiness();
   }, [loadReadiness]);
 
+  useEffect(() => {
+    const openPalette = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+    window.addEventListener("keydown", openPalette);
+    return () => window.removeEventListener("keydown", openPalette);
+  }, []);
+
+  const copyText = useCallback(async (value: string, label: string) => {
+    if (clipboardWriter) {
+      await clipboardWriter(value);
+      setClipboardMessage(`${label} copied.`);
+      return;
+    }
+    const clipboard = typeof window !== "undefined" ? window.navigator.clipboard : undefined;
+    if (!clipboard) {
+      setClipboardMessage("Clipboard unavailable in this browser.");
+      return;
+    }
+    await clipboard.writeText(value);
+    setClipboardMessage(`${label} copied.`);
+  }, [clipboardWriter]);
+
   const dataSourceLabel = useMemo(() => {
     if (loadState === "checking") return "Checking local backend. Fallback data is ready if unavailable.";
     if (loadState === "backend") return "Showing read-only backend status for the demo user.";
@@ -906,6 +1229,33 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
     setPrompt(value);
   };
 
+  const sessionSummary = useMemo(
+    () => summarizeSession(conversationTurns, lastConversationResponse),
+    [conversationTurns, lastConversationResponse],
+  );
+
+  const latestTurn = conversationTurns[conversationTurns.length - 1];
+  const latestSystemError = latestTurn?.role === "system" ? latestTurn.content : null;
+  const followUps = useMemo(
+    () => followUpsForResponse(lastConversationResponse, latestSystemError),
+    [lastConversationResponse, latestSystemError],
+  );
+
+  const proofReport = useMemo(
+    () => buildProofReportMarkdown({
+      readiness,
+      readinessLoadState,
+      consoleData,
+      sessionSummary,
+    }),
+    [readiness, readinessLoadState, consoleData, sessionSummary],
+  );
+
+  const sessionSummaryMarkdown = useMemo(
+    () => buildSessionSummaryMarkdown(sessionSummary),
+    [sessionSummary],
+  );
+
   const commandCards = useMemo(() => {
     if (readiness?.backend.reachable) {
       return [
@@ -918,12 +1268,143 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
     return COMMAND_CENTER_COMMANDS;
   }, [readiness]);
 
+  const recommendedCommand = useMemo<ConsoleCommand>(() => {
+    if (!readiness || readinessLoadState === "fallback" || !readiness.backend.reachable) {
+      return COMMAND_CENTER_COMMANDS[0];
+    }
+    if (readiness.status_json.freshness !== "fresh") {
+      return {
+        title: "Refresh readiness before the next validation",
+        detail: "Status JSON is not fresh. Use the read-only readiness refresh before trusting local cockpit state.",
+        command: "curl -s http://127.0.0.1:8000/system/readiness",
+      };
+    }
+    if (lastConversationResponse) {
+      return {
+        title: "Ask one more typed read-only question",
+        detail: "The backend conversation API is reachable and the latest answer stayed read-only.",
+        command: "Use /os Ask Delta or Command Palette to ask: What is still not built?",
+      };
+    }
+    return {
+      title: "Try a typed read-only OS Console question",
+      detail: "Backend readiness is available. Validate the command center without mic, TTS, notification, or writes.",
+      command: COMMAND_CENTER_COMMANDS[2].command,
+    };
+  }, [lastConversationResponse, readiness, readinessLoadState]);
+
+  const runFollowUp = async (action: FollowUpAction) => {
+    if (action.kind === "ask") {
+      await askDelta(action.label);
+    } else if (action.kind === "refresh_readiness") {
+      await loadReadiness();
+    } else if (action.kind === "copy_backend") {
+      await copyText(COMMAND_CENTER_COMMANDS[0].command, "Backend start command");
+    }
+  };
+
+  const commandPaletteActions: CommandPaletteAction[] = [
+    {
+      id: "ask-late-caffeine",
+      title: "Ask: What did you learn about late caffeine?",
+      detail: "Sends a typed read-only state inquiry to the backend conversation API.",
+      run: () => askDelta("What did you learn about late caffeine?"),
+      disabled: isAskingDelta,
+    },
+    {
+      id: "ask-jarvis",
+      title: "Ask: Can you talk like Jarvis yet?",
+      detail: "Sends a capability inquiry without enabling voice output.",
+      run: () => askDelta("Can you talk like Jarvis yet?"),
+      disabled: isAskingDelta,
+    },
+    {
+      id: "ask-monster",
+      title: "Ask: Monster at 10 PM",
+      detail: "Asks a hypothetical late-caffeine policy question.",
+      run: () => askDelta("What would you do if I drank a Monster at 10 PM?"),
+      disabled: isAskingDelta,
+    },
+    {
+      id: "refresh-readiness",
+      title: "Refresh readiness",
+      detail: "Re-runs the read-only /system/readiness check.",
+      run: loadReadiness,
+    },
+    {
+      id: "refresh-os-state",
+      title: "Refresh OS state",
+      detail: "Re-fetches the read-only Behavioral OS status used by the state panel.",
+      run: () => loadStatus(),
+    },
+    {
+      id: "copy-backend",
+      title: "Copy backend start command",
+      detail: "Copies the local backend start command.",
+      run: () => copyText(COMMAND_CENTER_COMMANDS[0].command, "Backend start command"),
+    },
+    {
+      id: "copy-site",
+      title: "Copy site start command",
+      detail: "Copies the local site start command.",
+      run: () => copyText(COMMAND_CENTER_COMMANDS[1].command, "Site start command"),
+    },
+    {
+      id: "copy-api",
+      title: "Copy conversation API curl command",
+      detail: "Copies the read-only typed conversation API validation command.",
+      run: () => copyText(COMMAND_CENTER_COMMANDS[2].command, "Conversation API command"),
+    },
+    {
+      id: "copy-live-tts",
+      title: "Copy live + TTS validation command",
+      detail: "Copies the terminal-only command. It does not run from the web UI.",
+      run: () => copyText(COMMAND_CENTER_COMMANDS[3].command, "Live + TTS validation command"),
+    },
+    {
+      id: "clear-session",
+      title: "Clear chat session",
+      detail: "Clears browser-local chat state only.",
+      run: clearConversation,
+    },
+    {
+      id: "copy-proof-report",
+      title: "Copy proof report",
+      detail: "Copies a local markdown report from current readiness and proof state.",
+      run: () => copyText(proofReport, "Proof report"),
+    },
+    {
+      id: "copy-session-summary",
+      title: "Copy current session summary",
+      detail: "Copies a local summary of the browser-only transcript.",
+      run: () => copyText(sessionSummaryMarkdown, "Session summary"),
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-background">
+      <CommandPalette
+        open={commandPaletteOpen}
+        actions={commandPaletteActions}
+        onClose={() => setCommandPaletteOpen(false)}
+      />
       <HeroStatus environment={consoleData.environment} />
       <div className="mx-auto max-w-7xl space-y-8 px-6 py-8">
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300">
           {dataSourceLabel} Typed Ask Delta is wired to the read-only backend conversation runtime; voice and speech controls stay disabled until separately validated for the web UI.
+        </div>
+        <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold">Command center controls</p>
+            <p className="mt-1 text-sm text-muted">Open the command palette with CmdK or CtrlK. Actions remain local or read-only.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCommandPaletteOpen(true)}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
+          >
+            Command Palette
+          </button>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.25fr_0.9fr]">
@@ -934,6 +1415,8 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
             onAsk={askDelta}
             onClear={clearConversation}
             onSuggestedPrompt={chooseSuggestedPrompt}
+            followUps={followUps}
+            onFollowUp={runFollowUp}
             isAsking={isAskingDelta}
             lastResponse={lastConversationResponse}
           />
@@ -952,6 +1435,15 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
           lastCheckedAt={readinessCheckedAt}
           onRefresh={() => void loadReadiness()}
         />
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <SessionSummaryCard
+            summary={sessionSummary}
+            clipboardMessage={clipboardMessage}
+            onCopySummary={() => void copyText(sessionSummaryMarkdown, "Session summary")}
+            onCopyProofReport={() => void copyText(proofReport, "Proof report")}
+          />
+          <RecommendedNextStepCard command={recommendedCommand} />
+        </div>
         <VoiceRuntimeCard items={consoleData.voiceRuntime} />
         <RecentInterventions items={consoleData.recentInterventions} />
         <SafetyGates items={consoleData.safetyGates} />

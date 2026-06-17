@@ -1,4 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is the Delta web app built with Next.js.
+
+## Delta OS Console
+
+The local command center lives at:
+
+```text
+http://127.0.0.1:3000/os
+```
+
+The console supports multi-turn typed chat against the read-only backend
+conversation API, a command palette, local session summary, proof report copy,
+readiness refresh, command cards, and recommended next-step logic.
+
+All OS Console chat/session state is browser-local. The page does not start
+microphone capture, browser TTS, desktop notifications, background listening,
+wake word, automatic memory writes, or Supabase mutations. Voice controls remain
+disabled/coming soon.
 
 ## Getting Started
 

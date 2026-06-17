@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import OSConsole from "./OSConsole";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
@@ -138,14 +138,29 @@ function readinessResponse(overrides: Partial<SystemReadinessResponse> = {}): Sy
 
 describe("OSConsole command center", () => {
   const originalFetch = global.fetch;
+  const clipboardWriteText = jest.fn<Promise<void>, [string]>();
 
   beforeEach(() => {
     mockAskDeltaConversation.mockReset();
     mockGetSystemReadiness.mockReset();
+    clipboardWriteText.mockReset();
+    clipboardWriteText.mockResolvedValue(undefined);
     mockGetSystemReadiness.mockImplementation(() => new Promise<SystemReadinessResponse>(() => undefined));
     global.fetch = jest.fn(
       () => new Promise<Response>(() => undefined),
     ) as jest.MockedFunction<typeof fetch>;
+    Object.defineProperty(Object.getPrototypeOf(window.navigator), "clipboard", {
+      configurable: true,
+      get: () => ({
+        writeText: clipboardWriteText,
+      }),
+    });
+    Object.defineProperty(window.navigator, "clipboard", {
+      configurable: true,
+      get: () => ({
+        writeText: clipboardWriteText,
+      }),
+    });
   });
 
   afterEach(() => {
@@ -153,7 +168,7 @@ describe("OSConsole command center", () => {
   });
 
   it("renders enabled typed input while voice and speech controls remain disabled", () => {
-    render(<OSConsole />);
+    render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
     expect(screen.getByLabelText("Ask Delta prompt")).toBeEnabled();
     expect(screen.getByRole("button", { name: "Ask Delta" })).toBeEnabled();
@@ -161,12 +176,13 @@ describe("OSConsole command center", () => {
     expect(screen.getByRole("button", { name: "Speak response pending validation" })).toBeDisabled();
     expect(screen.getAllByText("read-only API").length).toBeGreaterThan(0);
     expect(screen.getByText("no automatic memory writes")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Command Palette" })).toBeInTheDocument();
   });
 
   it("renders successful live system readiness", async () => {
     mockGetSystemReadiness.mockResolvedValue(readinessResponse());
 
-    render(<OSConsole />);
+    render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
     expect(screen.getByText("Can Delta run safely right now?")).toBeInTheDocument();
     expect(await screen.findByText("backend ready")).toBeInTheDocument();
@@ -188,7 +204,7 @@ describe("OSConsole command center", () => {
         }),
       );
 
-    render(<OSConsole />);
+    render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
     const prompt = screen.getByLabelText("Ask Delta prompt");
     await user.clear(prompt);
@@ -208,6 +224,93 @@ describe("OSConsole command center", () => {
       message: "what would you do if I drank a Monster at 10 PM?",
       sessionId: "session-1",
     });
+  });
+
+  it("opens and closes the command palette", async () => {
+    const user = userEvent.setup();
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Command Palette" }));
+    const dialog = screen.getByRole("dialog", { name: "Delta command palette" });
+    expect(within(dialog).getByText("Ask: What did you learn about late caffeine?")).toBeInTheDocument();
+
+    await user.click(within(dialog).getByRole("button", { name: "Close" }));
+
+    expect(screen.queryByRole("dialog", { name: "Delta command palette" })).not.toBeInTheDocument();
+  });
+
+  it("opens the command palette with CtrlK", async () => {
+    const user = userEvent.setup();
+
+    render(<OSConsole />);
+
+    await user.keyboard("{Control>}k{/Control}");
+
+    expect(screen.getByRole("dialog", { name: "Delta command palette" })).toBeInTheDocument();
+  });
+
+  it("command palette action sends a suggested question", async () => {
+    const user = userEvent.setup();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Command Palette" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Delta command palette" })).getByText("Ask: What did you learn about late caffeine?"));
+
+    expect(await screen.findByText(/105-minute cooldown/)).toBeInTheDocument();
+    expect(mockAskDeltaConversation).toHaveBeenCalledWith({
+      userId: "eric-demo-live-notification-test",
+      message: "What did you learn about late caffeine?",
+    });
+  });
+
+  it("command palette action refreshes readiness", async () => {
+    const user = userEvent.setup();
+    mockGetSystemReadiness.mockResolvedValue(readinessResponse());
+
+    render(<OSConsole />);
+
+    await waitFor(() => {
+      expect(mockGetSystemReadiness).toHaveBeenCalledTimes(1);
+    });
+    await user.click(screen.getByRole("button", { name: "Command Palette" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Delta command palette" })).getByText("Refresh readiness"));
+
+    await waitFor(() => {
+      expect(mockGetSystemReadiness).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it("command palette action clears browser-local chat", async () => {
+    const user = userEvent.setup();
+    mockAskDeltaConversation.mockResolvedValue(conversationTurn());
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    expect(await screen.findByText(/105-minute cooldown/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Command Palette" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Delta command palette" })).getByText("Clear chat session"));
+
+    expect(screen.queryByText(/105-minute cooldown/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Ask a typed, read-only question/)).toBeInTheDocument();
+  });
+
+  it("command palette copy action writes the expected command", async () => {
+    const user = userEvent.setup();
+
+    render(<OSConsole clipboardWriter={clipboardWriteText} />);
+
+    await user.click(screen.getByRole("button", { name: "Command Palette" }));
+    await user.click(within(screen.getByRole("dialog", { name: "Delta command palette" })).getByText("Copy backend start command"));
+
+    await waitFor(() => {
+      expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("uvicorn api_server:app"));
+    });
+    expect(screen.getByText("Backend start command copied.")).toBeInTheDocument();
   });
 
   it("shows loading state while the backend request is pending", async () => {
@@ -261,6 +364,33 @@ describe("OSConsole command center", () => {
     expect(screen.getByLabelText("Ask Delta prompt")).toHaveValue("Can you talk like Jarvis yet?");
   });
 
+  it("renders follow-up suggestions after an assistant response and sends one directly", async () => {
+    const user = userEvent.setup();
+    mockAskDeltaConversation
+      .mockResolvedValueOnce(conversationTurn())
+      .mockResolvedValueOnce(
+        conversationTurn({
+          message: "Why did Delta lower the cooldown?",
+          response: "Delta lowered the cooldown because the feedback was positive.",
+          intent: "explanation",
+        }),
+      );
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    expect(await screen.findByText("Why did Delta lower the cooldown?")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Why did Delta lower the cooldown?" }));
+
+    expect(await screen.findByText(/because the feedback was positive/)).toBeInTheDocument();
+    expect(mockAskDeltaConversation).toHaveBeenLastCalledWith({
+      userId: "eric-demo-live-notification-test",
+      message: "Why did Delta lower the cooldown?",
+      sessionId: "session-1",
+    });
+  });
+
   it("shows assistant metadata chips for read-only responses", async () => {
     const user = userEvent.setup();
     mockAskDeltaConversation.mockResolvedValue(conversationTurn());
@@ -274,6 +404,60 @@ describe("OSConsole command center", () => {
     expect(screen.getByText("no writes: true")).toBeInTheDocument();
     expect(screen.getByText("no TTS: true")).toBeInTheDocument();
     expect(screen.getByText("no notification: true")).toBeInTheDocument();
+  });
+
+  it("updates local session summary after multiple turns", async () => {
+    const user = userEvent.setup();
+    mockAskDeltaConversation
+      .mockResolvedValueOnce(conversationTurn())
+      .mockResolvedValueOnce(
+        conversationTurn({
+          message: "Can you talk like Jarvis yet?",
+          response: "Not fully. Typed conversation works; always-on is not built.",
+          intent: "capability_inquiry",
+        }),
+      );
+
+    render(<OSConsole />);
+
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+    await user.type(screen.getByLabelText("Ask Delta prompt"), "Can you talk like Jarvis yet?");
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+
+    expect(await screen.findByText("capability_inquiry")).toBeInTheDocument();
+    expect(screen.getByText("This summarizes browser-local chat state only. It is not written to memory or Supabase.")).toBeInTheDocument();
+    expect(screen.getByText("User turns")).toBeInTheDocument();
+    expect(screen.getByText("Assistant turns")).toBeInTheDocument();
+    expect(screen.getByText("Read-only turns")).toBeInTheDocument();
+  });
+
+  it("copies a proof report with readiness, proof, and safety fields", async () => {
+    const user = userEvent.setup();
+    mockGetSystemReadiness.mockResolvedValue(readinessResponse());
+
+    render(<OSConsole clipboardWriter={clipboardWriteText} />);
+
+    expect(await screen.findByText("backend ready")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Copy Proof Report" }));
+
+    await waitFor(() => {
+      expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("# Delta OS Proof Report"));
+    });
+    expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("## Backend Readiness"));
+    expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("## Safety Posture"));
+  });
+
+  it("copies the current local session summary", async () => {
+    const user = userEvent.setup();
+
+    render(<OSConsole clipboardWriter={clipboardWriteText} />);
+
+    await user.click(screen.getByRole("button", { name: "Copy current session summary" }));
+
+    await waitFor(() => {
+      expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("# Delta OS Local Session Summary"));
+    });
+    expect(clipboardWriteText).toHaveBeenCalledWith(expect.stringContaining("not written to Delta memory"));
   });
 
   it("refreshes OS state from the read-only status endpoint", async () => {
@@ -332,6 +516,19 @@ describe("OSConsole command center", () => {
     expect(screen.getByText("backend fallback")).toBeInTheDocument();
   });
 
+  it("recommended next step changes when backend is unavailable versus ready", async () => {
+    const { unmount } = render(<OSConsole />);
+
+    expect(screen.getAllByText("Start backend").length).toBeGreaterThan(0);
+
+    unmount();
+    mockGetSystemReadiness.mockReset();
+    mockGetSystemReadiness.mockResolvedValue(readinessResponse());
+    render(<OSConsole />);
+
+    expect(await screen.findByText("Try a typed read-only OS Console question")).toBeInTheDocument();
+  });
+
   it("keeps browser voice, wake word, and always-on marked not built", async () => {
     mockGetSystemReadiness.mockResolvedValue(readinessResponse());
 
@@ -347,12 +544,12 @@ describe("OSConsole command center", () => {
   it("renders command cards for local validation", () => {
     render(<OSConsole />);
 
-    expect(screen.getByText("Start backend")).toBeInTheDocument();
+    expect(screen.getAllByText("Start backend").length).toBeGreaterThan(0);
     expect(screen.getByText("Start site")).toBeInTheDocument();
     expect(screen.getByText("Validate typed conversation API")).toBeInTheDocument();
     expect(screen.getByText("Pending live + TTS validation")).toBeInTheDocument();
-    expect(screen.getByText(/uvicorn api_server:app/)).toBeInTheDocument();
-    expect(screen.getByText(/conversation\/turn/)).toBeInTheDocument();
+    expect(screen.getAllByText(/uvicorn api_server:app/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/conversation\/turn/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/ENABLE_LOCAL_TTS=true/).length).toBeGreaterThan(0);
   });
 });

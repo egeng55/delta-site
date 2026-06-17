@@ -25,6 +25,11 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("Voice input coming soon");
     expect(consoleSource).toContain("Speak response pending validation");
     expect(consoleSource).toContain("Clear session");
+    expect(consoleSource).toContain("Command Palette");
+    expect(consoleSource).toContain("Session Intelligence");
+    expect(consoleSource).toContain("Copy Proof Report");
+    expect(consoleSource).toContain("Recommended Next Step");
+    expect(consoleSource).toContain("Suggested follow-ups");
     expect(consoleSource).toContain("Refresh OS State");
     expect(consoleSource).toContain("Live System Readiness");
     expect(consoleSource).toContain("Refresh readiness");
