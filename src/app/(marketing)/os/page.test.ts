@@ -20,9 +20,13 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("Next Safe Action");
     expect(consoleSource).toContain("fallback fixture");
     expect(consoleSource).toContain("backend status unavailable");
-    expect(consoleSource).toContain("wireframe controls");
+    expect(consoleSource).toContain("read-only API");
+    expect(consoleSource).toContain("askDeltaConversation");
+    expect(consoleSource).toContain("Voice input coming soon");
+    expect(consoleSource).toContain("Speak response pending validation");
     expect(consoleSource).toContain("no automatic memory writes");
     expect(consoleSource).toContain("no always-on listening");
+    expect(consoleSource).toContain("Backend conversation unavailable");
 
     expect(fixtureSource).toContain("Live mic + TTS conversation");
     expect(fixtureSource).toContain("pending validation");

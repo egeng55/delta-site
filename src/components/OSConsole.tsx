@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DELTA_API_URL } from "@/lib/api";
+import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
 import {
   OS_CONSOLE_FALLBACK,
   OS_CONSOLE_USER_ID,
@@ -18,6 +19,12 @@ type BackendStatusPayload = {
   recent_interventions?: Array<Record<string, unknown>>;
   state_provenance?: Record<string, unknown>;
   persisted_state_status?: Record<string, unknown>;
+};
+
+type ConversationDisplayTurn = {
+  role: "user" | "delta";
+  content: string;
+  metadata?: ConversationTurnResponse;
 };
 
 const statusStyles: Record<ProofStatus, string> = {
@@ -170,7 +177,25 @@ function CommandCard({ title, detail, command }: { title: string; detail: string
   );
 }
 
-function ConversationShell() {
+function ConversationShell({
+  turns,
+  prompt,
+  setPrompt,
+  onAsk,
+  isAsking,
+  error,
+  lastResponse,
+}: {
+  turns: ConversationDisplayTurn[];
+  prompt: string;
+  setPrompt: (value: string) => void;
+  onAsk: () => void;
+  isAsking: boolean;
+  error: string;
+  lastResponse: ConversationTurnResponse | null;
+}) {
+  const canAsk = prompt.trim().length > 0 && !isAsking;
+
   return (
     <section className="rounded-lg border border-border bg-card p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -178,44 +203,83 @@ function ConversationShell() {
           <p className="text-sm font-medium uppercase tracking-wide text-primary">Conversation</p>
           <h2 className="mt-2 text-2xl font-semibold">Ask Delta without writing memory</h2>
         </div>
-        <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-600 dark:text-amber-400">
-          wireframe controls
+        <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-600 dark:text-green-400">
+          read-only API
         </span>
       </div>
       <div className="mt-5 space-y-3">
-        <div className="max-w-[80%] rounded-lg bg-background px-4 py-3 text-sm leading-6 text-muted">
-          What did you learn about late caffeine?
+        {turns.map((turn, index) => (
+          <div
+            key={`${turn.role}-${index}-${turn.content.slice(0, 18)}`}
+            className={
+              turn.role === "user"
+                ? "max-w-[82%] rounded-lg bg-background px-4 py-3 text-sm leading-6 text-muted"
+                : "ml-auto max-w-[86%] rounded-lg bg-primary px-4 py-3 text-sm leading-6 text-white"
+            }
+          >
+            {turn.content}
+          </div>
+        ))}
+        {isAsking && (
+          <div className="ml-auto max-w-[86%] rounded-lg border border-border bg-background px-4 py-3 text-sm leading-6 text-muted">
+            Reading Behavioral OS state...
+          </div>
+        )}
+      </div>
+      <form
+        className="mt-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canAsk) onAsk();
+        }}
+      >
+        <div className="rounded-md border border-border p-3">
+          <label htmlFor="delta-os-input" className="text-xs uppercase tracking-wide text-muted">
+            Ask Delta prompt
+          </label>
+          <textarea
+            id="delta-os-input"
+            value={prompt}
+            onChange={(event) => setPrompt(event.target.value)}
+            className="mt-2 min-h-20 w-full resize-none bg-transparent text-sm leading-6 text-muted outline-none"
+          />
         </div>
-        <div className="ml-auto max-w-[86%] rounded-lg bg-primary px-4 py-3 text-sm leading-6 text-white">
-          Your latest feedback was good_call. Delta is using a concise tone with a 105-minute cooldown.
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="submit"
+            disabled={!canAsk}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/40"
+          >
+            {isAsking ? "Asking Delta" : "Ask Delta"}
+          </button>
+          <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
+            Voice input coming soon
+          </button>
+          <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
+            Speak response pending validation
+          </button>
         </div>
-      </div>
-      <div className="mt-5 rounded-md border border-border p-3">
-        <label htmlFor="delta-os-input" className="text-xs uppercase tracking-wide text-muted">
-          Local prompt
-        </label>
-        <textarea
-          id="delta-os-input"
-          disabled
-          value="Conversation UI is not wired yet. Use the CLI command below for validated local runtime checks."
-          readOnly
-          className="mt-2 min-h-20 w-full resize-none bg-transparent text-sm leading-6 text-muted outline-none"
-        />
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button disabled className="rounded-md bg-primary/50 px-4 py-2 text-sm font-medium text-white">
-          Ask Delta
-        </button>
-        <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
-          Voice input
-        </button>
-        <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
-          Speak response
-        </button>
-      </div>
+      </form>
+      {error && (
+        <div className="mt-4 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
-        <span className="rounded-full border border-border px-3 py-1">read-only by default</span>
+        <span className="rounded-full border border-border px-3 py-1">read-only API</span>
         <span className="rounded-full border border-border px-3 py-1">no automatic memory writes</span>
+        <span className="rounded-full border border-border px-3 py-1">
+          memory writes: {lastResponse ? String(lastResponse.memory_writes) : "false"}
+        </span>
+        <span className="rounded-full border border-border px-3 py-1">
+          TTS: {lastResponse?.tts ? "enabled" : "false"}
+        </span>
+        <span className="rounded-full border border-border px-3 py-1">
+          notification: {lastResponse?.notification ? "enabled" : "false"}
+        </span>
+        <span className="rounded-full border border-border px-3 py-1">
+          state source: {lastResponse?.state_source || "pending"}
+        </span>
         <span className="rounded-full border border-border px-3 py-1">no always-on listening</span>
       </div>
     </section>
@@ -377,6 +441,17 @@ function HeroStatus({ environment }: { environment: ConsoleEnvironment }) {
 export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: string }) {
   const [consoleData, setConsoleData] = useState<OSConsoleFixture>(OS_CONSOLE_FALLBACK);
   const [loadState, setLoadState] = useState<"checking" | "backend" | "fallback">("checking");
+  const [prompt, setPrompt] = useState("what did you learn about late caffeine?");
+  const [conversationTurns, setConversationTurns] = useState<ConversationDisplayTurn[]>([
+    {
+      role: "delta",
+      content:
+        "Ask a typed, read-only question. Delta will answer through the local backend conversation runtime when it is available.",
+    },
+  ]);
+  const [conversationError, setConversationError] = useState("");
+  const [isAskingDelta, setIsAskingDelta] = useState(false);
+  const [lastConversationResponse, setLastConversationResponse] = useState<ConversationTurnResponse | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -421,16 +496,48 @@ export default function OSConsole({ userId = OS_CONSOLE_USER_ID }: { userId?: st
     return "Showing labeled fallback fixture because the backend is unavailable.";
   }, [loadState]);
 
+  const askDelta = async () => {
+    const message = prompt.trim();
+    if (!message) return;
+    setConversationError("");
+    setIsAskingDelta(true);
+    setConversationTurns((current) => [...current, { role: "user", content: message }]);
+    try {
+      const result = await askDeltaConversation({ userId, message });
+      setLastConversationResponse(result);
+      setConversationTurns((current) => [
+        ...current,
+        { role: "delta", content: result.response, metadata: result },
+      ]);
+    } catch (err) {
+      setConversationError(
+        err instanceof Error
+          ? `Backend conversation unavailable: ${err.message}`
+          : "Backend conversation unavailable.",
+      );
+    } finally {
+      setIsAskingDelta(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <HeroStatus environment={consoleData.environment} />
       <div className="mx-auto max-w-7xl space-y-8 px-6 py-8">
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300">
-          {dataSourceLabel} This console is a product shell: buttons are intentionally inert unless a validated CLI command is shown.
+          {dataSourceLabel} Typed Ask Delta is wired to the read-only backend conversation runtime; voice and speech controls stay disabled until separately validated for the web UI.
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.25fr_0.9fr]">
-          <ConversationShell />
+          <ConversationShell
+            turns={conversationTurns}
+            prompt={prompt}
+            setPrompt={setPrompt}
+            onAsk={askDelta}
+            isAsking={isAskingDelta}
+            error={conversationError}
+            lastResponse={lastConversationResponse}
+          />
           <BehavioralStateCard state={consoleData.behavioralState} />
         </div>
 
