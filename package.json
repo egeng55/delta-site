@@ -9,6 +9,7 @@
     "desktop:dev": "electron desktop/main.cjs",
     "desktop:preview": "electron desktop/main.cjs",
     "desktop:smoke": "electron desktop/main.cjs --smoke-test",
+    "desktop:smoke:services": "node desktop/smoke-check.cjs",
     "desktop:check": "node --check desktop/main.cjs && node --check desktop/preload.cjs && node desktop/smoke-check.cjs",
     "lint": "eslint",
     "test": "jest"

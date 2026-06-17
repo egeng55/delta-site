@@ -1,8 +1,8 @@
 # Delta OS Desktop Shell
 
-Phase 49 adds a local Mac desktop shell for the Delta OS Console.
+Phase 50 adds a local Mac desktop shell and narrow service manager for the Delta OS Console.
 
-The shell uses Electron because Tauri is blocked in the current development environment: Rust and Cargo are not installed. The shell is intentionally narrow. It loads the existing `/os` cockpit from:
+The shell uses Electron because Tauri is blocked in the current development environment: Rust and Cargo are not installed. The shell loads the existing `/os` cockpit from:
 
 ```text
 http://127.0.0.1:3000/os
@@ -20,15 +20,17 @@ The desktop shell may:
 
 - open a Mac desktop window titled `Delta OS`
 - load the existing OS Console URL
-- show a local fallback page if the console is unavailable
+- show a local service-manager page if the console is unavailable
+- start the allowlisted local backend development service
+- start the allowlisted local Next.js site development service
+- stop backend/site processes only if this desktop app launched them
+- show in-memory service logs
 - copy local start commands
 - open the OS Console URL in the system browser
 - refresh the shell window
 
 The desktop shell does not:
 
-- start the backend
-- start the Next.js site
 - record audio
 - run backend local TTS
 - send desktop notifications
@@ -36,12 +38,13 @@ The desktop shell does not:
 - mutate Supabase
 - run migrations
 - create a wake word or always-on listener
+- stop unrelated processes that were already running before the desktop app opened
 
-The Electron window denies runtime permission requests, keeps `nodeIntegration` disabled, keeps `contextIsolation` enabled, and runs the renderer sandbox.
+The Electron window denies runtime permission requests, keeps `nodeIntegration` disabled, keeps `contextIsolation` enabled, and runs the renderer sandbox. The renderer does not receive arbitrary shell access. It can only call named IPC methods such as `startBackend`, `startSite`, `startAll`, `stopAll`, `getServiceStatus`, and `getServiceLogs`.
 
-## Development flow
+## Allowlisted service commands
 
-Terminal 1:
+Backend:
 
 ```bash
 cd /Users/egeng/delta-backend
@@ -49,18 +52,37 @@ set -a; source .env; set +a
 .venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000
 ```
 
-Terminal 2:
+The app implements this without exposing `.env` contents to the renderer. The main process reads `.env` and launches the fixed Python command with `child_process.spawn` and `shell: false`.
+
+Site:
 
 ```bash
 cd /Users/egeng/delta-site
 npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
-Terminal 3:
+If either service is already running outside the desktop app, the service manager reports it as external and does not stop it.
+
+## Development flow
+
+Open the desktop app:
 
 ```bash
 cd /Users/egeng/delta-site
 npm run desktop:dev
+```
+
+If backend/site are down, the service manager appears. Click `Start Services`, or run the commands manually:
+
+```bash
+cd /Users/egeng/delta-backend
+set -a; source .env; set +a
+.venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000
+```
+
+```bash
+cd /Users/egeng/delta-site
+npm run dev -- --hostname 127.0.0.1 --port 3000
 ```
 
 ## Checks
@@ -72,6 +94,13 @@ cd /Users/egeng/delta-site
 npm run desktop:check
 ```
 
+Run the service-manager static smoke check directly:
+
+```bash
+cd /Users/egeng/delta-site
+npm run desktop:smoke:services
+```
+
 Run a non-visual smoke launch. If the site is not running, this should load the offline fallback:
 
 ```bash
@@ -81,4 +110,4 @@ npm run desktop:smoke
 
 ## Current limits
 
-This is not a signed, notarized, or App Store-ready app. It does not bundle the Python backend, it does not manage long-running services, and it does not package the Next.js site as offline static assets. It is a local developer desktop shell foundation for Delta OS Console.
+This is not a signed, notarized, or App Store-ready app. It does not bundle the Python backend into the app, does not manage production services, and does not package the Next.js site as offline static assets. It is a local developer desktop shell and service-manager foundation for Delta OS Console.

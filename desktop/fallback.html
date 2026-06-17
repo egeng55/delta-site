@@ -3,13 +3,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Delta OS Console Unavailable</title>
+    <title>Delta OS Service Manager</title>
     <style>
       :root {
         color-scheme: dark;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         background: #0d1117;
         color: #e6edf3;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
@@ -19,10 +23,9 @@
       }
 
       main {
-        box-sizing: border-box;
         margin: 0 auto;
-        max-width: 1040px;
-        padding: 64px 32px;
+        max-width: 1120px;
+        padding: 48px 28px;
       }
 
       .eyebrow {
@@ -34,31 +37,44 @@
       }
 
       h1 {
-        font-size: clamp(32px, 5vw, 56px);
+        font-size: clamp(32px, 5vw, 54px);
         letter-spacing: 0;
         line-height: 1.05;
-        margin: 14px 0 16px;
+        margin: 14px 0 14px;
+      }
+
+      h2,
+      h3 {
+        margin: 0;
+      }
+
+      h2 {
+        font-size: 18px;
+      }
+
+      h3 {
+        font-size: 15px;
       }
 
       p {
         color: #9da7b3;
-        font-size: 16px;
-        line-height: 1.65;
+        font-size: 15px;
+        line-height: 1.6;
         margin: 0;
       }
 
       .status {
         border: 1px solid #30363d;
         border-radius: 8px;
-        margin-top: 28px;
+        margin-top: 24px;
         padding: 16px;
       }
 
       .grid {
         display: grid;
         gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        margin-top: 28px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        margin-top: 20px;
       }
 
       .card {
@@ -68,22 +84,23 @@
         padding: 18px;
       }
 
-      h2 {
-        font-size: 16px;
-        margin: 0 0 12px;
+      .card-header {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
       }
 
-      pre {
-        background: #0d1117;
-        border: 1px solid #30363d;
-        border-radius: 6px;
-        color: #e6edf3;
-        font-size: 13px;
-        line-height: 1.5;
-        margin: 12px 0;
-        overflow-x: auto;
-        padding: 12px;
-        white-space: pre-wrap;
+      .stack {
+        display: grid;
+        gap: 12px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
       }
 
       button,
@@ -99,7 +116,6 @@
         font-size: 14px;
         font-weight: 700;
         justify-content: center;
-        margin: 10px 8px 0 0;
         padding: 10px 12px;
         text-decoration: none;
       }
@@ -110,92 +126,316 @@
         border: 1px solid #30363d;
       }
 
-      .note {
-        color: #d29922;
-        margin-top: 22px;
+      button.danger {
+        background: #8b2222;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      .pill {
+        border: 1px solid #30363d;
+        border-radius: 999px;
+        color: #c9d1d9;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 800;
+        padding: 6px 10px;
+        text-transform: uppercase;
+      }
+
+      .pill.running {
+        border-color: #2ea043;
+        color: #7ee787;
+      }
+
+      .pill.starting,
+      .pill.unknown {
+        border-color: #d29922;
+        color: #f2cc60;
+      }
+
+      .pill.error {
+        border-color: #f85149;
+        color: #ff7b72;
+      }
+
+      .detail {
+        display: grid;
+        gap: 6px;
+        margin-top: 14px;
+      }
+
+      .detail span {
+        color: #8b949e;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      code,
+      pre {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        color: #e6edf3;
+        font-size: 13px;
+      }
+
+      code {
+        padding: 2px 6px;
+      }
+
+      pre {
+        line-height: 1.5;
+        margin: 12px 0 0;
+        max-height: 220px;
+        overflow: auto;
+        padding: 12px;
+        white-space: pre-wrap;
+      }
+
+      .logs {
+        min-height: 180px;
+      }
+
+      .safety {
+        border-color: #6e4f12;
+      }
+
+      .safety ul {
+        color: #d8b96d;
+        line-height: 1.7;
+        margin: 12px 0 0;
+        padding-left: 20px;
       }
     </style>
   </head>
   <body>
     <main>
-      <div class="eyebrow">Delta OS shell mode</div>
-      <h1>Delta OS Console is not reachable.</h1>
+      <div class="eyebrow">Delta OS service manager</div>
+      <h1>Start local Delta services safely.</h1>
       <p>
-        The desktop shell is running, but the local web console did not respond. Start the backend and site
-        in separate terminals, then refresh this window.
+        The desktop shell is running. It can start only the allowlisted local backend and Next.js site
+        development services, then load the existing Delta OS Console.
       </p>
 
-      <div class="status">
+      <section class="status stack">
         <p><strong>Console URL:</strong> <span id="console-url">http://127.0.0.1:3000/os</span></p>
-        <p><strong>Status:</strong> unavailable</p>
+        <p><strong>Console status:</strong> <span id="console-status">checking</span></p>
         <p><strong>Reason:</strong> <span id="reason">OS Console unavailable</span></p>
-      </div>
+      </section>
 
-      <div>
-        <button id="refresh">Refresh Delta OS</button>
-        <button id="open-browser" class="secondary">Open OS Console in Browser</button>
+      <div class="actions">
+        <button id="start-all">Start Services</button>
+        <button id="start-backend" class="secondary">Start Backend</button>
+        <button id="start-site" class="secondary">Start Site</button>
+        <button id="stop-all" class="danger" disabled>Stop App-Launched Services</button>
+        <button id="refresh" class="secondary">Refresh Status</button>
+        <button id="reload-console" class="secondary">Open Delta OS Console</button>
+        <button id="open-browser" class="secondary">Open in Browser</button>
       </div>
 
       <div class="grid">
         <section class="card">
-          <h2>Start backend</h2>
-          <p>This enables the read-only conversation and readiness APIs.</p>
-          <pre id="backend-command">cd /Users/egeng/delta-backend
-set -a; source .env; set +a
-.venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000</pre>
-          <button class="secondary" data-copy="backend-command">Copy backend command</button>
+          <div class="card-header">
+            <h2>Backend</h2>
+            <span id="backend-pill" class="pill unknown">unknown</span>
+          </div>
+          <div class="detail">
+            <p><span>Owner</span><strong id="backend-owner">unknown</strong></p>
+            <p><span>PID</span><strong id="backend-pid">none</strong></p>
+            <p><span>Health</span><code id="backend-health">http://127.0.0.1:8000/health</code></p>
+            <p><span>Error</span><strong id="backend-error">none</strong></p>
+          </div>
         </section>
 
         <section class="card">
-          <h2>Start site</h2>
-          <p>This serves the existing Delta OS Console at the URL this desktop shell loads.</p>
-          <pre id="site-command">cd /Users/egeng/delta-site
-npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
-          <button class="secondary" data-copy="site-command">Copy site command</button>
+          <div class="card-header">
+            <h2>Site</h2>
+            <span id="site-pill" class="pill unknown">unknown</span>
+          </div>
+          <div class="detail">
+            <p><span>Owner</span><strong id="site-owner">unknown</strong></p>
+            <p><span>PID</span><strong id="site-pid">none</strong></p>
+            <p><span>Health</span><code id="site-health">http://127.0.0.1:3000/os</code></p>
+            <p><span>Error</span><strong id="site-error">none</strong></p>
+          </div>
         </section>
       </div>
 
-      <p class="note">
-        This shell does not start services, record audio, run TTS, send notifications, write memory, or mutate Supabase.
-      </p>
+      <div class="grid">
+        <section class="card">
+          <h2>Start backend command</h2>
+          <p>The app runs this fixed command with `.env` loaded in the main process. Secrets are not exposed to this page.</p>
+          <pre id="backend-command">cd /Users/egeng/delta-backend
+set -a; source .env; set +a
+.venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000</pre>
+          <div class="actions">
+            <button class="secondary" data-copy="backend-command">Copy backend command</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Start site command</h2>
+          <p>The app runs this fixed command from the site repo. It does not run arbitrary shell input.</p>
+          <pre id="site-command">cd /Users/egeng/delta-site
+npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
+          <div class="actions">
+            <button class="secondary" data-copy="site-command">Copy site command</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="card safety" style="margin-top: 20px">
+        <h2>Safety posture</h2>
+        <ul>
+          <li>No microphone capture, browser mic, wake word, or always-on listener is started.</li>
+          <li>No backend TTS, browser TTS playback, desktop notification, or delivery side effect is run.</li>
+          <li>No memory writes, feedback writes, migrations, schema changes, or Supabase mutations are performed.</li>
+          <li>Stop controls affect only backend/site child processes launched by this desktop app.</li>
+        </ul>
+      </section>
+
+      <section class="card" style="margin-top: 20px">
+        <div class="card-header">
+          <h2>Service logs</h2>
+          <span class="pill">latest 200 lines per service</span>
+        </div>
+        <pre id="logs" class="logs">No logs yet.</pre>
+      </section>
     </main>
 
     <script>
       const params = new URLSearchParams(window.location.search);
       const consoleUrl = params.get("consoleUrl") || "http://127.0.0.1:3000/os";
       const reason = params.get("reason") || "OS Console unavailable";
+      const api = window.deltaDesktop;
+      let pollTimer = null;
+      let autoReloadWhenReady = false;
+
       document.getElementById("console-url").textContent = consoleUrl;
       document.getElementById("reason").textContent = reason;
 
+      function text(value, fallback = "unknown") {
+        return value === undefined || value === null || value === "" ? fallback : String(value);
+      }
+
+      function setButtonBusy(button, busy) {
+        if (!button) return;
+        button.disabled = busy;
+      }
+
+      function renderService(name, service) {
+        const pill = document.getElementById(`${name}-pill`);
+        pill.textContent = service?.status || "unknown";
+        pill.className = `pill ${service?.status || "unknown"}`;
+        document.getElementById(`${name}-owner`).textContent = text(service?.owner, "none");
+        document.getElementById(`${name}-pid`).textContent = text(service?.pid, "none");
+        document.getElementById(`${name}-health`).textContent = text(service?.healthUrl);
+        document.getElementById(`${name}-error`).textContent = text(service?.error, "none");
+      }
+
+      function renderLogs(logs) {
+        const rows = [];
+        for (const serviceName of ["backend", "site"]) {
+          for (const entry of logs?.[serviceName] || []) {
+            rows.push(`${entry.timestamp} ${entry.service}/${entry.stream}: ${entry.line}`);
+          }
+        }
+        document.getElementById("logs").textContent = rows.slice(-220).join("\n") || "No logs yet.";
+      }
+
+      function renderStatus(status) {
+        const backend = status?.services?.backend;
+        const site = status?.services?.site;
+        renderService("backend", backend);
+        renderService("site", site);
+        const consoleReady = site?.status === "running";
+        document.getElementById("console-status").textContent = consoleReady ? "available" : "unavailable";
+        document.getElementById("stop-all").disabled = !(backend?.stoppable || site?.stoppable);
+        if (consoleReady && autoReloadWhenReady) {
+          autoReloadWhenReady = false;
+          window.setTimeout(() => api?.reloadConsole?.(), 700);
+        }
+      }
+
+      async function refreshStatus() {
+        if (!api?.getServiceStatus) {
+          document.getElementById("console-status").textContent = "desktop bridge unavailable";
+          return null;
+        }
+        const status = await api.getServiceStatus();
+        renderStatus(status);
+        if (api.getServiceLogs) renderLogs(await api.getServiceLogs());
+        return status;
+      }
+
+      async function withRefresh(buttonId, action) {
+        const button = document.getElementById(buttonId);
+        setButtonBusy(button, true);
+        try {
+          await action();
+          const status = await refreshStatus();
+          if (status?.services?.site?.status === "running") {
+            window.setTimeout(() => api?.reloadConsole?.(), 900);
+          }
+        } finally {
+          setButtonBusy(button, false);
+        }
+      }
+
       async function copyText(value) {
-        if (window.deltaDesktop?.copyText) {
-          await window.deltaDesktop.copyText(value);
+        if (api?.copyText) {
+          await api.copyText(value);
           return;
         }
         await navigator.clipboard.writeText(value);
       }
 
-      document.getElementById("refresh").addEventListener("click", () => {
-        if (window.deltaDesktop?.reloadConsole) window.deltaDesktop.reloadConsole();
+      document.getElementById("start-all").addEventListener("click", () => {
+        autoReloadWhenReady = true;
+        withRefresh("start-all", () => api?.startAll?.());
+      });
+      document.getElementById("start-backend").addEventListener("click", () => {
+        withRefresh("start-backend", () => api?.startBackend?.());
+      });
+      document.getElementById("start-site").addEventListener("click", () => {
+        autoReloadWhenReady = true;
+        withRefresh("start-site", () => api?.startSite?.());
+      });
+      document.getElementById("stop-all").addEventListener("click", () => {
+        withRefresh("stop-all", () => api?.stopAll?.());
+      });
+      document.getElementById("refresh").addEventListener("click", () => refreshStatus());
+      document.getElementById("reload-console").addEventListener("click", () => {
+        if (api?.reloadConsole) api.reloadConsole();
         else window.location.reload();
       });
-
       document.getElementById("open-browser").addEventListener("click", () => {
-        if (window.deltaDesktop?.openConsoleInBrowser) window.deltaDesktop.openConsoleInBrowser();
+        if (api?.openExternal) api.openExternal(consoleUrl);
         else window.open(consoleUrl, "_blank", "noopener,noreferrer");
       });
 
       document.querySelectorAll("[data-copy]").forEach((button) => {
         button.addEventListener("click", async () => {
+          const original = button.textContent;
           const target = document.getElementById(button.getAttribute("data-copy"));
           await copyText(target.textContent);
           button.textContent = "Copied";
-          setTimeout(() => {
-            button.textContent = button.getAttribute("data-copy") === "backend-command"
-              ? "Copy backend command"
-              : "Copy site command";
+          window.setTimeout(() => {
+            button.textContent = original;
           }, 1600);
         });
+      });
+
+      refreshStatus();
+      pollTimer = window.setInterval(refreshStatus, 4000);
+      window.addEventListener("beforeunload", () => {
+        if (pollTimer) window.clearInterval(pollTimer);
       });
     </script>
   </body>
