@@ -1,4 +1,5 @@
 import React from "react";
+import { renderToString } from "react-dom/server";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import OSConsole from "./OSConsole";
@@ -175,6 +176,14 @@ describe("OSConsole command center", () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+  });
+
+  it("server render keeps browser TTS text stable until client capability detection", () => {
+    const html = renderToString(<OSConsole clipboardWriter={clipboardWriteText} />);
+
+    expect(html).toContain("Speak response");
+    expect(html).toContain("browser TTS: <!-- -->checking");
+    expect(html).not.toContain("Browser TTS unavailable");
   });
 
   it("renders enabled typed input while voice input remains disabled and speech waits for a response", () => {
@@ -649,7 +658,7 @@ describe("OSConsole command center", () => {
     expect(screen.getAllByText("not built").length).toBeGreaterThan(0);
     expect(screen.getByText(/Browser mic, wake word, and always-on mode are not built/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Browser TTS unavailable" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Speak response" })).toBeDisabled();
   });
 
   it("renders command cards for local validation", () => {

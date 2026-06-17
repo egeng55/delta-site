@@ -1,4 +1,5 @@
 export type BrowserSpeechStatus =
+  | "checking"
   | "unavailable"
   | "idle"
   | "speaking"

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DELTA_API_URL } from "@/lib/api";
-import { createBrowserSpeechControls, type BrowserSpeechStatus } from "@/lib/browserSpeech";
+import { createBrowserSpeechControls, type BrowserSpeechControls, type BrowserSpeechStatus } from "@/lib/browserSpeech";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
 import { getSystemReadiness, type ReadinessStatus, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 import {
@@ -583,6 +583,9 @@ function ConversationShell({
 }) {
   const canAsk = prompt.trim().length > 0 && !isAsking;
   const canSpeak = Boolean(lastResponse?.response) && browserTtsAvailable && browserTtsStatus !== "speaking";
+  const speakButtonLabel = browserTtsStatus === "checking" || browserTtsAvailable
+    ? "Speak response"
+    : "Browser TTS unavailable";
 
   return (
     <section className="rounded-lg border border-border bg-card p-5">
@@ -704,7 +707,7 @@ function ConversationShell({
               onClick={onSpeakLatest}
               className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {browserTtsAvailable ? "Speak response" : "Browser TTS unavailable"}
+              {speakButtonLabel}
             </button>
           )}
           <button
@@ -1106,11 +1109,11 @@ function HeroStatus({ environment }: { environment: ConsoleEnvironment }) {
 export default function OSConsole({
   userId = OS_CONSOLE_USER_ID,
   clipboardWriter,
-  speechControls = createBrowserSpeechControls(),
+  speechControls,
 }: {
   userId?: string;
   clipboardWriter?: (value: string) => Promise<void>;
-  speechControls?: ReturnType<typeof createBrowserSpeechControls>;
+  speechControls?: BrowserSpeechControls;
 }) {
   const [consoleData, setConsoleData] = useState<OSConsoleFixture>(OS_CONSOLE_FALLBACK);
   const [loadState, setLoadState] = useState<"checking" | "backend" | "fallback">("checking");
@@ -1126,9 +1129,8 @@ export default function OSConsole({
   const [readinessCheckedAt, setReadinessCheckedAt] = useState("not checked");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [clipboardMessage, setClipboardMessage] = useState("");
-  const [browserTtsStatus, setBrowserTtsStatus] = useState<BrowserSpeechStatus>(
-    speechControls.available ? "idle" : "unavailable",
-  );
+  const [resolvedSpeechControls, setResolvedSpeechControls] = useState<BrowserSpeechControls | null>(null);
+  const [browserTtsStatus, setBrowserTtsStatus] = useState<BrowserSpeechStatus>("checking");
 
   const loadStatus = useCallback(async (signal?: AbortSignal) => {
     setLoadState("checking");
@@ -1156,6 +1158,15 @@ export default function OSConsole({
       setLastRefreshedAt(new Date().toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }));
     }
   }, [userId]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const controls = speechControls ?? createBrowserSpeechControls();
+      setResolvedSpeechControls(controls);
+      setBrowserTtsStatus(controls.available ? "idle" : "unavailable");
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [speechControls]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1215,22 +1226,26 @@ export default function OSConsole({
   }, [clipboardWriter]);
 
   const speakLatestResponse = useCallback(() => {
-    if (!lastConversationResponse?.response || !speechControls.available) {
+    if (!lastConversationResponse?.response || !resolvedSpeechControls?.available) {
       setBrowserTtsStatus("unavailable");
       return;
     }
-    const status = speechControls.speak(lastConversationResponse.response, {
+    const status = resolvedSpeechControls.speak(lastConversationResponse.response, {
       onStart: () => setBrowserTtsStatus("speaking"),
       onEnd: () => setBrowserTtsStatus("finished"),
       onError: () => setBrowserTtsStatus("failed"),
     });
     setBrowserTtsStatus(status);
-  }, [lastConversationResponse, speechControls]);
+  }, [lastConversationResponse, resolvedSpeechControls]);
 
   const stopSpeaking = useCallback(() => {
-    const status = speechControls.cancel();
+    if (!resolvedSpeechControls) {
+      setBrowserTtsStatus("unavailable");
+      return;
+    }
+    const status = resolvedSpeechControls.cancel();
     setBrowserTtsStatus(status);
-  }, [speechControls]);
+  }, [resolvedSpeechControls]);
 
   const dataSourceLabel = useMemo(() => {
     if (loadState === "checking") return "Checking local backend. Fallback data is ready if unavailable.";
@@ -1421,14 +1436,14 @@ export default function OSConsole({
       title: "Speak latest Delta response",
       detail: "Uses browser speechSynthesis only. No backend TTS, notification, or writes.",
       run: speakLatestResponse,
-      disabled: !lastConversationResponse || !speechControls.available,
+      disabled: !lastConversationResponse || !resolvedSpeechControls?.available,
     },
     {
       id: "stop-speaking",
       title: "Stop speaking",
       detail: "Cancels current browser speech playback.",
       run: stopSpeaking,
-      disabled: !speechControls.available || browserTtsStatus !== "speaking",
+      disabled: !resolvedSpeechControls?.available || browserTtsStatus !== "speaking",
     },
     {
       id: "clear-session",
@@ -1488,7 +1503,7 @@ export default function OSConsole({
             onFollowUp={runFollowUp}
             onSpeakLatest={speakLatestResponse}
             onStopSpeaking={stopSpeaking}
-            browserTtsAvailable={speechControls.available}
+            browserTtsAvailable={resolvedSpeechControls?.available ?? false}
             browserTtsStatus={browserTtsStatus}
             isAsking={isAskingDelta}
             lastResponse={lastConversationResponse}
