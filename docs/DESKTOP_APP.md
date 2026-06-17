@@ -8,6 +8,13 @@ The shell uses Electron because Tauri is blocked in the current development envi
 http://127.0.0.1:3000/os
 ```
 
+Phase 51 redesigns `/os` to feel more like a Mac desktop command center: the
+conversation workspace is primary, live readiness and Behavioral OS state are
+secondary inspector context, and developer commands, proof data, and safety
+details are grouped behind collapsible sections. The redesign does not add
+microphone, TTS, notification, memory-write, wake-word, or background-listener
+capabilities.
+
 You can override that URL for local development:
 
 ```bash

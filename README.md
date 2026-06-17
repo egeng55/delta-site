@@ -13,6 +13,11 @@ conversation API, a command palette, local session summary, proof report copy,
 readiness refresh, command cards, recommended next-step logic, and user-triggered
 browser TTS preview for assistant responses.
 
+Phase 51 redesigns the console into a calmer command-center layout: conversation
+is the primary workspace, Behavioral OS state and readiness live in the right
+inspector rail, and developer commands/proof details are grouped behind
+collapsible sections. No runtime capability changed during this redesign.
+
 All OS Console chat/session state is browser-local. The page does not start
 microphone capture, backend local TTS, desktop notifications, background
 listening, wake word, automatic memory writes, or Supabase mutations. Browser

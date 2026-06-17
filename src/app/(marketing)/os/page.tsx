@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 import OSConsole from "@/components/OSConsole";
 
 export const metadata: Metadata = {
@@ -9,11 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function DeltaOSConsolePage() {
-  return (
-    <>
-      <Navigation />
-      <OSConsole />
-      <Footer />
-    </>
-  );
+  return <OSConsole />;
 }

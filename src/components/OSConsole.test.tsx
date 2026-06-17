@@ -196,6 +196,8 @@ describe("OSConsole command center", () => {
     expect(screen.getAllByText("read-only API").length).toBeGreaterThan(0);
     expect(screen.getByText("no automatic memory writes")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Command Palette" })).toBeInTheDocument();
+    expect(screen.getByText("Developer Commands")).toBeInTheDocument();
+    expect(screen.getByText("Proof, Safety, and Runtime Details")).toBeInTheDocument();
   });
 
   it("renders successful live system readiness", async () => {
@@ -204,11 +206,11 @@ describe("OSConsole command center", () => {
     render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
     expect(screen.getByText("Can Delta run safely right now?")).toBeInTheDocument();
-    expect(await screen.findByText("backend ready")).toBeInTheDocument();
-    expect(screen.getByText("supabase ready")).toBeInTheDocument();
-    expect(screen.getByText("schema ready")).toBeInTheDocument();
-    expect(screen.getByText("conversation ready")).toBeInTheDocument();
-    expect(screen.getByText(/Readable for eric-demo-live-notification-test: good_call, concise tone, cooldown 105/)).toBeInTheDocument();
+    expect((await screen.findAllByText("backend ready")).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("supabase ready").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("schema ready").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("conversation ready").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Readable for eric-demo-live-notification-test: good_call, concise tone, cooldown 105/).length).toBeGreaterThan(0);
   });
 
   it("keeps previous messages when sending multiple questions", async () => {
@@ -557,7 +559,7 @@ describe("OSConsole command center", () => {
 
     render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
-    expect(await screen.findByText("backend ready")).toBeInTheDocument();
+    expect((await screen.findAllByText("backend ready")).length).toBeGreaterThan(0);
     await user.click(screen.getByRole("button", { name: "Copy Proof Report" }));
 
     await waitFor(() => {
@@ -633,7 +635,7 @@ describe("OSConsole command center", () => {
     render(<OSConsole />);
 
     expect(await screen.findByText("readiness backend unavailable")).toBeInTheDocument();
-    expect(screen.getByText("backend fallback")).toBeInTheDocument();
+    expect(screen.getAllByText("backend fallback").length).toBeGreaterThan(0);
   });
 
   it("recommended next step changes when backend is unavailable versus ready", async () => {
@@ -656,7 +658,7 @@ describe("OSConsole command center", () => {
 
     expect(await screen.findByText("Browser voice input")).toBeInTheDocument();
     expect(screen.getAllByText("not built").length).toBeGreaterThan(0);
-    expect(screen.getByText(/Browser mic, wake word, and always-on mode are not built/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Browser mic, wake word, and always-on mode are not built/).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Speak response" })).toBeDisabled();
   });

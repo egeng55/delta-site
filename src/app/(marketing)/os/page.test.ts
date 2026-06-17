@@ -17,7 +17,7 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("Recent Interventions");
     expect(consoleSource).toContain("Safety Gates");
     expect(consoleSource).toContain("Proof Ladder");
-    expect(consoleSource).toContain("Next Safe Action");
+    expect(consoleSource).toContain("Developer Commands");
     expect(consoleSource).toContain("fallback fixture");
     expect(consoleSource).toContain("backend status unavailable");
     expect(consoleSource).toContain("read-only API");
