@@ -89,6 +89,21 @@ The policy engine maps findings to action modes such as `report_only`,
 Policy rules live in `agent/policies/maintenance-policy.json`; the canonical
 definitions live in `docs/AGENT_MAINTENANCE_POLICY.md`.
 
+## Run Ledger
+
+Record a maintenance inspection run when a future agent needs durable context:
+
+```bash
+npm run agent:run-ledger -- --report
+npm run agent:run-ledger -- --write
+npm --silent run agent:run-ledger -- --json
+```
+
+Run records live in `agent/runs/` and capture repo HEAD, cleanliness, finding
+counts, top actionable finding, policy mode, allowed next actions, forbidden
+actions, refused actions, and the recommended next command. A run record does
+not resolve a finding or authorize implementation.
+
 ## Relationship To Finding Briefs
 
 Use `agent:finding:brief` to turn a finding into a scoped remediation brief:

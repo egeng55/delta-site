@@ -69,6 +69,7 @@ npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine>
 npm run agent:maintenance -- --report
 npm run agent:policy -- --report
 npm run agent:policy -- --top-actionable
+npm run agent:run-ledger -- --report
 npm run agent:finding:brief -- --top --phase <number>
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
@@ -99,10 +100,14 @@ overwritten unless `--force` is passed.
 `agent/findings/`. `agent:policy` classifies each finding into a permitted
 agent action mode, such as `human_required`,
 `implementation_requires_approval`, or `docs_eval_autofix_allowed`.
+`agent:run-ledger` records a maintenance inspection run, including policy
+decision, refused actions, approval requirements, and next command. It is
+report-only by default and writes only with `--write` to `agent/runs/`.
 `agent:finding:brief` turns an existing finding into a scoped remediation phase
 brief after checking the policy. It is print-only by default and writes only
-with `--write` to `agent/phase-briefs/`. Finding briefs are planning artifacts;
-they do not implement findings or mark them resolved.
+with `--write` to `agent/phase-briefs/`. Finding briefs and run records are
+planning/operational artifacts; they do not implement findings or mark them
+resolved.
 
 `agent:context` prints a read-only repo context bundle in Markdown by default,
 or JSON with `-- --json`. It includes recent commits, route/component/desktop

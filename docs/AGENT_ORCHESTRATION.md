@@ -68,6 +68,7 @@ Maintenance findings use the same planning model. Inspect the queue with:
 npm run agent:maintenance -- --report
 npm run agent:policy -- --report
 npm run agent:policy -- --top-actionable
+npm run agent:run-ledger -- --report
 ```
 
 Turn a specific finding or the highest-priority actionable finding into a phase
@@ -82,6 +83,10 @@ Finding briefs are still planning artifacts. They do not implement the finding,
 run verification, create worktrees, commit, or mark findings resolved. They
 include the policy action mode so approval requirements are visible in the
 handoff.
+
+For future report-only or autonomous planning, record a maintenance run with
+`npm run agent:run-ledger -- --write` before acting. The ledger records what was
+inspected and refused; it does not authorize implementation.
 
 Fresh worktrees may require `npm ci` before verification because `node_modules`
 is ignored and not shared. If production build fails only because ignored local

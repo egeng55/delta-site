@@ -75,6 +75,27 @@ Do not implement findings. Treat the policy output as the maximum allowed agent
 action until a human explicitly scopes a remediation phase.
 ```
 
+## /run-ledger
+
+```text
+Read docs/AGENT_RUN_LEDGER.md.
+Print a maintenance run report:
+npm run agent:run-ledger -- --report
+
+Write a durable run record only when requested:
+npm run agent:run-ledger -- --write
+
+For parser-clean JSON:
+npm --silent run agent:run-ledger -- --json
+
+Focus on a finding if needed:
+npm run agent:run-ledger -- --finding <finding-id>
+
+Do not treat a run record as approval to implement. It records what was
+inspected, what policy allowed, what was refused, and the recommended next
+command.
+```
+
 ## /routine
 
 ```text

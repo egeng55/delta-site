@@ -112,6 +112,15 @@ The initial policy is conservative:
   clearly require human approval before implementation.
 - `docs_eval_autofix_allowed` findings may produce docs/eval-scoped briefs.
 
+## Relationship To Run Ledger
+
+`agent:run-ledger` records the current policy output for a maintenance run. It
+captures the top actionable finding, action mode, approval requirement, allowed
+next actions, forbidden actions, and refused actions.
+
+Run records are operational logs for agents. They do not grant approval, close
+findings, create worktrees, or authorize implementation.
+
 ## Human Review Remains Required
 
 The policy engine is not an autonomous approval system. It is a local,
