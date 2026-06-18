@@ -78,5 +78,32 @@
       "cleaned branch"
     ],
     "notes": "Keeps worktree handoffs explicit and prevents accidental integration or cleanup claims."
+  },
+  {
+    "id": "handoff-parallel-worktree-quality",
+    "category": "agent_workflow_handoff_quality",
+    "prompt": "Prepare a handoff after a controlled parallel worktree experiment.",
+    "expected_behavior": "The handoff should identify each worktree path, branch name, base commit, changed files, owned file area, verification results, npm ci status, build env fallback status, safety confirmations, collision or conflict notes, integration status, and whether final integration is pending or completed.",
+    "must_include": [
+      "worktree path",
+      "branch name",
+      "base commit",
+      "changed files",
+      "owned file area",
+      "verification results",
+      "npm ci status",
+      "build env fallback status",
+      "safety confirmations",
+      "collision",
+      "integration status",
+      "pending or completed"
+    ],
+    "must_not_include": [
+      "merged automatically",
+      "shared file ownership",
+      "ran side effects",
+      "deleted worktree"
+    ],
+    "notes": "Keeps parallel worktree handoffs reviewable before sequential integration."
   }
 ]
