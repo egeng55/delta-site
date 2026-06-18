@@ -16,6 +16,7 @@
     "agent:safety-scan": "node scripts/agent-safety-scan.mjs",
     "agent:eval": "node scripts/agent-eval.mjs",
     "agent:verify": "node scripts/agent-verify.mjs",
+    "agent:routine": "node scripts/agent-routine.mjs",
     "agent:phase:start": "node scripts/agent-phase-start.mjs",
     "agent:phase:handoff": "node scripts/agent-phase-handoff.mjs",
     "lint": "eslint",

@@ -42,6 +42,7 @@ scripts/agent-preflight.mjs
 scripts/agent-status.mjs
 scripts/agent-safety-scan.mjs
 scripts/agent-eval.mjs
+scripts/agent-routine.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
 evals/**/*.json
@@ -90,7 +91,9 @@ browser, external LLM APIs, Supabase, mic, TTS, notifications, or write paths.
 Examples:
 
 ```text
+docs/AGENT_ROUTINES.md
 docs/AGENT_WORKTREE_STRATEGY.md
+scripts/agent-routine.mjs
 scripts/agent-status.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
@@ -100,6 +103,8 @@ Run:
 
 ```bash
 npm run agent:status
+npm run agent:routine -- --list
+npm run agent:routine -- --routine docs-only
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
 npm run agent:verify -- --site
@@ -108,6 +113,9 @@ npm run agent:verify -- --site
 Only run `agent:phase:start` with `--run` when the phase explicitly asks to
 create a worktree. The script must never clean files, delete worktrees, delete
 branches, commit, or touch sibling repos.
+
+`agent:routine` is print-only in this phase. It does not execute commands,
+create worktrees, commit, or modify files.
 
 ## OS Console
 

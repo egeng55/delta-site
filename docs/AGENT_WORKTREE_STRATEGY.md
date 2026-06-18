@@ -66,6 +66,7 @@ Use lowercase letters, numbers, and hyphens only.
 Preview first:
 
 ```bash
+npm run agent:routine -- --routine worktree-experiment --phase 56 --name worktree-orchestration
 npm run agent:phase:start -- --phase 56 --name worktree-orchestration --print
 ```
 
@@ -126,6 +127,14 @@ npm run agent:phase:handoff -- --phase 56
 
 The handoff script prints a skeleton only. It does not write files in this
 phase.
+
+Routine guidance is also available:
+
+```bash
+npm run agent:routine -- --routine handoff --phase 56
+```
+
+`agent:routine` is print-only and does not create, clean, or delete anything.
 
 ## Cleanup Rules
 

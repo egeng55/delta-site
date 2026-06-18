@@ -62,6 +62,8 @@ npm run agent:eval
 npm run agent:verify -- --docs-only
 npm run agent:verify -- --site
 npm run agent:verify -- --desktop
+npm run agent:routine -- --list
+npm run agent:routine -- --routine desktop
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
 ```
@@ -71,6 +73,9 @@ you are ready to execute the selected fixed command set.
 
 `agent:eval` validates local eval fixture JSON only. It does not call the
 backend, browser, external LLM APIs, Supabase, TTS, notifications, or mic paths.
+
+`agent:routine` prints recommended command sequences for common phase types. It
+does not execute commands, create worktrees, commit, or modify files.
 
 `agent:phase:start` prints worktree creation commands by default. It may create
 a worktree only with `--run`, a clean current repo, a valid phase/name, and a
@@ -152,6 +157,7 @@ Minimum expectations:
 - site component change: `npm run agent:verify -- --site`
 - `/os` or Electron change: `npm run agent:verify -- --desktop`
 - phase/worktree planning: `npm run agent:status`,
+  `npm run agent:routine -- --routine phase-start --phase <number> --name <slug>`,
   `npm run agent:phase:start -- --phase <number> --name <slug> --print`
 - auth/legal/schema changes: stop unless explicitly approved
 

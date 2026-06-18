@@ -45,6 +45,10 @@ starting or handing off work. For larger scoped phases, preview a worktree with
 `npm run agent:phase:start -- --phase <number> --name <slug> --print`. Creating
 a worktree requires `--run` and must only happen from a clean repo.
 
+Agents can use `npm run agent:routine -- --list` to print standard command
+sequences for common phase types. Routine output is guidance only; it does not
+execute commands or replace review.
+
 ## Codex First
 
 Codex is the primary agent workflow. Claude Code and Cursor are optional. Do not
@@ -77,6 +81,8 @@ Phase 53 does not add:
   local guardrails under `evals/`
 - `scripts/agent-verify.mjs`: print-first verification wrapper with
   `docs-only`, `site`, `desktop`, and `all` scopes
+- `scripts/agent-routine.mjs`: print-only routine guide for composing existing
+  agent commands
 - `scripts/agent-phase-start.mjs`: print-first worktree command helper; `--run`
   can create a new worktree only when the repo is clean
 - `scripts/agent-phase-handoff.mjs`: read-only handoff skeleton printer
@@ -89,3 +95,5 @@ and should be used after the phase scope is clear.
 
 `agent-phase-start` must never delete worktrees, clean files, commit, or touch
 sibling repos. Worktree cleanup remains a manual, explicitly approved action.
+`agent-routine` has no run mode in this phase and must not create worktrees,
+commit, or execute commands.

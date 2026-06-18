@@ -7,6 +7,7 @@ These are prompt templates for agents. They are not executable commands.
 ```text
 Read AGENTS.md and docs/AGENTIC_DEVELOPMENT.md.
 Run npm run agent:status if repo state is unclear.
+Run npm run agent:routine -- --list if the phase type is unclear.
 Inspect the requested files.
 Produce:
 1. repo scope
@@ -16,6 +17,22 @@ Produce:
    where possible
 5. commit plan
 Do not edit files yet.
+```
+
+## /routine
+
+```text
+Read docs/AGENT_ROUTINES.md.
+Print available routines:
+npm run agent:routine -- --list
+
+Print one routine:
+npm run agent:routine -- --routine <name>
+
+For worktree planning:
+npm run agent:routine -- --routine worktree-experiment --phase <number> --name <slug>
+
+Do not execute commands just because a routine prints them.
 ```
 
 ## /phase-start
