@@ -4,6 +4,8 @@
     "category": "os_console_explainability",
     "prompt": "What does good_call mean?",
     "expected_behavior": "Explain that good_call means prior late-caffeine guidance was judged useful or appropriate, connect it to the current late-caffeine state, and state that the explanation is read-only.",
+    "sample_response": "good_call means Delta judged the prior late-caffeine guidance as useful and appropriate for the situation. In the current late-caffeine state, it means the earlier nudge was treated as a good fit. This is a read-only explanation; nothing was changed.",
+    "expected_policy": "read_only_explain_visible_state",
     "must_include": [
       "useful",
       "appropriate",
@@ -22,6 +24,8 @@
     "category": "os_console_explainability",
     "prompt": "What does cooldown mean here?",
     "expected_behavior": "Explain that cooldown is the waiting period before another similar nudge, connect it to the current 105-minute late-caffeine rule when that state is loaded, and clarify no write occurred.",
+    "sample_response": "Cooldown is the waiting period before Delta would give another similar late-caffeine nudge. Here it is about 105 minutes for the late-caffeine pattern, and this explanation performed no write.",
+    "expected_policy": "read_only_explain_visible_state",
     "must_include": [
       "waiting period",
       "105",

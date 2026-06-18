@@ -47,8 +47,10 @@ Run:
 npm run agent:eval
 ```
 
-The runner validates that fixture JSON files are well formed and contain the
-required fields:
+The runner validates two local, deterministic layers.
+
+Structure validation checks that fixture JSON files are well formed and contain
+the required fields:
 
 - `id`
 - `category`
@@ -58,14 +60,22 @@ required fields:
 - `must_not_include`
 - `notes`
 
-It prints fixture counts by file and category. It does not evaluate live model
-responses yet.
+Sample-response validation runs when a fixture includes `sample_response`.
+For those fixtures, the runner checks:
+
+- every `must_include` string appears in the sample response
+- no `must_not_include` string appears in the sample response
+- optional fields such as `sample_response` and `expected_policy` are non-empty
+  strings when present
+
+It prints fixture counts by file and category plus the number of sample
+responses and sample assertions checked. It does not call the real OS Console,
+the backend, a browser, Supabase, or an external LLM.
 
 ## Deferred
 
 Later phases may add:
 
-- deterministic comparison against local fixture responses
 - browser-level `/os` transcript checks
 - optional LLM-judge experiments behind explicit approval
 - background report-only eval runs
@@ -74,6 +84,11 @@ Later phases may add:
   `delta-mobile`
 
 Do not add those in the current foundation without a dedicated phase brief.
+
+Live evals are explicitly deferred. Future live eval work should define whether
+it is checking rendered `/os` UI, local mocked conversation behavior, backend
+read-only API behavior, or optional LLM-judge output. Each of those paths needs
+its own approval and verification scope.
 
 ## How Future Agents Should Use Fixtures
 
@@ -88,7 +103,8 @@ agent handoff behavior:
 6. Run the normal verification scope from `docs/AGENT_VERIFICATION_MATRIX.md`.
 
 Fixtures are advisory. Passing `agent:eval` does not prove product behavior; it
-only proves the eval definitions are structurally valid.
+proves the eval definitions are structurally valid and that any included sample
+responses satisfy deterministic local assertions.
 
 ## Evaluating OS Console Explainability
 
