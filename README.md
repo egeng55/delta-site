@@ -23,6 +23,12 @@ It translates internal labels like `good_call`, cooldown, suppression, and
 persisted state into plain English, and keeps raw metadata behind read-only
 details. No runtime capability changed during these design passes.
 
+The current usability pass makes the default chat state more self-explanatory:
+Delta opens with a plain-English description of the console, suggested questions
+focus on common state and safety clarifications, and safety answers such as
+always-on listening or notifications are handled locally as read-only
+explanations. Proof and Developer details remain secondary.
+
 All OS Console chat/session state is browser-local. The page does not start
 microphone capture, backend local TTS, desktop notifications, background
 listening, wake word, automatic memory writes, or Supabase mutations. Browser

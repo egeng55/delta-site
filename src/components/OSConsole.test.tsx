@@ -203,11 +203,14 @@ describe("OSConsole command center", () => {
     expect(screen.getByRole("button", { name: "Ask Delta" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Speak response" })).toBeDisabled();
+    expect(screen.getByText(/Welcome to Delta OS/)).toBeInTheDocument();
+    expect(screen.getByText("Good starting questions")).toBeInTheDocument();
     expect(screen.getAllByText("read-only API").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/no memory writes/i).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Command Palette" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Ask Delta" })).toBeInTheDocument();
     expect(screen.getByText("System context")).toBeInTheDocument();
+    expect(screen.getByText(/What Delta believes about the current late-caffeine pattern/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "State" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Readiness" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Proof" })).toBeInTheDocument();
@@ -426,9 +429,9 @@ describe("OSConsole command center", () => {
 
     render(<OSConsole />);
 
-    await user.click(screen.getByRole("button", { name: "Can you talk like Jarvis yet?" }));
+    await user.click(screen.getByRole("button", { name: "What does cooldown mean here?" }));
 
-    expect(screen.getByLabelText("Ask Delta prompt")).toHaveValue("Can you talk like Jarvis yet?");
+    expect(screen.getByLabelText("Ask Delta prompt")).toHaveValue("What does cooldown mean here?");
   });
 
   it("renders follow-up suggestions after an assistant response and sends one directly", async () => {
@@ -470,6 +473,7 @@ describe("OSConsole command center", () => {
     expect(screen.queryByText("intent: state_inquiry")).not.toBeInTheDocument();
     expect(screen.queryByText("state: supabase")).not.toBeInTheDocument();
     expect(screen.queryByText("no writes: true")).not.toBeInTheDocument();
+    expect(screen.getByText("View details")).toBeInTheDocument();
     expect(screen.getAllByText("No memory writes").length).toBeGreaterThan(0);
     expect(screen.getByText("No TTS")).toBeInTheDocument();
     expect(screen.getByText("No notification")).toBeInTheDocument();
@@ -501,6 +505,27 @@ describe("OSConsole command center", () => {
 
     expect(await screen.findByText(/good_call means the previous late-caffeine guidance was judged useful or appropriate/)).toBeInTheDocument();
     expect(screen.getByText(/105-minute cooldown/)).toBeInTheDocument();
+    expect(mockAskDeltaConversation).not.toHaveBeenCalled();
+  });
+
+  it("answers core safety questions locally without enabling side effects", async () => {
+    const user = userEvent.setup();
+
+    render(<OSConsole />);
+
+    await user.clear(screen.getByLabelText("Ask Delta prompt"));
+    await user.type(screen.getByLabelText("Ask Delta prompt"), "Are you always listening?");
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+
+    expect(await screen.findByText(/Delta is not always listening in the OS Console/)).toBeInTheDocument();
+    expect(screen.getByText(/no wake word, no background listener, and browser mic input is not built/)).toBeInTheDocument();
+    expect(mockAskDeltaConversation).not.toHaveBeenCalled();
+
+    await user.type(screen.getByLabelText("Ask Delta prompt"), "Can you notify me?");
+    await user.click(screen.getByRole("button", { name: "Ask Delta" }));
+
+    expect(await screen.findByText(/Notification delivery has been validated separately/)).toBeInTheDocument();
+    expect(screen.getByText(/this OS Console does not send desktop notifications/)).toBeInTheDocument();
     expect(mockAskDeltaConversation).not.toHaveBeenCalled();
   });
 

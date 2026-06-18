@@ -57,19 +57,19 @@ type FollowUpAction = {
 
 type InspectorView = "state" | "readiness" | "proof" | "safety";
 
-const INSPECTOR_VIEWS: Array<{ id: InspectorView; label: string }> = [
-  { id: "state", label: "State" },
-  { id: "readiness", label: "Readiness" },
-  { id: "proof", label: "Proof" },
-  { id: "safety", label: "Safety" },
+const INSPECTOR_VIEWS: Array<{ id: InspectorView; label: string; description: string }> = [
+  { id: "state", label: "State", description: "What Delta believes about the current late-caffeine pattern." },
+  { id: "readiness", label: "Readiness", description: "Whether the local backend, schema, and proof-user state are readable." },
+  { id: "proof", label: "Proof", description: "What has been validated, what is implemented, and what is still pending." },
+  { id: "safety", label: "Safety", description: "What the console will not do from this screen." },
 ];
 
 const SUGGESTED_PROMPTS = [
   "What did you learn about late caffeine?",
   "What does good_call mean?",
-  "What would you do if I drank a Monster at 10 PM?",
-  "Can you talk like Jarvis yet?",
-  "Why did you notify me?",
+  "What does cooldown mean here?",
+  "Are you always listening?",
+  "Can you notify me?",
   "What is still not built?",
 ];
 
@@ -109,7 +109,7 @@ function initialConversationTurns(): ConversationDisplayTurn[] {
       role: "delta",
       orderLabel: "Ready",
       content:
-        "Ask a typed, read-only question. Delta will answer through the local backend conversation runtime when it is available.",
+        "Welcome to Delta OS. Ask a typed, read-only question about what Delta has learned, why it would act, or which parts of the system are ready. This console explains state; it does not write memory, use the mic, send notifications, or run backend TTS.",
     },
   ];
 }
@@ -410,6 +410,35 @@ function localClarificationResponse(message: string, state: ConsoleBehavioralSta
     || normalized.includes("meaning")
     || normalized.includes("explain");
   const asksWhyState = normalized.includes("why is") || normalized.includes("why does");
+
+  if (normalized.includes("always listening") || normalized.includes("wake word") || normalized.includes("background listening")) {
+    return {
+      ...base,
+      intent: "capability_inquiry",
+      response: `No. Delta is not always listening in the OS Console. There is no wake word, no background listener, and browser mic input is not built here. ${ending}`,
+    };
+  }
+  if (normalized.includes("notify") || normalized.includes("notification")) {
+    return {
+      ...base,
+      intent: "capability_inquiry",
+      response: `Notification delivery has been validated separately in controlled backend tests, but this OS Console does not send desktop notifications. From this screen, Delta can explain what it would do and keep the answer read-only. ${ending}`,
+    };
+  }
+  if (normalized.includes("turn on voice") || normalized.includes("enable voice") || normalized.includes("voice input")) {
+    return {
+      ...base,
+      intent: "capability_inquiry",
+      response: `Voice is not automatic in this console. Browser TTS preview is user-triggered for an existing assistant response, browser mic is not built, and backend TTS remains a terminal-only validation path. ${ending}`,
+    };
+  }
+  if (normalized.includes("write to memory") || normalized.includes("wrote to memory") || normalized.includes("memory write")) {
+    return {
+      ...base,
+      intent: "capability_inquiry",
+      response: `No memory write happened from this OS Console response. The chat transcript is browser-local, and any saved Behavioral OS state is read-only display data from Supabase when available. ${ending}`,
+    };
+  }
 
   if ((normalized.includes("good_call") || normalized.includes("good call")) && asksMeaning) {
     return {
@@ -830,7 +859,7 @@ function ConversationShell({
           <p className="text-xs font-medium tracking-wide text-muted">Conversation</p>
           <h2 className="mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Ask Delta</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-            Ask Delta about what it has learned, what it would do next, or what parts of the system are ready.
+            Use typed questions to understand saved Behavioral OS state, clarify visible terms, and check what Delta can safely do right now.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -840,6 +869,7 @@ function ConversationShell({
         </div>
       </div>
       <div className="mt-5 flex flex-wrap gap-2">
+        <p className="w-full text-xs font-medium text-muted">Good starting questions</p>
         {SUGGESTED_PROMPTS.map((suggestion) => (
           <button
             key={suggestion}
@@ -872,7 +902,12 @@ function ConversationShell({
             <p>{turn.content}</p>
             {turn.metadata && (
               <details className="mt-2 max-w-xl rounded-xl border border-border/30 bg-card/50 p-2 text-xs text-muted">
-                <summary className="cursor-pointer font-medium">Details: read-only response</summary>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                  <span className="rounded-full border border-green-500/25 bg-green-500/10 px-2.5 py-1 font-medium text-green-600 dark:text-green-400">
+                    Read-only response
+                  </span>
+                  <span className="text-muted">View details</span>
+                </summary>
                 <div className="mt-2 grid gap-1 sm:grid-cols-2">
                   <span>No memory writes</span>
                   <span>No TTS</span>
@@ -901,10 +936,11 @@ function ConversationShell({
       >
         <div className="rounded-2xl border border-border/45 bg-background/35 p-4 shadow-inner shadow-slate-950/5">
           <label htmlFor="delta-os-input" className="text-xs tracking-wide text-muted">
-            Ask Delta prompt
+            Ask a read-only question
           </label>
           <textarea
             id="delta-os-input"
+            aria-label="Ask Delta prompt"
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
             onKeyDown={(event) => {
@@ -1056,6 +1092,7 @@ function InspectorRail({
 }) {
   const interpretation = stateInterpretation(state);
   const readinessData = readinessSummary(readiness, readinessLoadState);
+  const activeViewConfig = INSPECTOR_VIEWS.find((view) => view.id === activeView) ?? INSPECTOR_VIEWS[0];
   const compactProof = proofItems.filter((item) =>
     ["Persistence", "Live mic notification", "Typed conversation", "Live conversation TTS", "Always-on", "Desktop service manager"].includes(item.label),
   );
@@ -1089,6 +1126,9 @@ function InspectorRail({
           </button>
         ))}
       </div>
+      <p className="mt-3 rounded-xl border border-border/25 bg-background/20 px-3 py-2 text-xs leading-5 text-muted">
+        {activeViewConfig.description}
+      </p>
 
       {activeView === "state" && (
         <div className="mt-5 space-y-4">

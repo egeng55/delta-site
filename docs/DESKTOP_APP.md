@@ -36,6 +36,13 @@ without crowding the chat. Developer commands, response metadata, proof reports,
 and local session summary remain in a collapsed developer drawer. No desktop
 runtime capability changed.
 
+Phase 61 polishes usability without changing capabilities. The chat empty state
+now explains the console in plain English, suggested prompts emphasize common
+state and safety questions, inspector tabs include helper descriptions, and
+common safety questions such as always-on listening or notification support are
+answered locally as read-only explanations. Proof and Developer surfaces remain
+available but secondary.
+
 You can override that URL for local development:
 
 ```bash
