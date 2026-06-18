@@ -29,6 +29,13 @@ compact, developer commands are collapsed by default, and the service-manager
 fallback page uses the same restrained desktop aesthetic. No desktop runtime
 capability changed.
 
+Phase 64 makes a stronger app-layout decision: conversation is the product
+surface, while system context lives in a compact right inspector. The inspector
+uses State, Readiness, Proof, and Safety tabs so those details stay available
+without crowding the chat. Developer commands, response metadata, proof reports,
+and local session summary remain in a collapsed developer drawer. No desktop
+runtime capability changed.
+
 You can override that URL for local development:
 
 ```bash

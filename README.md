@@ -13,16 +13,15 @@ conversation API, a command palette, local session summary, proof report copy,
 readiness refresh, command cards, recommended next-step logic, and user-triggered
 browser TTS preview for assistant responses.
 
-Recent UI passes redesigned the console into a calmer command-center layout:
+Recent UI passes redesigned the console into a calmer desktop app layout:
 conversation is the primary workspace, Behavioral OS state and readiness are
 secondary inspector context, and developer commands/proof details are grouped
-behind secondary or collapsible sections. The console has top-level navigation
-for Chat, State, Readiness, Proof, and Developer views, translates internal
-labels like `good_call`, cooldown, suppression, and persisted state into plain
-English, and keeps raw metadata behind read-only details. Phase 63 tightened the
-visual hierarchy, compacted readiness/proof/command surfaces, and lightly
-aligned the Electron service-manager fallback with the console aesthetic. No
-runtime capability changed during these design passes.
+behind secondary or collapsible sections. The current layout keeps the main chat
+wide, moves State/Readiness/Proof/Safety into a compact right inspector, and
+keeps developer commands in a collapsed drawer instead of the normal app flow.
+It translates internal labels like `good_call`, cooldown, suppression, and
+persisted state into plain English, and keeps raw metadata behind read-only
+details. No runtime capability changed during these design passes.
 
 All OS Console chat/session state is browser-local. The page does not start
 microphone capture, backend local TTS, desktop notifications, background

@@ -12,11 +12,16 @@ describe("Delta OS Console page", () => {
     expect(pageSource).toContain("<OSConsole />");
 
     expect(consoleSource).toContain("Conversation");
-    expect(consoleSource).toContain("Behavioral State");
-    expect(consoleSource).toContain("Voice Runtime");
-    expect(consoleSource).toContain("Recent Interventions");
-    expect(consoleSource).toContain("Safety Gates");
-    expect(consoleSource).toContain("Proof Ladder");
+    expect(consoleSource).toContain("System context");
+    expect(consoleSource).toContain("Current pattern");
+    expect(consoleSource).toContain("State");
+    expect(consoleSource).toContain("Readiness");
+    expect(consoleSource).toContain("Proof");
+    expect(consoleSource).toContain("Safety");
+    expect(consoleSource).toContain("Live readiness");
+    expect(consoleSource).toContain("Safety posture");
+    expect(consoleSource).toContain("Full proof ladder");
+    expect(consoleSource).toContain("Developer tools");
     expect(consoleSource).toContain("Developer Commands");
     expect(consoleSource).toContain("fallback fixture");
     expect(consoleSource).toContain("backend status unavailable");
@@ -34,15 +39,12 @@ describe("Delta OS Console page", () => {
     expect(consoleSource).toContain("Recommended Next Step");
     expect(consoleSource).toContain("Suggested follow-ups");
     expect(consoleSource).toContain("Refresh OS State");
-    expect(consoleSource).toContain("Live System Readiness");
-    expect(consoleSource).toContain("Refresh readiness");
-    expect(consoleSource).toContain("Can Delta run safely right now?");
     expect(consoleSource).toContain("terminal_only");
-    expect(consoleSource).toContain("Browser voice input");
+    expect(consoleSource).toContain("Voice input");
     expect(consoleSource).toContain("Start backend");
     expect(consoleSource).toContain("Validate typed conversation API");
-    expect(consoleSource).toContain("no automatic memory writes");
-    expect(consoleSource).toContain("no always-on listening");
+    expect(consoleSource).toContain("no memory writes");
+    expect(consoleSource).toContain("Always-on listening");
     expect(consoleSource).toContain("Backend conversation unavailable");
 
     expect(fixtureSource).toContain("Live mic + TTS conversation");

@@ -147,10 +147,14 @@ function browserSpeechControls(overrides: Partial<BrowserSpeechControls> = {}): 
   };
 }
 
-async function openConsoleView(user: ReturnType<typeof userEvent.setup>, label: string) {
+async function openInspectorView(user: ReturnType<typeof userEvent.setup>, label: string) {
   const viewButton = screen.getByText(label).closest("button");
   expect(viewButton).not.toBeNull();
   await user.click(viewButton as HTMLButtonElement);
+}
+
+async function openDeveloperTools(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByText("Developer tools"));
 }
 
 describe("OSConsole command center", () => {
@@ -200,14 +204,15 @@ describe("OSConsole command center", () => {
     expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Speak response" })).toBeDisabled();
     expect(screen.getAllByText("read-only API").length).toBeGreaterThan(0);
-    expect(screen.getByText("no automatic memory writes")).toBeInTheDocument();
+    expect(screen.getAllByText(/no memory writes/i).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Command Palette" })).toBeInTheDocument();
-    expect(screen.getByText("Chat").closest("button")).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("State")).toBeInTheDocument();
-    expect(screen.getByText("Readiness")).toBeInTheDocument();
-    expect(screen.getByText("Proof")).toBeInTheDocument();
-    expect(screen.getByText("Developer")).toBeInTheDocument();
-    expect(screen.queryByText("Developer Commands")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ask Delta" })).toBeInTheDocument();
+    expect(screen.getByText("System context")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "State" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Readiness" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Proof" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Safety" })).toBeInTheDocument();
+    expect(screen.getByText("Developer tools")).toBeInTheDocument();
   });
 
   it("renders successful live system readiness", async () => {
@@ -215,12 +220,13 @@ describe("OSConsole command center", () => {
 
     render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
-    expect(screen.getByText("Can Delta run safely right now?")).toBeInTheDocument();
+    await openInspectorView(userEvent.setup(), "Readiness");
+    expect(screen.getByText("Live readiness")).toBeInTheDocument();
     expect((await screen.findAllByText("backend ready")).length).toBeGreaterThan(0);
     expect(screen.getAllByText("supabase ready").length).toBeGreaterThan(0);
     expect(screen.getAllByText("schema ready").length).toBeGreaterThan(0);
     expect(screen.getAllByText("conversation ready").length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Readable for eric-demo-live-notification-test: good_call, concise tone, cooldown 105/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/good_call, concise tone, cooldown 105/).length).toBeGreaterThan(0);
   });
 
   it("keeps previous messages when sending multiple questions", async () => {
@@ -460,14 +466,14 @@ describe("OSConsole command center", () => {
 
     await user.click(screen.getByRole("button", { name: "Ask Delta" }));
 
-    expect(await screen.findByText("Read-only response")).toBeInTheDocument();
+    expect(await screen.findByText(/read-only response/i)).toBeInTheDocument();
     expect(screen.queryByText("intent: state_inquiry")).not.toBeInTheDocument();
     expect(screen.queryByText("state: supabase")).not.toBeInTheDocument();
     expect(screen.queryByText("no writes: true")).not.toBeInTheDocument();
     expect(screen.getAllByText("No memory writes").length).toBeGreaterThan(0);
     expect(screen.getByText("No TTS")).toBeInTheDocument();
     expect(screen.getByText("No notification")).toBeInTheDocument();
-    expect(screen.getByText("This answer used saved read-only system data.")).toBeInTheDocument();
+    expect(screen.getAllByText("This answer used saved read-only system data.").length).toBeGreaterThan(0);
   });
 
   it("shows a plain-English state view instead of only raw fields", async () => {
@@ -475,13 +481,13 @@ describe("OSConsole command center", () => {
 
     render(<OSConsole />);
 
-    await openConsoleView(user, "State");
+    await openInspectorView(user, "State");
 
     expect(screen.getAllByText("Late caffeine").length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Delta judged the last late-caffeine guidance as useful or appropriate/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Delta would wait 105 minutes before giving another similar late-caffeine nudge/).length).toBeGreaterThan(0);
-    expect(screen.getByText("What the labels mean")).toBeInTheDocument();
-    expect(screen.getByText("View raw state details")).toBeInTheDocument();
+    expect(screen.getByText("Current rule")).toBeInTheDocument();
+    expect(screen.getByText("Raw state fields")).toBeInTheDocument();
   });
 
   it("answers visible state term clarification directly without backend routing", async () => {
@@ -616,7 +622,7 @@ describe("OSConsole command center", () => {
     await user.type(screen.getByLabelText("Ask Delta prompt"), "Can you talk like Jarvis yet?");
     await user.click(screen.getByRole("button", { name: "Ask Delta" }));
 
-    await openConsoleView(user, "Developer");
+    await openDeveloperTools(user);
     expect(await screen.findByText("capability_inquiry")).toBeInTheDocument();
     expect(screen.getByText("This summarizes browser-local chat state only. It is not written to memory or Supabase.")).toBeInTheDocument();
     expect(screen.getByText("User turns")).toBeInTheDocument();
@@ -631,7 +637,7 @@ describe("OSConsole command center", () => {
     render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
     expect((await screen.findAllByText("backend ready")).length).toBeGreaterThan(0);
-    await openConsoleView(user, "Developer");
+    await openDeveloperTools(user);
     await user.click(screen.getByRole("button", { name: "Copy Proof Report" }));
 
     await waitFor(() => {
@@ -646,7 +652,7 @@ describe("OSConsole command center", () => {
 
     render(<OSConsole clipboardWriter={clipboardWriteText} />);
 
-    await openConsoleView(user, "Developer");
+    await openDeveloperTools(user);
     await user.click(screen.getByRole("button", { name: "Copy current session summary" }));
 
     await waitFor(() => {
@@ -682,7 +688,7 @@ describe("OSConsole command center", () => {
     await waitFor(() => {
       expect(mockGetSystemReadiness).toHaveBeenCalledTimes(1);
     });
-    await user.click(await screen.findByRole("button", { name: "Refresh readiness" }));
+    await user.click(screen.getAllByRole("button", { name: "Refresh" })[0]);
 
     await waitFor(() => {
       expect(mockGetSystemReadiness).toHaveBeenCalledTimes(2);
@@ -707,6 +713,7 @@ describe("OSConsole command center", () => {
 
     render(<OSConsole />);
 
+    await openInspectorView(userEvent.setup(), "Readiness");
     expect(await screen.findByText("readiness backend unavailable")).toBeInTheDocument();
     expect(screen.getAllByText("backend fallback").length).toBeGreaterThan(0);
   });
@@ -715,7 +722,7 @@ describe("OSConsole command center", () => {
     const user = userEvent.setup();
     const { unmount } = render(<OSConsole />);
 
-    await openConsoleView(user, "Developer");
+    await openDeveloperTools(user);
     expect(screen.getAllByText("Start backend").length).toBeGreaterThan(0);
 
     unmount();
@@ -723,7 +730,7 @@ describe("OSConsole command center", () => {
     mockGetSystemReadiness.mockResolvedValue(readinessResponse());
     render(<OSConsole />);
 
-    await openConsoleView(user, "Developer");
+    await openDeveloperTools(user);
     expect(await screen.findByText("Try a typed read-only OS Console question")).toBeInTheDocument();
   });
 
@@ -732,18 +739,19 @@ describe("OSConsole command center", () => {
 
     render(<OSConsole />);
 
-    expect(await screen.findByText("Browser voice input")).toBeInTheDocument();
+    await openInspectorView(userEvent.setup(), "Safety");
+    expect(await screen.findByText("Voice input")).toBeInTheDocument();
     expect(screen.getAllByText("not built").length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Browser mic, wake word, and always-on mode are not built/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Browser mic, wake word, and always-on mode are not built|Browser mic and wake word are not built/).length).toBeGreaterThan(0);
     expect(screen.getByRole("button", { name: "Voice input coming soon" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Speak response" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Speak response|Browser TTS unavailable/ })).toBeDisabled();
   });
 
   it("renders command cards for local validation", async () => {
     const user = userEvent.setup();
     render(<OSConsole />);
 
-    await openConsoleView(user, "Developer");
+    await openDeveloperTools(user);
     expect(screen.getAllByText("Start backend").length).toBeGreaterThan(0);
     expect(screen.getByText("Start site")).toBeInTheDocument();
     expect(screen.getByText("Validate typed conversation API")).toBeInTheDocument();

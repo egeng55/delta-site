@@ -55,14 +55,13 @@ type FollowUpAction = {
   kind: "ask" | "refresh_readiness" | "copy_backend";
 };
 
-type ConsoleView = "chat" | "state" | "readiness" | "proof" | "developer";
+type InspectorView = "state" | "readiness" | "proof" | "safety";
 
-const CONSOLE_VIEWS: Array<{ id: ConsoleView; label: string; detail: string }> = [
-  { id: "chat", label: "Chat", detail: "Ask Delta questions in read-only mode." },
-  { id: "state", label: "State", detail: "Understand the current Behavioral OS rule." },
-  { id: "readiness", label: "Readiness", detail: "Check what can run safely right now." },
-  { id: "proof", label: "Proof", detail: "Review validated capabilities and safety gates." },
-  { id: "developer", label: "Developer", detail: "Copy local commands and audit metadata." },
+const INSPECTOR_VIEWS: Array<{ id: InspectorView; label: string }> = [
+  { id: "state", label: "State" },
+  { id: "readiness", label: "Readiness" },
+  { id: "proof", label: "Proof" },
+  { id: "safety", label: "Safety" },
 ];
 
 const SUGGESTED_PROMPTS = [
@@ -519,14 +518,6 @@ function mapBackendToConsole(payload: BackendStatusPayload): OSConsoleFixture {
   };
 }
 
-function StatusChip({ status }: { status: ProofStatus }) {
-  return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[status]}`}>
-      {status}
-    </span>
-  );
-}
-
 function ReadinessChip({ status, label }: { status: ReadinessStatus; label?: string }) {
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${readinessStyles[status]}`}>
@@ -833,11 +824,11 @@ function ConversationShell({
     : "Browser TTS unavailable";
 
   return (
-    <section className="rounded-3xl border border-border/60 bg-card/85 p-5 shadow-sm shadow-slate-950/5 md:p-6">
+    <section className="flex min-h-[calc(100vh-13rem)] flex-col rounded-[1.75rem] border border-border/35 bg-card/65 p-5 shadow-sm shadow-slate-950/5 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-muted">Conversation</p>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">Ask Delta</h2>
+          <p className="text-xs font-medium tracking-wide text-muted">Conversation</p>
+          <h2 className="mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Ask Delta</h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
             Ask Delta about what it has learned, what it would do next, or what parts of the system are ready.
           </p>
@@ -848,38 +839,40 @@ function ConversationShell({
           </span>
         </div>
       </div>
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap gap-2">
         {SUGGESTED_PROMPTS.map((suggestion) => (
           <button
             key={suggestion}
             type="button"
             onClick={() => onSuggestedPrompt(suggestion)}
-            className="rounded-full border border-border/60 bg-background/35 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-primary/50 hover:bg-card hover:text-foreground"
+            className="rounded-full border border-border/40 bg-background/25 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-primary/40 hover:bg-card/70 hover:text-foreground"
           >
             {suggestion}
           </button>
         ))}
       </div>
-      <div className="mt-6 min-h-[28rem] max-h-[42rem] space-y-4 overflow-y-auto rounded-2xl bg-background/35 p-3 md:p-4">
+      <div className="mt-6 flex-1 space-y-5 overflow-y-auto rounded-2xl bg-background/20 p-3 md:p-5">
         {turns.map((turn, index) => (
           <div
             key={turn.id}
             className={
               turn.role === "user"
-                ? "ml-auto max-w-[82%] rounded-2xl border border-border/60 bg-card px-4 py-3 text-sm leading-6 text-foreground shadow-sm shadow-slate-950/5"
+                ? "ml-auto max-w-[76%] rounded-2xl bg-primary px-4 py-3 text-sm leading-6 text-white shadow-sm shadow-slate-950/10"
                 : turn.role === "system"
-                  ? "max-w-[88%] rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300"
-                  : "max-w-[88%] rounded-2xl border border-border/60 bg-card px-4 py-3 text-sm leading-6 text-foreground shadow-sm shadow-slate-950/5"
+                  ? "max-w-[88%] rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300"
+                  : "max-w-[86%] rounded-2xl px-1 py-1 text-sm leading-7 text-foreground"
             }
           >
-            <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-muted">
-              <span>{turn.role === "delta" ? "Delta" : turn.role}</span>
+            <div className={`mb-1 flex items-center justify-between gap-3 text-xs font-medium ${
+              turn.role === "user" ? "text-white/70" : "text-muted"
+            }`}>
+              <span>{turn.role === "delta" ? "Delta" : turn.role === "user" ? "You" : "System"}</span>
               <span>{turn.orderLabel || `Turn ${index + 1}`}</span>
             </div>
             <p>{turn.content}</p>
             {turn.metadata && (
-              <details className="mt-3 rounded-xl border border-border/60 bg-background/45 p-2 text-xs text-muted">
-                <summary className="cursor-pointer font-medium">Read-only response</summary>
+              <details className="mt-2 max-w-xl rounded-xl border border-border/30 bg-card/50 p-2 text-xs text-muted">
+                <summary className="cursor-pointer font-medium">Details: read-only response</summary>
                 <div className="mt-2 grid gap-1 sm:grid-cols-2">
                   <span>No memory writes</span>
                   <span>No TTS</span>
@@ -892,8 +885,8 @@ function ConversationShell({
           </div>
         ))}
         {isAsking && (
-          <div className="max-w-[86%] rounded-2xl border border-border/60 bg-card px-4 py-3 text-sm leading-6 text-muted">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Delta</div>
+          <div className="max-w-[86%] rounded-2xl px-1 py-1 text-sm leading-7 text-muted">
+            <div className="mb-1 text-xs font-medium text-muted">Delta</div>
             Reading Behavioral OS state...
           </div>
         )}
@@ -906,8 +899,8 @@ function ConversationShell({
           if (canAsk) void onAsk();
         }}
       >
-        <div className="rounded-2xl border border-border/70 bg-background/45 p-4 shadow-inner shadow-slate-950/5">
-          <label htmlFor="delta-os-input" className="text-xs uppercase tracking-wide text-muted">
+        <div className="rounded-2xl border border-border/45 bg-background/35 p-4 shadow-inner shadow-slate-950/5">
+          <label htmlFor="delta-os-input" className="text-xs tracking-wide text-muted">
             Ask Delta prompt
           </label>
           <textarea
@@ -920,7 +913,7 @@ function ConversationShell({
                 if (canAsk) void onAsk();
               }
             }}
-            className="mt-2 min-h-24 w-full resize-none bg-transparent text-sm leading-6 text-foreground outline-none"
+            className="mt-2 min-h-20 w-full resize-none bg-transparent text-sm leading-6 text-foreground outline-none"
           />
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -931,14 +924,14 @@ function ConversationShell({
           >
             {isAsking ? "Asking Delta" : "Ask Delta"}
           </button>
-          <button disabled className="rounded-xl border border-border/70 px-4 py-2 text-sm font-medium text-muted">
+          <button disabled className="rounded-xl border border-border/45 px-4 py-2 text-sm font-medium text-muted">
             Voice input coming soon
           </button>
           {browserTtsStatus === "speaking" ? (
             <button
               type="button"
               onClick={onStopSpeaking}
-              className="rounded-xl border border-border/70 px-4 py-2 text-sm font-medium transition-colors hover:bg-background"
+              className="rounded-xl border border-border/45 px-4 py-2 text-sm font-medium transition-colors hover:bg-background"
             >
               Stop speaking
             </button>
@@ -947,7 +940,7 @@ function ConversationShell({
               type="button"
               disabled={!canSpeak}
               onClick={onSpeakLatest}
-              className="rounded-xl border border-border/70 px-4 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-border/45 px-4 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
             >
               {speakButtonLabel}
             </button>
@@ -955,85 +948,20 @@ function ConversationShell({
           <button
             type="button"
             onClick={onClear}
-            className="ml-auto rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:border-border hover:bg-background"
+            className="ml-auto rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:border-border/60 hover:bg-background"
           >
             Clear session
           </button>
         </div>
       </form>
       <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
-        <span className="rounded-full border border-border/70 px-3 py-1">read-only API</span>
-        <span className="rounded-full border border-border/70 px-3 py-1">no automatic memory writes</span>
-        <span className="rounded-full border border-border/70 px-3 py-1">browser TTS: {browserTtsStatus}</span>
-        <span className="rounded-full border border-border/70 px-3 py-1">local browser playback only</span>
-        <span className="rounded-full border border-border/70 px-3 py-1">no backend TTS</span>
-        <span className="rounded-full border border-border/70 px-3 py-1">no always-on listening</span>
-        <span className="rounded-full border border-border/70 px-3 py-1">state source: {lastResponse?.state_source || "pending"}</span>
+        <span className="rounded-full border border-border/40 px-3 py-1">read-only API</span>
+        <span className="rounded-full border border-border/40 px-3 py-1">no memory writes</span>
+        <span className="rounded-full border border-border/40 px-3 py-1">browser TTS: {browserTtsStatus}</span>
+        <span className="rounded-full border border-border/40 px-3 py-1">no backend TTS</span>
+        <span className="rounded-full border border-border/40 px-3 py-1">state source: {lastResponse?.state_source || "pending"}</span>
       </div>
     </section>
-  );
-}
-
-function BehavioralStateCard({
-  state,
-  onRefresh,
-  isRefreshing,
-  lastRefreshedAt,
-}: {
-  state: ConsoleBehavioralState;
-  onRefresh: () => void;
-  isRefreshing: boolean;
-  lastRefreshedAt: string;
-}) {
-  const interpretation = stateInterpretation(state);
-
-  return (
-    <SectionCard
-      eyebrow="Behavioral State"
-      title={interpretation.pattern}
-      description={interpretation.summary}
-      action={
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={isRefreshing}
-          className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isRefreshing ? "Refreshing" : "Refresh OS State"}
-        </button>
-      }
-    >
-      <div className="mt-4 space-y-4">
-        <div className="rounded-xl border border-border/60 bg-background/40 p-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Current rule</p>
-          <p className="mt-1 text-sm leading-6 text-foreground">{interpretation.currentRule}</p>
-        </div>
-        <div className="rounded-xl border border-border/60 bg-background/40 p-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Why this rule</p>
-          <p className="mt-1 text-sm leading-6 text-muted">{interpretation.why}</p>
-        </div>
-        <div className="rounded-xl border border-border/60 bg-background/40 p-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted">Safety status</p>
-          <p className="mt-1 text-sm leading-6 text-muted">{interpretation.safety}</p>
-        </div>
-        <p className="rounded-xl border border-border/60 bg-background/40 p-3 text-sm leading-6 text-muted">
-          {interpretation.source} Last refreshed: {lastRefreshedAt}.
-        </p>
-      </div>
-      <details className="mt-4 rounded-xl border border-border/60 bg-background/35 p-3">
-        <summary className="cursor-pointer text-sm font-semibold">View raw state details</summary>
-        <div className="mt-3 grid gap-x-5 sm:grid-cols-2 xl:grid-cols-1">
-          <Metric label="Last outcome" value={state.lastOutcome} />
-          <Metric label="Tone" value={state.tone} />
-          <Metric label="Cooldown" value={`${state.cooldownMinutes} minutes`} />
-          <Metric label="Success rate" value={state.successRate} />
-          <Metric label="Delivered count" value={state.deliveredCount} />
-          <Metric label="Current cooldown" value={state.currentCooldown} />
-          <Metric label="Suppression" value={state.suppression} />
-          <Metric label="Simulated" value={state.stateIsSimulated ? "yes" : "no"} />
-        </div>
-      </details>
-    </SectionCard>
   );
 }
 
@@ -1043,39 +971,17 @@ function readinessState(condition: boolean | undefined, fallback: ReadinessStatu
   return "not_checked";
 }
 
-function ReadinessRow({
-  label,
-  detail,
-  status,
-}: {
-  label: string;
-  detail: string;
-  status: ReadinessStatus;
-}) {
-  return (
-    <div className="flex flex-col gap-2 border-t border-border/60 py-3 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <p className="text-sm font-semibold">{label}</p>
-        <p className="mt-1 text-sm leading-6 text-muted">{detail}</p>
-      </div>
-      <ReadinessChip status={status} />
-    </div>
-  );
-}
-
-function LiveSystemReadiness({
-  readiness,
-  loadState,
-  error,
-  lastCheckedAt,
-  onRefresh,
-}: {
-  readiness: SystemReadinessResponse | null;
-  loadState: "checking" | "ready" | "fallback";
-  error: string;
-  lastCheckedAt: string;
-  onRefresh: () => void;
-}) {
+function readinessSummary(
+  readiness: SystemReadinessResponse | null,
+  loadState: "checking" | "ready" | "fallback",
+): {
+  backendStatus: ReadinessStatus;
+  supabaseStatus: ReadinessStatus;
+  schemaStatus: ReadinessStatus;
+  conversationStatus: ReadinessStatus;
+  proofUserStatus: ReadinessStatus;
+  proofUserDetail: string;
+} {
   const backendStatus = readiness ? readinessState(readiness.backend.reachable) : loadState === "fallback" ? "fallback" : "not_checked";
   const supabaseStatus = readiness ? readinessState(readiness.supabase.reachable) : loadState === "fallback" ? "fallback" : "not_checked";
   const schemaStatus = readiness
@@ -1087,266 +993,236 @@ function LiveSystemReadiness({
       : "not_checked";
   const conversationStatus = readiness ? readinessState(readiness.conversation.api_available && readiness.conversation.read_only) : "not_checked";
   const proofUserStatus = readiness ? readinessState(readiness.proof_user.state_readable) : "not_checked";
-  const statusJsonStatus = readiness
-    ? readiness.status_json.available
-      ? readiness.status_json.freshness === "fresh"
-        ? "ready"
-        : "not_checked"
-      : "unavailable"
-    : "not_checked";
   const proofUserDetail =
     readiness && readiness.proof_user.state_readable
-      ? `Readable for ${readiness.proof_user.user_id}: ${readiness.proof_user.last_outcome || "unknown"}, ${readiness.proof_user.tone || "unknown"} tone, cooldown ${readiness.proof_user.cooldown_minutes ?? "unknown"}, success ${readiness.proof_user.success_rate ?? "unknown"}.`
+      ? `${readiness.proof_user.last_outcome || "unknown"}, ${readiness.proof_user.tone || "unknown"} tone, cooldown ${readiness.proof_user.cooldown_minutes ?? "unknown"}, success ${readiness.proof_user.success_rate ?? "unknown"}.`
       : readiness
-        ? readiness.proof_user.reason || "Proof user state is unavailable."
-        : "Proof user has not been checked yet.";
+        ? readiness.proof_user.reason || "Proof user state unavailable."
+        : "Proof user not checked yet.";
+
+  return {
+    backendStatus,
+    supabaseStatus,
+    schemaStatus,
+    conversationStatus,
+    proofUserStatus,
+    proofUserDetail,
+  };
+}
+
+function CompactStatusRow({ label, status, detail }: { label: string; status: ReadinessStatus | ProofStatus; detail?: string }) {
+  const statusClass = (status in readinessStyles ? readinessStyles[status as ReadinessStatus] : statusStyles[status as ProofStatus]);
+  return (
+    <div className="flex items-start justify-between gap-3 border-t border-border/25 py-3 first:border-t-0 first:pt-0">
+      <div>
+        <p className="text-sm font-medium">{label}</p>
+        {detail && <p className="mt-1 text-xs leading-5 text-muted">{detail}</p>}
+      </div>
+      <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium ${statusClass}`}>
+        {String(status).replace("_", " ")}
+      </span>
+    </div>
+  );
+}
+
+function InspectorRail({
+  activeView,
+  onChangeView,
+  state,
+  readiness,
+  readinessLoadState,
+  readinessError,
+  readinessCheckedAt,
+  onRefreshState,
+  onRefreshReadiness,
+  isRefreshingState,
+  lastRefreshedAt,
+  proofItems,
+  safetyItems,
+}: {
+  activeView: InspectorView;
+  onChangeView: (view: InspectorView) => void;
+  state: ConsoleBehavioralState;
+  readiness: SystemReadinessResponse | null;
+  readinessLoadState: "checking" | "ready" | "fallback";
+  readinessError: string;
+  readinessCheckedAt: string;
+  onRefreshState: () => void;
+  onRefreshReadiness: () => void;
+  isRefreshingState: boolean;
+  lastRefreshedAt: string;
+  proofItems: OSConsoleFixture["proofLadder"];
+  safetyItems: OSConsoleFixture["safetyGates"];
+}) {
+  const interpretation = stateInterpretation(state);
+  const readinessData = readinessSummary(readiness, readinessLoadState);
+  const compactProof = proofItems.filter((item) =>
+    ["Persistence", "Live mic notification", "Typed conversation", "Live conversation TTS", "Always-on", "Desktop service manager"].includes(item.label),
+  );
 
   return (
-    <SectionCard
-      eyebrow="Live System Readiness"
-      title="Can Delta run safely right now?"
-      description="Read-only checks only. This panel does not record audio, run TTS, send notifications, or write memory."
-      action={
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={loadState === "checking"}
-          className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {loadState === "checking" ? "Checking" : "Refresh readiness"}
-        </button>
-      }
-    >
-
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-        <ReadinessChip status={backendStatus} label={`backend ${backendStatus.replace("_", " ")}`} />
-        <ReadinessChip status={supabaseStatus} label={`supabase ${supabaseStatus.replace("_", " ")}`} />
-        <ReadinessChip status={schemaStatus} label={`schema ${schemaStatus.replace("_", " ")}`} />
-        <ReadinessChip status={conversationStatus} label={`conversation ${conversationStatus.replace("_", " ")}`} />
-        <ReadinessChip status={proofUserStatus} label={`proof user ${proofUserStatus.replace("_", " ")}`} />
+    <aside className="rounded-[1.5rem] border border-border/35 bg-card/55 p-4 shadow-sm shadow-slate-950/5 xl:sticky xl:top-5 xl:max-h-[calc(100vh-2.5rem)] xl:overflow-y-auto">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium text-muted">Inspector</p>
+          <h2 className="mt-1 text-lg font-semibold tracking-tight">System context</h2>
+        </div>
+        <span className="rounded-full border border-green-500/25 bg-green-500/10 px-2.5 py-1 text-[11px] font-medium text-green-600 dark:text-green-400">
+          read-only
+        </span>
       </div>
 
-      <p className="mt-3 text-xs text-muted">Last checked: {lastCheckedAt}</p>
-      {error && (
-        <p className="mt-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-600 dark:text-red-400">
-          {error}
-        </p>
+      <div className="mt-4 grid grid-cols-2 gap-1 rounded-2xl border border-border/30 bg-background/25 p-1">
+        {INSPECTOR_VIEWS.map((view) => (
+          <button
+            key={view.id}
+            type="button"
+            onClick={() => onChangeView(view.id)}
+            className={`rounded-xl px-2.5 py-2 text-sm font-medium transition-colors ${
+              activeView === view.id
+                ? "bg-card text-foreground shadow-sm shadow-slate-950/5"
+                : "text-muted hover:bg-card/60 hover:text-foreground"
+            }`}
+            aria-pressed={activeView === view.id}
+          >
+            {view.label}
+          </button>
+        ))}
+      </div>
+
+      {activeView === "state" && (
+        <div className="mt-5 space-y-4">
+          <div>
+            <p className="text-xs font-medium text-muted">Current pattern</p>
+            <h3 className="mt-1 text-xl font-semibold">{interpretation.pattern}</h3>
+            <p className="mt-2 text-sm leading-6 text-muted">{interpretation.summary}</p>
+          </div>
+          <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+            <p className="text-xs font-medium text-muted">Current rule</p>
+            <p className="mt-1 text-sm leading-6">{interpretation.currentRule}</p>
+          </div>
+          <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+            <p className="text-xs font-medium text-muted">Why</p>
+            <p className="mt-1 text-sm leading-6 text-muted">{interpretation.why}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="rounded-xl border border-border/25 bg-background/20 p-3">
+              <p className="text-xs text-muted">Outcome</p>
+              <p className="mt-1 font-medium">{state.lastOutcome}</p>
+            </div>
+            <div className="rounded-xl border border-border/25 bg-background/20 p-3">
+              <p className="text-xs text-muted">Cooldown</p>
+              <p className="mt-1 font-medium">{state.cooldownMinutes} min</p>
+            </div>
+            <div className="rounded-xl border border-border/25 bg-background/20 p-3">
+              <p className="text-xs text-muted">Tone</p>
+              <p className="mt-1 font-medium">{state.tone}</p>
+            </div>
+            <div className="rounded-xl border border-border/25 bg-background/20 p-3">
+              <p className="text-xs text-muted">Success</p>
+              <p className="mt-1 font-medium">{state.successRate}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onRefreshState}
+            disabled={isRefreshingState}
+            className="w-full rounded-xl border border-border/40 px-3 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isRefreshingState ? "Refreshing state" : "Refresh OS State"}
+          </button>
+          <p className="text-xs leading-5 text-muted">{sourceSummary(state.stateSource)} Last refreshed: {lastRefreshedAt}.</p>
+          <details className="rounded-xl border border-border/25 bg-background/20 p-3">
+            <summary className="cursor-pointer text-sm font-medium">Raw state fields</summary>
+            <div className="mt-3 grid gap-2 text-xs leading-5 text-muted">
+              <span>Delivered count: {state.deliveredCount}</span>
+              <span>Current cooldown: {state.currentCooldown}</span>
+              <span>Suppression: {state.suppression}</span>
+              <span>Simulated: {state.stateIsSimulated ? "yes" : "no"}</span>
+            </div>
+          </details>
+        </div>
       )}
 
-      <p className="mt-4 rounded-xl border border-border/60 bg-background/40 p-3 text-sm leading-6 text-muted">
-        {proofUserDetail}
-      </p>
-
-      <details className="mt-4 rounded-xl border border-border/60 bg-background/35 p-3">
-        <summary className="cursor-pointer text-sm font-semibold">View readiness details</summary>
-        <div className="mt-4 grid gap-6 lg:grid-cols-2">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Connected services</p>
-            <ReadinessRow
-              label="Backend"
-              detail={readiness ? `Status: ${readiness.backend.status}.` : "Backend readiness has not been checked yet."}
-              status={backendStatus}
-            />
-            <ReadinessRow
-              label="Supabase"
-              detail={
-                readiness
-                  ? `Configured: ${readiness.supabase.configured ? "yes" : "no"}. Reachable: ${readiness.supabase.reachable ? "yes" : "no"}.`
-                  : "Supabase readiness has not been checked yet."
-              }
-              status={supabaseStatus}
-            />
-            <ReadinessRow
-              label="Behavioral OS schema"
-              detail={readiness ? `Schema status: ${readiness.supabase.schema_status}.` : "Schema readiness has not been checked yet."}
-              status={schemaStatus}
-            />
-            <ReadinessRow
-              label="Conversation API"
-              detail={
-                readiness
-                  ? `Typed API: ${readiness.conversation.api_available ? "available" : "unavailable"}. Read-only: ${readiness.conversation.read_only ? "yes" : "no"}.`
-                  : "Conversation API readiness has not been checked yet."
-              }
-              status={conversationStatus}
-            />
-          </div>
-
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Proof user and local runtime</p>
-            <ReadinessRow label="Proof user state" detail={proofUserDetail} status={proofUserStatus} />
-            <ReadinessRow
-              label="Status JSON"
-              detail={
-                readiness
-                  ? `${readiness.status_json.freshness}; ${readiness.status_json.path || "no path reported"}.`
-                  : "Local status JSON has not been checked yet."
-              }
-              status={statusJsonStatus}
-            />
-            <ReadinessRow
-              label="Mic/TTS/notification checks"
-              detail="Available from local terminal commands only; the web endpoint does not record, speak, or notify."
-              status="terminal_only"
-            />
-            <ReadinessRow
-              label="Browser voice input"
-              detail="Browser mic, wake word, and always-on mode are not built. Browser TTS preview is user-triggered playback only."
-              status="not_built"
-            />
-          </div>
-        </div>
-      </details>
-
-      <details className="mt-4 rounded-xl border border-border/60 bg-background/35 p-3">
-        <summary className="cursor-pointer text-sm font-semibold">View safety details</summary>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <ReadinessRow
-            label="Side effects default"
-            detail={readiness ? readiness.safety.side_effects_default : "disabled"}
-            status="ready"
-          />
-          <ReadinessRow
-            label="Memory writes default"
-            detail={readiness ? readiness.safety.memory_writes_default : "disabled"}
-            status="ready"
-          />
-          <ReadinessRow
-            label="Explicit confirmation"
-            detail={readiness?.safety.requires_explicit_confirmation ? "Required for real side effects." : "Not checked."}
-            status={readiness?.safety.requires_explicit_confirmation ? "ready" : "not_checked"}
-          />
-          <ReadinessRow
-            label="Low-quality audio"
-            detail={readiness?.safety.low_quality_audio_gated ? "Gated before persistence." : "Not checked."}
-            status={readiness?.safety.low_quality_audio_gated ? "ready" : "not_checked"}
-          />
-        </div>
-      </details>
-    </SectionCard>
-  );
-}
-
-function VoiceRuntimeCard({ items }: { items: OSConsoleFixture["voiceRuntime"] }) {
-  return (
-    <SectionCard eyebrow="Voice Runtime" title="Input and output readiness">
-      <div className="mt-4 divide-y divide-border/80">
-        {items.map((item) => (
-          <div key={item.label} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-start sm:justify-between">
+      {activeView === "readiness" && (
+        <div className="mt-5 space-y-4">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold">{item.label}</p>
-              <p className="mt-1 text-sm leading-6 text-muted">{item.detail}</p>
+              <p className="text-xs font-medium text-muted">Live readiness</p>
+              <p className="mt-1 text-sm leading-6 text-muted">Read-only checks only. No audio, TTS, notification, or memory write.</p>
             </div>
-            <StatusChip status={item.status} />
+            <button
+              type="button"
+              onClick={onRefreshReadiness}
+              disabled={readinessLoadState === "checking"}
+              className="rounded-xl border border-border/40 px-3 py-2 text-xs font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {readinessLoadState === "checking" ? "Checking" : "Refresh"}
+            </button>
           </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
+          {readinessError && (
+            <p className="rounded-xl border border-red-500/25 bg-red-500/10 p-3 text-sm leading-6 text-red-600 dark:text-red-400">{readinessError}</p>
+          )}
+          <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+            <CompactStatusRow label="Backend" status={readinessData.backendStatus} />
+            <CompactStatusRow label="Supabase" status={readinessData.supabaseStatus} />
+            <CompactStatusRow label="Schema" status={readinessData.schemaStatus} />
+            <CompactStatusRow label="Conversation API" status={readinessData.conversationStatus} />
+            <CompactStatusRow label="Proof user" status={readinessData.proofUserStatus} detail={readinessData.proofUserDetail} />
+          </div>
+          <p className="text-xs leading-5 text-muted">Last checked: {readinessCheckedAt}</p>
+        </div>
+      )}
 
-function RecentInterventions({ items }: { items: RecentInterventionProof[] }) {
-  return (
-    <SectionCard
-      eyebrow="Recent Interventions"
-      title="Proof rows and fallback cards"
-      description="Backend data appears first when available. Fallback cards remain labeled and should not be mistaken for a live stream."
-    >
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item) => (
-          <article key={`${item.title}-${item.feedback}`} className="rounded-xl border border-border/60 bg-background/40 p-4">
-            <p className="text-sm font-semibold">{item.title}</p>
-            <dl className="mt-3 space-y-2 text-sm">
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted">Method</dt>
-                <dd className="mt-1 font-medium">{item.method}</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted">Delivery</dt>
-                <dd className="mt-1 font-medium">{item.deliveryStatus}</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted">Feedback</dt>
-                <dd className="mt-1 font-medium">{item.feedback}</dd>
-              </div>
-            </dl>
-            <p className="mt-3 text-sm leading-6 text-muted">{item.learnedChange}</p>
-            <p className="mt-3 inline-flex rounded-full border border-border px-3 py-1 text-xs text-muted">{item.provenance}</p>
-          </article>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
+      {activeView === "proof" && (
+        <div className="mt-5 space-y-4">
+          <div>
+            <p className="text-xs font-medium text-muted">Proof summary</p>
+            <p className="mt-1 text-sm leading-6 text-muted">A compact view of proven, implemented, pending, and not-built milestones.</p>
+          </div>
+          <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+            {compactProof.map((item) => (
+              <CompactStatusRow key={item.label} label={item.label} status={item.status} detail={item.detail} />
+            ))}
+          </div>
+          <details className="rounded-xl border border-border/25 bg-background/20 p-3">
+            <summary className="cursor-pointer text-sm font-medium">Full proof ladder</summary>
+            <div className="mt-3 space-y-2">
+              {proofItems.map((item) => (
+                <CompactStatusRow key={item.label} label={item.label} status={item.status} detail={item.detail} />
+              ))}
+            </div>
+          </details>
+        </div>
+      )}
 
-function SafetyGates({ items }: { items: OSConsoleFixture["safetyGates"] }) {
-  return (
-    <SectionCard
-      eyebrow="Safety Gates"
-      title="Designed to avoid annoying behavior"
-      description="The default view shows the safety posture once; the full list stays here for audit."
-    >
-      <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
-          <article key={item.title} className="rounded-xl border border-border/60 bg-background/40 p-4">
-            <p className="text-sm font-semibold">{item.title}</p>
-            <p className="mt-2 text-sm leading-6 text-muted">{item.detail}</p>
-          </article>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-function ProofLadder({ items }: { items: OSConsoleFixture["proofLadder"] }) {
-  const groups = [
-    {
-      label: "Behavioral OS",
-      items: items.filter((item) => ["Scripted loop", "Persistence", "Negative feedback"].includes(item.label)),
-    },
-    {
-      label: "Voice and input",
-      items: items.filter((item) => ["Notification", "TTS", "Live mic persistence", "Live mic notification"].includes(item.label)),
-    },
-    {
-      label: "Conversation",
-      items: items.filter((item) => ["Typed conversation", "Typed conversation TTS", "Live conversation", "Live conversation TTS"].includes(item.label)),
-    },
-    {
-      label: "Desktop App",
-      items: items.filter((item) => ["Desktop shell", "Desktop service manager"].includes(item.label)),
-    },
-    {
-      label: "Not Built Yet",
-      items: items.filter((item) => ["Always-on"].includes(item.label)),
-    },
-  ].filter((group) => group.items.length > 0);
-
-  return (
-    <SectionCard
-      eyebrow="Proof Ladder"
-      title="What is proven versus still gated"
-      description="Grouped by system area so proof data stays available without dominating the chat workspace."
-    >
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        {groups.map((group) => (
-          <div key={group.label} className="rounded-xl border border-border/60 bg-background/40 p-4">
-            <p className="text-sm font-semibold">{group.label}</p>
+      {activeView === "safety" && (
+        <div className="mt-5 space-y-4">
+          <div>
+            <p className="text-xs font-medium text-muted">Safety posture</p>
+            <p className="mt-1 text-sm leading-6 text-muted">The console can explain and preview, but it does not take side-effect actions.</p>
+          </div>
+          <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+            <CompactStatusRow label="Read-only conversation" status="ready" detail="Typed questions read backend state without writes." />
+            <CompactStatusRow label="No memory writes" status="ready" detail="Chat transcript is browser-local only." />
+            <CompactStatusRow label="No notifications" status="ready" detail="The web console does not send desktop notifications." />
+            <CompactStatusRow label="Voice input" status="not_built" detail="Browser mic and wake word are not built." />
+            <CompactStatusRow label="Browser TTS" status="terminal_only" detail="Speak response is user-triggered browser playback only." />
+          </div>
+          <details className="rounded-xl border border-border/25 bg-background/20 p-3">
+            <summary className="cursor-pointer text-sm font-medium">Safety gates</summary>
             <div className="mt-3 space-y-3">
-              {group.items.map((item) => (
-                <div key={item.label} className="border-t border-border/60 pt-3 first:border-t-0 first:pt-0">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="text-sm font-semibold">{item.label}</h3>
-                    <StatusChip status={item.status} />
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-muted">{item.detail}</p>
+              {safetyItems.map((item) => (
+                <div key={item.title} className="border-t border-border/25 pt-3 first:border-t-0 first:pt-0">
+                  <p className="text-sm font-medium">{item.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-muted">{item.detail}</p>
                 </div>
               ))}
             </div>
-          </div>
-        ))}
-      </div>
-    </SectionCard>
+          </details>
+        </div>
+      )}
+    </aside>
   );
 }
 
@@ -1375,23 +1251,25 @@ function HeroStatus({
   const conversationStatus = readiness ? readinessState(readiness.conversation.api_available && readiness.conversation.read_only) : "not_checked";
 
   return (
-    <section className="border-b border-border/60 bg-card/80 backdrop-blur">
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <section className="border-b border-border/35 bg-card/55 backdrop-blur">
+      <div className="mx-auto max-w-[1500px] px-4 py-3 sm:px-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted">Delta OS</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">Delta OS Console</h1>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
-              Local Behavioral OS and conversation runtime cockpit. Read-only by default.
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl font-semibold tracking-tight">Delta OS</h1>
+              <span className="rounded-full border border-green-500/25 bg-green-500/10 px-2.5 py-1 text-[11px] font-medium text-green-600 dark:text-green-400">
+                Read-only
+              </span>
+              <span className="text-xs text-muted">Local command center</span>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={onRefreshReadiness}
-              className="rounded-xl border border-border/70 px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
+              className="rounded-xl border border-border/45 px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
             >
-              Refresh readiness
+              Refresh
             </button>
             <button
               type="button"
@@ -1402,19 +1280,16 @@ function HeroStatus({
             </button>
           </div>
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <ReadinessChip status={backendStatus} label={`backend ${backendStatus.replace("_", " ")}`} />
           <ReadinessChip status={supabaseStatus} label={`supabase ${supabaseStatus.replace("_", " ")}`} />
           <ReadinessChip status={schemaStatus} label={`schema ${schemaStatus.replace("_", " ")}`} />
           <ReadinessChip status={conversationStatus} label={`conversation ${conversationStatus.replace("_", " ")}`} />
-          <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted">
+          <span className="rounded-full border border-border/40 px-3 py-1 text-xs font-medium text-muted">
             Data source: {environment.dataSource}
           </span>
-          <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted">
+          <span className="rounded-full border border-border/40 px-3 py-1 text-xs font-medium text-muted">
             Side effects: {environment.sideEffects}
-          </span>
-          <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted">
-            Updated: {environment.lastUpdated}
           </span>
         </div>
       </div>
@@ -1447,7 +1322,7 @@ export default function OSConsole({
   const [clipboardMessage, setClipboardMessage] = useState("");
   const [resolvedSpeechControls, setResolvedSpeechControls] = useState<BrowserSpeechControls | null>(null);
   const [browserTtsStatus, setBrowserTtsStatus] = useState<BrowserSpeechStatus>("checking");
-  const [activeView, setActiveView] = useState<ConsoleView>("chat");
+  const [activeInspectorView, setActiveInspectorView] = useState<InspectorView>("state");
 
   const loadStatus = useCallback(async (signal?: AbortSignal) => {
     setLoadState("checking");
@@ -1797,29 +1672,6 @@ export default function OSConsole({
     },
   ];
 
-  const visibleViews = (
-    <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
-      <div className="flex flex-wrap gap-1 rounded-2xl border border-border/60 bg-card/70 p-1 shadow-sm shadow-slate-950/5">
-        {CONSOLE_VIEWS.map((view) => (
-          <button
-            key={view.id}
-            type="button"
-            onClick={() => setActiveView(view.id)}
-            className={`rounded-xl px-3 py-2 text-left text-sm transition-colors ${
-              activeView === view.id
-                ? "bg-primary text-white"
-                : "text-muted hover:bg-background hover:text-foreground"
-            }`}
-            aria-pressed={activeView === view.id}
-          >
-            <span className="block font-semibold">{view.label}</span>
-            <span className="hidden text-xs opacity-80 sm:block">{view.detail}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <main className="min-h-screen bg-background">
       <CommandPalette
@@ -1834,101 +1686,55 @@ export default function OSConsole({
         onOpenPalette={() => setCommandPaletteOpen(true)}
         onRefreshReadiness={() => void loadReadiness()}
       />
-      {visibleViews}
-      <div className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:px-6">
+      <div className="mx-auto max-w-[1500px] space-y-4 px-4 py-4 sm:px-6">
         <SafetyStrip browserTtsStatus={browserTtsStatus} />
-        <div className="rounded-2xl border border-border/60 bg-card/55 px-4 py-3 text-xs leading-5 text-muted shadow-sm shadow-slate-950/5">
+        <div className="rounded-2xl border border-border/35 bg-card/35 px-4 py-2.5 text-xs leading-5 text-muted shadow-sm shadow-slate-950/5">
           {dataSourceLabel} Ask Delta uses the read-only backend conversation runtime when available. Voice input stays disabled; browser speech preview is user-triggered only.
         </div>
 
-        {activeView === "chat" && (
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-            <ConversationShell
-              turns={conversationTurns}
-              prompt={prompt}
-              setPrompt={setPrompt}
-              onAsk={askDelta}
-              onClear={clearConversation}
-              onSuggestedPrompt={chooseSuggestedPrompt}
-              followUps={followUps}
-              onFollowUp={runFollowUp}
-              onSpeakLatest={speakLatestResponse}
-              onStopSpeaking={stopSpeaking}
-              browserTtsAvailable={resolvedSpeechControls?.available ?? false}
-              browserTtsStatus={browserTtsStatus}
-              isAsking={isAskingDelta}
-              lastResponse={lastConversationResponse}
-            />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,27vw)] 2xl:grid-cols-[minmax(0,1fr)_390px]">
+          <ConversationShell
+            turns={conversationTurns}
+            prompt={prompt}
+            setPrompt={setPrompt}
+            onAsk={askDelta}
+            onClear={clearConversation}
+            onSuggestedPrompt={chooseSuggestedPrompt}
+            followUps={followUps}
+            onFollowUp={runFollowUp}
+            onSpeakLatest={speakLatestResponse}
+            onStopSpeaking={stopSpeaking}
+            browserTtsAvailable={resolvedSpeechControls?.available ?? false}
+            browserTtsStatus={browserTtsStatus}
+            isAsking={isAskingDelta}
+            lastResponse={lastConversationResponse}
+          />
+          <InspectorRail
+            activeView={activeInspectorView}
+            onChangeView={setActiveInspectorView}
+            state={consoleData.behavioralState}
+            readiness={readiness}
+            readinessLoadState={readinessLoadState}
+            readinessError={readinessError}
+            readinessCheckedAt={readinessCheckedAt}
+            onRefreshState={() => void loadStatus()}
+            onRefreshReadiness={() => void loadReadiness()}
+            isRefreshingState={loadState === "checking"}
+            lastRefreshedAt={lastRefreshedAt}
+            proofItems={consoleData.proofLadder}
+            safetyItems={consoleData.safetyGates}
+          />
+        </div>
 
-            <aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
-              <BehavioralStateCard
-                state={consoleData.behavioralState}
-                onRefresh={() => void loadStatus()}
-                isRefreshing={loadState === "checking"}
-                lastRefreshedAt={lastRefreshedAt}
-              />
-              <LiveSystemReadiness
-                readiness={readiness}
-                loadState={readinessLoadState}
-                error={readinessError}
-                lastCheckedAt={readinessCheckedAt}
-                onRefresh={() => void loadReadiness()}
-              />
-            </aside>
-          </div>
-        )}
-
-        {activeView === "state" && (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <BehavioralStateCard
-              state={consoleData.behavioralState}
-              onRefresh={() => void loadStatus()}
-              isRefreshing={loadState === "checking"}
-              lastRefreshedAt={lastRefreshedAt}
-            />
-            <SectionCard
-              eyebrow="Plain-English Glossary"
-              title="What the labels mean"
-              description="These terms are displayed read-only. They do not trigger memory writes or delivery."
-            >
-              <div className="mt-4 space-y-3 text-sm leading-6 text-muted">
-                <p><span className="font-semibold text-foreground">good_call:</span> previous guidance was judged useful or appropriate.</p>
-                <p><span className="font-semibold text-foreground">Cooldown:</span> how long Delta would wait before another similar nudge.</p>
-                <p><span className="font-semibold text-foreground">Suppression:</span> whether Delta should avoid this pattern entirely for a period.</p>
-                <p><span className="font-semibold text-foreground">Success rate:</span> how often recorded feedback has been positive for this pattern.</p>
-                <p><span className="font-semibold text-foreground">Persisted state:</span> saved system data loaded read-only into the console.</p>
-              </div>
-            </SectionCard>
-          </div>
-        )}
-
-        {activeView === "readiness" && (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <LiveSystemReadiness
-              readiness={readiness}
-              loadState={readinessLoadState}
-              error={readinessError}
-              lastCheckedAt={readinessCheckedAt}
-              onRefresh={() => void loadReadiness()}
-            />
-            <SafetyGates items={consoleData.safetyGates} />
-          </div>
-        )}
-
-        {activeView === "proof" && (
-          <div className="space-y-6">
-            <ProofLadder items={consoleData.proofLadder} />
-            <RecentInterventions items={consoleData.recentInterventions} />
-            <VoiceRuntimeCard items={consoleData.voiceRuntime} />
-          </div>
-        )}
-
-        {activeView === "developer" && (
-          <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-            <div className="space-y-6">
+        <CollapsibleSection
+          title="Developer tools"
+          description="Commands, raw route details, proof report, and session summary stay available without competing with chat."
+        >
+          <div className="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
+            <div className="space-y-4">
               <CollapsibleSection
                 title="Developer Commands"
-                description="Terminal commands stay available, but they are separate from the normal chat flow."
+                description="Terminal commands are copyable and remain separate from the normal app flow."
               >
                 <div className="grid gap-4">
                   {commandCards.map((command) => (
@@ -1938,7 +1744,7 @@ export default function OSConsole({
               </CollapsibleSection>
               <RecommendedNextStepCard command={recommendedCommand} />
             </div>
-            <div className="space-y-6">
+            <div className="space-y-4">
               <SectionCard
                 eyebrow="Response Metadata"
                 title="Latest details"
@@ -1953,15 +1759,15 @@ export default function OSConsole({
                   <p><span className="font-semibold text-foreground">Side effects:</span> {lastConversationResponse?.side_effect_status || "none"}</p>
                 </div>
               </SectionCard>
-            <SessionSummaryCard
-              summary={sessionSummary}
-              clipboardMessage={clipboardMessage}
-              onCopySummary={() => void copyText(sessionSummaryMarkdown, "Session summary")}
-              onCopyProofReport={() => void copyText(proofReport, "Proof report")}
-            />
+              <SessionSummaryCard
+                summary={sessionSummary}
+                clipboardMessage={clipboardMessage}
+                onCopySummary={() => void copyText(sessionSummaryMarkdown, "Session summary")}
+                onCopyProofReport={() => void copyText(proofReport, "Proof report")}
+              />
             </div>
           </div>
-        )}
+        </CollapsibleSection>
       </div>
     </main>
   );
