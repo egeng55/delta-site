@@ -63,12 +63,58 @@ function validateArrayField(item, field, label, issues) {
   }
 }
 
+function validateOptionalStringField(item, field, label, issues) {
+  if (!(field in item)) return;
+  if (typeof item[field] !== "string" || item[field].trim().length === 0) {
+    issues.push(`${label}: optional field "${field}" must be a non-empty string when present`);
+  }
+}
+
+function includesNormalized(haystack, needle) {
+  return haystack.toLowerCase().includes(needle.toLowerCase());
+}
+
+function validateSampleResponse(item, label, issues) {
+  if (!("sample_response" in item)) {
+    return { checked: false, assertions: 0 };
+  }
+
+  validateOptionalStringField(item, "sample_response", label, issues);
+  if (typeof item.sample_response !== "string" || item.sample_response.trim().length === 0) {
+    return { checked: true, assertions: 0 };
+  }
+
+  let assertions = 0;
+  if (Array.isArray(item.must_include)) {
+    for (const expected of item.must_include) {
+      if (typeof expected !== "string" || expected.trim().length === 0) continue;
+      assertions += 1;
+      if (!includesNormalized(item.sample_response, expected)) {
+        issues.push(`${label}: sample_response must include "${expected}"`);
+      }
+    }
+  }
+
+  if (Array.isArray(item.must_not_include)) {
+    for (const forbidden of item.must_not_include) {
+      if (typeof forbidden !== "string" || forbidden.trim().length === 0) continue;
+      assertions += 1;
+      if (includesNormalized(item.sample_response, forbidden)) {
+        issues.push(`${label}: sample_response must not include "${forbidden}"`);
+      }
+    }
+  }
+
+  return { checked: true, assertions };
+}
+
 function validateItem(item, filePath, index) {
   const label = `${relative(filePath)} item ${index + 1}${item && item.id ? ` (${item.id})` : ""}`;
   const issues = [];
+  let sampleCheck = { checked: false, assertions: 0 };
 
   if (!item || typeof item !== "object" || Array.isArray(item)) {
-    return [`${label}: item must be an object`];
+    return { issues: [`${label}: item must be an object`], sampleCheck };
   }
 
   for (const field of requiredFields) {
@@ -83,7 +129,13 @@ function validateItem(item, filePath, index) {
     validateArrayField(item, field, label, issues);
   }
 
-  return issues;
+  for (const field of ["sample_response", "expected_policy"]) {
+    validateOptionalStringField(item, field, label, issues);
+  }
+
+  sampleCheck = validateSampleResponse(item, label, issues);
+
+  return { issues, sampleCheck };
 }
 
 const files = findJsonFiles(evalRoot);
@@ -91,6 +143,8 @@ const issues = [];
 const categoryCounts = new Map();
 const fileCounts = new Map();
 let totalItems = 0;
+let sampleResponsesChecked = 0;
+let sampleAssertionsChecked = 0;
 
 console.log("Delta site agent eval fixture check");
 console.log("===================================");
@@ -124,7 +178,12 @@ for (const filePath of files) {
   totalItems += items.length;
 
   items.forEach((item, index) => {
-    issues.push(...validateItem(item, filePath, index));
+    const result = validateItem(item, filePath, index);
+    issues.push(...result.issues);
+    if (result.sampleCheck.checked) {
+      sampleResponsesChecked += 1;
+      sampleAssertionsChecked += result.sampleCheck.assertions;
+    }
     if (item && typeof item.category === "string" && item.category.trim()) {
       categoryCounts.set(item.category, (categoryCounts.get(item.category) || 0) + 1);
     }
@@ -144,6 +203,8 @@ for (const [category, count] of [...categoryCounts.entries()].sort(([a], [b]) =>
 console.log("");
 
 console.log(`Total eval items: ${totalItems}`);
+console.log(`Sample responses checked: ${sampleResponsesChecked}`);
+console.log(`Sample-response assertions checked: ${sampleAssertionsChecked}`);
 console.log("");
 
 if (issues.length > 0) {
@@ -153,4 +214,5 @@ if (issues.length > 0) {
 }
 
 console.log("All eval fixtures are valid.");
+console.log("Deterministic sample-response checks passed where sample_response is present.");
 console.log("Advisory only: these fixtures define expected behavior and do not replace Jest, lint, build, or human review.");
