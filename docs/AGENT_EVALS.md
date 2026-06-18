@@ -27,6 +27,9 @@ Current fixtures cover:
   intent, and late-caffeine learning
 - `/os` safety answers about always-on listening, notifications, memory writes,
   and voice enablement
+- `/os` domain metadata answers that identify Late caffeine as the current
+  proof-backed Behavioral OS domain while preserving the metadata-only,
+  no-user-state, no-mutation boundary
 - agent handoff quality for site-only phases, cross-repo boundaries, and safety
   scan reporting
 
@@ -72,11 +75,31 @@ It prints fixture counts by file and category plus the number of sample
 responses and sample assertions checked. It does not call the real OS Console,
 the backend, a browser, Supabase, or an external LLM.
 
+## Domain Metadata Fixtures
+
+`evals/os-console/domain-metadata.json` protects the Phase 86 domain-aware
+console behavior with deterministic local examples. These fixtures assert that
+domain metadata language:
+
+- names the Behavioral OS domains surface clearly
+- identifies Late caffeine as the current proof-backed domain
+- explains proof-backed status without claiming all domains are production-ready
+- states that metadata display reads no user state
+- states that metadata display performs no memory write, feedback mutation,
+  Supabase mutation, notification, TTS, voice, or intervention-policy action
+- handles unavailable metadata as a graceful unavailable state instead of
+  inventing user state
+
+These checks validate only fixture text and sample responses. They do not call
+`/behavioral-os/domains`, do not render `/os`, and do not prove backend
+availability.
+
 ## Deferred
 
 Later phases may add:
 
 - browser-level `/os` transcript checks
+- backend integration checks for `/behavioral-os/domains`
 - optional LLM-judge experiments behind explicit approval
 - background report-only eval runs
 - CI integration

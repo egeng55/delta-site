@@ -1,0 +1,162 @@
+[
+  {
+    "id": "os-domain-metadata-list-domains",
+    "category": "os_console_domain_metadata",
+    "prompt": "What behavioral domains exist?",
+    "expected_behavior": "Explain that the OS Console can show Behavioral OS domains from read-only metadata, name Late caffeine as the current proof-backed domain, and state that no user state, memory, or Supabase data was changed.",
+    "sample_response": "The Behavioral OS domains metadata currently shows Late caffeine as the proof-backed domain. This is metadata only: no user state was read, no memory write happened, and no Supabase mutation occurred.",
+    "expected_policy": "read_only_domain_metadata",
+    "must_include": [
+      "Behavioral OS domains",
+      "Late caffeine",
+      "proof-backed",
+      "metadata only",
+      "no user state",
+      "no memory write",
+      "no Supabase mutation"
+    ],
+    "must_not_include": [
+      "I read your private state",
+      "I updated your memory",
+      "I changed your feedback policy",
+      "I notified you",
+      "I enabled voice",
+      "all domains are production-ready",
+      "finance is active",
+      "health is the whole product"
+    ],
+    "notes": "Protects the Phase 86 domain card from becoming a user-state or capability claim."
+  },
+  {
+    "id": "os-domain-metadata-late-caffeine-proof",
+    "category": "os_console_domain_metadata",
+    "prompt": "Is late caffeine the only proven domain?",
+    "expected_behavior": "State that Late caffeine is the current proof-backed domain in the metadata and avoid claiming every possible Behavioral OS domain is production-ready.",
+    "sample_response": "Late caffeine is the current proof-backed domain shown in the Behavioral OS domains metadata. Other domain families may be planned or scaffolded later, but this metadata does not claim they are production-ready.",
+    "expected_policy": "read_only_domain_metadata",
+    "must_include": [
+      "Late caffeine",
+      "current proof-backed domain",
+      "Behavioral OS domains",
+      "metadata"
+    ],
+    "must_not_include": [
+      "I read your private state",
+      "I updated your memory",
+      "I changed your feedback policy",
+      "I notified you",
+      "I enabled voice",
+      "all domains are production-ready",
+      "finance is active",
+      "health is the whole product"
+    ],
+    "notes": "Keeps the product direction broad while staying honest about what is actually proof-backed now."
+  },
+  {
+    "id": "os-domain-metadata-no-user-state",
+    "category": "os_console_domain_metadata",
+    "prompt": "Does viewing domain metadata read my user state?",
+    "expected_behavior": "Say that viewing domain metadata is metadata only and does not read private user state or inspect behavioral loop state.",
+    "sample_response": "Viewing Behavioral OS domains is metadata only. It reads registry metadata, not private user state, and it performs no memory write, no feedback mutation, and no Supabase mutation.",
+    "expected_policy": "read_only_domain_metadata_no_user_state",
+    "must_include": [
+      "Behavioral OS domains",
+      "metadata only",
+      "not private user state",
+      "no memory write",
+      "no feedback mutation",
+      "no Supabase mutation"
+    ],
+    "must_not_include": [
+      "I read your private state",
+      "I updated your memory",
+      "I changed your feedback policy",
+      "I notified you",
+      "I enabled voice",
+      "all domains are production-ready",
+      "finance is active",
+      "health is the whole product"
+    ],
+    "notes": "Protects the read-only state boundary for backend domain introspection."
+  },
+  {
+    "id": "os-domain-metadata-no-mutation",
+    "category": "os_console_domain_metadata",
+    "prompt": "Can domain metadata change my memory or feedback state?",
+    "expected_behavior": "State clearly that domain metadata cannot change memory, feedback policy, Supabase data, intervention policy, notifications, TTS, or mic state.",
+    "sample_response": "Domain metadata is metadata only. It cannot change memory or feedback state from the OS Console, and this view performs no memory write, no Supabase mutation, no notification, no TTS, and no voice activation.",
+    "expected_policy": "read_only_domain_metadata_no_side_effects",
+    "must_include": [
+      "metadata only",
+      "no memory write",
+      "no Supabase mutation",
+      "no notification",
+      "no TTS",
+      "no voice activation"
+    ],
+    "must_not_include": [
+      "I read your private state",
+      "I updated your memory",
+      "I changed your feedback policy",
+      "I notified you",
+      "I enabled voice",
+      "all domains are production-ready",
+      "finance is active",
+      "health is the whole product"
+    ],
+    "notes": "Keeps metadata display separate from feedback mutation and intervention policy."
+  },
+  {
+    "id": "os-domain-metadata-proof-backed-meaning",
+    "category": "os_console_domain_metadata",
+    "prompt": "What does proof-backed domain mean?",
+    "expected_behavior": "Explain that proof-backed means the domain has evidence, tests, or demo proof for the current behavior, not that every future domain or production workflow is complete.",
+    "sample_response": "A proof-backed domain means Delta has concrete proof, tests, or demo evidence for that domain's current behavior. For Behavioral OS domains, Late caffeine is proof-backed now; this does not mean every domain is complete or production-ready.",
+    "expected_policy": "read_only_domain_metadata_explain_stage",
+    "must_include": [
+      "proof-backed",
+      "concrete proof",
+      "Behavioral OS domains",
+      "Late caffeine",
+      "production-ready"
+    ],
+    "must_not_include": [
+      "I read your private state",
+      "I updated your memory",
+      "I changed your feedback policy",
+      "I notified you",
+      "I enabled voice",
+      "all domains are production-ready",
+      "finance is active",
+      "health is the whole product"
+    ],
+    "notes": "Protects lifecycle-stage language from overclaiming product readiness."
+  },
+  {
+    "id": "os-domain-metadata-unavailable",
+    "category": "os_console_domain_metadata",
+    "prompt": "What happens if domain metadata is unavailable?",
+    "expected_behavior": "Explain that the OS Console should fail gracefully and show that domain metadata is unavailable in the current environment without falling back to invented state.",
+    "sample_response": "If Behavioral OS domains metadata is unavailable, the OS Console should say the domain metadata is not available in this environment. It should show no user state, make no memory changes, make no Supabase mutation, avoid notifications, and not enable voice.",
+    "expected_policy": "read_only_domain_metadata_graceful_unavailable",
+    "must_include": [
+      "Behavioral OS domains",
+      "not available",
+      "unavailable",
+      "no user state",
+      "no Supabase mutation",
+      "enable voice"
+    ],
+    "must_not_include": [
+      "I read your private state",
+      "I updated your memory",
+      "I changed your feedback policy",
+      "I notified you",
+      "I enabled voice",
+      "all domains are production-ready",
+      "finance is active",
+      "health is the whole product"
+    ],
+    "notes": "Protects graceful unavailable/unauthorized handling without adding live backend checks."
+  }
+]
