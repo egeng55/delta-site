@@ -57,7 +57,13 @@ Agent advisory checks:
 ```bash
 npm run agent:preflight
 npm run agent:safety-scan
+npm run agent:verify -- --docs-only
+npm run agent:verify -- --site
+npm run agent:verify -- --desktop
 ```
+
+`agent:verify` prints recommended commands by default. Add `--run` only when
+you are ready to execute the selected fixed command set.
 
 Local development:
 
@@ -130,11 +136,14 @@ Use `docs/AGENT_VERIFICATION_MATRIX.md` to choose checks.
 
 Minimum expectations:
 
-- docs-only: `npm run agent:preflight`, `npm run agent:safety-scan`
-- site component change: focused test, `npm test -- --runInBand`, lint, build
-- `/os` change: full site tests, lint, build, desktop checks
-- Electron change: desktop checks and smoke checks
+- docs-only: `npm run agent:verify -- --docs-only`
+- site component change: `npm run agent:verify -- --site`
+- `/os` or Electron change: `npm run agent:verify -- --desktop`
 - auth/legal/schema changes: stop unless explicitly approved
+
+`agent:safety-scan` is advisory, not a replacement for review. It separates
+source/config risks from lower-severity documentation mentions so agents can
+focus on executable changes first.
 
 ## Electron Safety Rules
 

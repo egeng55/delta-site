@@ -31,6 +31,10 @@ the phase explicitly includes them.
 6. Commit with explicit `git add -- <files>` only after checks pass.
 7. Report final status and the next safest command.
 
+Agents can use `npm run agent:verify -- --<scope>` to print the recommended
+commands for a phase. The wrapper does not execute anything unless `--run` is
+provided.
+
 ## Codex First
 
 Codex is the primary agent workflow. Claude Code and Cursor are optional. Do not
@@ -55,6 +59,12 @@ Phase 53 does not add:
 - `AGENTS.md`: agent policy and repo contract
 - `docs/AGENT_*`: templates, roles, verification, safety docs
 - `scripts/agent-preflight.mjs`: read-only repo context report
-- `scripts/agent-safety-scan.mjs`: advisory static scan for risky patterns
+- `scripts/agent-safety-scan.mjs`: advisory static scan for risky patterns,
+  grouped by source/config risks and lower-severity documentation mentions
+- `scripts/agent-verify.mjs`: print-first verification wrapper with
+  `docs-only`, `site`, `desktop`, and `all` scopes
 
-All scripts are advisory and read-only.
+All scripts are local and advisory. `agent-preflight` and `agent-safety-scan`
+are read-only. `agent-verify` prints by default; `--run` executes only fixed
+commands from the selected scope and should be used after the phase scope is
+clear.
