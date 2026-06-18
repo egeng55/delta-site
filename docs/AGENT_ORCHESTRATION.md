@@ -38,6 +38,12 @@ The planner references, but does not execute:
 
 The script remains advisory. It is not a task runner.
 
+Use `npm run agent:context` before orchestration when a phase needs the richer
+repo map: recent commits, route/component/desktop maps, tests, docs, evals,
+agent scripts, risk classification, Morning-Standup exclusion, and advisory
+verification recommendations. Use `npm --silent run agent:context -- --json`
+when another tool needs parser-clean context.
+
 For a durable markdown phase contract, use `agent:phase:brief`:
 
 ```bash

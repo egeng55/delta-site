@@ -20,8 +20,10 @@ Use MCP first for read-only context:
 Repo maps must use `docs/AGENT_WORKSPACE_LAYOUT.md` as the layout source. Delta
 context includes only `delta-site`, `delta-backend`, and `delta-mobile`.
 Unrelated projects such as `/Users/egeng/morning-standup` are out of scope.
-Future repo-map MCPs should wrap or mirror `npm run agent:context` instead of
-creating a second source of truth.
+Future repo-map MCPs should wrap `npm run agent:context` instead of creating a
+second source of truth. The script already emits Markdown and parser-clean JSON
+for recent commits, route/component/desktop/test/doc/eval/script maps, risk
+classification, workspace exclusions, and advisory verification recommendations.
 
 Do not use MCP first for mutation, shell execution, database access, desktop
 side effects, or commits.
@@ -37,6 +39,8 @@ Keep these as plain npm scripts:
 - `npm run agent:eval`
 - `npm run agent:verify`
 - `npm run agent:routine`
+- `npm run agent:orchestrate`
+- `npm run agent:phase:brief`
 - `npm run agent:phase:start`
 - `npm run agent:phase:handoff`
 

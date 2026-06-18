@@ -51,9 +51,12 @@ starting or handing off work. For larger scoped phases, preview a worktree with
 a worktree requires `--run` and must only happen from a clean repo.
 
 Agents can use `npm run agent:context` for a fuller read-only repo context
-bundle before a phase begins. Add `-- --json` when a machine-readable bundle is
-needed. It does not write files, call services, run tests, or scan generated
-directories.
+bundle before a phase begins. It reports recent commits, route/component maps,
+desktop files, tests, docs, eval fixtures, agent scripts, risk classification,
+Morning-Standup exclusion status, and advisory verification recommendations.
+Add `-- --json` when a machine-readable bundle is needed, or `-- --compact` for
+a shorter Markdown startup snapshot. It does not write files, call services,
+run tests, or scan generated directories.
 
 Agents can use `npm run agent:routine -- --list` to print standard command
 sequences for common phase types. Routine output is guidance only; it does not
@@ -104,7 +107,8 @@ Phase 53 does not add:
 - `scripts/agent-preflight.mjs`: read-only repo context report
 - `scripts/agent-status.mjs`: read-only status report with suggested next safe
   commands
-- `scripts/agent-context.mjs`: read-only Markdown or JSON repo context bundle
+- `scripts/agent-context.mjs`: read-only Markdown, compact Markdown, or JSON
+  repo context bundle and repo map
 - `scripts/agent-safety-scan.mjs`: advisory static scan for risky patterns,
   grouped by source/config risks and lower-severity documentation mentions
 - `scripts/agent-eval.mjs`: read-only eval fixture validator for deterministic

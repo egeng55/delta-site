@@ -82,11 +82,13 @@ Use:
 
 ```bash
 npm run agent:context
+npm run agent:context -- --compact
 npm run agent:context -- --json
 ```
 
-The context script is read-only and script-first. A future repo-map MCP may wrap
-its output, but the script remains the source of truth.
+The context script is read-only and script-first. It reports only Delta product
+repo context and explicitly excludes Morning-Standup. A future repo-map MCP may
+wrap its output, but the script remains the source of truth.
 Use `npm --silent run agent:context -- --json` or
 `node scripts/agent-context.mjs --json` when another tool needs parser-clean
 JSON without npm's command banner.

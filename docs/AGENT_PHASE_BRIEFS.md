@@ -62,7 +62,8 @@ Future Codex runs should:
 
 1. Read `AGENTS.md`.
 2. Read the relevant `agent/phase-briefs/phase-XXX-name.md`.
-3. Run the brief's context commands.
+3. Run the brief's context commands, especially `npm run agent:context`, to get
+   the latest repo map and verification recommendation.
 4. Confirm scope and forbidden actions.
 5. Implement only the requested phase.
 6. Run the brief's verification plan.

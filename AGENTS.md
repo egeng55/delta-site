@@ -92,9 +92,12 @@ stdout by default and writes only with `--write` to
 overwritten unless `--force` is passed.
 
 `agent:context` prints a read-only repo context bundle in Markdown by default,
-or JSON with `-- --json`. It is the script-first repo map for Codex phases and
-does not write bundle files, scan generated directories, call services, run
-tests, or start servers. For parser-clean JSON, use
+or JSON with `-- --json`. It includes recent commits, route/component/desktop
+maps, test/docs/eval/script inventories, risk classification, workspace
+exclusion status, and advisory verification recommendations. Use `--compact`
+for shorter Markdown startup context. It is the script-first repo map for Codex
+phases and does not write bundle files, scan generated directories, call
+services, run tests, or start servers. For parser-clean JSON, use
 `npm --silent run agent:context -- --json` or
 `node scripts/agent-context.mjs --json`.
 

@@ -146,8 +146,10 @@ Workspace layout changes must keep Delta product context limited to
 `/Users/egeng/morning-standup` remain excluded.
 
 `agent:context` is read-only and prints Markdown by default or JSON with
-`-- --json`. It does not replace verification commands; it gives future agents
-a bounded repo map before they edit.
+`-- --json`. It also supports `-- --compact` for shorter Markdown. It does not
+replace verification commands; it gives future agents a bounded repo map before
+they edit, including route/component/desktop/test/doc/eval/script maps, risk
+classification, workspace exclusions, and advisory verification recommendations.
 
 ## OS Console
 
