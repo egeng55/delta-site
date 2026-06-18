@@ -6,6 +6,7 @@ These are prompt templates for agents. They are not executable commands.
 
 ```text
 Read AGENTS.md and docs/AGENTIC_DEVELOPMENT.md.
+Run npm run agent:status if repo state is unclear.
 Inspect the requested files.
 Produce:
 1. repo scope
@@ -15,6 +16,19 @@ Produce:
    where possible
 5. commit plan
 Do not edit files yet.
+```
+
+## /phase-start
+
+```text
+Read docs/AGENT_WORKTREE_STRATEGY.md.
+If a worktree is useful, preview it first:
+npm run agent:phase:start -- --phase <number> --name <slug> --print
+
+Only create a worktree if explicitly requested:
+npm run agent:phase:start -- --phase <number> --name <slug> --run
+
+Do not delete worktrees, clean files, commit, or touch backend/mobile.
 ```
 
 ## /safe-site-change
@@ -95,6 +109,7 @@ or agent handoff expectations changed.
 
 ```text
 Use docs/AGENT_HANDOFF_TEMPLATE.md.
+Optionally run npm run agent:phase:handoff -- --phase <number> for a skeleton.
 Include files changed, tests run, current git status, warnings, safety
 confirmations, and next safest command.
 ```

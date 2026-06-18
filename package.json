@@ -12,9 +12,12 @@
     "desktop:smoke:services": "node desktop/smoke-check.cjs",
     "desktop:check": "node --check desktop/main.cjs && node --check desktop/preload.cjs && node desktop/smoke-check.cjs",
     "agent:preflight": "node scripts/agent-preflight.mjs",
+    "agent:status": "node scripts/agent-status.mjs",
     "agent:safety-scan": "node scripts/agent-safety-scan.mjs",
     "agent:eval": "node scripts/agent-eval.mjs",
     "agent:verify": "node scripts/agent-verify.mjs",
+    "agent:phase:start": "node scripts/agent-phase-start.mjs",
+    "agent:phase:handoff": "node scripts/agent-phase-handoff.mjs",
     "lint": "eslint",
     "test": "jest"
   },

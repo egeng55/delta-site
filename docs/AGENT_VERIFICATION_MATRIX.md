@@ -39,14 +39,18 @@ Examples:
 AGENTS.md
 docs/AGENT_*.md
 scripts/agent-preflight.mjs
+scripts/agent-status.mjs
 scripts/agent-safety-scan.mjs
 scripts/agent-eval.mjs
+scripts/agent-phase-start.mjs
+scripts/agent-phase-handoff.mjs
 evals/**/*.json
 ```
 
 Run:
 
 ```bash
+npm run agent:status
 npm run agent:verify -- --docs-only
 ```
 
@@ -80,6 +84,30 @@ npm run agent:verify -- --site
 
 `agent:eval` validates fixture structure only. It does not call the backend,
 browser, external LLM APIs, Supabase, mic, TTS, notifications, or write paths.
+
+## Agent Phase Orchestration
+
+Examples:
+
+```text
+docs/AGENT_WORKTREE_STRATEGY.md
+scripts/agent-status.mjs
+scripts/agent-phase-start.mjs
+scripts/agent-phase-handoff.mjs
+```
+
+Run:
+
+```bash
+npm run agent:status
+npm run agent:phase:start -- --phase <number> --name <slug> --print
+npm run agent:phase:handoff -- --phase <number>
+npm run agent:verify -- --site
+```
+
+Only run `agent:phase:start` with `--run` when the phase explicitly asks to
+create a worktree. The script must never clean files, delete worktrees, delete
+branches, commit, or touch sibling repos.
 
 ## OS Console
 

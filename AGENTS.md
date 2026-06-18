@@ -56,11 +56,14 @@ Agent advisory checks:
 
 ```bash
 npm run agent:preflight
+npm run agent:status
 npm run agent:safety-scan
 npm run agent:eval
 npm run agent:verify -- --docs-only
 npm run agent:verify -- --site
 npm run agent:verify -- --desktop
+npm run agent:phase:start -- --phase <number> --name <slug> --print
+npm run agent:phase:handoff -- --phase <number>
 ```
 
 `agent:verify` prints recommended commands by default. Add `--run` only when
@@ -68,6 +71,11 @@ you are ready to execute the selected fixed command set.
 
 `agent:eval` validates local eval fixture JSON only. It does not call the
 backend, browser, external LLM APIs, Supabase, TTS, notifications, or mic paths.
+
+`agent:phase:start` prints worktree creation commands by default. It may create
+a worktree only with `--run`, a clean current repo, a valid phase/name, and a
+nonexistent target path. It must never delete worktrees, clean files, commit, or
+touch sibling repos.
 
 Local development:
 
@@ -143,6 +151,8 @@ Minimum expectations:
 - docs-only: `npm run agent:verify -- --docs-only`
 - site component change: `npm run agent:verify -- --site`
 - `/os` or Electron change: `npm run agent:verify -- --desktop`
+- phase/worktree planning: `npm run agent:status`,
+  `npm run agent:phase:start -- --phase <number> --name <slug> --print`
 - auth/legal/schema changes: stop unless explicitly approved
 
 `agent:safety-scan` is advisory, not a replacement for review. It separates
@@ -190,6 +200,8 @@ local TTS.
 - Stage explicit files only.
 - Do not commit unrelated dirty files.
 - Do not revert user changes unless explicitly requested.
+- Do not delete worktrees or branches unless explicitly requested after
+  reporting exact paths and branch names.
 - Final reports must include checks run, results, safety confirmations, commit
   hash, and final status for `delta-site`.
 - If context must be handed off, use `docs/AGENT_HANDOFF_TEMPLATE.md`.

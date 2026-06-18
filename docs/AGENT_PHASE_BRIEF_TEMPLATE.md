@@ -16,6 +16,12 @@ Files likely in scope:
 
 Files explicitly out of scope:
 
+Worktree plan:
+- Use worktree: yes/no
+- Worktree path:
+- Branch name:
+- Preview command:
+
 Safety constraints:
 - No Supabase mutation.
 - No live mic.
@@ -40,5 +46,8 @@ Open questions:
 - Prefer one repo per phase.
 - If backend or mobile are only context, say read-only context.
 - Identify high-risk files before editing.
+- For larger or parallelizable phases, preview a worktree with
+  `npm run agent:phase:start -- --phase <number> --name <slug> --print`.
+- Creating a worktree requires `--run` and a clean repo.
 - If side effects are requested, list exact command and confirmation required.
 - If verification cannot run, say why before committing.

@@ -24,6 +24,12 @@ Current git status:
 
 Uncommitted changes:
 
+Worktree state:
+- Worktree path:
+- Branch:
+- Created by agent script:
+- Cleanup requested:
+
 Safety confirmations:
 - Supabase mutation:
 - Live mic:
@@ -45,4 +51,7 @@ Next safest command:
 - Be concrete; include exact paths.
 - Do not say "all tests passed" unless listing commands.
 - Include process IDs or server status if local services are still running.
+- Include worktree path and branch when work happened outside the primary
+  checkout.
+- Do not remove worktrees, delete branches, or clean files as part of handoff.
 - Include the latest user request and any newer redirecting instruction.
