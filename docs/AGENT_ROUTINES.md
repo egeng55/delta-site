@@ -258,9 +258,12 @@ npm run agent:phase:start -- --phase <number> --name <slug> --run
 After creation:
 
 ```bash
-cd /Users/egeng/delta-worktrees/site-phase-<number>-<slug>
+cd /Users/egeng/delta/worktrees/site-phase-<number>-<slug>
 npm run agent:status
 ```
+
+Use `/Users/egeng/delta-worktrees/...` as the fallback while the repos are in
+the current flat layout.
 
 Handoff must include worktree path, branch, HEAD, git status, verification, and
 whether cleanup was requested. Never clean up automatically.
@@ -279,6 +282,10 @@ Future planning should require:
 - explicit repo scope per agent
 - explicit worktree per agent
 - report-only behavior by default
+- Delta context limited to `delta-site`, `delta-backend`, and `delta-mobile`
 - no cross-repo writes without approval
 - no production deployment actions
 - no Supabase, mic, TTS, notification, or memory-write side effects
+
+Do not include unrelated projects such as `morning-standup`; see
+`docs/AGENT_WORKSPACE_LAYOUT.md`.

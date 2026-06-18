@@ -13,13 +13,18 @@ Phase 53 adds a Codex-first operating model for future development work in
 
 ## Current Repo Shape
 
-`delta-site` is a standalone Next.js and Electron repo. It has sibling repos:
+`delta-site` is a standalone Next.js and Electron repo. Delta product context
+includes exactly:
 
-- `/Users/egeng/delta-backend`
-- `/Users/egeng/delta-mobile`
+- `delta-site`
+- `delta-backend`
+- `delta-mobile`
 
-There is no parent monorepo yet. Treat sibling repos as read-only context unless
-the phase explicitly includes them.
+The workspace may currently be flat under `/Users/egeng`, or manually moved to
+the preferred grouped layout under `/Users/egeng/delta`. See
+`docs/AGENT_WORKSPACE_LAYOUT.md` for supported paths. Treat sibling repos as
+read-only context unless the phase explicitly includes them. Unrelated projects
+such as `morning-standup` are not part of Delta context.
 
 ## Default Agent Loop
 
@@ -96,6 +101,8 @@ Phase 53 does not add:
   source of truth
 - `docs/AGENT_PARALLEL_WORKFLOWS.md`: future parallel-agent and report-only
   workflow strategy
+- `docs/AGENT_WORKSPACE_LAYOUT.md`: supported Delta repo layouts and unrelated
+  project exclusions
 
 All scripts are local and advisory. `agent-preflight` and `agent-safety-scan`
 are read-only. `agent-eval` validates JSON fixtures without calling backend,

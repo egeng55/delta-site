@@ -59,6 +59,11 @@ The Electron window denies runtime permission requests, keeps `nodeIntegration` 
 
 ## Allowlisted service commands
 
+The commands below reflect the current flat local layout. If the repos are
+manually moved under `/Users/egeng/delta`, use the corresponding
+`/Users/egeng/delta/delta-backend` and `/Users/egeng/delta/delta-site` paths.
+See `docs/AGENT_WORKSPACE_LAYOUT.md`.
+
 Backend:
 
 ```bash

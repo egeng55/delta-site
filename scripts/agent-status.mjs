@@ -15,6 +15,7 @@ const agentScripts = [
   "agent:safety-scan",
   "agent:eval",
   "agent:verify",
+  "agent:routine",
   "agent:phase:start",
   "agent:phase:handoff",
 ];
@@ -36,16 +37,52 @@ function mark(value) {
   return value ? "yes" : "no";
 }
 
+function unique(values) {
+  return [...new Set(values)];
+}
+
+function workspaceCandidates() {
+  const repoParent = path.dirname(repoRoot);
+  const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+  return unique([
+    repoParent,
+    path.join(homeCandidate, "delta"),
+    homeCandidate,
+  ]);
+}
+
+function findRepo(name) {
+  for (const candidate of workspaceCandidates()) {
+    const repoPath = path.join(candidate, name);
+    if (existsSync(repoPath)) return repoPath;
+  }
+  return null;
+}
+
+function findUnrelatedMorningStandup() {
+  const repoParent = path.dirname(repoRoot);
+  const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+  const candidates = [
+    path.join(homeCandidate, "Morning-Standup"),
+    path.join(homeCandidate, "delta", "Morning-Standup"),
+    path.join(homeCandidate, "morning-standup"),
+    path.join(homeCandidate, "delta", "morning-standup"),
+  ];
+  return candidates.find((candidate) => existsSync(candidate)) || null;
+}
+
 const invokedFrom = process.cwd();
 const branch = runGit(["rev-parse", "--abbrev-ref", "HEAD"]);
 const head = runGit(["rev-parse", "--short", "HEAD"]);
 const status = runGit(["status", "--short"]);
 const isClean = status.ok && status.output.length === 0;
-const parent = path.dirname(repoRoot);
+const repoParent = path.dirname(repoRoot);
+const layout = path.basename(repoParent) === "delta" ? "grouped-delta" : "flat";
 const siblingRepos = {
-  "delta-backend": existsSync(path.join(parent, "delta-backend")),
-  "delta-mobile": existsSync(path.join(parent, "delta-mobile")),
+  "delta-backend": findRepo("delta-backend"),
+  "delta-mobile": findRepo("delta-mobile"),
 };
+const morningStandup = findUnrelatedMorningStandup();
 
 console.log("Delta site agent status");
 console.log("=======================");
@@ -54,6 +91,14 @@ console.log(`Invoked from: ${invokedFrom}`);
 console.log(`Branch: ${branch.ok ? branch.output : "unknown"}`);
 console.log(`HEAD: ${head.ok ? head.output : "unknown"}`);
 console.log(`Working tree clean: ${mark(isClean)}`);
+console.log("");
+
+console.log("Workspace layout:");
+console.log(`- detected layout: ${layout}`);
+console.log(`- delta-site: ${repoRoot}`);
+console.log(`- delta-backend: ${siblingRepos["delta-backend"] || "not found"}`);
+console.log(`- delta-mobile: ${siblingRepos["delta-mobile"] || "not found"}`);
+console.log(`- unrelated morning-standup excluded: ${morningStandup || "not found"}`);
 console.log("");
 
 console.log("Git status summary:");
@@ -73,8 +118,8 @@ for (const name of agentScripts) {
 console.log("");
 
 console.log("Sibling repo presence:");
-for (const [name, exists] of Object.entries(siblingRepos)) {
-  console.log(`- ${name}: ${mark(exists)}`);
+for (const [name, repoPath] of Object.entries(siblingRepos)) {
+  console.log(`- ${name}: ${repoPath ? `yes (${repoPath})` : "no"}`);
 }
 console.log("");
 

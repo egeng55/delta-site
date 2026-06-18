@@ -7,7 +7,16 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
-const defaultWorktreeRoot = path.join(path.dirname(repoRoot), "delta-worktrees");
+
+function defaultWorktreeRootForRepo() {
+  const repoParent = path.dirname(repoRoot);
+  if (path.basename(repoParent) === "delta") {
+    return path.join(repoParent, "worktrees");
+  }
+  return path.join(repoParent, "delta-worktrees");
+}
+
+const defaultWorktreeRoot = defaultWorktreeRootForRepo();
 
 function parseArgs(argv) {
   const values = {

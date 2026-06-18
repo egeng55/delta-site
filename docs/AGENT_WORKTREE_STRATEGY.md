@@ -8,6 +8,8 @@ For future multi-agent coordination, pair this document with
 `docs/AGENT_PARALLEL_WORKFLOWS.md`. This document remains the canonical source
 for worktree paths, branch names, and cleanup rules.
 
+Workspace layout is documented in `docs/AGENT_WORKSPACE_LAYOUT.md`.
+
 ## Why Worktrees Matter
 
 Worktrees help with agent safety because they:
@@ -43,11 +45,17 @@ Do not use a worktree when:
 Keep worktrees outside the repo:
 
 ```text
+/Users/egeng/delta/worktrees/site-phase-56-worktree-orchestration
+```
+
+When the repos are still in the current flat layout, use the fallback:
+
+```text
 /Users/egeng/delta-worktrees/site-phase-56-worktree-orchestration
 ```
 
-Do not place worktrees under `/Users/egeng/delta-site`, `.next`, `node_modules`,
-or any generated build directory.
+Do not place worktrees under `delta-site`, `.next`, `node_modules`, or any
+generated build directory.
 
 ## Branch Naming Convention
 
@@ -95,8 +103,8 @@ mobile.
 phase explicitly includes them:
 
 ```text
-/Users/egeng/delta-backend
-/Users/egeng/delta-mobile
+delta-backend
+delta-mobile
 ```
 
 Before editing, run:
@@ -150,6 +158,7 @@ Do not run:
 git worktree remove
 git branch -D
 rm -rf /Users/egeng/delta-worktrees/...
+rm -rf /Users/egeng/delta/worktrees/...
 ```
 
 unless the user explicitly asks for cleanup after reviewing the worktree state.

@@ -1,7 +1,7 @@
 # Delta Site Agent Guide
 
 This file is the source of truth for coding agents working inside
-`/Users/egeng/delta-site`.
+the `delta-site` checkout.
 
 ## Repository Purpose
 
@@ -82,6 +82,11 @@ Future MCP and parallel-agent planning lives in
 strategy documents only; they do not authorize MCP servers, background agents,
 CI/CD automation, or autonomous writes.
 
+Workspace layout guidance lives in `docs/AGENT_WORKSPACE_LAYOUT.md`. Delta
+product context includes only `delta-site`, `delta-backend`, and
+`delta-mobile`; unrelated projects such as `morning-standup` must not be
+included in context bundles, MCP repo maps, or multi-repo orchestration.
+
 `agent:phase:start` prints worktree creation commands by default. It may create
 a worktree only with `--run`, a clean current repo, a valid phase/name, and a
 nonexistent target path. It must never delete worktrees, clean files, commit, or
@@ -102,6 +107,9 @@ cd /Users/egeng/delta-backend
 set -a; source .env; set +a
 .venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000
 ```
+
+That command reflects the current flat layout. If the repos are manually moved
+under `/Users/egeng/delta`, use `/Users/egeng/delta/delta-backend` instead.
 
 ## Forbidden Actions Without Explicit Approval
 
@@ -149,8 +157,12 @@ High-risk site files requiring explicit scope:
 
 Sibling repos:
 
-- `/Users/egeng/delta-backend` is read-only context unless explicitly included.
-- `/Users/egeng/delta-mobile` is read-only context unless explicitly included.
+- `delta-backend` is read-only context unless explicitly included.
+- `delta-mobile` is read-only context unless explicitly included.
+
+Supported local layouts are documented in `docs/AGENT_WORKSPACE_LAYOUT.md`.
+Scripts should detect both the current flat layout under `/Users/egeng` and the
+preferred grouped layout under `/Users/egeng/delta`.
 
 ## Verification Expectations
 

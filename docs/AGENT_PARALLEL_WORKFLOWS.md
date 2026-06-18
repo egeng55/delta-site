@@ -11,9 +11,12 @@ Use the detailed conventions in `docs/AGENT_WORKTREE_STRATEGY.md`.
 Recommended shape:
 
 ```text
-/Users/egeng/delta-worktrees/site-phase-58-mcp-strategy
-/Users/egeng/delta-worktrees/site-phase-59-repo-map-mcp
+/Users/egeng/delta/worktrees/site-phase-58-mcp-strategy
+/Users/egeng/delta/worktrees/site-phase-59-repo-map-mcp
 ```
+
+Use `/Users/egeng/delta-worktrees/...` as the fallback while the repos are in
+the current flat layout. See `docs/AGENT_WORKSPACE_LAYOUT.md`.
 
 Branch shape:
 
@@ -117,7 +120,7 @@ Delta may later add a parent workspace layer, but the current repo remains
 standalone. A future workspace should start as read-only:
 
 ```text
-/Users/egeng/delta-workspace/
+/Users/egeng/delta/workspace/
   docs/
     MULTI_REPO_AGENT_GUIDE.md
     MULTI_REPO_VERIFICATION.md
@@ -133,6 +136,7 @@ Initial multi-repo orchestration should only:
 - report available agent scripts
 - suggest per-repo verification
 - preserve repo ownership boundaries
+- exclude unrelated projects such as `morning-standup`
 
 Do not centralize commits, cleanup, deployment, schema changes, or service
 startup until a later explicitly scoped phase.

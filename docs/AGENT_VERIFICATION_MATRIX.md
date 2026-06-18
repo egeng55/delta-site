@@ -93,6 +93,7 @@ Examples:
 ```text
 docs/AGENT_ROUTINES.md
 docs/AGENT_WORKTREE_STRATEGY.md
+docs/AGENT_WORKSPACE_LAYOUT.md
 docs/AGENT_MCP_STRATEGY.md
 docs/AGENT_PARALLEL_WORKFLOWS.md
 scripts/agent-routine.mjs

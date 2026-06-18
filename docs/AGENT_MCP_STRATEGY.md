@@ -17,6 +17,10 @@ Use MCP first for read-only context:
 - verification plan summaries
 - read-only status snapshots
 
+Repo maps must use `docs/AGENT_WORKSPACE_LAYOUT.md` as the layout source. Delta
+context includes only `delta-site`, `delta-backend`, and `delta-mobile`.
+Unrelated projects such as `morning-standup` are out of scope.
+
 Do not use MCP first for mutation, shell execution, database access, desktop
 side effects, or commits.
 
@@ -64,6 +68,7 @@ Any future MCP must start with a read-only mode that proves:
 
 - allowed repo roots are explicit
 - forbidden paths are explicit
+- unrelated nearby projects are excluded
 - network access is declared
 - command execution is absent or disabled
 - writes are absent

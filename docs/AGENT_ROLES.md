@@ -75,8 +75,9 @@ Must not change product behavior.
 
 ## Backend Context Reader
 
-May inspect `/Users/egeng/delta-backend` for contracts, docs, and endpoint
-behavior. Must not edit backend unless the phase explicitly includes backend.
+May inspect `delta-backend` for contracts, docs, and endpoint behavior. Must not
+edit backend unless the phase explicitly includes backend. Use
+`docs/AGENT_WORKSPACE_LAYOUT.md` for supported local paths.
 
 ## Multi-Repo Coordinator
 
