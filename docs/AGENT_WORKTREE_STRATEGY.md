@@ -143,6 +143,15 @@ npm run agent:routine -- --routine handoff --phase 56
 
 `agent:routine` is print-only and does not create, clean, or delete anything.
 
+## First Controlled Worktree Experiment
+
+The first controlled worktree experiment should stay intentionally small:
+create the worktree from a clean main checkout, make a docs/eval-only change,
+run verification inside the worktree, commit on the phase branch, and hand off
+without merging automatically. The handoff should make integration state
+explicit by naming the worktree path, branch name, changed files, verification
+results, safety confirmations, and whether the branch is still pending review.
+
 ## Cleanup Rules
 
 Never clean up worktrees automatically.
