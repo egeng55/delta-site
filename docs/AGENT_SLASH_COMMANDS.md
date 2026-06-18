@@ -45,6 +45,19 @@ npm run agent:verify -- --<scope> --run
 
 Remember that agent:safety-scan is advisory. Review source/config findings
 before documentation mentions.
+Run npm run agent:eval when the phase touches /os explainability, safety copy,
+handoff templates, or eval fixtures.
+```
+
+## /eval-review
+
+```text
+Read docs/AGENT_EVALS.md and the relevant evals/**/*.json fixtures.
+Confirm the fixtures match the intended /os explainability, safety-language, or
+handoff behavior.
+Run npm run agent:eval.
+Do not call external LLM APIs, live backend services, browser automation,
+Supabase, mic, TTS, notifications, or write paths.
 ```
 
 ## /test-fix-loop
@@ -74,6 +87,8 @@ Review the diff for:
 Report findings before commit.
 Use npm run agent:safety-scan as an advisory input, not as a replacement for
 human diff review.
+Use npm run agent:eval as an advisory fixture check when /os response language
+or agent handoff expectations changed.
 ```
 
 ## /handoff

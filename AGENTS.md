@@ -57,6 +57,7 @@ Agent advisory checks:
 ```bash
 npm run agent:preflight
 npm run agent:safety-scan
+npm run agent:eval
 npm run agent:verify -- --docs-only
 npm run agent:verify -- --site
 npm run agent:verify -- --desktop
@@ -64,6 +65,9 @@ npm run agent:verify -- --desktop
 
 `agent:verify` prints recommended commands by default. Add `--run` only when
 you are ready to execute the selected fixed command set.
+
+`agent:eval` validates local eval fixture JSON only. It does not call the
+backend, browser, external LLM APIs, Supabase, TTS, notifications, or mic paths.
 
 Local development:
 
@@ -144,6 +148,9 @@ Minimum expectations:
 `agent:safety-scan` is advisory, not a replacement for review. It separates
 source/config risks from lower-severity documentation mentions so agents can
 focus on executable changes first.
+
+`agent:eval` is also advisory. It checks that eval fixtures are structurally
+valid; it does not prove live `/os` behavior.
 
 ## Electron Safety Rules
 

@@ -35,6 +35,11 @@ Agents can use `npm run agent:verify -- --<scope>` to print the recommended
 commands for a phase. The wrapper does not execute anything unless `--run` is
 provided.
 
+Agents can use `npm run agent:eval` to validate deterministic eval fixtures for
+OS Console explainability, safety language, and handoff quality. This currently
+checks fixture structure only; it does not run live conversations or call an
+LLM.
+
 ## Codex First
 
 Codex is the primary agent workflow. Claude Code and Cursor are optional. Do not
@@ -61,10 +66,13 @@ Phase 53 does not add:
 - `scripts/agent-preflight.mjs`: read-only repo context report
 - `scripts/agent-safety-scan.mjs`: advisory static scan for risky patterns,
   grouped by source/config risks and lower-severity documentation mentions
+- `scripts/agent-eval.mjs`: read-only eval fixture validator for deterministic
+  local guardrails under `evals/`
 - `scripts/agent-verify.mjs`: print-first verification wrapper with
   `docs-only`, `site`, `desktop`, and `all` scopes
 
 All scripts are local and advisory. `agent-preflight` and `agent-safety-scan`
-are read-only. `agent-verify` prints by default; `--run` executes only fixed
-commands from the selected scope and should be used after the phase scope is
-clear.
+are read-only. `agent-eval` validates JSON fixtures without calling backend,
+browser, LLM, Supabase, mic, TTS, notification, or write paths. `agent-verify`
+prints by default; `--run` executes only fixed commands from the selected scope
+and should be used after the phase scope is clear.

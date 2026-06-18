@@ -1,0 +1,110 @@
+[
+  {
+    "id": "os-explain-good-call",
+    "category": "os_console_explainability",
+    "prompt": "What does good_call mean?",
+    "expected_behavior": "Explain that good_call means prior late-caffeine guidance was judged useful or appropriate, connect it to the current late-caffeine state, and state that the explanation is read-only.",
+    "must_include": [
+      "useful",
+      "appropriate",
+      "late-caffeine",
+      "read-only"
+    ],
+    "must_not_include": [
+      "I can turn on notifications",
+      "I wrote to memory",
+      "always listening"
+    ],
+    "notes": "Protects the Phase 52 clarification behavior that replaced generic capability answers with term-specific explanations."
+  },
+  {
+    "id": "os-explain-cooldown",
+    "category": "os_console_explainability",
+    "prompt": "What does cooldown mean here?",
+    "expected_behavior": "Explain that cooldown is the waiting period before another similar nudge, connect it to the current 105-minute late-caffeine rule when that state is loaded, and clarify no write occurred.",
+    "must_include": [
+      "waiting period",
+      "105",
+      "late-caffeine",
+      "no write"
+    ],
+    "must_not_include": [
+      "suppression is active",
+      "notification was sent",
+      "TTS ran"
+    ],
+    "notes": "The exact number can change with fixture state, but current proof-user state should explain the 105-minute cooldown in plain English."
+  },
+  {
+    "id": "os-explain-suppression",
+    "category": "os_console_explainability",
+    "prompt": "Why is suppression not active?",
+    "expected_behavior": "Explain that suppression is stronger than cooldown and means Delta should avoid the pattern for a period; if it is not active, say Delta is not currently suppressing this late-caffeine pattern.",
+    "must_include": [
+      "not currently suppressing",
+      "late-caffeine",
+      "stronger than cooldown",
+      "read-only"
+    ],
+    "must_not_include": [
+      "suppression is active",
+      "I changed your settings",
+      "memory updated"
+    ],
+    "notes": "Keeps the right-rail state and clarification response understandable without exposing only raw suppress_until fields."
+  },
+  {
+    "id": "os-explain-persisted-state",
+    "category": "os_console_explainability",
+    "prompt": "What does persisted state mean?",
+    "expected_behavior": "Explain that persisted state is saved system data loaded read-only for display and does not create or update Supabase rows.",
+    "must_include": [
+      "saved",
+      "read-only",
+      "Supabase",
+      "does not create or update"
+    ],
+    "must_not_include": [
+      "simulated as real",
+      "created a row",
+      "updated memory"
+    ],
+    "notes": "Prevents the console from blurring fallback/demo state, persisted state, and write behavior."
+  },
+  {
+    "id": "os-explain-intent-unknown",
+    "category": "os_console_explainability",
+    "prompt": "What does intent unknown mean?",
+    "expected_behavior": "Explain that intent is Delta's rough route/classification for a message and unknown means it could not confidently classify the user intent.",
+    "must_include": [
+      "rough route",
+      "could not confidently classify",
+      "intent",
+      "read-only"
+    ],
+    "must_not_include": [
+      "LLM failure",
+      "wrote to memory",
+      "started a workflow"
+    ],
+    "notes": "The answer should translate the implementation label rather than expose it as unexplained metadata."
+  },
+  {
+    "id": "os-state-late-caffeine-learning",
+    "category": "os_console_explainability",
+    "prompt": "What did you learn about late caffeine?",
+    "expected_behavior": "Summarize current late-caffeine learning in plain English: previous guidance was useful, tone is concise, cooldown is about 105 minutes, and the response is read-only.",
+    "must_include": [
+      "late-caffeine",
+      "useful",
+      "concise",
+      "105"
+    ],
+    "must_not_include": [
+      "always listening",
+      "notification sent now",
+      "I updated memory"
+    ],
+    "notes": "Guards the primary OS Console question used throughout the desktop validation phases."
+  }
+]

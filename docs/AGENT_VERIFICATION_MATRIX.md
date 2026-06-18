@@ -28,6 +28,9 @@ Scopes:
 - `--all`: same as desktop for now because `/os` and Electron are this repo's
   highest-risk surfaces
 
+Run `npm run agent:eval` separately when a phase touches eval fixtures, `/os`
+explainability, safety language, or agent handoff expectations.
+
 ## Docs And Agent Tooling Only
 
 Examples:
@@ -37,6 +40,8 @@ AGENTS.md
 docs/AGENT_*.md
 scripts/agent-preflight.mjs
 scripts/agent-safety-scan.mjs
+scripts/agent-eval.mjs
+evals/**/*.json
 ```
 
 Run:
@@ -54,6 +59,27 @@ npm test -- --runInBand
 npm run lint
 npm run build
 ```
+
+## Agent Eval Fixtures
+
+Examples:
+
+```text
+docs/AGENT_EVALS.md
+evals/os-console/*.json
+evals/agent-workflow/*.json
+scripts/agent-eval.mjs
+```
+
+Run:
+
+```bash
+npm run agent:eval
+npm run agent:verify -- --site
+```
+
+`agent:eval` validates fixture structure only. It does not call the backend,
+browser, external LLM APIs, Supabase, mic, TTS, notifications, or write paths.
 
 ## OS Console
 
@@ -143,3 +169,9 @@ it exits successfully unless the script itself crashes. Findings are grouped as:
 - source/config risks: review first because they can affect executable behavior
 - documentation mentions: lower severity, often intentional policy examples
 - generated/build artifacts ignored: skipped dependency, cache, and build paths
+
+## Eval Notes
+
+`npm run agent:eval` is advisory. It validates fixture shape and reports counts
+by category. It does not replace Jest tests, lint, build, desktop smoke checks,
+or human review of copy and safety posture.

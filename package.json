@@ -13,6 +13,7 @@
     "desktop:check": "node --check desktop/main.cjs && node --check desktop/preload.cjs && node desktop/smoke-check.cjs",
     "agent:preflight": "node scripts/agent-preflight.mjs",
     "agent:safety-scan": "node scripts/agent-safety-scan.mjs",
+    "agent:eval": "node scripts/agent-eval.mjs",
     "agent:verify": "node scripts/agent-verify.mjs",
     "lint": "eslint",
     "test": "jest"
