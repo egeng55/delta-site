@@ -139,6 +139,22 @@ creating worktrees, writing files, or committing. Use `npm --silent` or direct
 only with `--write`, under `agent/phase-briefs/`, and refuses to overwrite
 without `--force`.
 
+Fresh worktrees may need dependency setup before tests or builds:
+
+```bash
+npm ci
+```
+
+`node_modules` is ignored and is not copied between worktrees. Do not commit
+dependency folders, caches, or generated build output. If `npm run build` fails
+only because ignored local env is absent, retry with:
+
+```bash
+NEXT_PUBLIC_DELTA_API_URL=http://127.0.0.1:8000 npm run build
+```
+
+Do not commit `.env.local`, print secrets, or change production env handling.
+
 MCP and parallel-agent strategy docs are documentation only. They do not
 authorize new servers, background jobs, CI/CD automation, or autonomous writes.
 Workspace layout changes must keep Delta product context limited to

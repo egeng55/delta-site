@@ -10,7 +10,8 @@ const repoRoot = path.resolve(__dirname, "..");
 
 function defaultWorktreeRootForRepo() {
   const repoParent = path.dirname(repoRoot);
-  const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+  const parentName = path.basename(repoParent);
+  const homeCandidate = parentName === "delta" || parentName === "delta-worktrees" ? path.dirname(repoParent) : repoParent;
   return path.join(homeCandidate, "delta-worktrees");
 }
 

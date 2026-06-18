@@ -43,6 +43,15 @@ The script creates `agent/phase-briefs/` only when `--write` is used.
 If the target file already exists, the script stops. Use `--force` only when
 replacing that planning artifact is intentional.
 
+Phase briefs generated from an existing worktree should still point at the
+canonical worktree root:
+
+```text
+/Users/egeng/delta-worktrees
+```
+
+They should not infer nested roots under another worktree.
+
 ## Relationship To Orchestration
 
 `agent:orchestrate` prints an ephemeral phase plan. `agent:phase:brief` turns
@@ -68,6 +77,14 @@ Future Codex runs should:
 5. Implement only the requested phase.
 6. Run the brief's verification plan.
 7. Use `npm run agent:phase:handoff -- --phase <number>` for handoff.
+
+When a phase runs in a fresh worktree, record whether `npm ci` was needed before
+tests/builds and whether the local build needed the inline public API URL
+fallback:
+
+```bash
+NEXT_PUBLIC_DELTA_API_URL=http://127.0.0.1:8000 npm run build
+```
 
 Briefs are guidance and contract memory. They do not replace human review,
 tests, lint, build, safety scan, or final git inspection.

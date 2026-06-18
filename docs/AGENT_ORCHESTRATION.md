@@ -38,6 +38,14 @@ The planner references, but does not execute:
 
 The script remains advisory. It is not a task runner.
 
+Worktree paths in orchestration output should always use the canonical root:
+
+```text
+/Users/egeng/delta-worktrees
+```
+
+This must stay true even when the planner is invoked from an existing worktree.
+
 Use `npm run agent:context` before orchestration when a phase needs the richer
 repo map: recent commits, route/component/desktop maps, tests, docs, evals,
 agent scripts, risk classification, Morning-Standup exclusion, and advisory
@@ -53,6 +61,14 @@ npm run agent:phase:brief -- --phase 64 --name repo-map --routine site --write
 
 `agent:phase:brief` uses the same routine model but writes only with `--write`
 under `agent/phase-briefs/`.
+
+Fresh worktrees may require `npm ci` before verification because `node_modules`
+is ignored and not shared. If production build fails only because ignored local
+env is absent, use the documented local fallback:
+
+```bash
+NEXT_PUBLIC_DELTA_API_URL=http://127.0.0.1:8000 npm run build
+```
 
 ## Supported Routines
 

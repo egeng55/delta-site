@@ -72,6 +72,10 @@ This keeps worktrees out of `delta-site`, out of the grouped product parent,
 and away from unrelated projects. `agent:phase:start` still prints by default
 and creates a worktree only with `--run`.
 
+When scripts run from an existing worktree under `/Users/egeng/delta-worktrees`,
+they should preserve `/Users/egeng/delta-worktrees` as the canonical root
+instead of inferring `/Users/egeng/delta-worktrees/delta-worktrees`.
+
 ## Context Bundle Rule
 
 Context bundles, repo-map MCPs, and multi-repo orchestration should scan only

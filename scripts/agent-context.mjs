@@ -211,14 +211,15 @@ function unique(values) {
 
 function workspacePaths() {
   const repoParent = path.dirname(repoRoot);
-  const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+  const parentName = path.basename(repoParent);
+  const homeCandidate = parentName === "delta" || parentName === "delta-worktrees" ? path.dirname(repoParent) : repoParent;
 
   return {
     repoParent,
     homeCandidate,
     preferredProductRoot: path.join(homeCandidate, "delta"),
     canonicalWorktreeRoot: path.join(homeCandidate, "delta-worktrees"),
-    layout: path.basename(repoParent) === "delta" ? "grouped-delta" : "flat",
+    layout: parentName === "delta" ? "grouped-delta" : parentName === "delta-worktrees" ? "worktree" : "flat",
   };
 }
 

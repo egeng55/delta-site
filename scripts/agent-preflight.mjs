@@ -36,7 +36,8 @@ function unique(values) {
 
 function workspaceCandidates() {
   const repoParent = path.dirname(repoRoot);
-  const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+  const parentName = path.basename(repoParent);
+  const homeCandidate = parentName === "delta" || parentName === "delta-worktrees" ? path.dirname(repoParent) : repoParent;
   return unique([
     repoParent,
     path.join(homeCandidate, "delta"),
@@ -54,7 +55,8 @@ function findRepo(name) {
 
 function findUnrelatedMorningStandup() {
   const repoParent = path.dirname(repoRoot);
-  const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+  const parentName = path.basename(repoParent);
+  const homeCandidate = parentName === "delta" || parentName === "delta-worktrees" ? path.dirname(repoParent) : repoParent;
   const candidates = [
     path.join(homeCandidate, "morning-standup"),
     path.join(homeCandidate, "Morning-Standup"),
@@ -76,10 +78,11 @@ const branch = runGit(["rev-parse", "--abbrev-ref", "HEAD"]);
 const head = runGit(["rev-parse", "--short", "HEAD"]);
 const status = runGit(["status", "--short"]);
 const repoParent = path.dirname(repoRoot);
-const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+const parentName = path.basename(repoParent);
+const homeCandidate = parentName === "delta" || parentName === "delta-worktrees" ? path.dirname(repoParent) : repoParent;
 const preferredProductRoot = path.join(homeCandidate, "delta");
 const canonicalWorktreeRoot = path.join(homeCandidate, "delta-worktrees");
-const layout = path.basename(repoParent) === "delta" ? "grouped-delta" : "flat";
+const layout = parentName === "delta" ? "grouped-delta" : parentName === "delta-worktrees" ? "worktree" : "flat";
 const siblingRepos = {
   "delta-backend": findRepo("delta-backend"),
   "delta-mobile": findRepo("delta-mobile"),

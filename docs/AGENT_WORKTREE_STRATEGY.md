@@ -48,6 +48,10 @@ Keep worktrees outside the repo and outside the Delta product parent:
 /Users/egeng/delta-worktrees/site-phase-56-worktree-orchestration
 ```
 
+This is the canonical worktree root from both the primary checkout and any
+worktree already under `/Users/egeng/delta-worktrees`. Agent scripts must not
+infer nested roots such as `/Users/egeng/delta-worktrees/delta-worktrees`.
+
 Do not place worktrees under `delta-site`, `/Users/egeng/delta`, `.next`,
 `node_modules`, or any generated build directory. This avoids mixing worktrees
 with product repos or unrelated projects such as `/Users/egeng/morning-standup`.
@@ -92,6 +96,36 @@ The start script must refuse to create a worktree when:
 It must not delete worktrees, clean files, commit, touch backend, or touch
 mobile.
 
+## Fresh Worktree Setup
+
+Git worktrees do not share ignored dependency folders. A fresh worktree may not
+have `node_modules`, so tests or builds can fail with missing local binaries
+such as `jest` until dependencies are installed.
+
+Use:
+
+```bash
+npm ci
+```
+
+`npm ci` should install dependencies from `package-lock.json` without changing
+product behavior. Do not commit `node_modules`, dependency caches, or generated
+build output.
+
+## Local Build Env Fallback
+
+Fresh worktrees also do not copy ignored local env files such as `.env.local`.
+If `npm run build` fails only because an ignored public local env value is
+absent, agents may retry with:
+
+```bash
+NEXT_PUBLIC_DELTA_API_URL=http://127.0.0.1:8000 npm run build
+```
+
+Do not commit `.env.local`. Do not print or invent secrets. This fallback does
+not change production env handling; it only supplies the local public API URL
+needed for a one-off verification command.
+
 ## Avoiding Cross-Repo Edits
 
 `delta-site` agents may inspect sibling repos only as read-only context unless a
@@ -120,10 +154,13 @@ A worktree handoff should include:
 - HEAD commit
 - git status
 - files changed
+- whether `npm ci` was needed
+- whether build env fallback was needed
 - commands run
 - checks passing/failing
 - safety confirmations
 - whether the worktree was created by an agent script
+- integration status: unmerged, merged, or pending review
 - next safest command
 
 Use:

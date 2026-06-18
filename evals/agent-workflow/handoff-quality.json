@@ -60,11 +60,14 @@
     "id": "handoff-worktree-integration-status",
     "category": "agent_workflow_handoff_quality",
     "prompt": "Prepare a handoff after a worktree-based Delta site phase.",
-    "expected_behavior": "The handoff should identify the worktree path, branch name, changed files, verification results, safety confirmations, and integration status without implying the worktree was merged automatically.",
+    "expected_behavior": "The handoff should identify the worktree path, branch name, commit, changed files, whether npm ci was needed, whether build env fallback was needed, verification results, safety confirmations, and integration status without implying the worktree was merged automatically.",
     "must_include": [
       "worktree path",
       "branch name",
+      "commit",
       "changed files",
+      "npm ci",
+      "build env fallback",
       "verification results",
       "safety confirmations",
       "integration status"

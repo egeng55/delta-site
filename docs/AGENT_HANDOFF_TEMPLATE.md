@@ -51,7 +51,9 @@ Next safest command:
 - Be concrete; include exact paths.
 - Do not say "all tests passed" unless listing commands.
 - Include process IDs or server status if local services are still running.
-- Include worktree path and branch when work happened outside the primary
-  checkout.
+- Include worktree path, branch, commit, and integration status when work
+  happened outside the primary checkout.
+- State whether `npm ci` was needed in the worktree and whether build required
+  `NEXT_PUBLIC_DELTA_API_URL=http://127.0.0.1:8000 npm run build`.
 - Do not remove worktrees, delete branches, or clean files as part of handoff.
 - Include the latest user request and any newer redirecting instruction.
