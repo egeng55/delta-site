@@ -104,6 +104,22 @@ counts, top actionable finding, policy mode, allowed next actions, forbidden
 actions, refused actions, and the recommended next command. A run record does
 not resolve a finding or authorize implementation.
 
+## Report-Only Maintenance Cycle
+
+Use the one-command runner when a future report-only agent needs to inspect the
+queue, classify findings, select the top actionable item, and stop:
+
+```bash
+npm run agent:maintenance:run -- --report
+npm run agent:maintenance:run -- --write
+npm --silent run agent:maintenance:run -- --json
+```
+
+Cycle reports live in `agent/runs/` with a `maintenance-cycle` suffix. The
+runner does not implement findings, generate phase brief files, create
+worktrees, run tests, or call services. See
+`docs/AGENT_MAINTENANCE_RUNNER.md`.
+
 ## Relationship To Finding Briefs
 
 Use `agent:finding:brief` to turn a finding into a scoped remediation brief:

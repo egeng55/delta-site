@@ -21,6 +21,7 @@ const agentScripts = [
   "agent:maintenance",
   "agent:policy",
   "agent:run-ledger",
+  "agent:maintenance:run",
   "agent:finding:brief",
   "agent:phase:brief",
   "agent:phase:start",

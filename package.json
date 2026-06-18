@@ -22,6 +22,7 @@
     "agent:maintenance": "node scripts/agent-maintenance.mjs",
     "agent:policy": "node scripts/agent-policy.mjs",
     "agent:run-ledger": "node scripts/agent-run-ledger.mjs",
+    "agent:maintenance:run": "node scripts/agent-maintenance-runner.mjs",
     "agent:finding:brief": "node scripts/agent-finding-brief.mjs",
     "agent:phase:brief": "node scripts/agent-phase-brief.mjs",
     "agent:phase:start": "node scripts/agent-phase-start.mjs",

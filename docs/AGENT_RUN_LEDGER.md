@@ -34,6 +34,12 @@ The run ledger describes one maintenance inspection run. A run record can point
 to a finding, but it does not resolve that finding and does not authorize
 implementation.
 
+`agent:maintenance:run` is the higher-level report-only maintenance cycle. It
+combines finding inspection, policy classification, top actionable selection,
+and the recommended next command. It may write a `maintenance-cycle` report.
+`agent:run-ledger` remains the narrower command for recording one run ledger
+entry.
+
 ## Report-Only Default
 
 Print a report:

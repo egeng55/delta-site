@@ -70,6 +70,7 @@ npm run agent:maintenance -- --report
 npm run agent:policy -- --report
 npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
+npm run agent:maintenance:run -- --report
 npm run agent:finding:brief -- --top --phase <number>
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
@@ -103,6 +104,9 @@ agent action mode, such as `human_required`,
 `agent:run-ledger` records a maintenance inspection run, including policy
 decision, refused actions, approval requirements, and next command. It is
 report-only by default and writes only with `--write` to `agent/runs/`.
+`agent:maintenance:run` composes the maintenance report, policy selection, and
+recommended next command into one report-only cycle. It writes a durable
+maintenance cycle report only with `--write`.
 `agent:finding:brief` turns an existing finding into a scoped remediation phase
 brief after checking the policy. It is print-only by default and writes only
 with `--write` to `agent/phase-briefs/`. Finding briefs and run records are

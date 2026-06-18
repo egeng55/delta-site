@@ -121,6 +121,12 @@ next actions, forbidden actions, and refused actions.
 Run records are operational logs for agents. They do not grant approval, close
 findings, create worktrees, or authorize implementation.
 
+`agent:maintenance:run` uses the same policy output for a one-command
+report-only maintenance cycle. It selects the top actionable finding, prints the
+approval requirement, and may write a `maintenance-cycle` report with `--write`.
+It still does not grant approval, close findings, create worktrees, or
+authorize implementation.
+
 ## Human Review Remains Required
 
 The policy engine is not an autonomous approval system. It is a local,

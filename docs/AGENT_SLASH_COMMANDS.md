@@ -96,6 +96,25 @@ inspected, what policy allowed, what was refused, and the recommended next
 command.
 ```
 
+## /maintenance-run
+
+```text
+Read docs/AGENT_MAINTENANCE.md, docs/AGENT_MAINTENANCE_POLICY.md, and
+docs/AGENT_MAINTENANCE_RUNNER.md.
+Print the full report-only maintenance cycle:
+npm run agent:maintenance:run -- --report
+
+Write a durable cycle report only when requested:
+npm run agent:maintenance:run -- --write
+
+For parser-clean JSON:
+npm --silent run agent:maintenance:run -- --json
+
+Do not implement findings, create worktrees, run tests, generate phase brief
+files, or treat the recommended command as approval. The runner records the top
+finding, policy mode, approval requirement, refused actions, and next command.
+```
+
 ## /routine
 
 ```text
