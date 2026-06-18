@@ -160,3 +160,18 @@ startup until a later explicitly scoped phase.
 
 If parallel outputs conflict, stop and resolve deliberately. Do not let the last
 agent overwrite earlier work by default.
+
+## First Controlled Parallel Worktree Experiment
+
+The first controlled parallel worktree experiment should keep the work split
+small and explicit. Two worktrees can be created from the same clean main base,
+but each worktree needs its own dependency setup with `npm ci` because
+`node_modules` is ignored and not shared. Each worktree must own a separate file
+area, such as docs-only in one branch and eval-only in another.
+
+Do not fix npm audit warnings from `npm ci` during unrelated phases. Audit
+findings are separate dependency-maintenance work. Main should stay clean until
+intentional integration, and final integration must happen sequentially.
+
+Each worktree handoff should include the branch, path, changed files,
+verification results, safety confirmations, and integration status.
