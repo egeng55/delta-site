@@ -271,6 +271,9 @@ Documented only. This repo does not yet implement parallel agents, background
 agents, autonomous writes, MCP orchestration, CI/CD automation, or overnight
 mutation loops.
 
+Use `docs/AGENT_PARALLEL_WORKFLOWS.md` for the detailed worktree-per-agent
+model. Use `docs/AGENT_MCP_STRATEGY.md` for optional future MCP boundaries.
+
 Future planning should require:
 
 - explicit repo scope per agent

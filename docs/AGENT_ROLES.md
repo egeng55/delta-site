@@ -3,6 +3,9 @@
 These roles are definitions for future delegation. Phase 53 does not implement
 subagents or background agents.
 
+For which roles may run in parallel and which must remain sequential, see
+`docs/AGENT_PARALLEL_WORKFLOWS.md`.
+
 ## Delta Site Frontend Agent
 
 Scope:

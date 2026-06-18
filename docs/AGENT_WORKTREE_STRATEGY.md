@@ -4,6 +4,10 @@ Git worktrees give agents a clean, isolated checkout for scoped phases without
 dirtying the primary `delta-site` checkout. They are useful when a phase is
 large, experimental, or likely to span multiple turns.
 
+For future multi-agent coordination, pair this document with
+`docs/AGENT_PARALLEL_WORKFLOWS.md`. This document remains the canonical source
+for worktree paths, branch names, and cleanup rules.
+
 ## Why Worktrees Matter
 
 Worktrees help with agent safety because they:

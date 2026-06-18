@@ -49,6 +49,12 @@ Agents can use `npm run agent:routine -- --list` to print standard command
 sequences for common phase types. Routine output is guidance only; it does not
 execute commands or replace review.
 
+Future MCP and parallel-agent planning is documented separately:
+
+- `docs/AGENT_MCP_STRATEGY.md`: read-only-first MCP policy and candidate matrix
+- `docs/AGENT_PARALLEL_WORKFLOWS.md`: worktree-per-agent and report-only
+  workflow policy
+
 ## Codex First
 
 Codex is the primary agent workflow. Claude Code and Cursor are optional. Do not
@@ -86,6 +92,10 @@ Phase 53 does not add:
 - `scripts/agent-phase-start.mjs`: print-first worktree command helper; `--run`
   can create a new worktree only when the repo is clean
 - `scripts/agent-phase-handoff.mjs`: read-only handoff skeleton printer
+- `docs/AGENT_MCP_STRATEGY.md`: optional future MCP strategy; scripts remain the
+  source of truth
+- `docs/AGENT_PARALLEL_WORKFLOWS.md`: future parallel-agent and report-only
+  workflow strategy
 
 All scripts are local and advisory. `agent-preflight` and `agent-safety-scan`
 are read-only. `agent-eval` validates JSON fixtures without calling backend,

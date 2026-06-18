@@ -77,6 +77,11 @@ backend, browser, external LLM APIs, Supabase, TTS, notifications, or mic paths.
 `agent:routine` prints recommended command sequences for common phase types. It
 does not execute commands, create worktrees, commit, or modify files.
 
+Future MCP and parallel-agent planning lives in
+`docs/AGENT_MCP_STRATEGY.md` and `docs/AGENT_PARALLEL_WORKFLOWS.md`. These are
+strategy documents only; they do not authorize MCP servers, background agents,
+CI/CD automation, or autonomous writes.
+
 `agent:phase:start` prints worktree creation commands by default. It may create
 a worktree only with `--run`, a clean current repo, a valid phase/name, and a
 nonexistent target path. It must never delete worktrees, clean files, commit, or

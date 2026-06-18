@@ -93,6 +93,8 @@ Examples:
 ```text
 docs/AGENT_ROUTINES.md
 docs/AGENT_WORKTREE_STRATEGY.md
+docs/AGENT_MCP_STRATEGY.md
+docs/AGENT_PARALLEL_WORKFLOWS.md
 scripts/agent-routine.mjs
 scripts/agent-status.mjs
 scripts/agent-phase-start.mjs
@@ -116,6 +118,9 @@ branches, commit, or touch sibling repos.
 
 `agent:routine` is print-only in this phase. It does not execute commands,
 create worktrees, commit, or modify files.
+
+MCP and parallel-agent strategy docs are documentation only. They do not
+authorize new servers, background jobs, CI/CD automation, or autonomous writes.
 
 ## OS Console
 
