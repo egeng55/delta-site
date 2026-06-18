@@ -11,6 +11,8 @@
     "desktop:smoke": "electron desktop/main.cjs --smoke-test",
     "desktop:smoke:services": "node desktop/smoke-check.cjs",
     "desktop:check": "node --check desktop/main.cjs && node --check desktop/preload.cjs && node desktop/smoke-check.cjs",
+    "agent:preflight": "node scripts/agent-preflight.mjs",
+    "agent:safety-scan": "node scripts/agent-safety-scan.mjs",
     "lint": "eslint",
     "test": "jest"
   },

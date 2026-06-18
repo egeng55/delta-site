@@ -1,0 +1,20 @@
+---
+description: Delta site agent safety and workflow rules
+alwaysApply: true
+---
+
+`AGENTS.md` is the source of truth for this repo.
+
+Use Codex-first, phase-scoped development. Inspect before editing. Do not touch
+backend or mobile unless explicitly scoped. Do not enable live mic, backend TTS,
+desktop notifications, Supabase mutations, memory writes, wake word, always-on
+behavior, auth, billing, legal, schema, migrations, or deployment behavior
+without explicit approval.
+
+For `/os` changes, preserve read-only behavior and visible safety posture.
+
+For Electron changes, keep `nodeIntegration: false`, `contextIsolation: true`,
+`sandbox: true`, allowlisted IPC only, and no arbitrary shell execution.
+
+Run the verification matrix in `docs/AGENT_VERIFICATION_MATRIX.md`. Use explicit
+`git add -- <files>` only.
