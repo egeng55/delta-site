@@ -8,6 +8,10 @@ The shell uses Electron because Tauri is blocked in the current development envi
 http://127.0.0.1:3000/os
 ```
 
+`/os` is local-development-only by default. The site middleware allows it for
+local Next.js/Electron development, but production builds return a clear 403 so
+the OS Console is not exposed as a public marketing route by accident.
+
 Phase 51 redesigns `/os` to feel more like a Mac desktop command center: the
 conversation workspace is primary, live readiness and Behavioral OS state are
 secondary inspector context, and developer commands, proof data, and safety

@@ -8,6 +8,11 @@ The local command center lives at:
 http://127.0.0.1:3000/os
 ```
 
+`/os` is intentionally a local developer cockpit. The middleware keeps it
+available during local development and Electron usage, but production
+deployments return a clear 403 instead of exposing the OS Console publicly by
+accident. It is not a public marketing page.
+
 The console supports multi-turn typed chat against the read-only backend
 conversation API, a command palette, local session summary, proof report copy,
 readiness refresh, command cards, recommended next-step logic, and user-triggered
@@ -34,6 +39,11 @@ microphone capture, backend local TTS, desktop notifications, background
 listening, wake word, automatic memory writes, or Supabase mutations. Browser
 speech playback uses `window.speechSynthesis` only after the user clicks Speak.
 Browser mic remains disabled/coming soon.
+
+The legacy `/api/chat` site proxy is not public. It now requires an incoming
+`Authorization` bearer token and forwards that token to the backend `/chat`
+endpoint. The OS Console continues to use the read-only `/conversation/turn`
+backend API directly for local development.
 
 ## Delta OS Desktop Shell
 

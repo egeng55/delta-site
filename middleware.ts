@@ -3,6 +3,11 @@ import { createServerClient } from '@supabase/ssr';
 
 const PROTECTED_ROUTES = ['/dashboard', '/settings', '/account', '/insights'];
 const AUTH_ROUTES = ['/login', '/signup'];
+const OS_CONSOLE_ROUTE = '/os';
+
+function isOsConsoleRoute(pathname: string): boolean {
+  return pathname === OS_CONSOLE_ROUTE || pathname.startsWith(`${OS_CONSOLE_ROUTE}/`);
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,6 +18,20 @@ export async function middleware(request: NextRequest) {
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const isOsRoute = isOsConsoleRoute(pathname);
+
+  // Delta OS Console is a local developer cockpit. Keep it available for
+  // localhost/Electron development, but do not expose it from production
+  // deployments until a full authenticated product boundary is implemented.
+  if (isOsRoute) {
+    if (process.env.NODE_ENV === 'production') {
+      return new NextResponse('Delta OS Console is available only in local development.', {
+        status: 403,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      });
+    }
+    return response;
+  }
 
   if (!supabaseUrl || !supabaseAnonKey) {
     const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
@@ -58,5 +77,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/settings/:path*', '/account/:path*', '/insights/:path*', '/login', '/signup'],
+  matcher: ['/os/:path*', '/dashboard/:path*', '/settings/:path*', '/account/:path*', '/insights/:path*', '/login', '/signup'],
 };

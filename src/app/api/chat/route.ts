@@ -5,12 +5,13 @@ const MAX_REQUESTS = 10;
 const ipRequestMap = new Map<string, { count: number; resetAt: number }>();
 
 // Clean up stale entries every 5 minutes
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now();
   for (const [ip, data] of ipRequestMap) {
     if (now > data.resetAt) ipRequestMap.delete(ip);
   }
 }, 5 * 60 * 1000);
+(cleanupInterval as ReturnType<typeof setInterval> & { unref?: () => void }).unref?.();
 
 function getClientIp(request: NextRequest): string {
   return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
@@ -47,11 +48,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'API not configured' }, { status: 503 });
   }
 
+  const authorization = request.headers.get('authorization');
+  if (!authorization) {
+    return NextResponse.json(
+      { error: 'Authenticated chat proxy requires an Authorization bearer token.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
     const response = await fetch(`${apiUrl}/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: authorization,
+      },
       body: JSON.stringify(body),
     });
 
