@@ -58,11 +58,17 @@ They should not infer nested roots under another worktree.
 the same planning model into a durable markdown contract that can be checked in
 or handed to the next Codex run.
 
+`agent:finding:brief` starts from a maintenance finding instead of a manually
+selected phase objective. It uses finding evidence, priority, repo scope, and
+recommended next phase to generate a remediation brief, but it does not
+implement the finding or mark it resolved.
+
 Use both together when a phase needs durable context:
 
 ```bash
 npm run agent:orchestrate -- --phase 64 --name repo-map --routine site
 npm run agent:phase:brief -- --phase 64 --name repo-map --routine site --write
+npm run agent:finding:brief -- --id 002 --phase 74 --name mobile-cache-strategy --write
 ```
 
 ## Using Briefs With Codex

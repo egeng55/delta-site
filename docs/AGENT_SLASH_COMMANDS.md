@@ -27,6 +27,29 @@ Do not edit product files yet. Do not overwrite existing brief files without
 explicit `--force`.
 ```
 
+## /finding-brief
+
+```text
+Read docs/AGENT_MAINTENANCE.md and docs/AGENT_FINDING_BRIEFS.md.
+Inspect the current finding queue:
+npm run agent:maintenance -- --report
+
+Generate a printed remediation brief from a specific finding:
+npm run agent:finding:brief -- --id <finding-id> --phase <number> --name <slug>
+
+Generate a printed brief from the highest-priority actionable finding:
+npm run agent:finding:brief -- --top --phase <number>
+
+Write a durable brief only when requested:
+npm run agent:finding:brief -- --id <finding-id> --phase <number> --name <slug> --write
+
+For parser-clean JSON:
+npm --silent run agent:finding:brief -- --id <finding-id> --phase <number> --json
+
+Treat the output as a phase proposal. Do not implement the finding, mark it
+resolved, create worktrees, or commit unless a later implementation phase asks.
+```
+
 ## /routine
 
 ```text

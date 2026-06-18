@@ -66,6 +66,8 @@ npm run agent:routine -- --list
 npm run agent:routine -- --routine desktop
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine <routine>
 npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine>
+npm run agent:maintenance -- --report
+npm run agent:finding:brief -- --top --phase <number>
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
 ```
@@ -90,6 +92,12 @@ machine-readable output.
 stdout by default and writes only with `--write` to
 `agent/phase-briefs/phase-XXX-name.md`. Existing brief files are never
 overwritten unless `--force` is passed.
+
+`agent:maintenance` reports the local maintenance findings queue under
+`agent/findings/`. `agent:finding:brief` turns an existing finding into a
+scoped remediation phase brief. It is print-only by default and writes only
+with `--write` to `agent/phase-briefs/`. Finding briefs are planning artifacts;
+they do not implement findings or mark them resolved.
 
 `agent:context` prints a read-only repo context bundle in Markdown by default,
 or JSON with `-- --json`. It includes recent commits, route/component/desktop

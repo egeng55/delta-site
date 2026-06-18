@@ -62,6 +62,23 @@ npm run agent:phase:brief -- --phase 64 --name repo-map --routine site --write
 `agent:phase:brief` uses the same routine model but writes only with `--write`
 under `agent/phase-briefs/`.
 
+Maintenance findings use the same planning model. Inspect the queue with:
+
+```bash
+npm run agent:maintenance -- --report
+```
+
+Turn a specific finding or the highest-priority actionable finding into a phase
+brief with:
+
+```bash
+npm run agent:finding:brief -- --id <id> --phase <number>
+npm run agent:finding:brief -- --top --phase <number>
+```
+
+Finding briefs are still planning artifacts. They do not implement the finding,
+run verification, create worktrees, commit, or mark findings resolved.
+
 Fresh worktrees may require `npm ci` before verification because `node_modules`
 is ignored and not shared. If production build fails only because ignored local
 env is absent, use the documented local fallback:

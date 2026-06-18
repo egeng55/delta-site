@@ -19,6 +19,8 @@
     "agent:verify": "node scripts/agent-verify.mjs",
     "agent:routine": "node scripts/agent-routine.mjs",
     "agent:orchestrate": "node scripts/agent-orchestrate.mjs",
+    "agent:maintenance": "node scripts/agent-maintenance.mjs",
+    "agent:finding:brief": "node scripts/agent-finding-brief.mjs",
     "agent:phase:brief": "node scripts/agent-phase-brief.mjs",
     "agent:phase:start": "node scripts/agent-phase-start.mjs",
     "agent:phase:handoff": "node scripts/agent-phase-handoff.mjs",
