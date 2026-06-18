@@ -96,6 +96,21 @@ The start script must refuse to create a worktree when:
 It must not delete worktrees, clean files, commit, touch backend, or touch
 mobile.
 
+## Maintenance Worktree Dispatch
+
+For maintenance findings, prefer the policy-aware dispatcher instead of manually
+inventing a branch/path:
+
+```bash
+npm run agent:dispatch:worktree -- --id 005 --phase 80 --name live-eval-coverage
+npm run agent:dispatch:worktree -- --id 005 --phase 80 --name live-eval-coverage --approve-worktree --write-task
+```
+
+The dispatcher creates worktrees only with `--approve-worktree`, writes task
+packets only with `--write-task`, refuses policy-blocked findings, and does not
+implement or merge the finding. It uses the same canonical worktree root:
+`/Users/egeng/delta-worktrees`.
+
 ## Fresh Worktree Setup
 
 Git worktrees do not share ignored dependency folders. A fresh worktree may not

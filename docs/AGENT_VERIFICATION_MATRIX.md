@@ -49,6 +49,7 @@ scripts/agent-policy.mjs
 scripts/agent-run-ledger.mjs
 scripts/agent-maintenance-runner.mjs
 scripts/agent-dispatch-plan.mjs
+scripts/agent-dispatch-worktree.mjs
 scripts/agent-finding-brief.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
@@ -57,6 +58,7 @@ agent/findings/*.md
 agent/policies/*.json
 agent/runs/*.md
 agent/dispatch-plans/*.md
+agent/dispatch-tasks/*.md
 agent/phase-briefs/*.md
 ```
 
@@ -124,6 +126,7 @@ scripts/agent-policy.mjs
 scripts/agent-run-ledger.mjs
 scripts/agent-maintenance-runner.mjs
 scripts/agent-dispatch-plan.mjs
+scripts/agent-dispatch-worktree.mjs
 scripts/agent-finding-brief.mjs
 scripts/agent-status.mjs
 scripts/agent-phase-start.mjs
@@ -132,6 +135,7 @@ agent/findings/*.md
 agent/policies/*.json
 agent/runs/*.md
 agent/dispatch-plans/*.md
+agent/dispatch-tasks/*.md
 ```
 
 Run:
@@ -149,6 +153,7 @@ npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
 npm run agent:maintenance:run -- --report
 npm run agent:dispatch:plan -- --top --phase <number>
+npm run agent:dispatch:worktree -- --top --phase <number>
 npm run agent:finding:brief -- --top --phase <number>
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine worktree-experiment --mode parallel-plan
 npm run agent:phase:start -- --phase <number> --name <slug> --print
@@ -177,10 +182,13 @@ is a read-only classifier that maps findings to allowed action modes.
 `agent:run-ledger` is report-only by default and writes maintenance run records
 only with `--write`. `agent:maintenance:run` is a report-only maintenance cycle
 runner and writes cycle reports only with `--write`. `agent:dispatch:plan` is
-planning-only and writes dispatch plans only with `--write`. `agent:finding:brief`
-checks policy first, is print-only by default, and writes a generated
-remediation phase brief only with `--write`. These scripts must not implement
-findings, run tests, create worktrees, commit, or mark findings resolved.
+planning-only and writes dispatch plans only with `--write`.
+`agent:dispatch:worktree` is approval-gated: it creates worktrees only with
+`--approve-worktree`, writes task packets only with `--write-task`, and still
+does not implement, test, merge, delete, or clean up findings.
+`agent:finding:brief` checks policy first, is print-only by default, and writes
+a generated remediation phase brief only with `--write`. These scripts must not
+implement findings, run tests from planners, commit, or mark findings resolved.
 
 Fresh worktrees may need dependency setup before tests or builds:
 

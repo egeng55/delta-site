@@ -135,6 +135,22 @@ Dispatch plans are planning-only. They may show a proposed worktree path and
 verification plan, but they do not create worktrees or implement findings. See
 `docs/AGENT_DISPATCH_PLANNER.md`.
 
+## Worktree Dispatch
+
+Use the worktree dispatcher only after reviewing policy and receiving explicit
+approval for a scoped worktree:
+
+```bash
+npm run agent:dispatch:worktree -- --top --phase 80
+npm run agent:dispatch:worktree -- --id 005 --phase 80 --name live-eval-coverage
+npm run agent:dispatch:worktree -- --id 005 --phase 80 --name live-eval-coverage --approve-worktree --write-task
+npm --silent run agent:dispatch:worktree -- --id 005 --phase 80 --json
+```
+
+It creates worktrees only with `--approve-worktree`, writes task packets only
+with `--write-task`, and does not implement or merge findings. See
+`docs/AGENT_WORKTREE_DISPATCHER.md`.
+
 ## Relationship To Finding Briefs
 
 Use `agent:finding:brief` to turn a finding into a scoped remediation brief:

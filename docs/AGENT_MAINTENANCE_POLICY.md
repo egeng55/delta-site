@@ -132,6 +132,11 @@ dispatch plan with proposed phase, scope, worktree path, and verification
 commands, but the policy mode still controls whether implementation is blocked,
 manual-only, or approval-required.
 
+`agent:dispatch:worktree` enforces the same policy one step later. It refuses
+`human_required`, `blocked`, and `report_only` worktree dispatches, requires
+`--approve-worktree` for any worktree creation, requires `--write-task` for task
+packets, and still performs no implementation or merge.
+
 ## Human Review Remains Required
 
 The policy engine is not an autonomous approval system. It is a local,

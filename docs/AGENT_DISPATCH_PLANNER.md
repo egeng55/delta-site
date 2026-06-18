@@ -18,6 +18,10 @@ queue, classify findings, select the top actionable finding, and stop.
 dispatch plan. It is one step closer to implementation planning, but it still
 does not execute anything.
 
+When a human approves a scoped worktree after reviewing a dispatch plan, use
+`agent:dispatch:worktree`. That later command creates a worktree only with
+`--approve-worktree` and writes a task packet only with `--write-task`.
+
 ## Policy Behavior
 
 The planner uses `agent:policy` classifications:
@@ -80,6 +84,18 @@ hardening, or Electron production path, the planner may show:
 
 This is not approval to implement. A later phase must explicitly authorize code
 or runtime changes.
+
+## Worktree Dispatcher
+
+The worktree dispatcher is documented in `docs/AGENT_WORKTREE_DISPATCHER.md`.
+Typical usage:
+
+```bash
+npm run agent:dispatch:worktree -- --id 005 --phase 80 --name live-eval-coverage
+npm run agent:dispatch:worktree -- --id 005 --phase 80 --name live-eval-coverage --approve-worktree --write-task
+```
+
+It prepares a future Codex run; it does not make the implementation change.
 
 ## Safety Rules
 

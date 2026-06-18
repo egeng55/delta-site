@@ -137,6 +137,27 @@ dispatch plan as approval. It only records policy mode, approval requirement,
 scope, proposed worktree details, verification, and the next safe command.
 ```
 
+## /dispatch-worktree
+
+```text
+Read docs/AGENT_MAINTENANCE_POLICY.md, docs/AGENT_DISPATCH_PLANNER.md, and
+docs/AGENT_WORKTREE_DISPATCHER.md.
+
+Preview the dispatch without creating anything:
+npm run agent:dispatch:worktree -- --top --phase <number>
+npm run agent:dispatch:worktree -- --id <finding-id> --phase <number> --name <slug>
+
+Create a worktree and task packet only after explicit human approval:
+npm run agent:dispatch:worktree -- --id <finding-id> --phase <number> --name <slug> --approve-worktree --write-task
+
+For parser-clean JSON:
+npm --silent run agent:dispatch:worktree -- --id <finding-id> --phase <number> --json
+
+Do not implement the finding, run tests from the dispatcher, merge, delete
+worktrees, or treat the task packet as implementation approval. It only
+prepares an isolated workspace and instructions for a later Codex run.
+```
+
 ## /routine
 
 ```text

@@ -71,6 +71,7 @@ npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
 npm run agent:maintenance:run -- --report
 npm run agent:dispatch:plan -- --top --phase <number>
+npm run agent:dispatch:worktree -- --top --phase <number>
 ```
 
 Turn a specific finding or the highest-priority actionable finding into a phase
@@ -95,6 +96,16 @@ npm run agent:dispatch:plan -- --id <id> --phase <number> --name <slug>
 
 Dispatch plans may show a proposed worktree path and branch, but they do not
 create worktrees or authorize implementation.
+
+For an approval-gated worktree and task packet after human review, use:
+
+```bash
+npm run agent:dispatch:worktree -- --id <id> --phase <number> --name <slug>
+npm run agent:dispatch:worktree -- --id <id> --phase <number> --name <slug> --approve-worktree --write-task
+```
+
+`agent:dispatch:worktree` still does not implement, verify, merge, delete, or
+clean up anything.
 
 For future report-only or autonomous planning, record a maintenance run with
 `npm run agent:maintenance:run -- --write` or

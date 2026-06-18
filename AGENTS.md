@@ -72,6 +72,7 @@ npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
 npm run agent:maintenance:run -- --report
 npm run agent:dispatch:plan -- --top --phase <number>
+npm run agent:dispatch:worktree -- --top --phase <number>
 npm run agent:finding:brief -- --top --phase <number>
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
@@ -111,6 +112,9 @@ maintenance cycle report only with `--write`.
 `agent:dispatch:plan` converts a selected finding into a policy-aware dispatch
 plan. It is planning-only, writes only with `--write`, and never creates
 worktrees or implements findings.
+`agent:dispatch:worktree` is the approval-gated dispatcher. It prints proposed
+dispatch by default, creates a worktree only with `--approve-worktree`, writes a
+task packet only with `--write-task`, and never implements or merges findings.
 `agent:finding:brief` turns an existing finding into a scoped remediation phase
 brief after checking the policy. It is print-only by default and writes only
 with `--write` to `agent/phase-briefs/`. Finding briefs and run records are
