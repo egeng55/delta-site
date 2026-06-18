@@ -560,10 +560,10 @@ function SectionCard({
   className?: string;
 }) {
   return (
-    <section className={`rounded-lg border border-border/80 bg-card/80 p-5 shadow-sm ${className}`}>
+    <section className={`rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm shadow-slate-950/5 ${className}`}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          {eyebrow && <p className="text-xs font-medium uppercase tracking-wide text-primary">{eyebrow}</p>}
+          {eyebrow && <p className="text-xs font-medium uppercase tracking-wide text-muted">{eyebrow}</p>}
           <h2 className="mt-1 text-lg font-semibold tracking-tight">{title}</h2>
           {description && <p className="mt-2 text-sm leading-6 text-muted">{description}</p>}
         </div>
@@ -586,15 +586,15 @@ function CollapsibleSection({
   defaultOpen?: boolean;
 }) {
   return (
-    <details className="rounded-lg border border-border/80 bg-card/70 p-4 shadow-sm" open={defaultOpen}>
+    <details className="rounded-2xl border border-border/60 bg-card/70 p-4 shadow-sm shadow-slate-950/5" open={defaultOpen}>
       <summary className="cursor-pointer list-none">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-base font-semibold tracking-tight">{title}</h2>
             <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
           </div>
-          <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted">
-            expand
+          <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted">
+            show details
           </span>
         </div>
       </summary>
@@ -605,7 +605,7 @@ function CollapsibleSection({
 
 function SafetyStrip({ browserTtsStatus }: { browserTtsStatus: BrowserSpeechStatus }) {
   return (
-    <div className="rounded-lg border border-border/80 bg-card/70 px-4 py-3 shadow-sm">
+    <div className="rounded-2xl border border-border/60 bg-card/70 px-4 py-3 shadow-sm shadow-slate-950/5">
       <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted">
         <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-green-600 dark:text-green-400">
           Read-only
@@ -615,8 +615,8 @@ function SafetyStrip({ browserTtsStatus }: { browserTtsStatus: BrowserSpeechStat
         <span className="rounded-full border border-border px-3 py-1">Voice input disabled</span>
         <span className="rounded-full border border-border px-3 py-1">Browser TTS: {browserTtsStatus}</span>
       </div>
-      <p className="mt-2 text-sm leading-6 text-muted">
-        Browser mic, wake word, and always-on mode are not built. Speak response is a user-triggered browser preview only.
+      <p className="mt-2 text-xs leading-5 text-muted">
+        Browser mic, wake word, and always-on mode are not built. Speak response is user-triggered browser playback only.
       </p>
     </div>
   );
@@ -633,7 +633,7 @@ function CommandCard({ title, detail, command }: { title: string; detail: string
   };
 
   return (
-    <div className="rounded-lg border border-border/80 bg-background/60 p-4">
+    <div className="rounded-xl border border-border/60 bg-background/45 p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-sm font-semibold">{title}</h3>
@@ -642,14 +642,17 @@ function CommandCard({ title, detail, command }: { title: string; detail: string
         <button
           type="button"
           onClick={copyCommand}
-          className="inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-primary/10"
+          className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-border/70 px-3 text-sm font-medium transition-colors hover:bg-card"
         >
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <pre className="mt-4 max-h-40 overflow-x-auto rounded-md border border-border bg-card p-3 text-xs leading-5 text-muted">
-        <code>{command}</code>
-      </pre>
+      <details className="mt-3">
+        <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-muted">View command</summary>
+        <pre className="mt-3 max-h-40 overflow-x-auto rounded-lg border border-border/70 bg-card/80 p-3 text-xs leading-5 text-muted">
+          <code>{command}</code>
+        </pre>
+      </details>
     </div>
   );
 }
@@ -671,18 +674,18 @@ function CommandPalette({
         role="dialog"
         aria-modal="true"
         aria-label="Delta command palette"
-        className="mx-auto max-w-2xl rounded-lg border border-border bg-card shadow-xl"
+        className="mx-auto max-w-2xl rounded-2xl border border-border/70 bg-card shadow-2xl shadow-slate-950/20"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-border p-4">
+        <div className="flex items-start justify-between gap-4 border-b border-border/70 p-4">
           <div>
-            <p className="text-sm font-medium uppercase tracking-wide text-primary">Command Palette</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted">Command Palette</p>
             <h2 className="mt-1 text-xl font-semibold">Run local read-only console actions</h2>
             <p className="mt-1 text-sm text-muted">No palette action starts mic, TTS, notification, or memory writes.</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
+            className="rounded-lg border border-border/70 px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
           >
             Close
           </button>
@@ -697,7 +700,7 @@ function CommandPalette({
                 await action.run();
                 onClose();
               }}
-              className="block w-full rounded-md px-3 py-3 text-left transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
+              className="block w-full rounded-xl px-3 py-3 text-left transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="text-sm font-semibold">{action.title}</span>
               <span className="mt-1 block text-sm leading-6 text-muted">{action.detail}</span>
@@ -718,7 +721,7 @@ function FollowUpSuggestions({
 }) {
   if (items.length === 0) return null;
   return (
-    <div className="mt-4 rounded-md border border-border bg-background p-3">
+    <div className="mt-4 rounded-xl border border-border/60 bg-background/45 p-3">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted">Suggested follow-ups</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {items.map((item) => (
@@ -726,7 +729,7 @@ function FollowUpSuggestions({
             key={`${item.kind}-${item.label}`}
             type="button"
             onClick={() => void onRun(item)}
-            className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors hover:bg-card"
+            className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted transition-colors hover:bg-card hover:text-foreground"
           >
             {item.label}
           </button>
@@ -830,50 +833,52 @@ function ConversationShell({
     : "Browser TTS unavailable";
 
   return (
-    <section className="rounded-lg border border-border/80 bg-card/90 p-5 shadow-sm">
+    <section className="rounded-3xl border border-border/60 bg-card/85 p-5 shadow-sm shadow-slate-950/5 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-primary">Conversation</p>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight">Ask Delta</h2>
-          <p className="mt-2 text-sm leading-6 text-muted">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">Conversation</p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">Ask Delta</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
             Ask Delta about what it has learned, what it would do next, or what parts of the system are ready.
           </p>
         </div>
-        <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-600 dark:text-green-400">
-          read-only API
-        </span>
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-full border border-green-500/30 bg-green-500/10 px-3 py-1 text-xs font-medium text-green-600 dark:text-green-400">
+            read-only API
+          </span>
+        </div>
       </div>
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-6 flex flex-wrap gap-2">
         {SUGGESTED_PROMPTS.map((suggestion) => (
           <button
             key={suggestion}
             type="button"
             onClick={() => onSuggestedPrompt(suggestion)}
-            className="rounded-full border border-border/80 bg-background/50 px-3 py-1 text-xs font-medium text-muted transition-colors hover:border-primary/50 hover:text-foreground"
+            className="rounded-full border border-border/60 bg-background/35 px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-primary/50 hover:bg-card hover:text-foreground"
           >
             {suggestion}
           </button>
         ))}
       </div>
-      <div className="mt-5 max-h-[34rem] space-y-3 overflow-y-auto rounded-lg border border-border/70 bg-background/45 p-3">
+      <div className="mt-6 min-h-[28rem] max-h-[42rem] space-y-4 overflow-y-auto rounded-2xl bg-background/35 p-3 md:p-4">
         {turns.map((turn, index) => (
           <div
             key={turn.id}
             className={
               turn.role === "user"
-                ? "max-w-[86%] rounded-lg border border-border/70 bg-card px-4 py-3 text-sm leading-6 text-muted"
+                ? "ml-auto max-w-[82%] rounded-2xl border border-border/60 bg-card px-4 py-3 text-sm leading-6 text-foreground shadow-sm shadow-slate-950/5"
                 : turn.role === "system"
-                  ? "max-w-[88%] rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300"
-                  : "ml-auto max-w-[88%] rounded-lg bg-primary px-4 py-3 text-sm leading-6 text-white shadow-sm"
+                  ? "max-w-[88%] rounded-2xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300"
+                  : "max-w-[88%] rounded-2xl border border-border/60 bg-card px-4 py-3 text-sm leading-6 text-foreground shadow-sm shadow-slate-950/5"
             }
           >
-            <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide opacity-80">
+            <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-muted">
               <span>{turn.role === "delta" ? "Delta" : turn.role}</span>
               <span>{turn.orderLabel || `Turn ${index + 1}`}</span>
             </div>
             <p>{turn.content}</p>
             {turn.metadata && (
-              <details className="mt-3 rounded-md border border-white/20 bg-white/10 p-2 text-xs text-white/85">
+              <details className="mt-3 rounded-xl border border-border/60 bg-background/45 p-2 text-xs text-muted">
                 <summary className="cursor-pointer font-medium">Read-only response</summary>
                 <div className="mt-2 grid gap-1 sm:grid-cols-2">
                   <span>No memory writes</span>
@@ -887,7 +892,7 @@ function ConversationShell({
           </div>
         ))}
         {isAsking && (
-          <div className="ml-auto max-w-[86%] rounded-lg border border-border bg-card px-4 py-3 text-sm leading-6 text-muted">
+          <div className="max-w-[86%] rounded-2xl border border-border/60 bg-card px-4 py-3 text-sm leading-6 text-muted">
             <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Delta</div>
             Reading Behavioral OS state...
           </div>
@@ -901,7 +906,7 @@ function ConversationShell({
           if (canAsk) void onAsk();
         }}
       >
-        <div className="rounded-lg border border-border/80 bg-background/45 p-3">
+        <div className="rounded-2xl border border-border/70 bg-background/45 p-4 shadow-inner shadow-slate-950/5">
           <label htmlFor="delta-os-input" className="text-xs uppercase tracking-wide text-muted">
             Ask Delta prompt
           </label>
@@ -922,18 +927,18 @@ function ConversationShell({
           <button
             type="submit"
             disabled={!canAsk}
-            className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/40"
+            className="rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:bg-primary/40"
           >
             {isAsking ? "Asking Delta" : "Ask Delta"}
           </button>
-          <button disabled className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted">
+          <button disabled className="rounded-xl border border-border/70 px-4 py-2 text-sm font-medium text-muted">
             Voice input coming soon
           </button>
           {browserTtsStatus === "speaking" ? (
             <button
               type="button"
               onClick={onStopSpeaking}
-              className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-background"
+              className="rounded-xl border border-border/70 px-4 py-2 text-sm font-medium transition-colors hover:bg-background"
             >
               Stop speaking
             </button>
@@ -942,7 +947,7 @@ function ConversationShell({
               type="button"
               disabled={!canSpeak}
               onClick={onSpeakLatest}
-              className="rounded-md border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-border/70 px-4 py-2 text-sm font-medium transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-60"
             >
               {speakButtonLabel}
             </button>
@@ -950,23 +955,20 @@ function ConversationShell({
           <button
             type="button"
             onClick={onClear}
-            className="ml-auto rounded-md border border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:border-border hover:bg-background"
+            className="ml-auto rounded-xl border border-transparent px-3 py-2 text-sm font-medium text-muted transition-colors hover:border-border hover:bg-background"
           >
             Clear session
           </button>
         </div>
       </form>
-      <div className="mt-4 grid gap-2 text-xs text-muted sm:grid-cols-2 lg:grid-cols-4">
-        <span>read-only API</span>
-        <span>no automatic memory writes</span>
-        <span>memory writes: {lastResponse ? String(lastResponse.memory_writes) : "false"}</span>
-        <span>TTS: {lastResponse?.tts ? "enabled" : "false"}</span>
-        <span>browser TTS: {browserTtsStatus}</span>
-        <span>local browser playback only</span>
-        <span>no backend TTS</span>
-        <span>notification: {lastResponse?.notification ? "enabled" : "false"}</span>
-        <span>state source: {lastResponse?.state_source || "pending"}</span>
-        <span>no always-on listening</span>
+      <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
+        <span className="rounded-full border border-border/70 px-3 py-1">read-only API</span>
+        <span className="rounded-full border border-border/70 px-3 py-1">no automatic memory writes</span>
+        <span className="rounded-full border border-border/70 px-3 py-1">browser TTS: {browserTtsStatus}</span>
+        <span className="rounded-full border border-border/70 px-3 py-1">local browser playback only</span>
+        <span className="rounded-full border border-border/70 px-3 py-1">no backend TTS</span>
+        <span className="rounded-full border border-border/70 px-3 py-1">no always-on listening</span>
+        <span className="rounded-full border border-border/70 px-3 py-1">state source: {lastResponse?.state_source || "pending"}</span>
       </div>
     </section>
   );
@@ -1002,23 +1004,23 @@ function BehavioralStateCard({
       }
     >
       <div className="mt-4 space-y-4">
-        <div>
+        <div className="rounded-xl border border-border/60 bg-background/40 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Current rule</p>
           <p className="mt-1 text-sm leading-6 text-foreground">{interpretation.currentRule}</p>
         </div>
-        <div>
+        <div className="rounded-xl border border-border/60 bg-background/40 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Why this rule</p>
           <p className="mt-1 text-sm leading-6 text-muted">{interpretation.why}</p>
         </div>
-        <div>
+        <div className="rounded-xl border border-border/60 bg-background/40 p-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Safety status</p>
           <p className="mt-1 text-sm leading-6 text-muted">{interpretation.safety}</p>
         </div>
-        <p className="rounded-md border border-border/80 bg-background/50 p-3 text-sm leading-6 text-muted">
+        <p className="rounded-xl border border-border/60 bg-background/40 p-3 text-sm leading-6 text-muted">
           {interpretation.source} Last refreshed: {lastRefreshedAt}.
         </p>
       </div>
-      <details className="mt-4 rounded-md border border-border/80 bg-background/40 p-3">
+      <details className="mt-4 rounded-xl border border-border/60 bg-background/35 p-3">
         <summary className="cursor-pointer text-sm font-semibold">View raw state details</summary>
         <div className="mt-3 grid gap-x-5 sm:grid-cols-2 xl:grid-cols-1">
           <Metric label="Last outcome" value={state.lastOutcome} />
@@ -1051,7 +1053,7 @@ function ReadinessRow({
   status: ReadinessStatus;
 }) {
   return (
-    <div className="flex flex-col gap-2 border-t border-border/80 py-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex flex-col gap-2 border-t border-border/60 py-3 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <p className="text-sm font-semibold">{label}</p>
         <p className="mt-1 text-sm leading-6 text-muted">{detail}</p>
@@ -1116,11 +1118,12 @@ function LiveSystemReadiness({
       }
     >
 
-      <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
         <ReadinessChip status={backendStatus} label={`backend ${backendStatus.replace("_", " ")}`} />
         <ReadinessChip status={supabaseStatus} label={`supabase ${supabaseStatus.replace("_", " ")}`} />
         <ReadinessChip status={schemaStatus} label={`schema ${schemaStatus.replace("_", " ")}`} />
         <ReadinessChip status={conversationStatus} label={`conversation ${conversationStatus.replace("_", " ")}`} />
+        <ReadinessChip status={proofUserStatus} label={`proof user ${proofUserStatus.replace("_", " ")}`} />
       </div>
 
       <p className="mt-3 text-xs text-muted">Last checked: {lastCheckedAt}</p>
@@ -1130,11 +1133,11 @@ function LiveSystemReadiness({
         </p>
       )}
 
-      <p className="mt-4 rounded-md border border-border/80 bg-background/50 p-3 text-sm leading-6 text-muted">
+      <p className="mt-4 rounded-xl border border-border/60 bg-background/40 p-3 text-sm leading-6 text-muted">
         {proofUserDetail}
       </p>
 
-      <details className="mt-4 rounded-md border border-border/80 bg-background/40 p-3">
+      <details className="mt-4 rounded-xl border border-border/60 bg-background/35 p-3">
         <summary className="cursor-pointer text-sm font-semibold">View readiness details</summary>
         <div className="mt-4 grid gap-6 lg:grid-cols-2">
           <div>
@@ -1195,28 +1198,31 @@ function LiveSystemReadiness({
         </div>
       </details>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <ReadinessRow
-          label="Side effects default"
-          detail={readiness ? readiness.safety.side_effects_default : "disabled"}
-          status="ready"
-        />
-        <ReadinessRow
-          label="Memory writes default"
-          detail={readiness ? readiness.safety.memory_writes_default : "disabled"}
-          status="ready"
-        />
-        <ReadinessRow
-          label="Explicit confirmation"
-          detail={readiness?.safety.requires_explicit_confirmation ? "Required for real side effects." : "Not checked."}
-          status={readiness?.safety.requires_explicit_confirmation ? "ready" : "not_checked"}
-        />
-        <ReadinessRow
-          label="Low-quality audio"
-          detail={readiness?.safety.low_quality_audio_gated ? "Gated before persistence." : "Not checked."}
-          status={readiness?.safety.low_quality_audio_gated ? "ready" : "not_checked"}
-        />
-      </div>
+      <details className="mt-4 rounded-xl border border-border/60 bg-background/35 p-3">
+        <summary className="cursor-pointer text-sm font-semibold">View safety details</summary>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <ReadinessRow
+            label="Side effects default"
+            detail={readiness ? readiness.safety.side_effects_default : "disabled"}
+            status="ready"
+          />
+          <ReadinessRow
+            label="Memory writes default"
+            detail={readiness ? readiness.safety.memory_writes_default : "disabled"}
+            status="ready"
+          />
+          <ReadinessRow
+            label="Explicit confirmation"
+            detail={readiness?.safety.requires_explicit_confirmation ? "Required for real side effects." : "Not checked."}
+            status={readiness?.safety.requires_explicit_confirmation ? "ready" : "not_checked"}
+          />
+          <ReadinessRow
+            label="Low-quality audio"
+            detail={readiness?.safety.low_quality_audio_gated ? "Gated before persistence." : "Not checked."}
+            status={readiness?.safety.low_quality_audio_gated ? "ready" : "not_checked"}
+          />
+        </div>
+      </details>
     </SectionCard>
   );
 }
@@ -1246,9 +1252,9 @@ function RecentInterventions({ items }: { items: RecentInterventionProof[] }) {
       title="Proof rows and fallback cards"
       description="Backend data appears first when available. Fallback cards remain labeled and should not be mistaken for a live stream."
     >
-      <div className="mt-4 grid gap-3 lg:grid-cols-4">
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {items.map((item) => (
-          <article key={`${item.title}-${item.feedback}`} className="rounded-lg border border-border/80 bg-background/50 p-4">
+          <article key={`${item.title}-${item.feedback}`} className="rounded-xl border border-border/60 bg-background/40 p-4">
             <p className="text-sm font-semibold">{item.title}</p>
             <dl className="mt-3 space-y-2 text-sm">
               <div>
@@ -1275,10 +1281,14 @@ function RecentInterventions({ items }: { items: RecentInterventionProof[] }) {
 
 function SafetyGates({ items }: { items: OSConsoleFixture["safetyGates"] }) {
   return (
-    <SectionCard eyebrow="Safety Gates" title="Designed to avoid annoying behavior">
+    <SectionCard
+      eyebrow="Safety Gates"
+      title="Designed to avoid annoying behavior"
+      description="The default view shows the safety posture once; the full list stays here for audit."
+    >
       <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
-          <article key={item.title} className="rounded-lg border border-border/80 bg-background/50 p-4">
+          <article key={item.title} className="rounded-xl border border-border/60 bg-background/40 p-4">
             <p className="text-sm font-semibold">{item.title}</p>
             <p className="mt-2 text-sm leading-6 text-muted">{item.detail}</p>
           </article>
@@ -1303,20 +1313,28 @@ function ProofLadder({ items }: { items: OSConsoleFixture["proofLadder"] }) {
       items: items.filter((item) => ["Typed conversation", "Typed conversation TTS", "Live conversation", "Live conversation TTS"].includes(item.label)),
     },
     {
+      label: "Desktop App",
+      items: items.filter((item) => ["Desktop shell", "Desktop service manager"].includes(item.label)),
+    },
+    {
       label: "Not Built Yet",
       items: items.filter((item) => ["Always-on"].includes(item.label)),
     },
   ].filter((group) => group.items.length > 0);
 
   return (
-    <SectionCard eyebrow="Proof Ladder" title="What is proven versus still gated">
+    <SectionCard
+      eyebrow="Proof Ladder"
+      title="What is proven versus still gated"
+      description="Grouped by system area so proof data stays available without dominating the chat workspace."
+    >
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         {groups.map((group) => (
-          <div key={group.label} className="rounded-lg border border-border/80 bg-background/50 p-4">
+          <div key={group.label} className="rounded-xl border border-border/60 bg-background/40 p-4">
             <p className="text-sm font-semibold">{group.label}</p>
             <div className="mt-3 space-y-3">
               {group.items.map((item) => (
-                <div key={item.label} className="border-t border-border/70 pt-3 first:border-t-0 first:pt-0">
+                <div key={item.label} className="border-t border-border/60 pt-3 first:border-t-0 first:pt-0">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="text-sm font-semibold">{item.label}</h3>
                     <StatusChip status={item.status} />
@@ -1357,45 +1375,45 @@ function HeroStatus({
   const conversationStatus = readiness ? readinessState(readiness.conversation.api_available && readiness.conversation.read_only) : "not_checked";
 
   return (
-    <section className="border-b border-border/80 bg-card/90">
-      <div className="mx-auto max-w-7xl px-6 py-5">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+    <section className="border-b border-border/60 bg-card/80 backdrop-blur">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-primary">Delta OS</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Delta OS Console</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted md:text-base">
-              Local Behavioral OS and conversation runtime cockpit.
+            <p className="text-xs font-medium uppercase tracking-wide text-muted">Delta OS</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">Delta OS Console</h1>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
+              Local Behavioral OS and conversation runtime cockpit. Read-only by default.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={onRefreshReadiness}
-              className="rounded-md border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
+              className="rounded-xl border border-border/70 px-3 py-2 text-sm font-medium transition-colors hover:bg-background"
             >
               Refresh readiness
             </button>
             <button
               type="button"
               onClick={onOpenPalette}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
+              className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-dark"
             >
               Command Palette
             </button>
           </div>
         </div>
-        <div className="mt-5 flex flex-wrap items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <ReadinessChip status={backendStatus} label={`backend ${backendStatus.replace("_", " ")}`} />
           <ReadinessChip status={supabaseStatus} label={`supabase ${supabaseStatus.replace("_", " ")}`} />
           <ReadinessChip status={schemaStatus} label={`schema ${schemaStatus.replace("_", " ")}`} />
           <ReadinessChip status={conversationStatus} label={`conversation ${conversationStatus.replace("_", " ")}`} />
-          <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted">
+          <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted">
             Data source: {environment.dataSource}
           </span>
-          <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted">
+          <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted">
             Side effects: {environment.sideEffects}
           </span>
-          <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted">
+          <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted">
             Updated: {environment.lastUpdated}
           </span>
         </div>
@@ -1780,14 +1798,14 @@ export default function OSConsole({
   ];
 
   const visibleViews = (
-    <div className="mx-auto max-w-7xl px-6 pt-5">
-      <div className="flex flex-wrap gap-2 rounded-lg border border-border/80 bg-card/70 p-2">
+    <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
+      <div className="flex flex-wrap gap-1 rounded-2xl border border-border/60 bg-card/70 p-1 shadow-sm shadow-slate-950/5">
         {CONSOLE_VIEWS.map((view) => (
           <button
             key={view.id}
             type="button"
             onClick={() => setActiveView(view.id)}
-            className={`rounded-md px-3 py-2 text-left text-sm transition-colors ${
+            className={`rounded-xl px-3 py-2 text-left text-sm transition-colors ${
               activeView === view.id
                 ? "bg-primary text-white"
                 : "text-muted hover:bg-background hover:text-foreground"
@@ -1817,10 +1835,10 @@ export default function OSConsole({
         onRefreshReadiness={() => void loadReadiness()}
       />
       {visibleViews}
-      <div className="mx-auto max-w-7xl space-y-6 px-6 py-6">
+      <div className="mx-auto max-w-7xl space-y-5 px-4 py-5 sm:px-6">
         <SafetyStrip browserTtsStatus={browserTtsStatus} />
-        <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-amber-700 dark:text-amber-300">
-          {dataSourceLabel} Typed Ask Delta is wired to the read-only backend conversation runtime; voice input stays disabled and browser speech preview is user-triggered only.
+        <div className="rounded-2xl border border-border/60 bg-card/55 px-4 py-3 text-xs leading-5 text-muted shadow-sm shadow-slate-950/5">
+          {dataSourceLabel} Ask Delta uses the read-only backend conversation runtime when available. Voice input stays disabled; browser speech preview is user-triggered only.
         </div>
 
         {activeView === "chat" && (
@@ -1911,7 +1929,6 @@ export default function OSConsole({
               <CollapsibleSection
                 title="Developer Commands"
                 description="Terminal commands stay available, but they are separate from the normal chat flow."
-                defaultOpen
               >
                 <div className="grid gap-4">
                   {commandCards.map((command) => (

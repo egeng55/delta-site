@@ -23,6 +23,12 @@ suppression, persisted state, intent, delivered count, and success rate without
 requiring users to decode implementation labels. Developer commands and proof
 metadata remain available, but they are secondary to normal conversation.
 
+Phase 63 tightens the visual hierarchy again: the header is more app-like, the
+conversation workspace is calmer, readiness/proof/command surfaces are more
+compact, developer commands are collapsed by default, and the service-manager
+fallback page uses the same restrained desktop aesthetic. No desktop runtime
+capability changed.
+
 You can override that URL for local development:
 
 ```bash

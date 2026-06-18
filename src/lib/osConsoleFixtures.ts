@@ -202,6 +202,8 @@ export const OS_CONSOLE_FALLBACK: OSConsoleFixture = {
     { label: "Typed conversation TTS", status: "implemented", detail: "Explicit TTS path exists; keep it opt-in." },
     { label: "Live conversation", status: "proven", detail: "Spoken question routed to text response once." },
     { label: "Live conversation TTS", status: "pending validation", detail: "Implemented but not user-validated yet." },
+    { label: "Desktop shell", status: "implemented", detail: "Electron shell can load the OS Console when local services are running." },
+    { label: "Desktop service manager", status: "implemented", detail: "Desktop shell can start backend/site dev services with allowlisted commands." },
     { label: "Always-on", status: "not built", detail: "No wake word or background mode exists." },
   ],
   nextSafeAction: {
