@@ -66,6 +66,9 @@ Existing reports are not overwritten unless `--force` is passed.
 - `agent:run-ledger` records one run ledger entry.
 - `agent:maintenance:run` performs the full report-only cycle and may write a
   cycle report.
+- `agent:dispatch:plan` turns the selected finding into a planning-only
+  dispatch plan with approval requirements, proposed worktree details, scope,
+  and verification.
 - `agent:finding:brief` turns a selected finding into a scoped phase brief, but
   only when a later phase explicitly asks for that planning artifact.
 

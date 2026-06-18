@@ -40,6 +40,10 @@ and the recommended next command. It may write a `maintenance-cycle` report.
 `agent:run-ledger` remains the narrower command for recording one run ledger
 entry.
 
+`agent:dispatch:plan` is the next planning layer. It can propose a phase,
+worktree path, likely files, and verification for a finding, but it still does
+not authorize implementation or create worktrees.
+
 ## Report-Only Default
 
 Print a report:

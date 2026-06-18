@@ -127,6 +127,11 @@ approval requirement, and may write a `maintenance-cycle` report with `--write`.
 It still does not grant approval, close findings, create worktrees, or
 authorize implementation.
 
+`agent:dispatch:plan` also uses this policy output. It may print or write a
+dispatch plan with proposed phase, scope, worktree path, and verification
+commands, but the policy mode still controls whether implementation is blocked,
+manual-only, or approval-required.
+
 ## Human Review Remains Required
 
 The policy engine is not an autonomous approval system. It is a local,

@@ -120,6 +120,21 @@ runner does not implement findings, generate phase brief files, create
 worktrees, run tests, or call services. See
 `docs/AGENT_MAINTENANCE_RUNNER.md`.
 
+## Dispatch Plans
+
+Use the dispatch planner when the next step is to describe what would happen if
+a finding were approved:
+
+```bash
+npm run agent:dispatch:plan -- --top --phase 78
+npm run agent:dispatch:plan -- --id 002 --phase 78 --name mobile-cache-strategy
+npm --silent run agent:dispatch:plan -- --id 002 --phase 78 --json
+```
+
+Dispatch plans are planning-only. They may show a proposed worktree path and
+verification plan, but they do not create worktrees or implement findings. See
+`docs/AGENT_DISPATCH_PLANNER.md`.
+
 ## Relationship To Finding Briefs
 
 Use `agent:finding:brief` to turn a finding into a scoped remediation brief:

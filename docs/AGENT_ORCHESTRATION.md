@@ -70,6 +70,7 @@ npm run agent:policy -- --report
 npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
 npm run agent:maintenance:run -- --report
+npm run agent:dispatch:plan -- --top --phase <number>
 ```
 
 Turn a specific finding or the highest-priority actionable finding into a phase
@@ -84,6 +85,16 @@ Finding briefs are still planning artifacts. They do not implement the finding,
 run verification, create worktrees, commit, or mark findings resolved. They
 include the policy action mode so approval requirements are visible in the
 handoff.
+
+For an intermediate dispatch plan before a phase brief, use:
+
+```bash
+npm run agent:dispatch:plan -- --top --phase <number>
+npm run agent:dispatch:plan -- --id <id> --phase <number> --name <slug>
+```
+
+Dispatch plans may show a proposed worktree path and branch, but they do not
+create worktrees or authorize implementation.
 
 For future report-only or autonomous planning, record a maintenance run with
 `npm run agent:maintenance:run -- --write` or

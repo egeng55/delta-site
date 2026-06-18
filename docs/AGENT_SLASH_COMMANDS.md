@@ -115,6 +115,28 @@ files, or treat the recommended command as approval. The runner records the top
 finding, policy mode, approval requirement, refused actions, and next command.
 ```
 
+## /dispatch-plan
+
+```text
+Read docs/AGENT_MAINTENANCE.md, docs/AGENT_MAINTENANCE_POLICY.md, and
+docs/AGENT_DISPATCH_PLANNER.md.
+Plan dispatch for the top actionable finding:
+npm run agent:dispatch:plan -- --top --phase <number>
+
+Plan dispatch for a specific finding:
+npm run agent:dispatch:plan -- --id <finding-id> --phase <number> --name <slug>
+
+Write a durable dispatch plan only when requested:
+npm run agent:dispatch:plan -- --id <finding-id> --phase <number> --name <slug> --write
+
+For parser-clean JSON:
+npm --silent run agent:dispatch:plan -- --id <finding-id> --phase <number> --json
+
+Do not implement the finding, create worktrees, run tests, or treat the
+dispatch plan as approval. It only records policy mode, approval requirement,
+scope, proposed worktree details, verification, and the next safe command.
+```
+
 ## /routine
 
 ```text

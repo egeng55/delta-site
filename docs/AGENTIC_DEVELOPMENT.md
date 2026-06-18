@@ -81,6 +81,9 @@ or `--write` to record what a maintenance run inspected and what policy allowed.
 Use `npm run agent:maintenance:run -- --report` for a single report-only
 maintenance cycle that combines findings, policy, top actionable selection, and
 the next recommended command.
+Use `npm run agent:dispatch:plan -- --top --phase <number>` to turn the
+policy-selected finding into a planning-only dispatch plan with approval
+requirements, proposed worktree details, scope, and verification.
 Use `npm run agent:finding:brief -- --id <id> --phase <number>` or `--top` to
 turn an existing finding into a scoped remediation phase brief. Finding briefs
 and run records are planning/operational artifacts only; they do not implement
@@ -96,6 +99,7 @@ Future MCP and parallel-agent planning is documented separately:
 - `docs/AGENT_MAINTENANCE.md`: local maintenance finding queue policy
 - `docs/AGENT_MAINTENANCE_POLICY.md`: allowed action modes for findings
 - `docs/AGENT_MAINTENANCE_RUNNER.md`: one-command report-only maintenance cycle
+- `docs/AGENT_DISPATCH_PLANNER.md`: policy-aware finding dispatch plans
 - `docs/AGENT_RUN_LEDGER.md`: durable records for maintenance inspection runs
 - `docs/AGENT_FINDING_BRIEFS.md`: finding-to-phase brief generator policy
 
@@ -145,6 +149,8 @@ Phase 53 does not add:
   to `agent/runs/` only with `--write`
 - `scripts/agent-maintenance-runner.mjs`: report-only maintenance cycle runner;
   writes cycle reports only with `--write`
+- `scripts/agent-dispatch-plan.mjs`: planning-only maintenance dispatch planner;
+  writes dispatch plans only with `--write`
 - `scripts/agent-finding-brief.mjs`: print-first finding-to-phase brief
   generator; writes to `agent/phase-briefs/` only with `--write`
 - `scripts/agent-phase-start.mjs`: print-first worktree command helper; `--run`
