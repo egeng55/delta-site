@@ -45,11 +45,13 @@ scripts/agent-eval.mjs
 scripts/agent-routine.mjs
 scripts/agent-phase-brief.mjs
 scripts/agent-maintenance.mjs
+scripts/agent-policy.mjs
 scripts/agent-finding-brief.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
 evals/**/*.json
 agent/findings/*.md
+agent/policies/*.json
 agent/phase-briefs/*.md
 ```
 
@@ -104,16 +106,19 @@ docs/AGENT_PARALLEL_WORKFLOWS.md
 docs/AGENT_ORCHESTRATION.md
 docs/AGENT_PHASE_BRIEFS.md
 docs/AGENT_MAINTENANCE.md
+docs/AGENT_MAINTENANCE_POLICY.md
 docs/AGENT_FINDING_BRIEFS.md
 scripts/agent-routine.mjs
 scripts/agent-orchestrate.mjs
 scripts/agent-phase-brief.mjs
 scripts/agent-maintenance.mjs
+scripts/agent-policy.mjs
 scripts/agent-finding-brief.mjs
 scripts/agent-status.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
 agent/findings/*.md
+agent/policies/*.json
 ```
 
 Run:
@@ -126,6 +131,8 @@ npm run agent:routine -- --routine docs-only
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine docs-only
 npm run agent:phase:brief -- --phase <number> --name <slug> --routine docs-only
 npm run agent:maintenance -- --report
+npm run agent:policy -- --report
+npm run agent:policy -- --top-actionable
 npm run agent:finding:brief -- --top --phase <number>
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine worktree-experiment --mode parallel-plan
 npm run agent:phase:start -- --phase <number> --name <slug> --print
@@ -149,10 +156,12 @@ creating worktrees, writing files, or committing. Use `npm --silent` or direct
 only with `--write`, under `agent/phase-briefs/`, and refuses to overwrite
 without `--force`.
 
-`agent:maintenance` is a read-only report over `agent/findings/`. `agent:finding:brief`
-is print-only by default and writes a generated remediation phase brief only
-with `--write`. It must not implement findings, run tests, create worktrees,
-commit, or mark findings resolved.
+`agent:maintenance` is a read-only report over `agent/findings/`. `agent:policy`
+is a read-only classifier that maps findings to allowed action modes.
+`agent:finding:brief` checks policy first, is print-only by default, and writes
+a generated remediation phase brief only with `--write`. These scripts must not
+implement findings, run tests, create worktrees, commit, or mark findings
+resolved.
 
 Fresh worktrees may need dependency setup before tests or builds:
 

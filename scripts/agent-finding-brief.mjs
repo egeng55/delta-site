@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import {
+  classifyFinding,
+  classifyFindings,
+  readFindings,
+  readPolicy,
+  repoRoot,
+  selectTopActionable,
+} from "./agent-policy.mjs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "..");
-const findingsDir = path.join(repoRoot, "agent", "findings");
 const briefsDir = path.join(repoRoot, "agent", "phase-briefs");
-
-const priorityOrder = { P0: 0, P1: 1, P2: 2, P3: 3 };
-const statusOrder = { open: 0, "pending-human": 1, deferred: 2, resolved: 3 };
 
 function parseArgs(argv) {
   const values = {
@@ -56,47 +57,6 @@ function parseArgs(argv) {
   return values;
 }
 
-function stripQuotes(value) {
-  return value.replace(/^["']|["']$/g, "");
-}
-
-function parseScalar(value) {
-  const stripped = stripQuotes(value.trim());
-  if (stripped === "true") return true;
-  if (stripped === "false") return false;
-  return stripped;
-}
-
-function parseFrontmatter(text) {
-  const match = text.match(/^---\n([\s\S]*?)\n---\n?/);
-  if (!match) return {};
-
-  const data = {};
-  let currentListKey = null;
-  for (const rawLine of match[1].split("\n")) {
-    const line = rawLine.trimEnd();
-    if (!line.trim()) continue;
-
-    const listItem = line.match(/^\s*-\s+(.*)$/);
-    if (listItem && currentListKey) {
-      data[currentListKey].push(stripQuotes(listItem[1].trim()));
-      continue;
-    }
-
-    const keyValue = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (!keyValue) continue;
-    const [, key, rawValue] = keyValue;
-    if (rawValue.trim() === "") {
-      data[key] = [];
-      currentListKey = key;
-    } else {
-      data[key] = parseScalar(rawValue);
-      currentListKey = null;
-    }
-  }
-  return data;
-}
-
 function slugify(value) {
   return String(value || "")
     .toLowerCase()
@@ -110,60 +70,6 @@ function validPhase(value) {
 
 function paddedPhase(phase) {
   return String(phase).padStart(3, "0");
-}
-
-function readFindings() {
-  if (!existsSync(findingsDir)) return [];
-  return readdirSync(findingsDir)
-    .filter((name) => name.endsWith(".md"))
-    .sort()
-    .map((name) => {
-      const filePath = path.join(findingsDir, name);
-      const text = readFileSync(filePath, "utf8");
-      return {
-        file: path.relative(repoRoot, filePath),
-        body: text.replace(/^---\n[\s\S]*?\n---\n?/, "").trim(),
-        ...parseFrontmatter(text),
-      };
-    });
-}
-
-function sortFindings(findings) {
-  return [...findings].sort((a, b) => {
-    const priorityDelta = (priorityOrder[a.priority] ?? 99) - (priorityOrder[b.priority] ?? 99);
-    if (priorityDelta !== 0) return priorityDelta;
-    const statusDelta = (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99);
-    if (statusDelta !== 0) return statusDelta;
-    return Number(a.id) - Number(b.id);
-  });
-}
-
-function selectFinding(findings, args) {
-  if (args.id) {
-    const finding = findings.find((candidate) => candidate.id === args.id);
-    if (!finding) {
-      return { finding: null, rationale: `No finding with id ${args.id} exists.` };
-    }
-    return { finding, rationale: `Selected exact finding id ${args.id}.` };
-  }
-
-  if (args.top) {
-    const candidates = sortFindings(findings).filter((finding) => {
-      if (finding.status === "resolved" || finding.status === "deferred") return false;
-      if (finding.status === "pending-human" && finding.agent_executable !== true) return false;
-      return finding.agent_executable === true;
-    });
-    const finding = candidates[0] || null;
-    if (!finding) {
-      return { finding: null, rationale: "No open agent-actionable finding is available." };
-    }
-    return {
-      finding,
-      rationale: `Selected highest-priority agent-actionable finding: ${finding.priority} ${finding.status} id ${finding.id}.`,
-    };
-  }
-
-  return { finding: null, rationale: "Provide --id <finding-id> or --top." };
 }
 
 function usagePayload(message = null) {
@@ -190,6 +96,7 @@ function usagePayload(message = null) {
       "Writes only with --write under agent/phase-briefs/.",
       "Does not implement findings.",
       "Does not run tests, create worktrees, call services, or commit.",
+      "Refuses blocked findings.",
     ],
   };
 }
@@ -199,7 +106,16 @@ function list(items) {
   return safeItems.map((item) => `- ${item}`).join("\n");
 }
 
-function verificationPlan(finding, repo, routine) {
+function verificationPlan(finding, repo, routine, policy) {
+  if (policy.actionMode === "human_required") {
+    const commands = ["Review the manual/provider checklist without printing secrets."];
+    if (repo === "backend" || finding.security_related === true) {
+      commands.push("cd /Users/egeng/delta-backend");
+      commands.push(".venv/bin/python scripts/secret_scan.py");
+    }
+    return commands;
+  }
+
   if (repo === "mobile") {
     return [
       "cd /Users/egeng/delta-mobile",
@@ -226,7 +142,7 @@ function verificationPlan(finding, repo, routine) {
     ];
   }
 
-  if (routine === "docs-only") {
+  if (routine === "docs-only" || policy.actionMode === "docs_eval_autofix_allowed") {
     return [
       "npm run agent:safety-scan",
       "npm run agent:eval",
@@ -247,7 +163,23 @@ function verificationPlan(finding, repo, routine) {
   ];
 }
 
-function buildBrief(args, finding, rationale) {
+function approvalText(policy) {
+  if (policy.actionMode === "human_required") {
+    return "Human/provider action is required. This brief is a manual checklist and confirmation plan only.";
+  }
+  if (policy.actionMode === "implementation_requires_approval") {
+    return "Human approval is required before any implementation, code, runtime, storage, or cross-repo changes.";
+  }
+  if (policy.actionMode === "docs_eval_autofix_allowed") {
+    return "Docs/eval-only changes may be prepared only within the explicitly scoped phase and should wait for human merge review.";
+  }
+  if (policy.actionMode === "worktree_allowed") {
+    return "A worktree may be recommended or created only after an explicit reviewed command; implementation still needs separate approval.";
+  }
+  return "This brief is planning-only unless a later phase explicitly authorizes implementation.";
+}
+
+function buildBrief(args, finding, policy, rationale) {
   const phase = args.phase;
   const name = slugify(args.name || finding.slug || finding.title);
   const repo = args.repo || finding.repo || "site";
@@ -255,7 +187,7 @@ function buildBrief(args, finding, rationale) {
   const evidenceFiles = Array.isArray(finding.evidence) ? finding.evidence : [];
   const likelyFiles = Array.isArray(finding.likely_files) ? finding.likely_files : [];
   const outOfScope = Array.isArray(finding.out_of_scope) ? finding.out_of_scope : [];
-  const verification = verificationPlan(finding, repo, routine);
+  const verification = verificationPlan(finding, repo, routine, policy);
   const objective = finding.recommended_next_phase || finding.objective || "Define the smallest safe remediation for this finding.";
 
   return {
@@ -264,6 +196,7 @@ function buildBrief(args, finding, rationale) {
     repo,
     routine,
     finding,
+    policy,
     rationale,
     targetPath: path.join(briefsDir, `phase-${paddedPhase(phase)}-${name}.md`),
     markdown: `# Delta Phase ${phase}: ${name}
@@ -285,6 +218,18 @@ commit changes.
 - Repo: ${repo}
 - Recommended routine: ${routine}
 - Selection rationale: ${rationale}
+
+## Maintenance Policy
+
+- Action mode: ${policy.actionMode}
+- Policy reason: ${policy.reason}
+- Approval requirement: ${approvalText(policy)}
+
+Allowed next commands:
+${list(policy.allowedNextCommands)}
+
+Forbidden actions:
+${list(policy.forbiddenActions)}
 
 ## Objective
 
@@ -317,12 +262,14 @@ ${list(outOfScope)}
 - No secret logging.
 - No destructive cleanup.
 - No backend/mobile/site runtime behavior changes outside the selected repo and phase scope.
+- Follow the policy action mode before creating worktrees or making implementation changes.
 
 ## Implementation Checklist
 
 - [ ] Inspect the evidence files listed above.
 - [ ] Confirm the current state before editing.
-- [ ] Make the smallest safe change.
+- [ ] Re-check policy with \`npm run agent:policy -- --id ${finding.id}\`.
+- [ ] Make the smallest safe change only if this phase and policy allow it.
 - [ ] Update tests and docs for the changed behavior.
 - [ ] Update the maintenance finding status only after implementation and verification.
 - [ ] Keep provider/manual-action findings open or \`pending-human\` until a human confirms completion.
@@ -338,6 +285,7 @@ ${verification.join("\n")}
 - Do not mark the finding resolved until implementation is complete and verified.
 - If this phase only creates a plan, the finding remains open.
 - If human/provider action is required, the finding remains \`pending-human\`.
+- Include the policy action mode and approval requirement in the handoff.
 
 ## Handoff Expectations
 
@@ -345,6 +293,8 @@ Final report should include:
 
 - files changed
 - finding id: ${finding.id}
+- policy action mode: ${policy.actionMode}
+- approval requirement
 - finding status change, if any
 - verification results
 - safety confirmations
@@ -376,8 +326,32 @@ function printUsage(payload) {
   for (const item of payload.safety) console.log(`- ${item}`);
 }
 
+function selectFinding(findings, policyConfig, args) {
+  if (args.id) {
+    const finding = findings.find((candidate) => candidate.id === args.id);
+    if (!finding) {
+      return { finding: null, policy: null, rationale: `No finding with id ${args.id} exists.` };
+    }
+    return {
+      finding,
+      policy: classifyFinding(finding, policyConfig),
+      rationale: `Selected exact finding id ${args.id}.`,
+    };
+  }
+
+  if (args.top) {
+    const classified = classifyFindings(findings, policyConfig);
+    const { selected, rationale } = selectTopActionable(classified);
+    if (!selected) return { finding: null, policy: null, rationale };
+    return { finding: selected.finding, policy: selected.policy, rationale };
+  }
+
+  return { finding: null, policy: null, rationale: "Provide --id <finding-id> or --top." };
+}
+
 const args = parseArgs(process.argv.slice(2));
 const findings = readFindings();
+const policyConfig = readPolicy();
 
 if (!validPhase(args.phase)) {
   const usage = usagePayload("Missing or invalid --phase <number>.");
@@ -386,7 +360,7 @@ if (!validPhase(args.phase)) {
   process.exit(1);
 }
 
-const { finding, rationale } = selectFinding(findings, args);
+const { finding, policy, rationale } = selectFinding(findings, policyConfig, args);
 if (!finding) {
   const usage = usagePayload(rationale);
   if (args.json) process.stdout.write(`${JSON.stringify({ error: usage }, null, 2)}\n`);
@@ -394,7 +368,17 @@ if (!finding) {
   process.exit(1);
 }
 
-const brief = buildBrief(args, finding, rationale);
+if (policy.actionMode === "blocked" || policy.actionMode === "report_only") {
+  const message = policy.actionMode === "blocked"
+    ? `Policy blocked finding ${finding.id}; refusing to generate an implementation brief.`
+    : `Policy classifies finding ${finding.id} as report_only; refusing to generate a phase brief.`;
+  const payload = { error: message, finding, policy, rationale };
+  if (args.json) process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+  else console.error(message);
+  process.exit(1);
+}
+
+const brief = buildBrief(args, finding, policy, rationale);
 const payload = {
   generatedBy: "scripts/agent-finding-brief.mjs",
   printOnlyDefault: true,
@@ -407,6 +391,7 @@ const payload = {
     status: finding.status,
     rationale,
   },
+  policy,
   phaseIdentity: {
     phase: brief.phase,
     name: brief.name,

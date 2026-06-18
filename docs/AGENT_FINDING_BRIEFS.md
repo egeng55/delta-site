@@ -7,9 +7,10 @@ Codex implementation.
 ## Relationship To Maintenance
 
 `agent:maintenance` reports known findings under `agent/findings/`.
-`agent:finding:brief` selects one of those findings and produces a phase brief
-with objective, evidence, scope, safety boundaries, verification commands, and
-handoff expectations.
+`agent:policy` classifies the allowed action mode for each finding.
+`agent:finding:brief` selects one of those findings, checks the policy, and
+produces a phase brief with objective, evidence, scope, safety boundaries,
+verification commands, policy action mode, and handoff expectations.
 
 The brief does not implement the finding.
 
@@ -36,9 +37,24 @@ Select the highest-priority agent-actionable finding:
 npm run agent:finding:brief -- --top --phase 74
 ```
 
-`--top` prioritizes `P0` before `P1` before `P2`, excludes `resolved` and
-`deferred`, and skips `pending-human` findings unless they are explicitly marked
-agent-executable. Ties use the lowest numeric finding id.
+`--top` delegates selection to the policy engine. It prioritizes `P0` before
+`P1` before `P2`, excludes `resolved` and `deferred`, skips `human_required` and
+`blocked` findings, and selects the highest-priority finding whose policy allows
+at least brief generation. Ties use the lowest numeric finding id.
+
+## Policy Behavior
+
+- `human_required`: generate a manual/checklist brief only.
+- `blocked`: refuse to generate an implementation brief.
+- `implementation_requires_approval`: generate a planning brief that clearly
+  requires human approval before code or runtime changes.
+- `docs_eval_autofix_allowed`: allow a docs/eval-scoped brief.
+
+Check a finding first with:
+
+```bash
+npm run agent:policy -- --id 002
+```
 
 ## Write Behavior
 

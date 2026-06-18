@@ -30,9 +30,14 @@ explicit `--force`.
 ## /finding-brief
 
 ```text
-Read docs/AGENT_MAINTENANCE.md and docs/AGENT_FINDING_BRIEFS.md.
+Read docs/AGENT_MAINTENANCE.md, docs/AGENT_MAINTENANCE_POLICY.md, and
+docs/AGENT_FINDING_BRIEFS.md.
 Inspect the current finding queue:
 npm run agent:maintenance -- --report
+
+Inspect policy action modes:
+npm run agent:policy -- --report
+npm run agent:policy -- --id <finding-id>
 
 Generate a printed remediation brief from a specific finding:
 npm run agent:finding:brief -- --id <finding-id> --phase <number> --name <slug>
@@ -48,6 +53,26 @@ npm --silent run agent:finding:brief -- --id <finding-id> --phase <number> --jso
 
 Treat the output as a phase proposal. Do not implement the finding, mark it
 resolved, create worktrees, or commit unless a later implementation phase asks.
+```
+
+## /policy-review
+
+```text
+Read docs/AGENT_MAINTENANCE_POLICY.md.
+Report all finding action modes:
+npm run agent:policy -- --report
+
+Inspect the next policy-allowed finding:
+npm run agent:policy -- --top-actionable
+
+Inspect one finding:
+npm run agent:policy -- --id <finding-id>
+
+For parser-clean JSON:
+npm --silent run agent:policy -- --json
+
+Do not implement findings. Treat the policy output as the maximum allowed agent
+action until a human explicitly scopes a remediation phase.
 ```
 
 ## /routine

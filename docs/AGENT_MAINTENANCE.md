@@ -71,6 +71,24 @@ npm --silent run agent:maintenance -- --json
 The report is read-only. It does not update statuses, implement fixes, run
 tests, create worktrees, or commit.
 
+## Policy Classification
+
+Classify findings before generating implementation plans:
+
+```bash
+npm run agent:policy -- --report
+npm run agent:policy -- --id 002
+npm run agent:policy -- --top-actionable
+npm --silent run agent:policy -- --json
+```
+
+The policy engine maps findings to action modes such as `report_only`,
+`brief_allowed`, `docs_eval_autofix_allowed`,
+`implementation_requires_approval`, `human_required`, and `blocked`.
+
+Policy rules live in `agent/policies/maintenance-policy.json`; the canonical
+definitions live in `docs/AGENT_MAINTENANCE_POLICY.md`.
+
 ## Relationship To Finding Briefs
 
 Use `agent:finding:brief` to turn a finding into a scoped remediation brief:
@@ -83,3 +101,8 @@ npm run agent:finding:brief -- --id 002 --phase 74 --name mobile-cache-strategy 
 Findings should not be marked `resolved` until implementation is complete and
 verification passes. Planning-only phases leave the finding `open`. Items that
 need provider-side or manual confirmation remain `pending-human`.
+
+`agent:finding:brief` checks the policy first. It refuses `blocked` findings,
+labels `human_required` findings as manual/checklist work, and labels
+`implementation_requires_approval` findings as planning-only until a human
+explicitly approves implementation.

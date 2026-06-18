@@ -67,6 +67,8 @@ npm run agent:routine -- --routine desktop
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine <routine>
 npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine>
 npm run agent:maintenance -- --report
+npm run agent:policy -- --report
+npm run agent:policy -- --top-actionable
 npm run agent:finding:brief -- --top --phase <number>
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
@@ -94,8 +96,11 @@ stdout by default and writes only with `--write` to
 overwritten unless `--force` is passed.
 
 `agent:maintenance` reports the local maintenance findings queue under
-`agent/findings/`. `agent:finding:brief` turns an existing finding into a
-scoped remediation phase brief. It is print-only by default and writes only
+`agent/findings/`. `agent:policy` classifies each finding into a permitted
+agent action mode, such as `human_required`,
+`implementation_requires_approval`, or `docs_eval_autofix_allowed`.
+`agent:finding:brief` turns an existing finding into a scoped remediation phase
+brief after checking the policy. It is print-only by default and writes only
 with `--write` to `agent/phase-briefs/`. Finding briefs are planning artifacts;
 they do not implement findings or mark them resolved.
 

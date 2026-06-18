@@ -66,6 +66,8 @@ Maintenance findings use the same planning model. Inspect the queue with:
 
 ```bash
 npm run agent:maintenance -- --report
+npm run agent:policy -- --report
+npm run agent:policy -- --top-actionable
 ```
 
 Turn a specific finding or the highest-priority actionable finding into a phase
@@ -77,7 +79,9 @@ npm run agent:finding:brief -- --top --phase <number>
 ```
 
 Finding briefs are still planning artifacts. They do not implement the finding,
-run verification, create worktrees, commit, or mark findings resolved.
+run verification, create worktrees, commit, or mark findings resolved. They
+include the policy action mode so approval requirements are visible in the
+handoff.
 
 Fresh worktrees may require `npm ci` before verification because `node_modules`
 is ignored and not shared. If production build fails only because ignored local

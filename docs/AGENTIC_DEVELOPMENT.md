@@ -74,8 +74,10 @@ the phase should create `agent/phase-briefs/phase-XXX-name.md`; existing brief
 files require `--force` to replace.
 
 Agents can use `npm run agent:maintenance -- --report` to inspect the local
-maintenance findings queue. Use `npm run agent:finding:brief -- --id <id>
---phase <number>` or `--top` to turn an existing finding into a scoped
+maintenance findings queue. Use `npm run agent:policy -- --report` or
+`npm run agent:policy -- --id <id>` to classify each finding into an allowed
+agent action mode before planning. Use `npm run agent:finding:brief -- --id
+<id> --phase <number>` or `--top` to turn an existing finding into a scoped
 remediation phase brief. Finding briefs are planning artifacts only; they do not
 implement the remediation or close the finding.
 
@@ -87,6 +89,7 @@ Future MCP and parallel-agent planning is documented separately:
 - `docs/AGENT_ORCHESTRATION.md`: print-only phase orchestration planner
 - `docs/AGENT_PHASE_BRIEFS.md`: durable phase brief generator policy
 - `docs/AGENT_MAINTENANCE.md`: local maintenance finding queue policy
+- `docs/AGENT_MAINTENANCE_POLICY.md`: allowed action modes for findings
 - `docs/AGENT_FINDING_BRIEFS.md`: finding-to-phase brief generator policy
 
 ## Codex First
@@ -130,6 +133,7 @@ Phase 53 does not add:
 - `scripts/agent-phase-brief.mjs`: print-first phase contract generator; writes
   to `agent/phase-briefs/` only with `--write`
 - `scripts/agent-maintenance.mjs`: read-only maintenance finding reporter
+- `scripts/agent-policy.mjs`: read-only maintenance finding policy classifier
 - `scripts/agent-finding-brief.mjs`: print-first finding-to-phase brief
   generator; writes to `agent/phase-briefs/` only with `--write`
 - `scripts/agent-phase-start.mjs`: print-first worktree command helper; `--run`

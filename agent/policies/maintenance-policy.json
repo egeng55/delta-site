@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "defaultMode": "report_only",
+  "modes": {
+    "report_only": {
+      "summary": "Agent may report status only. No brief generation, no worktree, no implementation."
+    },
+    "brief_allowed": {
+      "summary": "Agent may generate a scoped phase brief. No implementation."
+    },
+    "worktree_allowed": {
+      "summary": "Agent may recommend or create a worktree only after an explicit command. No implementation unless separately allowed."
+    },
+    "docs_eval_autofix_allowed": {
+      "summary": "Agent may make docs/eval-only changes in an isolated worktree, verify, and wait for human merge approval."
+    },
+    "implementation_requires_approval": {
+      "summary": "Agent may plan and prepare a brief. Human approval is required before code or runtime changes."
+    },
+    "human_required": {
+      "summary": "Agent may only document or checklist the issue. Provider, account, credential, or other human action is required."
+    },
+    "blocked": {
+      "summary": "Agent must not act. This includes destructive cleanup, secret printing, unapproved database writes, or side-effect enablement."
+    }
+  },
+  "statusRules": {
+    "pending-human": {
+      "mode": "human_required",
+      "reason": "Finding status requires manual human or provider action."
+    },
+    "resolved": {
+      "mode": "report_only",
+      "reason": "Resolved findings should only be reported."
+    },
+    "deferred": {
+      "mode": "report_only",
+      "reason": "Deferred findings should only be reported."
+    }
+  },
+  "keywordRules": [
+    {
+      "mode": "blocked",
+      "keywords": [
+        "supabase mutation",
+        "database write",
+        "run migration",
+        "destructive cleanup",
+        "print secret",
+        "secret logging",
+        "enable mic",
+        "enable tts",
+        "enable notification",
+        "memory write",
+        "npm audit fix"
+      ],
+      "reason": "Finding text requests or implies a forbidden side effect."
+    },
+    {
+      "mode": "human_required",
+      "keywords": [
+        "credential rotation",
+        "provider dashboard",
+        "provider-side",
+        "production secret",
+        "payment provider",
+        "api key rotation"
+      ],
+      "reason": "Finding requires provider/account action that an agent cannot safely perform."
+    },
+    {
+      "mode": "implementation_requires_approval",
+      "keywords": [
+        "auth",
+        "billing",
+        "privacy",
+        "terms",
+        "schema",
+        "migration",
+        "deployment",
+        "signing",
+        "notarization",
+        "storage behavior",
+        "runtime behavior"
+      ],
+      "reason": "Finding touches a high-risk product boundary and needs explicit implementation approval."
+    }
+  ],
+  "routineRules": {
+    "eval-update": {
+      "mode": "docs_eval_autofix_allowed",
+      "reason": "Eval fixture updates can be docs/eval-only when they avoid live services and side effects."
+    },
+    "docs-only": {
+      "mode": "docs_eval_autofix_allowed",
+      "reason": "Docs-only findings can be handled as docs/eval changes when scoped to documentation artifacts."
+    },
+    "desktop": {
+      "mode": "implementation_requires_approval",
+      "reason": "Desktop and Electron changes may affect packaging, process management, or local permissions."
+    }
+  },
+  "repoRules": {
+    "backend": {
+      "mode": "implementation_requires_approval",
+      "reason": "Backend runtime changes require explicit approval after a brief."
+    },
+    "mobile": {
+      "mode": "implementation_requires_approval",
+      "reason": "Mobile runtime and storage changes require explicit approval after a brief."
+    },
+    "multi": {
+      "mode": "implementation_requires_approval",
+      "reason": "Multi-repo changes require explicit coordination and approval after a brief."
+    }
+  },
+  "priorityRules": {
+    "P0": {
+      "maxAutoMode": "implementation_requires_approval",
+      "reason": "P0 findings must never auto-implement."
+    },
+    "P1": {
+      "maxAutoMode": "implementation_requires_approval",
+      "reason": "P1 findings may generate briefs but require approval for runtime changes."
+    },
+    "P2": {
+      "maxAutoMode": "docs_eval_autofix_allowed",
+      "reason": "P2 docs/eval/tooling findings may allow docs/eval autofix when no runtime boundary is touched."
+    }
+  }
+}

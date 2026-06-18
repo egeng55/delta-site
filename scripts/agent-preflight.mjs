@@ -107,6 +107,7 @@ const requiredDocs = [
   "docs/AGENT_ORCHESTRATION.md",
   "docs/AGENT_PHASE_BRIEFS.md",
   "docs/AGENT_MAINTENANCE.md",
+  "docs/AGENT_MAINTENANCE_POLICY.md",
   "docs/AGENT_FINDING_BRIEFS.md",
   "docs/AGENT_MCP_STRATEGY.md",
   "docs/AGENT_PARALLEL_WORKFLOWS.md",
