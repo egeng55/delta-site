@@ -10,11 +10,17 @@ Print routine guidance with:
 ```bash
 npm run agent:context
 npm run agent:context -- --json
+npm run agent:orchestrate -- --phase <number> --name <slug> --routine docs-only
 npm run agent:routine -- --list
 npm run agent:routine -- --routine docs-only
 npm run agent:routine -- --routine desktop
 npm run agent:routine -- --routine worktree-experiment --phase 58 --name example
 ```
+
+Use `docs/AGENT_ORCHESTRATION.md` when a phase needs one combined plan with
+context commands, routine guidance, a worktree preview, suggested roles,
+verification commands, and handoff expectations. The orchestration planner is
+advisory and print-only.
 
 ## Shared Safety Rules
 

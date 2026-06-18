@@ -31,6 +31,13 @@ Preview worktree commands first:
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 ```
 
+For a broader advisory split across roles and candidate worktrees, use the
+print-only orchestration planner:
+
+```bash
+npm run agent:orchestrate -- --phase <number> --name <slug> --routine worktree-experiment --mode parallel-plan
+```
+
 Creating a worktree requires explicit approval and `--run`. Worktree cleanup is
 manual and must never be automatic.
 

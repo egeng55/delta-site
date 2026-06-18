@@ -59,11 +59,18 @@ Agents can use `npm run agent:routine -- --list` to print standard command
 sequences for common phase types. Routine output is guidance only; it does not
 execute commands or replace review.
 
+Agents can use `npm run agent:orchestrate -- --phase <number> --name <slug>
+--routine <routine>` to print a complete phase plan that combines context,
+routine, worktree, role, verification, safety, and handoff guidance. It is
+print-only and does not execute commands, create worktrees, write files, or
+commit.
+
 Future MCP and parallel-agent planning is documented separately:
 
 - `docs/AGENT_MCP_STRATEGY.md`: read-only-first MCP policy and candidate matrix
 - `docs/AGENT_PARALLEL_WORKFLOWS.md`: worktree-per-agent and report-only
   workflow policy
+- `docs/AGENT_ORCHESTRATION.md`: print-only phase orchestration planner
 
 ## Codex First
 
@@ -100,6 +107,8 @@ Phase 53 does not add:
   `docs-only`, `site`, `desktop`, and `all` scopes
 - `scripts/agent-routine.mjs`: print-only routine guide for composing existing
   agent commands
+- `scripts/agent-orchestrate.mjs`: print-only planner for composing context,
+  routine, worktree, verification, role, and handoff guidance
 - `scripts/agent-phase-start.mjs`: print-first worktree command helper; `--run`
   can create a new worktree only when the repo is clean
 - `scripts/agent-phase-handoff.mjs`: read-only handoff skeleton printer

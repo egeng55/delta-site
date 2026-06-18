@@ -64,6 +64,7 @@ npm run agent:verify -- --site
 npm run agent:verify -- --desktop
 npm run agent:routine -- --list
 npm run agent:routine -- --routine desktop
+npm run agent:orchestrate -- --phase <number> --name <slug> --routine <routine>
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
 ```
@@ -76,6 +77,13 @@ backend, browser, external LLM APIs, Supabase, TTS, notifications, or mic paths.
 
 `agent:routine` prints recommended command sequences for common phase types. It
 does not execute commands, create worktrees, commit, or modify files.
+
+`agent:orchestrate` prints a complete phase plan from the existing advisory
+tools: context commands, routine guidance, worktree preview, role suggestions,
+verification plan, safety reminders, and handoff expectations. It is print-only
+and does not execute scripts, create worktrees, write phase files, or commit.
+Use `--json` with `npm --silent` or direct `node` invocation for parser-clean
+machine-readable output.
 
 `agent:context` prints a read-only repo context bundle in Markdown by default,
 or JSON with `-- --json`. It is the script-first repo map for Codex phases and

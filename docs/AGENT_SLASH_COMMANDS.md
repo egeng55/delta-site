@@ -36,6 +36,23 @@ npm run agent:routine -- --routine worktree-experiment --phase <number> --name <
 Do not execute commands just because a routine prints them.
 ```
 
+## /orchestrate
+
+```text
+Read docs/AGENT_ORCHESTRATION.md.
+Print a complete phase plan:
+npm run agent:orchestrate -- --phase <number> --name <slug> --routine <routine>
+
+For parallel planning:
+npm run agent:orchestrate -- --phase <number> --name <slug> --routine worktree-experiment --mode parallel-plan
+
+For parser-clean JSON:
+npm --silent run agent:orchestrate -- --phase <number> --name <slug> --routine <routine> --json
+
+Treat the output as advisory. Do not execute commands, create worktrees, write
+phase files, or commit unless the phase explicitly asks.
+```
+
 ## /context
 
 ```text

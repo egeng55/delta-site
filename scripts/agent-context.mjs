@@ -50,6 +50,7 @@ const requiredDocs = [
   "docs/AGENT_ROLES.md",
   "docs/AGENT_EVALS.md",
   "docs/AGENT_ROUTINES.md",
+  "docs/AGENT_ORCHESTRATION.md",
   "docs/AGENT_MCP_STRATEGY.md",
   "docs/AGENT_PARALLEL_WORKFLOWS.md",
 ];
@@ -62,6 +63,7 @@ const agentScriptNames = [
   "agent:eval",
   "agent:verify",
   "agent:routine",
+  "agent:orchestrate",
   "agent:phase:start",
   "agent:phase:handoff",
 ];

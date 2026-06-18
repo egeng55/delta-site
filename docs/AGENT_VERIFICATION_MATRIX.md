@@ -96,7 +96,9 @@ docs/AGENT_WORKTREE_STRATEGY.md
 docs/AGENT_WORKSPACE_LAYOUT.md
 docs/AGENT_MCP_STRATEGY.md
 docs/AGENT_PARALLEL_WORKFLOWS.md
+docs/AGENT_ORCHESTRATION.md
 scripts/agent-routine.mjs
+scripts/agent-orchestrate.mjs
 scripts/agent-status.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
@@ -109,6 +111,8 @@ npm run agent:status
 npm run agent:context
 npm run agent:routine -- --list
 npm run agent:routine -- --routine docs-only
+npm run agent:orchestrate -- --phase <number> --name <slug> --routine docs-only
+npm run agent:orchestrate -- --phase <number> --name <slug> --routine worktree-experiment --mode parallel-plan
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
 npm run agent:verify -- --site
@@ -120,6 +124,11 @@ branches, commit, or touch sibling repos.
 
 `agent:routine` is print-only in this phase. It does not execute commands,
 create worktrees, commit, or modify files.
+
+`agent:orchestrate` is also print-only. It composes context, routine, worktree,
+role, verification, safety, and handoff guidance without executing commands,
+creating worktrees, writing files, or committing. Use `npm --silent` or direct
+`node` invocation for parser-clean JSON output.
 
 MCP and parallel-agent strategy docs are documentation only. They do not
 authorize new servers, background jobs, CI/CD automation, or autonomous writes.
