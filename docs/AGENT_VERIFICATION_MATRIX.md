@@ -106,6 +106,7 @@ Run:
 
 ```bash
 npm run agent:status
+npm run agent:context
 npm run agent:routine -- --list
 npm run agent:routine -- --routine docs-only
 npm run agent:phase:start -- --phase <number> --name <slug> --print
@@ -124,7 +125,11 @@ MCP and parallel-agent strategy docs are documentation only. They do not
 authorize new servers, background jobs, CI/CD automation, or autonomous writes.
 Workspace layout changes must keep Delta product context limited to
 `delta-site`, `delta-backend`, and `delta-mobile`; unrelated projects such as
-`morning-standup` remain excluded.
+`/Users/egeng/morning-standup` remain excluded.
+
+`agent:context` is read-only and prints Markdown by default or JSON with
+`-- --json`. It does not replace verification commands; it gives future agents
+a bounded repo map before they edit.
 
 ## OS Console
 

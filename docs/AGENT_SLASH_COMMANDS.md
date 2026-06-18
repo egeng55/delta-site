@@ -7,6 +7,7 @@ These are prompt templates for agents. They are not executable commands.
 ```text
 Read AGENTS.md and docs/AGENTIC_DEVELOPMENT.md.
 Run npm run agent:status if repo state is unclear.
+Run npm run agent:context when a structured repo map is useful.
 Run npm run agent:routine -- --list if the phase type is unclear.
 Inspect the requested files.
 Produce:
@@ -35,6 +36,21 @@ npm run agent:routine -- --routine worktree-experiment --phase <number> --name <
 Do not execute commands just because a routine prints them.
 ```
 
+## /context
+
+```text
+Print the read-only repo context bundle:
+npm run agent:context
+
+For machine-readable output:
+npm run agent:context -- --json
+npm --silent run agent:context -- --json
+
+Use this before broad phases, repo-map work, MCP strategy work, and handoffs
+that need structured context. Do not write bundle files or include
+/Users/egeng/morning-standup in Delta context.
+```
+
 ## /mcp-strategy
 
 ```text
@@ -56,8 +72,7 @@ Define one repo, one worktree, one role, and one verification scope per agent.
 Keep final integration sequential.
 Do not create worktrees, background agents, or autonomous writers unless the
 phase explicitly asks.
-Do not include morning-standup or /Users/egeng/delta/Morning-Standup in Delta
-context.
+Do not include /Users/egeng/morning-standup in Delta context.
 ```
 
 ## /phase-start

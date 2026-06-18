@@ -12,6 +12,7 @@ const packageScripts = packageJson.scripts || {};
 const agentScripts = [
   "agent:preflight",
   "agent:status",
+  "agent:context",
   "agent:safety-scan",
   "agent:eval",
   "agent:verify",
@@ -63,9 +64,9 @@ function findUnrelatedMorningStandup() {
   const repoParent = path.dirname(repoRoot);
   const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
   const candidates = [
+    path.join(homeCandidate, "morning-standup"),
     path.join(homeCandidate, "Morning-Standup"),
     path.join(homeCandidate, "delta", "Morning-Standup"),
-    path.join(homeCandidate, "morning-standup"),
     path.join(homeCandidate, "delta", "morning-standup"),
   ];
   return candidates.find((candidate) => existsSync(candidate)) || null;
@@ -92,7 +93,7 @@ const siblingRepos = {
 };
 const morningStandup = findUnrelatedMorningStandup();
 const morningStandupInsideDelta = morningStandup ? isInside(morningStandup, preferredProductRoot) : false;
-const cleanupPending = layout !== "grouped-delta" || morningStandupInsideDelta;
+const groupedLayoutPending = layout !== "grouped-delta";
 
 console.log("Delta site agent status");
 console.log("=======================");
@@ -111,9 +112,11 @@ console.log(`- delta-site: ${repoRoot}`);
 console.log(`- delta-backend: ${siblingRepos["delta-backend"] || "not found"}`);
 console.log(`- delta-mobile: ${siblingRepos["delta-mobile"] || "not found"}`);
 console.log(`- unrelated morning-standup excluded: ${morningStandup || "not found"}`);
-console.log(`- manual cleanup pending: ${cleanupPending ? "yes" : "no"}`);
+console.log(`- preferred grouped layout pending: ${groupedLayoutPending ? "yes" : "no"}`);
 if (morningStandupInsideDelta) {
   console.log("- note: Morning-Standup is under the Delta parent folder but remains excluded from Delta context.");
+} else if (morningStandup) {
+  console.log("- note: Morning-Standup is separate from Delta and remains excluded from Delta context.");
 }
 console.log("");
 
@@ -141,6 +144,7 @@ console.log("");
 
 console.log("Suggested next safe commands:");
 console.log("- npm run agent:preflight");
+console.log("- npm run agent:context");
 console.log("- npm run agent:safety-scan");
 console.log("- npm run agent:eval");
 console.log("- npm run agent:verify -- --desktop");

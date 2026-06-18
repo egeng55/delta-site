@@ -50,7 +50,7 @@ Keep worktrees outside the repo and outside the Delta product parent:
 
 Do not place worktrees under `delta-site`, `/Users/egeng/delta`, `.next`,
 `node_modules`, or any generated build directory. This avoids mixing worktrees
-with product repos or unrelated projects such as `Morning-Standup`.
+with product repos or unrelated projects such as `/Users/egeng/morning-standup`.
 
 ## Branch Naming Convention
 

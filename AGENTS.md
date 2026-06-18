@@ -77,6 +77,13 @@ backend, browser, external LLM APIs, Supabase, TTS, notifications, or mic paths.
 `agent:routine` prints recommended command sequences for common phase types. It
 does not execute commands, create worktrees, commit, or modify files.
 
+`agent:context` prints a read-only repo context bundle in Markdown by default,
+or JSON with `-- --json`. It is the script-first repo map for Codex phases and
+does not write bundle files, scan generated directories, call services, run
+tests, or start servers. For parser-clean JSON, use
+`npm --silent run agent:context -- --json` or
+`node scripts/agent-context.mjs --json`.
+
 Future MCP and parallel-agent planning lives in
 `docs/AGENT_MCP_STRATEGY.md` and `docs/AGENT_PARALLEL_WORKFLOWS.md`. These are
 strategy documents only; they do not authorize MCP servers, background agents,
@@ -86,8 +93,8 @@ Workspace layout guidance lives in `docs/AGENT_WORKSPACE_LAYOUT.md`. Delta
 product context includes only `delta-site`, `delta-backend`, and
 `delta-mobile`; unrelated projects such as `morning-standup` must not be
 included in context bundles, MCP repo maps, or multi-repo orchestration.
-If `Morning-Standup` still appears under `/Users/egeng/delta`, treat it as an
-unrelated project pending manual filesystem cleanup.
+`morning-standup` now lives separately at `/Users/egeng/morning-standup` and
+remains excluded from Delta context.
 
 `agent:phase:start` prints worktree creation commands by default. It may create
 a worktree only with `--run`, a clean current repo, a valid phase/name, and a

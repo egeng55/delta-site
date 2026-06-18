@@ -24,8 +24,7 @@ The workspace may currently be flat under `/Users/egeng`, or manually moved to
 the preferred grouped layout under `/Users/egeng/delta`. See
 `docs/AGENT_WORKSPACE_LAYOUT.md` for supported paths. Treat sibling repos as
 read-only context unless the phase explicitly includes them. Unrelated projects
-such as `morning-standup` are not part of Delta context, even if a local legacy
-folder still appears as `/Users/egeng/delta/Morning-Standup`.
+such as `/Users/egeng/morning-standup` are not part of Delta context.
 
 ## Default Agent Loop
 
@@ -50,6 +49,11 @@ Agents can use `npm run agent:status` for a read-only repo snapshot before
 starting or handing off work. For larger scoped phases, preview a worktree with
 `npm run agent:phase:start -- --phase <number> --name <slug> --print`. Creating
 a worktree requires `--run` and must only happen from a clean repo.
+
+Agents can use `npm run agent:context` for a fuller read-only repo context
+bundle before a phase begins. Add `-- --json` when a machine-readable bundle is
+needed. It does not write files, call services, run tests, or scan generated
+directories.
 
 Agents can use `npm run agent:routine -- --list` to print standard command
 sequences for common phase types. Routine output is guidance only; it does not
@@ -87,6 +91,7 @@ Phase 53 does not add:
 - `scripts/agent-preflight.mjs`: read-only repo context report
 - `scripts/agent-status.mjs`: read-only status report with suggested next safe
   commands
+- `scripts/agent-context.mjs`: read-only Markdown or JSON repo context bundle
 - `scripts/agent-safety-scan.mjs`: advisory static scan for risky patterns,
   grouped by source/config risks and lower-severity documentation mentions
 - `scripts/agent-eval.mjs`: read-only eval fixture validator for deterministic

@@ -136,8 +136,7 @@ Initial multi-repo orchestration should only:
 - report available agent scripts
 - suggest per-repo verification
 - preserve repo ownership boundaries
-- exclude unrelated projects such as `morning-standup` or the current local
-  `/Users/egeng/delta/Morning-Standup` folder
+- exclude unrelated projects such as `/Users/egeng/morning-standup`
 
 Do not centralize commits, cleanup, deployment, schema changes, or service
 startup until a later explicitly scoped phase.

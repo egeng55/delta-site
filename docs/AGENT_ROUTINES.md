@@ -8,6 +8,8 @@ human review.
 Print routine guidance with:
 
 ```bash
+npm run agent:context
+npm run agent:context -- --json
 npm run agent:routine -- --list
 npm run agent:routine -- --routine docs-only
 npm run agent:routine -- --routine desktop
@@ -39,6 +41,7 @@ Before changes:
 ```bash
 npm run agent:status
 npm run agent:preflight
+npm run agent:context
 ```
 
 After changes:
@@ -287,6 +290,5 @@ Future planning should require:
 - no production deployment actions
 - no Supabase, mic, TTS, notification, or memory-write side effects
 
-Do not include unrelated projects such as `morning-standup` or the current local
-`/Users/egeng/delta/Morning-Standup` folder; see
+Do not include unrelated projects such as `/Users/egeng/morning-standup`; see
 `docs/AGENT_WORKSPACE_LAYOUT.md`.
