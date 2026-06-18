@@ -86,11 +86,15 @@ Workspace layout guidance lives in `docs/AGENT_WORKSPACE_LAYOUT.md`. Delta
 product context includes only `delta-site`, `delta-backend`, and
 `delta-mobile`; unrelated projects such as `morning-standup` must not be
 included in context bundles, MCP repo maps, or multi-repo orchestration.
+If `Morning-Standup` still appears under `/Users/egeng/delta`, treat it as an
+unrelated project pending manual filesystem cleanup.
 
 `agent:phase:start` prints worktree creation commands by default. It may create
 a worktree only with `--run`, a clean current repo, a valid phase/name, and a
 nonexistent target path. It must never delete worktrees, clean files, commit, or
 touch sibling repos.
+The canonical worktree root is `/Users/egeng/delta-worktrees` for both flat and
+grouped local layouts.
 
 Local development:
 

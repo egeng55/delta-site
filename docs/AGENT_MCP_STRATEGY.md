@@ -19,7 +19,8 @@ Use MCP first for read-only context:
 
 Repo maps must use `docs/AGENT_WORKSPACE_LAYOUT.md` as the layout source. Delta
 context includes only `delta-site`, `delta-backend`, and `delta-mobile`.
-Unrelated projects such as `morning-standup` are out of scope.
+Unrelated projects such as `morning-standup` are out of scope, including the
+current local legacy path `/Users/egeng/delta/Morning-Standup` if it exists.
 
 Do not use MCP first for mutation, shell execution, database access, desktop
 side effects, or commits.

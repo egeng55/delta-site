@@ -24,7 +24,8 @@ The workspace may currently be flat under `/Users/egeng`, or manually moved to
 the preferred grouped layout under `/Users/egeng/delta`. See
 `docs/AGENT_WORKSPACE_LAYOUT.md` for supported paths. Treat sibling repos as
 read-only context unless the phase explicitly includes them. Unrelated projects
-such as `morning-standup` are not part of Delta context.
+such as `morning-standup` are not part of Delta context, even if a local legacy
+folder still appears as `/Users/egeng/delta/Morning-Standup`.
 
 ## Default Agent Loop
 

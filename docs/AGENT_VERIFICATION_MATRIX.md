@@ -122,6 +122,9 @@ create worktrees, commit, or modify files.
 
 MCP and parallel-agent strategy docs are documentation only. They do not
 authorize new servers, background jobs, CI/CD automation, or autonomous writes.
+Workspace layout changes must keep Delta product context limited to
+`delta-site`, `delta-backend`, and `delta-mobile`; unrelated projects such as
+`morning-standup` remain excluded.
 
 ## OS Console
 

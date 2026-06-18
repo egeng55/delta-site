@@ -64,6 +64,11 @@ function findUnrelatedMorningStandup() {
   return candidates.find((candidate) => existsSync(candidate)) || null;
 }
 
+function isInside(childPath, parentPath) {
+  const relative = path.relative(parentPath, childPath);
+  return Boolean(relative) && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
 const packagePath = path.join(repoRoot, "package.json");
 const packageJson = readJson(packagePath);
 const invokedFrom = process.cwd();
@@ -71,12 +76,17 @@ const branch = runGit(["rev-parse", "--abbrev-ref", "HEAD"]);
 const head = runGit(["rev-parse", "--short", "HEAD"]);
 const status = runGit(["status", "--short"]);
 const repoParent = path.dirname(repoRoot);
+const homeCandidate = path.basename(repoParent) === "delta" ? path.dirname(repoParent) : repoParent;
+const preferredProductRoot = path.join(homeCandidate, "delta");
+const canonicalWorktreeRoot = path.join(homeCandidate, "delta-worktrees");
 const layout = path.basename(repoParent) === "delta" ? "grouped-delta" : "flat";
 const siblingRepos = {
   "delta-backend": findRepo("delta-backend"),
   "delta-mobile": findRepo("delta-mobile"),
 };
 const morningStandup = findUnrelatedMorningStandup();
+const morningStandupInsideDelta = morningStandup ? isInside(morningStandup, preferredProductRoot) : false;
+const cleanupPending = layout !== "grouped-delta" || morningStandupInsideDelta;
 
 const requiredDocs = [
   "AGENTS.md",
@@ -103,10 +113,16 @@ console.log("");
 
 console.log("Workspace layout:");
 console.log(`- detected layout: ${layout}`);
+console.log(`- preferred product root: ${preferredProductRoot}`);
+console.log(`- canonical worktree root: ${canonicalWorktreeRoot}`);
 console.log(`- delta-site: ${repoRoot}`);
 console.log(`- delta-backend: ${siblingRepos["delta-backend"] || "not found"}`);
 console.log(`- delta-mobile: ${siblingRepos["delta-mobile"] || "not found"}`);
 console.log(`- unrelated morning-standup excluded: ${morningStandup || "not found"}`);
+console.log(`- manual cleanup pending: ${cleanupPending ? "yes" : "no"}`);
+if (morningStandupInsideDelta) {
+  console.log("- note: Morning-Standup is under the Delta parent folder but remains excluded from Delta context.");
+}
 console.log("");
 
 console.log("Git status:");

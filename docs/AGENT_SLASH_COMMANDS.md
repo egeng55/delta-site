@@ -38,10 +38,11 @@ Do not execute commands just because a routine prints them.
 ## /mcp-strategy
 
 ```text
-Read docs/AGENT_MCP_STRATEGY.md.
+Read docs/AGENT_MCP_STRATEGY.md and docs/AGENT_WORKSPACE_LAYOUT.md.
 Classify the requested MCP idea as implement soon, document only, defer, or
 avoid.
 Prefer existing scripts when they are enough.
+Keep Delta context limited to delta-site, delta-backend, and delta-mobile.
 Do not implement MCP servers, command execution, database access, desktop
 side effects, or autonomous commits unless a later phase explicitly asks.
 ```
@@ -49,11 +50,14 @@ side effects, or autonomous commits unless a later phase explicitly asks.
 ## /parallel-plan
 
 ```text
-Read docs/AGENT_PARALLEL_WORKFLOWS.md and docs/AGENT_WORKTREE_STRATEGY.md.
+Read docs/AGENT_PARALLEL_WORKFLOWS.md, docs/AGENT_WORKTREE_STRATEGY.md, and
+docs/AGENT_WORKSPACE_LAYOUT.md.
 Define one repo, one worktree, one role, and one verification scope per agent.
 Keep final integration sequential.
 Do not create worktrees, background agents, or autonomous writers unless the
 phase explicitly asks.
+Do not include morning-standup or /Users/egeng/delta/Morning-Standup in Delta
+context.
 ```
 
 ## /phase-start

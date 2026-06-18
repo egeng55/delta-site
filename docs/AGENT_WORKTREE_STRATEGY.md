@@ -42,20 +42,15 @@ Do not use a worktree when:
 
 ## Directory Convention
 
-Keep worktrees outside the repo:
-
-```text
-/Users/egeng/delta/worktrees/site-phase-56-worktree-orchestration
-```
-
-When the repos are still in the current flat layout, use the fallback:
+Keep worktrees outside the repo and outside the Delta product parent:
 
 ```text
 /Users/egeng/delta-worktrees/site-phase-56-worktree-orchestration
 ```
 
-Do not place worktrees under `delta-site`, `.next`, `node_modules`, or any
-generated build directory.
+Do not place worktrees under `delta-site`, `/Users/egeng/delta`, `.next`,
+`node_modules`, or any generated build directory. This avoids mixing worktrees
+with product repos or unrelated projects such as `Morning-Standup`.
 
 ## Branch Naming Convention
 
@@ -158,7 +153,6 @@ Do not run:
 git worktree remove
 git branch -D
 rm -rf /Users/egeng/delta-worktrees/...
-rm -rf /Users/egeng/delta/worktrees/...
 ```
 
 unless the user explicitly asks for cleanup after reviewing the worktree state.
