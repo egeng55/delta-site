@@ -43,6 +43,11 @@ mutate memory, feedback, Supabase, or intervention policy. If the backend
 endpoint is unavailable or unauthorized, the console shows a small unavailable
 state instead.
 
+The site client normalizes that domain metadata through local TypeScript
+contract helpers aligned with the backend response models. Malformed optional
+fields are treated as unavailable or empty display metadata instead of crashing
+the read-only console.
+
 All OS Console chat/session state is browser-local. The page does not start
 microphone capture, backend local TTS, desktop notifications, background
 listening, wake word, automatic memory writes, or Supabase mutations. Browser

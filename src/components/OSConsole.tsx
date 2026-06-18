@@ -5,6 +5,11 @@ import { DELTA_API_URL } from "@/lib/api";
 import { createBrowserSpeechControls, type BrowserSpeechControls, type BrowserSpeechStatus } from "@/lib/browserSpeech";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
 import { getBehavioralDomains, type BehavioralDomainRegistryResponse } from "@/lib/domainMetadataApi";
+import {
+  formatDomainLifecycleStage,
+  formatDomainPrivacyLevel,
+  formatFeedbackCapability,
+} from "@/lib/domainMetadataTypes";
 import { getSystemReadiness, type ReadinessStatus, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 import {
   OS_CONSOLE_FALLBACK,
@@ -348,33 +353,6 @@ function sourceSummary(source: string) {
   if (source === "unavailable") return "Saved state is not currently available for this user.";
   if (source === "persisted" || source === "supabase") return "This answer used saved read-only system data.";
   return `This state source is ${source}.`;
-}
-
-function titleCase(value: string) {
-  return value
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function feedbackLabel(value: string) {
-  if (value === "good_call") return "good call";
-  if (value === "too_much") return "too much";
-  if (value === "not_useful") return "not useful";
-  if (value === "wrong_timing") return "wrong timing";
-  if (value === "remind_earlier") return "remind earlier";
-  if (value === "remind_later") return "remind later";
-  if (value === "suppress_topic") return "suppress topic";
-  return value.replace(/_/g, " ");
-}
-
-function privacySummary(level: string) {
-  if (level === "high") return "High - sleep, caffeine, and routine behavior";
-  if (level === "critical") return "Critical - requires explicit privacy review";
-  if (level === "medium") return "Medium - behavior context with retention controls";
-  if (level === "low") return "Low - generic preference or display metadata";
-  return titleCase(level || "unknown");
 }
 
 function intentSummary(intent: string) {
@@ -1135,7 +1113,7 @@ function DomainMetadataCard({
     );
   }
 
-  const feedback = proofBackedDomain.feedback_capabilities.map(feedbackLabel).join(", ");
+  const feedback = proofBackedDomain.feedback_capabilities.map(formatFeedbackCapability).join(", ");
   const requirementCount =
     proofBackedDomain.readiness_requirements.length +
     proofBackedDomain.proof_requirements.length +
@@ -1150,11 +1128,11 @@ function DomainMetadataCard({
       <div className="mt-3 grid gap-2 text-sm">
         <div>
           <p className="text-xs text-muted">Lifecycle stage</p>
-          <p className="font-medium">{titleCase(proofBackedDomain.lifecycle_stage)}</p>
+          <p className="font-medium">{formatDomainLifecycleStage(proofBackedDomain.lifecycle_stage)}</p>
         </div>
         <div>
           <p className="text-xs text-muted">Privacy level</p>
-          <p className="font-medium">{privacySummary(proofBackedDomain.privacy_level)}</p>
+          <p className="font-medium">{formatDomainPrivacyLevel(proofBackedDomain.privacy_level)}</p>
         </div>
       </div>
       <p className="mt-3 text-sm leading-6 text-muted">

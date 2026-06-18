@@ -57,6 +57,12 @@ intervention policy. If the endpoint is unavailable or unauthorized, `/os`
 shows a compact unavailable state. Production `/os` access remains blocked by
 the Phase 68 access boundary.
 
+Phase 89 adds site-side TypeScript contract handling for that metadata. The
+frontend normalizes the backend payload before rendering it, keeps malformed
+optional fields as safe empty display metadata, and preserves the same
+unavailable state for unusable registry responses. This does not add endpoints
+or change desktop runtime behavior.
+
 You can override that URL for local development:
 
 ```bash
