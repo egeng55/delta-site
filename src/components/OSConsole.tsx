@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { DELTA_API_URL } from "@/lib/api";
 import { createBrowserSpeechControls, type BrowserSpeechControls, type BrowserSpeechStatus } from "@/lib/browserSpeech";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
+import { getBehavioralDomains, type BehavioralDomainRegistryResponse } from "@/lib/domainMetadataApi";
 import { getSystemReadiness, type ReadinessStatus, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 import {
   OS_CONSOLE_FALLBACK,
@@ -56,6 +57,7 @@ type FollowUpAction = {
 };
 
 type InspectorView = "state" | "readiness" | "proof" | "safety";
+type DomainMetadataLoadState = "checking" | "ready" | "unavailable";
 
 const INSPECTOR_VIEWS: Array<{ id: InspectorView; label: string; description: string }> = [
   { id: "state", label: "State", description: "What Delta believes about the current late-caffeine pattern." },
@@ -346,6 +348,33 @@ function sourceSummary(source: string) {
   if (source === "unavailable") return "Saved state is not currently available for this user.";
   if (source === "persisted" || source === "supabase") return "This answer used saved read-only system data.";
   return `This state source is ${source}.`;
+}
+
+function titleCase(value: string) {
+  return value
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function feedbackLabel(value: string) {
+  if (value === "good_call") return "good call";
+  if (value === "too_much") return "too much";
+  if (value === "not_useful") return "not useful";
+  if (value === "wrong_timing") return "wrong timing";
+  if (value === "remind_earlier") return "remind earlier";
+  if (value === "remind_later") return "remind later";
+  if (value === "suppress_topic") return "suppress topic";
+  return value.replace(/_/g, " ");
+}
+
+function privacySummary(level: string) {
+  if (level === "high") return "High - sleep, caffeine, and routine behavior";
+  if (level === "critical") return "Critical - requires explicit privacy review";
+  if (level === "medium") return "Medium - behavior context with retention controls";
+  if (level === "low") return "Low - generic preference or display metadata";
+  return titleCase(level || "unknown");
 }
 
 function intentSummary(intent: string) {
@@ -1061,10 +1090,115 @@ function CompactStatusRow({ label, status, detail }: { label: string; status: Re
   );
 }
 
+function DomainMetadataCard({
+  metadata,
+  loadState,
+  error,
+}: {
+  metadata: BehavioralDomainRegistryResponse | null;
+  loadState: DomainMetadataLoadState;
+  error: string;
+}) {
+  const domains = metadata?.domains ?? [];
+  const proofBackedDomain = domains.find((domain) => domain.lifecycle_stage === "proof_backed") ?? domains[0];
+
+  if (loadState === "checking") {
+    return (
+      <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+        <p className="text-xs font-medium text-muted">Behavioral OS domains</p>
+        <p className="mt-2 text-sm leading-6 text-muted">Checking Behavioral OS domains...</p>
+      </div>
+    );
+  }
+
+  if (loadState === "unavailable") {
+    return (
+      <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+        <p className="text-xs font-medium text-muted">Behavioral OS domains</p>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Domain metadata is unavailable in this environment.
+        </p>
+        {error && error !== "Domain metadata is unavailable in this environment." && (
+          <p className="mt-2 text-xs leading-5 text-muted">{error}</p>
+        )}
+      </div>
+    );
+  }
+
+  if (!proofBackedDomain) {
+    return (
+      <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+        <p className="text-xs font-medium text-muted">Behavioral OS domains</p>
+        <p className="mt-2 text-sm leading-6 text-muted">No Behavioral OS domains are registered yet.</p>
+        <p className="mt-2 text-xs leading-5 text-muted">This is domain metadata only. No user state was read.</p>
+      </div>
+    );
+  }
+
+  const feedback = proofBackedDomain.feedback_capabilities.map(feedbackLabel).join(", ");
+  const requirementCount =
+    proofBackedDomain.readiness_requirements.length +
+    proofBackedDomain.proof_requirements.length +
+    proofBackedDomain.eval_requirements.length;
+
+  return (
+    <div className="rounded-2xl border border-border/30 bg-background/25 p-3">
+      <p className="text-xs font-medium text-muted">Behavioral OS domains</p>
+      <h3 className="mt-1 text-base font-semibold">
+        Current proof-backed domain: {proofBackedDomain.name}
+      </h3>
+      <div className="mt-3 grid gap-2 text-sm">
+        <div>
+          <p className="text-xs text-muted">Lifecycle stage</p>
+          <p className="font-medium">{titleCase(proofBackedDomain.lifecycle_stage)}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted">Privacy level</p>
+          <p className="font-medium">{privacySummary(proofBackedDomain.privacy_level)}</p>
+        </div>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-muted">
+        Feedback supported: {feedback || "none listed"}.
+      </p>
+      <p className="mt-2 text-xs leading-5 text-muted">
+        This is domain metadata only. No user state was read, and no memory, feedback, Supabase, or intervention policy was changed.
+      </p>
+      <details className="mt-3 rounded-xl border border-border/25 bg-card/35 p-3">
+        <summary className="cursor-pointer text-sm font-medium">
+          View readiness, proof, and eval requirements ({requirementCount})
+        </summary>
+        <div className="mt-3 space-y-3 text-xs leading-5 text-muted">
+          <div>
+            <p className="font-semibold text-foreground">Readiness</p>
+            <ul className="mt-1 list-disc space-y-1 pl-4">
+              {proofBackedDomain.readiness_requirements.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Proof</p>
+            <ul className="mt-1 list-disc space-y-1 pl-4">
+              {proofBackedDomain.proof_requirements.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Evals</p>
+            <ul className="mt-1 list-disc space-y-1 pl-4">
+              {proofBackedDomain.eval_requirements.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </div>
+        </div>
+      </details>
+    </div>
+  );
+}
+
 function InspectorRail({
   activeView,
   onChangeView,
   state,
+  domainMetadata,
+  domainMetadataLoadState,
+  domainMetadataError,
   readiness,
   readinessLoadState,
   readinessError,
@@ -1079,6 +1213,9 @@ function InspectorRail({
   activeView: InspectorView;
   onChangeView: (view: InspectorView) => void;
   state: ConsoleBehavioralState;
+  domainMetadata: BehavioralDomainRegistryResponse | null;
+  domainMetadataLoadState: DomainMetadataLoadState;
+  domainMetadataError: string;
   readiness: SystemReadinessResponse | null;
   readinessLoadState: "checking" | "ready" | "fallback";
   readinessError: string;
@@ -1145,6 +1282,11 @@ function InspectorRail({
             <p className="text-xs font-medium text-muted">Why</p>
             <p className="mt-1 text-sm leading-6 text-muted">{interpretation.why}</p>
           </div>
+          <DomainMetadataCard
+            metadata={domainMetadata}
+            loadState={domainMetadataLoadState}
+            error={domainMetadataError}
+          />
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-xl border border-border/25 bg-background/20 p-3">
               <p className="text-xs text-muted">Outcome</p>
@@ -1358,6 +1500,9 @@ export default function OSConsole({
   const [readinessLoadState, setReadinessLoadState] = useState<"checking" | "ready" | "fallback">("checking");
   const [readinessError, setReadinessError] = useState("");
   const [readinessCheckedAt, setReadinessCheckedAt] = useState("not checked");
+  const [domainMetadata, setDomainMetadata] = useState<BehavioralDomainRegistryResponse | null>(null);
+  const [domainMetadataLoadState, setDomainMetadataLoadState] = useState<DomainMetadataLoadState>("checking");
+  const [domainMetadataError, setDomainMetadataError] = useState("");
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [clipboardMessage, setClipboardMessage] = useState("");
   const [resolvedSpeechControls, setResolvedSpeechControls] = useState<BrowserSpeechControls | null>(null);
@@ -1430,6 +1575,27 @@ export default function OSConsole({
   useEffect(() => {
     void loadReadiness();
   }, [loadReadiness]);
+
+  const loadDomainMetadata = useCallback(async () => {
+    setDomainMetadataLoadState("checking");
+    setDomainMetadataError("");
+    try {
+      const result = await getBehavioralDomains();
+      setDomainMetadata(result);
+      setDomainMetadataLoadState("ready");
+    } catch (err) {
+      setDomainMetadata(null);
+      setDomainMetadataLoadState("unavailable");
+      setDomainMetadataError(err instanceof Error ? err.message : "Domain metadata is unavailable in this environment.");
+    }
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadDomainMetadata();
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [loadDomainMetadata]);
 
   useEffect(() => {
     const openPalette = (event: KeyboardEvent) => {
@@ -1753,6 +1919,9 @@ export default function OSConsole({
             activeView={activeInspectorView}
             onChangeView={setActiveInspectorView}
             state={consoleData.behavioralState}
+            domainMetadata={domainMetadata}
+            domainMetadataLoadState={domainMetadataLoadState}
+            domainMetadataError={domainMetadataError}
             readiness={readiness}
             readinessLoadState={readinessLoadState}
             readinessError={readinessError}

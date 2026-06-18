@@ -34,6 +34,15 @@ focus on common state and safety clarifications, and safety answers such as
 always-on listening or notifications are handled locally as read-only
 explanations. Proof and Developer details remain secondary.
 
+The console can also show read-only Behavioral OS domain metadata from the
+backend when the authenticated metadata endpoint is available. This lets `/os`
+name Delta as a multi-domain Behavioral OS and identify Late caffeine as the
+current proof-backed domain, with lifecycle, privacy, feedback, readiness,
+proof, and eval metadata. This metadata does not read user state and does not
+mutate memory, feedback, Supabase, or intervention policy. If the backend
+endpoint is unavailable or unauthorized, the console shows a small unavailable
+state instead.
+
 All OS Console chat/session state is browser-local. The page does not start
 microphone capture, backend local TTS, desktop notifications, background
 listening, wake word, automatic memory writes, or Supabase mutations. Browser

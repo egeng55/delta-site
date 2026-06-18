@@ -47,6 +47,16 @@ common safety questions such as always-on listening or notification support are
 answered locally as read-only explanations. Proof and Developer surfaces remain
 available but secondary.
 
+Phase 86 makes the console domain-aware without changing runtime behavior. The
+State inspector can display authenticated, read-only Behavioral OS domain
+metadata from the backend, including Late caffeine as the current proof-backed
+domain, lifecycle stage, privacy level, supported feedback, and readiness/proof
+eval requirements. The metadata endpoint does not read user state, does not
+call Supabase from the site, and does not mutate memory, feedback, or
+intervention policy. If the endpoint is unavailable or unauthorized, `/os`
+shows a compact unavailable state. Production `/os` access remains blocked by
+the Phase 68 access boundary.
+
 You can override that URL for local development:
 
 ```bash

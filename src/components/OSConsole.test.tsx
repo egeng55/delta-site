@@ -5,10 +5,15 @@ import userEvent from "@testing-library/user-event";
 import OSConsole from "./OSConsole";
 import type { BrowserSpeechControls } from "@/lib/browserSpeech";
 import { askDeltaConversation, type ConversationTurnResponse } from "@/lib/conversationApi";
+import { getBehavioralDomains, type BehavioralDomainRegistryResponse } from "@/lib/domainMetadataApi";
 import { getSystemReadiness, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
 
 jest.mock("@/lib/conversationApi", () => ({
   askDeltaConversation: jest.fn(),
+}));
+
+jest.mock("@/lib/domainMetadataApi", () => ({
+  getBehavioralDomains: jest.fn(),
 }));
 
 jest.mock("@/lib/systemReadinessApi", () => ({
@@ -16,6 +21,7 @@ jest.mock("@/lib/systemReadinessApi", () => ({
 }));
 
 const mockAskDeltaConversation = askDeltaConversation as jest.MockedFunction<typeof askDeltaConversation>;
+const mockGetBehavioralDomains = getBehavioralDomains as jest.MockedFunction<typeof getBehavioralDomains>;
 const mockGetSystemReadiness = getSystemReadiness as jest.MockedFunction<typeof getSystemReadiness>;
 
 function conversationTurn(overrides: Partial<ConversationTurnResponse> = {}): ConversationTurnResponse {
@@ -138,6 +144,51 @@ function readinessResponse(overrides: Partial<SystemReadinessResponse> = {}): Sy
   };
 }
 
+function domainMetadataResponse(overrides: Partial<BehavioralDomainRegistryResponse> = {}): BehavioralDomainRegistryResponse {
+  return {
+    domain_count: 1,
+    introspection_mode: "read_only_metadata",
+    user_state_included: false,
+    side_effects: {
+      supabase: false,
+      memory_writes: false,
+      notifications: false,
+      tts: false,
+      live_mic: false,
+    },
+    domains: [
+      {
+        domain_id: "late_caffeine",
+        name: "Late Caffeine",
+        description: "Detects late caffeine and adapts timing, tone, cooldown, and suppression from feedback.",
+        lifecycle_stage: "proof_backed",
+        privacy_level: "high",
+        event_types: ["caffeine", "late_caffeine_intake", "ambient_non_event"],
+        state_fields: ["tone", "cooldown_minutes", "suppress_until", "last_outcome"],
+        prediction_types: ["sleep_risk", "intervention_usefulness", "timing_fit"],
+        intervention_types: ["notify", "defer", "store_silently", "stay_silent", "suppress"],
+        feedback_capabilities: [
+          "good_call",
+          "too_much",
+          "not_useful",
+          "wrong_timing",
+          "remind_earlier",
+          "remind_later",
+          "misunderstood",
+          "suppress_topic",
+        ],
+        storage_policy: "Persisted in behavioral_loop_state with explicit provenance.",
+        readiness_requirements: ["event extraction handles caffeine and ambient no-event scenarios"],
+        eval_requirements: ["positive late-caffeine event", "ambient no-event filter"],
+        proof_requirements: ["no-event scenario stays silent", "feedback changes future behavior"],
+        notes: ["First proof-backed Behavioral OS domain."],
+        introspection_mode: "read_only_metadata",
+      },
+    ],
+    ...overrides,
+  };
+}
+
 function browserSpeechControls(overrides: Partial<BrowserSpeechControls> = {}): BrowserSpeechControls {
   return {
     available: true,
@@ -163,10 +214,12 @@ describe("OSConsole command center", () => {
 
   beforeEach(() => {
     mockAskDeltaConversation.mockReset();
+    mockGetBehavioralDomains.mockReset();
     mockGetSystemReadiness.mockReset();
     clipboardWriteText.mockReset();
     clipboardWriteText.mockResolvedValue(undefined);
     mockGetSystemReadiness.mockImplementation(() => new Promise<SystemReadinessResponse>(() => undefined));
+    mockGetBehavioralDomains.mockImplementation(() => new Promise<BehavioralDomainRegistryResponse>(() => undefined));
     global.fetch = jest.fn(
       () => new Promise<Response>(() => undefined),
     ) as jest.MockedFunction<typeof fetch>;
@@ -492,6 +545,48 @@ describe("OSConsole command center", () => {
     expect(screen.getAllByText(/Delta would wait 105 minutes before giving another similar late-caffeine nudge/).length).toBeGreaterThan(0);
     expect(screen.getByText("Current rule")).toBeInTheDocument();
     expect(screen.getByText("Raw state fields")).toBeInTheDocument();
+  });
+
+  it("shows read-only Behavioral OS domain metadata when available", async () => {
+    const user = userEvent.setup();
+    mockGetBehavioralDomains.mockResolvedValue(domainMetadataResponse());
+
+    render(<OSConsole />);
+
+    await openInspectorView(user, "State");
+
+    expect(await screen.findByText("Behavioral OS domains")).toBeInTheDocument();
+    expect(screen.getByText("Current proof-backed domain: Late Caffeine")).toBeInTheDocument();
+    expect(screen.getByText("Proof Backed")).toBeInTheDocument();
+    expect(screen.getByText("High - sleep, caffeine, and routine behavior")).toBeInTheDocument();
+    expect(screen.getByText(/Feedback supported: good call, too much, not useful, wrong timing, remind earlier, remind later, misunderstood, suppress topic/)).toBeInTheDocument();
+    expect(screen.getByText(/This is domain metadata only. No user state was read/)).toBeInTheDocument();
+    expect(screen.getByText(/View readiness, proof, and eval requirements/)).toBeInTheDocument();
+  });
+
+  it("fails gracefully when domain metadata is unavailable or unauthorized", async () => {
+    const user = userEvent.setup();
+    mockGetBehavioralDomains.mockRejectedValue(new Error("Domain metadata is unavailable in this environment."));
+
+    render(<OSConsole />);
+
+    await openInspectorView(user, "State");
+
+    expect(await screen.findByText("Domain metadata is unavailable in this environment.")).toBeInTheDocument();
+    expect(screen.queryByText("Current proof-backed domain: Late Caffeine")).not.toBeInTheDocument();
+    expect(mockAskDeltaConversation).not.toHaveBeenCalled();
+  });
+
+  it("shows an empty state when no Behavioral OS domains are registered", async () => {
+    const user = userEvent.setup();
+    mockGetBehavioralDomains.mockResolvedValue(domainMetadataResponse({ domain_count: 0, domains: [] }));
+
+    render(<OSConsole />);
+
+    await openInspectorView(user, "State");
+
+    expect(await screen.findByText("No Behavioral OS domains are registered yet.")).toBeInTheDocument();
+    expect(screen.getByText("This is domain metadata only. No user state was read.")).toBeInTheDocument();
   });
 
   it("answers visible state term clarification directly without backend routing", async () => {
