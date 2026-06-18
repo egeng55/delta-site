@@ -11,6 +11,7 @@ Print routine guidance with:
 npm run agent:context
 npm run agent:context -- --json
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine docs-only
+npm run agent:phase:brief -- --phase <number> --name <slug> --routine docs-only
 npm run agent:routine -- --list
 npm run agent:routine -- --routine docs-only
 npm run agent:routine -- --routine desktop
@@ -21,6 +22,10 @@ Use `docs/AGENT_ORCHESTRATION.md` when a phase needs one combined plan with
 context commands, routine guidance, a worktree preview, suggested roles,
 verification commands, and handoff expectations. The orchestration planner is
 advisory and print-only.
+
+Use `docs/AGENT_PHASE_BRIEFS.md` when that plan should become a durable
+markdown artifact. Brief generation is print-only by default and writes only
+with `--write`.
 
 ## Shared Safety Rules
 

@@ -43,9 +43,11 @@ scripts/agent-status.mjs
 scripts/agent-safety-scan.mjs
 scripts/agent-eval.mjs
 scripts/agent-routine.mjs
+scripts/agent-phase-brief.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
 evals/**/*.json
+agent/phase-briefs/*.md
 ```
 
 Run:
@@ -97,8 +99,10 @@ docs/AGENT_WORKSPACE_LAYOUT.md
 docs/AGENT_MCP_STRATEGY.md
 docs/AGENT_PARALLEL_WORKFLOWS.md
 docs/AGENT_ORCHESTRATION.md
+docs/AGENT_PHASE_BRIEFS.md
 scripts/agent-routine.mjs
 scripts/agent-orchestrate.mjs
+scripts/agent-phase-brief.mjs
 scripts/agent-status.mjs
 scripts/agent-phase-start.mjs
 scripts/agent-phase-handoff.mjs
@@ -112,6 +116,7 @@ npm run agent:context
 npm run agent:routine -- --list
 npm run agent:routine -- --routine docs-only
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine docs-only
+npm run agent:phase:brief -- --phase <number> --name <slug> --routine docs-only
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine worktree-experiment --mode parallel-plan
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
@@ -129,6 +134,10 @@ create worktrees, commit, or modify files.
 role, verification, safety, and handoff guidance without executing commands,
 creating worktrees, writing files, or committing. Use `npm --silent` or direct
 `node` invocation for parser-clean JSON output.
+
+`agent:phase:brief` is print-only by default. It writes a durable markdown brief
+only with `--write`, under `agent/phase-briefs/`, and refuses to overwrite
+without `--force`.
 
 MCP and parallel-agent strategy docs are documentation only. They do not
 authorize new servers, background jobs, CI/CD automation, or autonomous writes.

@@ -5,10 +5,16 @@ These are prompt templates for agents. They are not executable commands.
 ## /phase-brief
 
 ```text
-Read AGENTS.md and docs/AGENTIC_DEVELOPMENT.md.
+Read AGENTS.md, docs/AGENTIC_DEVELOPMENT.md, and docs/AGENT_PHASE_BRIEFS.md.
 Run npm run agent:status if repo state is unclear.
 Run npm run agent:context when a structured repo map is useful.
 Run npm run agent:routine -- --list if the phase type is unclear.
+Generate a printed phase brief:
+npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine>
+
+Write a durable brief only when requested:
+npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine> --write
+
 Inspect the requested files.
 Produce:
 1. repo scope
@@ -17,7 +23,8 @@ Produce:
 4. verification scope and commands, using npm run agent:verify -- --<scope>
    where possible
 5. commit plan
-Do not edit files yet.
+Do not edit product files yet. Do not overwrite existing brief files without
+explicit `--force`.
 ```
 
 ## /routine

@@ -38,6 +38,16 @@ The planner references, but does not execute:
 
 The script remains advisory. It is not a task runner.
 
+For a durable markdown phase contract, use `agent:phase:brief`:
+
+```bash
+npm run agent:phase:brief -- --phase 64 --name repo-map --routine site
+npm run agent:phase:brief -- --phase 64 --name repo-map --routine site --write
+```
+
+`agent:phase:brief` uses the same routine model but writes only with `--write`
+under `agent/phase-briefs/`.
+
 ## Supported Routines
 
 | Routine | Suggested role | Typical verification |

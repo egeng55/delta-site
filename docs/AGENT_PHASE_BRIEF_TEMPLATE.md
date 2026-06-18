@@ -2,6 +2,16 @@
 
 Use this before implementation.
 
+To generate this structure from the local agent tooling, run:
+
+```bash
+npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine>
+```
+
+Add `--write` only when the brief should be saved under
+`agent/phase-briefs/phase-XXX-name.md`. Existing files require `--force` to
+replace.
+
 ```text
 Phase:
 

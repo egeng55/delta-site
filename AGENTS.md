@@ -65,6 +65,7 @@ npm run agent:verify -- --desktop
 npm run agent:routine -- --list
 npm run agent:routine -- --routine desktop
 npm run agent:orchestrate -- --phase <number> --name <slug> --routine <routine>
+npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine>
 npm run agent:phase:start -- --phase <number> --name <slug> --print
 npm run agent:phase:handoff -- --phase <number>
 ```
@@ -84,6 +85,11 @@ verification plan, safety reminders, and handoff expectations. It is print-only
 and does not execute scripts, create worktrees, write phase files, or commit.
 Use `--json` with `npm --silent` or direct `node` invocation for parser-clean
 machine-readable output.
+
+`agent:phase:brief` generates a durable markdown phase contract. It prints to
+stdout by default and writes only with `--write` to
+`agent/phase-briefs/phase-XXX-name.md`. Existing brief files are never
+overwritten unless `--force` is passed.
 
 `agent:context` prints a read-only repo context bundle in Markdown by default,
 or JSON with `-- --json`. It is the script-first repo map for Codex phases and
@@ -193,6 +199,7 @@ Minimum expectations:
 - site component change: `npm run agent:verify -- --site`
 - `/os` or Electron change: `npm run agent:verify -- --desktop`
 - phase/worktree planning: `npm run agent:status`,
+  `npm run agent:phase:brief -- --phase <number> --name <slug> --routine <routine>`,
   `npm run agent:routine -- --routine phase-start --phase <number> --name <slug>`,
   `npm run agent:phase:start -- --phase <number> --name <slug> --print`
 - auth/legal/schema changes: stop unless explicitly approved
