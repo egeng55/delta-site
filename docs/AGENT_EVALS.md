@@ -75,6 +75,66 @@ It prints fixture counts by file and category plus the number of sample
 responses and sample assertions checked. It does not call the real OS Console,
 the backend, a browser, Supabase, or an external LLM.
 
+## Optional Local Live Eval
+
+Phase 90 adds an explicit local live eval skeleton:
+
+```bash
+npm run agent:eval:live
+```
+
+This command is separate from `npm run agent:eval`. It is local-only,
+read-only, and opt-in. It does not start services, render `/os`, run browser
+automation, call LLM APIs, mutate files, mutate Supabase, send notifications,
+run TTS, open the microphone, or write memory.
+
+The live skeleton checks only the backend domain metadata endpoint:
+
+```text
+GET ${NEXT_PUBLIC_DELTA_API_URL || http://127.0.0.1:8000}/behavioral-os/domains
+```
+
+When the endpoint returns metadata, the script normalizes the response and
+asserts that:
+
+- `late_caffeine` exists
+- lifecycle and privacy fields are present
+- feedback capabilities are present
+- the response says no user state is included
+- side-effect flags for Supabase, memory writes, notifications, TTS, and live
+  mic are false
+
+If the backend is unavailable, the command reports `skipped` and exits
+successfully by default. If the endpoint returns `401` without a token, the
+command treats that as expected protected behavior and reports
+`protected/unavailable without token` as a skipped state.
+
+Use `--require-live` only when a local backend and valid auth context are
+intentionally available:
+
+```bash
+npm run agent:eval:live -- --require-live
+```
+
+For authenticated local checks, provide a bearer token through the environment:
+
+```bash
+DELTA_LIVE_EVAL_BEARER_TOKEN=<do-not-print-token> npm run agent:eval:live -- --require-live
+```
+
+The script never prints token values. It reports only whether a token was
+provided.
+
+Parser-clean JSON is available for future report-only automation:
+
+```bash
+npm --silent run agent:eval:live -- --json
+```
+
+JSON output distinguishes `passed`, `skipped`, and `failed`. Skips are for
+unavailable/protected local services. Failures are reserved for assertion
+failures or malformed responses when a service responds with data.
+
 ## Domain Metadata Fixtures
 
 `evals/os-console/domain-metadata.json` protects the Phase 86 domain-aware
@@ -99,7 +159,8 @@ availability.
 Later phases may add:
 
 - browser-level `/os` transcript checks
-- backend integration checks for `/behavioral-os/domains`
+- broader authenticated backend integration checks beyond the local domain
+  metadata skeleton
 - optional LLM-judge experiments behind explicit approval
 - background report-only eval runs
 - CI integration
@@ -108,10 +169,11 @@ Later phases may add:
 
 Do not add those in the current foundation without a dedicated phase brief.
 
-Live evals are explicitly deferred. Future live eval work should define whether
-it is checking rendered `/os` UI, local mocked conversation behavior, backend
-read-only API behavior, or optional LLM-judge output. Each of those paths needs
-its own approval and verification scope.
+Broader live evals remain explicitly deferred. Future work should define
+whether it is checking rendered `/os` UI, local mocked conversation behavior,
+authenticated backend read-only API behavior beyond domain metadata, browser
+automation, or optional LLM-judge output. Each of those paths needs its own
+approval and verification scope.
 
 ## How Future Agents Should Use Fixtures
 

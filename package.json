@@ -16,6 +16,7 @@
     "agent:context": "node scripts/agent-context.mjs",
     "agent:safety-scan": "node scripts/agent-safety-scan.mjs",
     "agent:eval": "node scripts/agent-eval.mjs",
+    "agent:eval:live": "node scripts/agent-eval-live.mjs",
     "agent:verify": "node scripts/agent-verify.mjs",
     "agent:routine": "node scripts/agent-routine.mjs",
     "agent:orchestrate": "node scripts/agent-orchestrate.mjs",
