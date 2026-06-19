@@ -161,6 +161,34 @@ local services. Failures are reserved for rejected provided tokens, assertion
 failures, malformed responses, or required live checks that cannot reach a valid
 local endpoint.
 
+Optional durable local result recording is available only with an explicit
+write flag:
+
+```bash
+npm run agent:eval:live -- --write
+```
+
+This writes a timestamped Markdown report under `agent/runs/`, including the
+backend URL, expected domain, status, classification, checked assertions, token
+presence as yes/no only, and a next recommended command. Reports may record
+skipped states such as `backend_unavailable`; they are local evidence, not CI
+gates. Existing report files are not overwritten unless `--force` is passed.
+
+Parser-clean JSON remains available when writing:
+
+```bash
+npm --silent run agent:eval:live -- --json --write
+```
+
+Authenticated local result recording uses the same token-safety rules:
+
+```bash
+DELTA_LIVE_EVAL_BEARER_TOKEN=<do-not-print-token> npm run agent:eval:live -- --require-live --write
+```
+
+Live eval reports never store token values, request headers, or sensitive
+backend payloads.
+
 For the full backend-plus-site workflow, terminal setup, authenticated mode,
 and troubleshooting guidance, see `docs/LOCAL_DOMAIN_LIVE_EVALS.md`.
 

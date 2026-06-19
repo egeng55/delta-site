@@ -133,6 +133,26 @@ cd /Users/egeng/delta-site
 npm --silent run agent:eval:live -- --backend-url http://127.0.0.1:8000 --json
 ```
 
+Optional durable result recording:
+
+```bash
+cd /Users/egeng/delta-site
+npm run agent:eval:live -- --backend-url http://127.0.0.1:8000 --write
+```
+
+`--write` saves a timestamped Markdown report under `agent/runs/`. A report can
+record pass, fail, or skipped states. It is evidence for local quality review,
+not a CI gate and not a replacement for deterministic `agent:eval`.
+
+JSON can be combined with report writing:
+
+```bash
+cd /Users/egeng/delta-site
+npm --silent run agent:eval:live -- --backend-url http://127.0.0.1:8000 --json --write
+```
+
+Existing report paths are not overwritten unless `--force` is passed.
+
 This command is optional and separate from deterministic evals:
 
 ```bash
@@ -152,6 +172,13 @@ cd /Users/egeng/delta-site
 DELTA_LIVE_EVAL_BEARER_TOKEN=<token> npm run agent:eval:live -- --backend-url http://127.0.0.1:8000 --require-live
 ```
 
+Authenticated report recording:
+
+```bash
+cd /Users/egeng/delta-site
+DELTA_LIVE_EVAL_BEARER_TOKEN=<token> npm run agent:eval:live -- --backend-url http://127.0.0.1:8000 --require-live --write
+```
+
 Token rules:
 
 - never commit tokens
@@ -160,6 +187,8 @@ Token rules:
 - scripts may report token presence only as yes/no
 - a rejected token should be reported as `token_unauthorized` without echoing
   the token
+- live eval reports must not store token values, request headers, or sensitive
+  backend payloads
 
 ## Expected Outcomes
 
@@ -227,6 +256,12 @@ Build or test failures:
   eval path
 - do not treat a live-eval skip as a build/test failure
 - do not add live backend requirements to default test/build scripts
+
+Report path already exists:
+
+- rerun after the timestamp changes, or pass `--force` only when intentionally
+  replacing a local report
+- do not use `--force` to hide a failed or skipped result
 
 ## Future Work Deferred
 

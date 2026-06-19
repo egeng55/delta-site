@@ -1,6 +1,7 @@
 const DEFAULT_BACKEND_URL = "http://127.0.0.1:8000";
 const DEFAULT_EXPECTED_DOMAIN = "late_caffeine";
 const DOMAIN_PATH = "/behavioral-os/domains";
+const LIVE_EVAL_REPORT_SUFFIX = "live-domain-eval";
 const EXPECTED_LATE_CAFFEINE_FEEDBACK = [
   "good_call",
   "too_much",
@@ -16,14 +17,20 @@ function parseArgs(argv, env = process.env) {
   const args = {
     backendUrl: env.NEXT_PUBLIC_DELTA_API_URL || DEFAULT_BACKEND_URL,
     expectedDomain: DEFAULT_EXPECTED_DOMAIN,
+    force: false,
     json: false,
     requireLive: false,
+    write: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--json") {
       args.json = true;
+    } else if (arg === "--write") {
+      args.write = true;
+    } else if (arg === "--force") {
+      args.force = true;
     } else if (arg === "--require-live") {
       args.requireLive = true;
     } else if (arg === "--backend-url") {
@@ -42,6 +49,18 @@ function parseArgs(argv, env = process.env) {
   }
 
   return args;
+}
+
+function timestampForFilename(date = new Date()) {
+  return date.toISOString().replace(/\.\d{3}Z$/, "Z").replace(/:/g, "-");
+}
+
+function liveEvalReportFilename(date = new Date()) {
+  return `${timestampForFilename(date)}-${LIVE_EVAL_REPORT_SUFFIX}.md`;
+}
+
+function liveEvalReportPath(runsDir, date = new Date()) {
+  return `${String(runsDir).replace(/\/+$/, "")}/${liveEvalReportFilename(date)}`;
 }
 
 function isRecord(value) {
@@ -148,6 +167,98 @@ function passedResult(assertions, context = {}) {
     assertions,
     context,
   );
+}
+
+function nextRecommendedCommand(result) {
+  if (result.status === "passed") {
+    return "Record the result in the phase report and continue with normal verification.";
+  }
+  if (result.classification === "backend_unavailable") {
+    return "Start the local backend, then rerun npm run agent:eval:live -- --backend-url http://127.0.0.1:8000.";
+  }
+  if (result.classification === "protected_token_missing") {
+    return "Provide DELTA_LIVE_EVAL_BEARER_TOKEN only when intentionally running an authenticated local check.";
+  }
+  if (result.classification === "token_unauthorized") {
+    return "Refresh the local bearer token without printing it, then rerun with --require-live.";
+  }
+  if (result.classification === "malformed_payload" || result.classification === "assertion_failure") {
+    return "Review backend domain metadata contracts and site normalization before relying on the live result.";
+  }
+  return "Review the live eval output and rerun after resolving the reported condition.";
+}
+
+function renderLiveEvalReport(result, date = new Date()) {
+  const timestamp = date.toISOString();
+  const lines = [
+    "# Live Domain Eval Result",
+    "",
+    `Timestamp: ${timestamp}`,
+    "",
+    "## Summary",
+    "",
+    `- Backend URL: \`${result.endpoint}\``,
+    `- Expected domain: \`${result.expectedDomain}\``,
+    `- Status: \`${result.status}\``,
+    `- Classification: \`${result.classification}\``,
+    `- Reason: ${result.reason}`,
+    `- Token present: \`${result.tokenProvided ? "yes" : "no"}\``,
+    "- Token value stored: `false`",
+    "- Request headers stored: `false`",
+    "- Sensitive payload stored: `false`",
+  ];
+
+  if (typeof result.httpStatus === "number") {
+    lines.push(`- HTTP status: \`${result.httpStatus}\``);
+  }
+  if (typeof result.domainCount === "number") {
+    lines.push(`- Domain count: \`${result.domainCount}\``);
+  }
+
+  lines.push("", "## Assertions", "");
+  if (result.assertions.length === 0) {
+    lines.push("- No assertions were checked because the live endpoint was unavailable or protected.");
+  } else {
+    for (const assertion of result.assertions) {
+      lines.push(`- ${assertion.passed ? "pass" : "fail"} \`${assertion.name}\`: ${assertion.detail}`);
+    }
+  }
+
+  if (result.failures?.length) {
+    lines.push("", "## Failures", "");
+    for (const failure of result.failures) {
+      lines.push(`- ${failure}`);
+    }
+  }
+
+  lines.push(
+    "",
+    "## Side Effects",
+    "",
+    `- Services started: \`${result.sideEffects.startsServices ? "yes" : "no"}\``,
+    `- LLM calls: \`${result.sideEffects.callsLlms ? "yes" : "no"}\``,
+    `- Browser automation: \`${result.sideEffects.browserAutomation ? "yes" : "no"}\``,
+    `- File mutations outside this report: \`${result.sideEffects.mutatesFiles ? "yes" : "no"}\``,
+    `- Supabase mutation: \`${result.sideEffects.mutatesSupabase ? "yes" : "no"}\``,
+    `- Mic: \`${result.sideEffects.mic ? "yes" : "no"}\``,
+    `- TTS: \`${result.sideEffects.tts ? "yes" : "no"}\``,
+    `- Notifications: \`${result.sideEffects.notifications ? "yes" : "no"}\``,
+    `- Memory writes: \`${result.sideEffects.memoryWrites ? "yes" : "no"}\``,
+    "",
+    "## Next Recommended Command",
+    "",
+    "```bash",
+    nextRecommendedCommand(result),
+    "```",
+    "",
+    "## Notes",
+    "",
+    "- This report is local evidence only; it is not a CI gate.",
+    "- Live evals remain optional and are not part of default deterministic evals.",
+    "- Token values, request headers, and sensitive response payloads are intentionally omitted.",
+  );
+
+  return `${lines.join("\n")}\n`;
 }
 
 function assertDomainMetadata(payload, expectedDomain = DEFAULT_EXPECTED_DOMAIN) {
@@ -368,12 +479,17 @@ module.exports = {
   DEFAULT_BACKEND_URL,
   DEFAULT_EXPECTED_DOMAIN,
   EXPECTED_LATE_CAFFEINE_FEEDBACK,
+  LIVE_EVAL_REPORT_SUFFIX,
   assertDomainMetadata,
   endpointUrl,
+  liveEvalReportFilename,
+  liveEvalReportPath,
   normalizeDomainMetadata,
   normalizeDomainRegistryResponse,
   parseArgs,
   printText,
+  renderLiveEvalReport,
   runLiveEval,
   sanitizeMessage,
+  timestampForFilename,
 };

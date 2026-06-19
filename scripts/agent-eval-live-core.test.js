@@ -2,7 +2,10 @@
 const {
   DEFAULT_EXPECTED_DOMAIN,
   EXPECTED_LATE_CAFFEINE_FEEDBACK,
+  liveEvalReportFilename,
+  liveEvalReportPath,
   parseArgs,
+  renderLiveEvalReport,
   runLiveEval,
 } = require("./agent-eval-live-core.cjs");
 
@@ -59,11 +62,15 @@ describe("agent live eval core", () => {
       "focus_routine",
       "--json",
       "--require-live",
+      "--write",
+      "--force",
     ], {})).toEqual({
       backendUrl: "http://localhost:9000",
       expectedDomain: "focus_routine",
+      force: true,
       json: true,
       requireLive: true,
+      write: true,
     });
   });
 
@@ -115,6 +122,13 @@ describe("agent live eval core", () => {
     expect(result.classification).toBe("token_unauthorized");
     expect(result.tokenProvided).toBe(true);
     expect(JSON.stringify(result)).not.toContain(token);
+
+    const report = renderLiveEvalReport(result, new Date("2026-06-19T13:00:00Z"));
+    expect(report).toContain("Classification: `token_unauthorized`");
+    expect(report).toContain("Token present: `yes`");
+    expect(report).toContain("Token value stored: `false`");
+    expect(report).not.toContain(token);
+    expect(report).not.toContain("Authorization");
   });
 
   it("fails malformed domain metadata payloads", async () => {
@@ -148,5 +162,52 @@ describe("agent live eval core", () => {
       expect.objectContaining({ name: "metadata_only_no_user_state", passed: true }),
       expect.objectContaining({ name: "metadata_only_no_supabase_side_effect", passed: true }),
     ]));
+  });
+
+  it("generates timestamped live eval report paths", () => {
+    const date = new Date("2026-06-19T13:14:15Z");
+
+    expect(liveEvalReportFilename(date)).toBe("2026-06-19T13-14-15Z-live-domain-eval.md");
+    expect(liveEvalReportPath("/tmp/agent/runs", date)).toBe(
+      "/tmp/agent/runs/2026-06-19T13-14-15Z-live-domain-eval.md",
+    );
+  });
+
+  it("renders skipped reports with classification and next command", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: false },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockRejectedValue(new Error("connect ECONNREFUSED")),
+      },
+    );
+
+    const report = renderLiveEvalReport(result, new Date("2026-06-19T13:00:00Z"));
+
+    expect(report).toContain("Timestamp: 2026-06-19T13:00:00.000Z");
+    expect(report).toContain("Status: `skipped`");
+    expect(report).toContain("Classification: `backend_unavailable`");
+    expect(report).toContain("No assertions were checked");
+    expect(report).toContain("Start the local backend");
+  });
+
+  it("keeps JSON output data parser-clean after report metadata is attached", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: false },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockRejectedValue(new Error("connect ECONNREFUSED")),
+      },
+    );
+    const withReport = {
+      ...result,
+      report: {
+        written: true,
+        path: "agent/runs/2026-06-19T13-14-15Z-live-domain-eval.md",
+        absolutePath: "/tmp/agent/runs/2026-06-19T13-14-15Z-live-domain-eval.md",
+      },
+    };
+
+    expect(JSON.parse(JSON.stringify(withReport))).toEqual(withReport);
   });
 });
