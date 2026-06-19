@@ -77,7 +77,8 @@ the backend, a browser, Supabase, or an external LLM.
 
 ## Optional Local Live Eval
 
-Phase 90 adds an explicit local live eval skeleton:
+Phase 90 adds an explicit local live eval skeleton, and Phase 91 hardens the
+authenticated local path:
 
 ```bash
 npm run agent:eval:live
@@ -97,17 +98,39 @@ GET ${NEXT_PUBLIC_DELTA_API_URL || http://127.0.0.1:8000}/behavioral-os/domains
 When the endpoint returns metadata, the script normalizes the response and
 asserts that:
 
-- `late_caffeine` exists
+- the expected domain exists, defaulting to `late_caffeine`
 - lifecycle and privacy fields are present
 - feedback capabilities are present
+- `late_caffeine` includes the expected feedback labels when it is the selected
+  domain
 - the response says no user state is included
 - side-effect flags for Supabase, memory writes, notifications, TTS, and live
   mic are false
 
+The selected domain can be overridden for future local metadata checks:
+
+```bash
+npm run agent:eval:live -- --expected-domain late_caffeine
+```
+
+Output distinguishes these local states:
+
+- `backend_unavailable`: the local backend is not reachable.
+- `protected_token_missing`: the endpoint returned `401` or `403` and no
+  `DELTA_LIVE_EVAL_BEARER_TOKEN` was provided.
+- `token_unauthorized`: a token was provided but the endpoint returned `401` or
+  `403`.
+- `malformed_payload`: the endpoint responded, but the payload did not normalize
+  through the site contract parser.
+- `assertion_failure`: normalized metadata was present, but a read-only domain
+  assertion failed.
+- `live_domain_metadata_passed`: the endpoint returned metadata satisfying the
+  read-only domain assertions.
+
 If the backend is unavailable, the command reports `skipped` and exits
-successfully by default. If the endpoint returns `401` without a token, the
-command treats that as expected protected behavior and reports
-`protected/unavailable without token` as a skipped state.
+successfully by default. If the endpoint returns `401` or `403` without a token,
+the command treats that as expected protected behavior and reports
+`protected_token_missing` as a skipped state.
 
 Use `--require-live` only when a local backend and valid auth context are
 intentionally available:
@@ -122,8 +145,9 @@ For authenticated local checks, provide a bearer token through the environment:
 DELTA_LIVE_EVAL_BEARER_TOKEN=<do-not-print-token> npm run agent:eval:live -- --require-live
 ```
 
-The script never prints token values. It reports only whether a token was
-provided.
+The script never prints token values, request headers, or auth payloads. It
+reports only whether a token was provided. If a token is rejected, output says
+`token_unauthorized` without echoing the token.
 
 Parser-clean JSON is available for future report-only automation:
 
@@ -131,9 +155,11 @@ Parser-clean JSON is available for future report-only automation:
 npm --silent run agent:eval:live -- --json
 ```
 
-JSON output distinguishes `passed`, `skipped`, and `failed`. Skips are for
-unavailable/protected local services. Failures are reserved for assertion
-failures or malformed responses when a service responds with data.
+JSON output distinguishes `passed`, `skipped`, and `failed` and includes the
+same classification labels as text output. Skips are for unavailable/protected
+local services. Failures are reserved for rejected provided tokens, assertion
+failures, malformed responses, or required live checks that cannot reach a valid
+local endpoint.
 
 ## Domain Metadata Fixtures
 
