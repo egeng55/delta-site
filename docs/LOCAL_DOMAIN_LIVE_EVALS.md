@@ -162,6 +162,17 @@ npm run agent:eval
 Normal `npm run agent:eval` remains deterministic and does not call the
 backend.
 
+The daily maintenance wrapper can include the same skip-safe live eval status
+without making live evals required:
+
+```bash
+cd /Users/egeng/delta-site
+npm run agent:daily:maintenance -- --include-live-eval
+```
+
+Without `--include-live-eval`, the daily wrapper only reports existing live eval
+evidence from `agent/runs/`.
+
 ## Authenticated Mode
 
 If the domain endpoint is protected and a developer intentionally has a local

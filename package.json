@@ -24,6 +24,7 @@
     "agent:policy": "node scripts/agent-policy.mjs",
     "agent:run-ledger": "node scripts/agent-run-ledger.mjs",
     "agent:maintenance:run": "node scripts/agent-maintenance-runner.mjs",
+    "agent:daily:maintenance": "node scripts/agent-daily-maintenance.mjs",
     "agent:dispatch:plan": "node scripts/agent-dispatch-plan.mjs",
     "agent:dispatch:worktree": "node scripts/agent-dispatch-worktree.mjs",
     "agent:finding:brief": "node scripts/agent-finding-brief.mjs",

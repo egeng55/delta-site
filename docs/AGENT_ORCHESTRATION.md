@@ -70,6 +70,7 @@ npm run agent:policy -- --report
 npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
 npm run agent:maintenance:run -- --report
+npm run agent:daily:maintenance -- --report
 npm run agent:dispatch:plan -- --top --phase <number>
 npm run agent:dispatch:worktree -- --top --phase <number>
 ```
@@ -108,9 +109,12 @@ npm run agent:dispatch:worktree -- --id <id> --phase <number> --name <slug> --ap
 clean up anything.
 
 For future report-only or autonomous planning, record a maintenance run with
-`npm run agent:maintenance:run -- --write` or
-`npm run agent:run-ledger -- --write` before acting. These reports record what
-was inspected and refused; they do not authorize implementation.
+`npm run agent:maintenance:run -- --write`,
+`npm run agent:run-ledger -- --write`, or
+`npm run agent:daily:maintenance -- --write` before acting. These reports record
+what was inspected and refused; they do not authorize implementation. The daily
+wrapper is manually invoked and report-only; it is not a scheduler or
+background agent.
 
 Fresh worktrees may require `npm ci` before verification because `node_modules`
 is ignored and not shared. If production build fails only because ignored local

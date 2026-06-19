@@ -44,6 +44,12 @@ entry.
 worktree path, likely files, and verification for a finding, but it still does
 not authorize implementation or create worktrees.
 
+`agent:daily:maintenance` is the broader manual daily-style wrapper. It
+summarizes the latest run records, policy-selected finding, dispatch decision,
+and deterministic eval fixture inventory. It may write a `daily-maintenance`
+report, but it does not replace narrower ledger records when a phase needs one
+specific durable run entry.
+
 ## Report-Only Default
 
 Print a report:
@@ -79,6 +85,12 @@ agent/runs/YYYY-MM-DDTHH-MM-SSZ-maintenance-run.md
 ```
 
 Existing records are not overwritten unless `--force` is passed.
+
+Daily maintenance reports are written separately with:
+
+```bash
+npm run agent:daily:maintenance -- --write
+```
 
 ## Required Before Future Autonomous Actions
 

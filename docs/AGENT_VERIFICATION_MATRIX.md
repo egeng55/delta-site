@@ -152,6 +152,7 @@ npm run agent:policy -- --report
 npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
 npm run agent:maintenance:run -- --report
+npm run agent:daily:maintenance -- --report
 npm run agent:dispatch:plan -- --top --phase <number>
 npm run agent:dispatch:worktree -- --top --phase <number>
 npm run agent:finding:brief -- --top --phase <number>
@@ -181,7 +182,11 @@ without `--force`.
 is a read-only classifier that maps findings to allowed action modes.
 `agent:run-ledger` is report-only by default and writes maintenance run records
 only with `--write`. `agent:maintenance:run` is a report-only maintenance cycle
-runner and writes cycle reports only with `--write`. `agent:dispatch:plan` is
+runner and writes cycle reports only with `--write`. `agent:daily:maintenance`
+is a manual report-only daily wrapper over maintenance, policy, dispatch,
+recent run evidence, and deterministic eval fixture inventory; it writes daily
+reports only with `--write` and includes skip-safe live eval status only with
+`--include-live-eval`. `agent:dispatch:plan` is
 planning-only and writes dispatch plans only with `--write`.
 `agent:dispatch:worktree` is approval-gated: it creates worktrees only with
 `--approve-worktree`, writes task packets only with `--write-task`, and still

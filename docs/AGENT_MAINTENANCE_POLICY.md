@@ -127,6 +127,13 @@ approval requirement, and may write a `maintenance-cycle` report with `--write`.
 It still does not grant approval, close findings, create worktrees, or
 authorize implementation.
 
+`agent:daily:maintenance` uses the same policy output for a manually invoked
+daily-style summary. It adds dispatch context, recent run artifacts, live eval
+report evidence, and deterministic eval fixture inventory. It writes
+`daily-maintenance` reports only with `--write`, includes skip-safe live eval
+status only with `--include-live-eval`, and still performs no implementation or
+scheduling.
+
 `agent:dispatch:plan` also uses this policy output. It may print or write a
 dispatch plan with proposed phase, scope, worktree path, and verification
 commands, but the policy mode still controls whether implementation is blocked,

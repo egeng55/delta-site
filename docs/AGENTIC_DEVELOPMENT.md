@@ -81,6 +81,11 @@ or `--write` to record what a maintenance run inspected and what policy allowed.
 Use `npm run agent:maintenance:run -- --report` for a single report-only
 maintenance cycle that combines findings, policy, top actionable selection, and
 the next recommended command.
+Use `npm run agent:daily:maintenance -- --report` for a manually invoked
+daily-style maintenance wrapper. It summarizes findings, policy, dispatch
+planning, recent run records, and deterministic eval fixture inventory. It
+writes daily reports only with `--write` and includes optional skip-safe live
+eval status only with `--include-live-eval`.
 Use `npm run agent:dispatch:plan -- --top --phase <number>` to turn the
 policy-selected finding into a planning-only dispatch plan with approval
 requirements, proposed worktree details, scope, and verification.
@@ -102,6 +107,8 @@ Future MCP and parallel-agent planning is documented separately:
 - `docs/AGENT_MAINTENANCE.md`: local maintenance finding queue policy
 - `docs/AGENT_MAINTENANCE_POLICY.md`: allowed action modes for findings
 - `docs/AGENT_MAINTENANCE_RUNNER.md`: one-command report-only maintenance cycle
+- `docs/AGENT_DAILY_MAINTENANCE.md`: manual report-only daily maintenance
+  wrapper
 - `docs/AGENT_DISPATCH_PLANNER.md`: policy-aware finding dispatch plans
 - `docs/AGENT_WORKTREE_DISPATCHER.md`: approval-gated worktree and task packet
   dispatcher
@@ -154,6 +161,8 @@ Phase 53 does not add:
   to `agent/runs/` only with `--write`
 - `scripts/agent-maintenance-runner.mjs`: report-only maintenance cycle runner;
   writes cycle reports only with `--write`
+- `scripts/agent-daily-maintenance.mjs`: manual report-only daily maintenance
+  wrapper; writes daily reports only with `--write`
 - `scripts/agent-dispatch-plan.mjs`: planning-only maintenance dispatch planner;
   writes dispatch plans only with `--write`
 - `scripts/agent-dispatch-worktree.mjs`: approval-gated maintenance worktree

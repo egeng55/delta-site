@@ -120,6 +120,24 @@ runner does not implement findings, generate phase brief files, create
 worktrees, run tests, or call services. See
 `docs/AGENT_MAINTENANCE_RUNNER.md`.
 
+## Daily Maintenance Wrapper
+
+Use the manual daily-style wrapper when a future report-only agent or human
+wants one consolidated maintenance snapshot:
+
+```bash
+npm run agent:daily:maintenance -- --report
+npm run agent:daily:maintenance -- --include-live-eval
+npm run agent:daily:maintenance -- --write
+npm --silent run agent:daily:maintenance -- --json
+```
+
+Daily reports live in `agent/runs/` with a `daily-maintenance` suffix. The
+wrapper summarizes findings, policy, dispatch planning, recent run records,
+live eval report evidence, and deterministic eval fixture inventory. It does
+not implement findings, create worktrees, merge, run tests/build/lint, start
+services, or schedule itself. See `docs/AGENT_DAILY_MAINTENANCE.md`.
+
 ## Dispatch Plans
 
 Use the dispatch planner when the next step is to describe what would happen if

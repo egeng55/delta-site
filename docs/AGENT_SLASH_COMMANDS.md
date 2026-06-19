@@ -115,6 +115,28 @@ files, or treat the recommended command as approval. The runner records the top
 finding, policy mode, approval requirement, refused actions, and next command.
 ```
 
+## /daily-maintenance
+
+```text
+Read docs/AGENT_DAILY_MAINTENANCE.md.
+Print the manual daily-style maintenance report:
+npm run agent:daily:maintenance -- --report
+
+Include skip-safe live eval status only when requested:
+npm run agent:daily:maintenance -- --include-live-eval
+
+Write a durable daily report only when requested:
+npm run agent:daily:maintenance -- --write
+
+For parser-clean JSON:
+npm --silent run agent:daily:maintenance -- --json
+
+Do not implement findings, create worktrees, merge, start services, schedule
+jobs, run tests/build/lint, or treat the recommended command as approval. The
+daily wrapper summarizes maintenance, policy, dispatch, recent run evidence,
+and deterministic eval fixture inventory.
+```
+
 ## /dispatch-plan
 
 ```text

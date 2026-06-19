@@ -71,6 +71,7 @@ npm run agent:policy -- --report
 npm run agent:policy -- --top-actionable
 npm run agent:run-ledger -- --report
 npm run agent:maintenance:run -- --report
+npm run agent:daily:maintenance -- --report
 npm run agent:dispatch:plan -- --top --phase <number>
 npm run agent:dispatch:worktree -- --top --phase <number>
 npm run agent:finding:brief -- --top --phase <number>
@@ -109,6 +110,12 @@ report-only by default and writes only with `--write` to `agent/runs/`.
 `agent:maintenance:run` composes the maintenance report, policy selection, and
 recommended next command into one report-only cycle. It writes a durable
 maintenance cycle report only with `--write`.
+`agent:daily:maintenance` is the manual report-only daily maintenance wrapper.
+It summarizes findings, policy, dispatch planning, recent run records, and
+deterministic eval fixture inventory. It writes daily reports only with
+`--write`, includes skip-safe live eval status only with `--include-live-eval`,
+and does not schedule itself, create worktrees, run tests/build/lint, or
+implement findings.
 `agent:dispatch:plan` converts a selected finding into a policy-aware dispatch
 plan. It is planning-only, writes only with `--write`, and never creates
 worktrees or implements findings.

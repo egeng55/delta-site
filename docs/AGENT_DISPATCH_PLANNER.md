@@ -14,6 +14,10 @@ tests, call external services, mutate Supabase, or change product behavior.
 `agent:maintenance:run` performs the one-command report-only cycle: inspect the
 queue, classify findings, select the top actionable finding, and stop.
 
+`agent:daily:maintenance` is the manual daily-style wrapper that summarizes
+that cycle plus recent run artifacts, live eval report evidence, and
+deterministic eval fixture inventory.
+
 `agent:dispatch:plan` starts from a selected finding and prints the next
 dispatch plan. It is one step closer to implementation planning, but it still
 does not execute anything.

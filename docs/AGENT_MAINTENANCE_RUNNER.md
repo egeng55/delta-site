@@ -66,6 +66,9 @@ Existing reports are not overwritten unless `--force` is passed.
 - `agent:run-ledger` records one run ledger entry.
 - `agent:maintenance:run` performs the full report-only cycle and may write a
   cycle report.
+- `agent:daily:maintenance` summarizes the maintenance cycle, dispatch planning
+  context, recent run records, latest live eval evidence, and deterministic eval
+  fixture inventory into a manual daily-style report.
 - `agent:dispatch:plan` turns the selected finding into a planning-only
   dispatch plan with approval requirements, proposed worktree details, scope,
   and verification.
@@ -74,6 +77,15 @@ Existing reports are not overwritten unless `--force` is passed.
 
 The runner may print a suggested `agent:finding:brief` command. That command is
 not executed by the runner and does not authorize implementation.
+
+For a broader daily-style snapshot, use:
+
+```bash
+npm run agent:daily:maintenance -- --report
+```
+
+That wrapper is also report-only. It does not schedule itself or run
+tests/build/lint.
 
 ## Future Background Agents
 
