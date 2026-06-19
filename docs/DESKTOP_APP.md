@@ -63,6 +63,11 @@ optional fields as safe empty display metadata, and preserves the same
 unavailable state for unusable registry responses. This does not add endpoints
 or change desktop runtime behavior.
 
+For optional local verification of that backend domain metadata contract, see
+`docs/LOCAL_DOMAIN_LIVE_EVALS.md`. The runbook covers backend readiness,
+manual uvicorn startup, site `agent:eval:live`, authenticated token handling,
+and skipped/protected/unavailable outcomes.
+
 You can override that URL for local development:
 
 ```bash

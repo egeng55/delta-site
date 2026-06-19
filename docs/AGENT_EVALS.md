@@ -161,6 +161,9 @@ local services. Failures are reserved for rejected provided tokens, assertion
 failures, malformed responses, or required live checks that cannot reach a valid
 local endpoint.
 
+For the full backend-plus-site workflow, terminal setup, authenticated mode,
+and troubleshooting guidance, see `docs/LOCAL_DOMAIN_LIVE_EVALS.md`.
+
 ## Domain Metadata Fixtures
 
 `evals/os-console/domain-metadata.json` protects the Phase 86 domain-aware

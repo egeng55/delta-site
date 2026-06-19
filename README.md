@@ -48,6 +48,11 @@ contract helpers aligned with the backend response models. Malformed optional
 fields are treated as unavailable or empty display metadata instead of crashing
 the read-only console.
 
+For the optional local backend-plus-site domain metadata eval workflow, see
+`docs/LOCAL_DOMAIN_LIVE_EVALS.md`. The runbook explains backend readiness,
+manual uvicorn startup, authenticated token handling, and expected live-eval
+outcomes without making live services part of normal tests or builds.
+
 All OS Console chat/session state is browser-local. The page does not start
 microphone capture, backend local TTS, desktop notifications, background
 listening, wake word, automatic memory writes, or Supabase mutations. Browser
