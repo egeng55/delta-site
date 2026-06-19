@@ -106,6 +106,11 @@ The wrapper must not:
 The daily wrapper can recommend a dispatch or finding-brief command. It does
 not execute that command.
 
+If a broad finding has been partially remediated and split into narrower
+follow-ups, mark the broad finding as deferred with clear notes rather than
+leaving it as the top actionable item. The daily wrapper should then surface the
+next active finding selected by policy.
+
 ## Future Scheduling Plan
 
 Scheduling is intentionally deferred. Before any cron, launchd, CI, or

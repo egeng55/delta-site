@@ -47,6 +47,12 @@ Statuses:
 - `deferred`: intentionally postponed.
 - `resolved`: completed and verified.
 
+Broad findings can also be deferred when they have been partially remediated
+and superseded by narrower open follow-up findings. In that case, the original
+finding should clearly list completed phases, remaining categories, and the new
+finding ids. Do not mark the broad finding `resolved` unless all remaining
+categories are complete and verified.
+
 Priorities:
 
 - `P0`: security or data-risk item that should be handled before product
