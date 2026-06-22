@@ -2,21 +2,25 @@
 id: "017"
 title: "Behavioral OS domain event taxonomy"
 priority: "P1"
-status: "open"
+status: "resolved"
 repo: "backend"
 routine: "backend-architecture-plan"
 slug: "behavioral-os-domain-event-taxonomy"
 agent_executable: true
 security_related: false
 source: "phase-114-reconciliation"
-last_reviewed: "2026-06-21"
+last_reviewed: "2026-06-22"
 owner: "behavioral-os architecture maintenance"
-recommended_next_phase: "Define a formal read-only event taxonomy for Behavioral OS domains without changing runtime interpretation behavior."
+recommended_next_phase: "Event taxonomy metadata completed in Phase 122; future work should scope runtime event validation or site display separately."
 evidence:
   - "/Users/egeng/delta-backend/docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
   - "/Users/egeng/delta-backend/docs/DOMAIN_MODEL_IMPLEMENTATION_INVENTORY.md"
+  - "/Users/egeng/delta-backend/docs/DOMAIN_EVENT_TAXONOMY.md"
   - "/Users/egeng/delta-backend/domains/base.py"
+  - "/Users/egeng/delta-backend/domains/event_taxonomy.py"
   - "/Users/egeng/delta-backend/domains/late_caffeine.py"
+  - "/Users/egeng/delta-backend/domains/capabilities.py"
+  - "/Users/egeng/delta-backend/tests/test_domain_event_taxonomy.py"
   - "/Users/egeng/delta-backend/event_interpreter.py"
 likely_files:
   - "docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
@@ -36,16 +40,48 @@ formal cross-domain event taxonomy. Future domains need shared vocabulary for
 event source, evidence quality, no-event filtering, privacy level, storage
 decision, and domain ownership before event model expansion becomes safe.
 
+## Resolution Summary
+
+Phase 122 added a backend metadata-only domain event taxonomy.
+
+Backend now has:
+
+- `domains/event_taxonomy.py`
+- `docs/DOMAIN_EVENT_TAXONOMY.md`
+- taxonomy-aware capability matrix metadata in `domains/capabilities.py`
+- focused coverage in `tests/test_domain_event_taxonomy.py`
+
+The taxonomy defines event categories, source classes, sensitivity levels,
+stable event-type ids, validation helpers, and late-caffeine event support.
+It does not change runtime event interpretation behavior.
+
 ## Current State
 
-`late_caffeine` lists `caffeine`, `late_caffeine_intake`, and
-`ambient_non_event` event categories. Those labels are useful but not yet a
-general taxonomy for future domains.
+`late_caffeine` now declares these formal event types:
+
+- `substance.caffeine_intake`
+- `sleep.sleep_disruption`
+- `schedule.late_day`
+- `feedback.intervention_outcome`
+
+The capability matrix reports supported event categories, supported event
+types, event sources, and event sensitivity levels.
 
 ## Risk
 
-Medium. Without a taxonomy, future domains may use incompatible event labels or
-overclaim behavior from vague natural-language observations.
+Medium. The metadata risk is now reduced, but future runtime phases must still
+avoid overclaiming behavior from vague natural-language observations.
+
+## Remaining Work
+
+This finding is resolved for metadata/contracts/docs/tests. Separate future
+work may cover:
+
+- runtime event type validation
+- provider event source mapping
+- optional site `/os` display of event taxonomy metadata
+
+Those are intentionally not implemented in Phase 122.
 
 ## Verification Needed
 
