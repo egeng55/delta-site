@@ -106,6 +106,13 @@ asserts that:
 - the response says no user state is included
 - side-effect flags for Supabase, memory writes, notifications, TTS, and live
   mic are false
+- event taxonomy metadata is valid when exposed through current domain
+  metadata; current `event_types` coverage checks that Late caffeine includes
+  `substance.caffeine_intake`
+- feedback policy metadata is valid when optional fields are exposed; absent
+  optional fields are reported as `not_exposed`, not failed
+- capability matrix metadata is valid when optional fields are exposed; absent
+  optional fields are reported as `not_exposed`, not failed
 
 The selected domain can be overridden for future local metadata checks:
 
@@ -126,6 +133,19 @@ Output distinguishes these local states:
   assertion failed.
 - `live_domain_metadata_passed`: the endpoint returned metadata satisfying the
   read-only domain assertions.
+
+Live eval output also includes coverage status for:
+
+- `domain_metadata`
+- `event_taxonomy_metadata`
+- `feedback_policy_metadata`
+- `capability_matrix_metadata`
+
+Coverage can be `passed`, `skipped`, `not_exposed`, or `failed`. `not_exposed`
+means an optional metadata area is not present in the current backend response
+shape and is not required for the live eval to pass. `--require-live` requires
+backend/auth availability only; it does not require optional metadata fields
+that are not currently exposed.
 
 If the backend is unavailable, the command reports `skipped` and exits
 successfully by default. If the endpoint returns `401` or `403` without a token,
@@ -190,7 +210,9 @@ Live eval reports never store token values, request headers, or sensitive
 backend payloads.
 
 For the full backend-plus-site workflow, terminal setup, authenticated mode,
-and troubleshooting guidance, see `docs/LOCAL_DOMAIN_LIVE_EVALS.md`.
+troubleshooting guidance, and coverage inventory, see
+`docs/LOCAL_DOMAIN_LIVE_EVALS.md` and
+`docs/LIVE_EVAL_COVERAGE_INVENTORY.md`.
 
 ## Domain Metadata Fixtures
 
@@ -223,6 +245,8 @@ Later phases may add:
 - CI integration
 - multi-repo eval plans across `delta-backend`, `delta-site`, and
   `delta-mobile`
+- exposed capability-matrix and feedback-policy metadata live checks if a
+  future backend phase adds those fields to read-only introspection responses
 
 Do not add those in the current foundation without a dedicated phase brief.
 

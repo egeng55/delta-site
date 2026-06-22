@@ -12,6 +12,21 @@ const EXPECTED_LATE_CAFFEINE_FEEDBACK = [
   "misunderstood",
   "suppress_topic",
 ];
+const EXPECTED_LATE_CAFFEINE_EVENT_TYPES = [
+  "substance.caffeine_intake",
+];
+const EXPECTED_LATE_CAFFEINE_FEEDBACK_SIGNALS = [
+  "explicit_helpful",
+  "explicit_not_helpful",
+  "explicit_dismissed",
+  "explicit_snoozed",
+];
+const COVERAGE_AREAS = [
+  "domain_metadata",
+  "event_taxonomy_metadata",
+  "feedback_policy_metadata",
+  "capability_matrix_metadata",
+];
 
 function parseArgs(argv, env = process.env) {
   const args = {
@@ -80,6 +95,30 @@ function stringArray(value) {
   return value.filter((item) => typeof item === "string" && item.trim().length > 0);
 }
 
+function hasOwn(record, key) {
+  return Object.prototype.hasOwnProperty.call(record, key);
+}
+
+function optionalStringArrayField(record, key) {
+  if (!hasOwn(record, key)) {
+    return { present: false, valid: true, value: [] };
+  }
+  if (!Array.isArray(record[key])) {
+    return { present: true, valid: false, value: [] };
+  }
+  return { present: true, valid: true, value: stringArray(record[key]) };
+}
+
+function optionalBooleanField(record, key) {
+  if (!hasOwn(record, key)) {
+    return { present: false, valid: true, value: null };
+  }
+  if (typeof record[key] !== "boolean") {
+    return { present: true, valid: false, value: null };
+  }
+  return { present: true, valid: true, value: record[key] };
+}
+
 function normalizeDomainMetadata(raw) {
   if (!isRecord(raw)) return null;
   const domainId = stringValue(raw.domain_id);
@@ -102,6 +141,21 @@ function normalizeDomainMetadata(raw) {
     proof_requirements: stringArray(raw.proof_requirements),
     notes: stringArray(raw.notes),
     introspection_mode: stringValue(raw.introspection_mode, "unknown"),
+    optional_metadata: {
+      supported_event_categories: optionalStringArrayField(raw, "supported_event_categories"),
+      supported_event_types: optionalStringArrayField(raw, "supported_event_types"),
+      event_sources: optionalStringArrayField(raw, "event_sources"),
+      event_sensitivity_levels: optionalStringArrayField(raw, "event_sensitivity_levels"),
+      supported_feedback_signals: optionalStringArrayField(raw, "supported_feedback_signals"),
+      feedback_sources: optionalStringArrayField(raw, "feedback_sources"),
+      feedback_learning_modes: optionalStringArrayField(raw, "feedback_learning_modes"),
+      feedback_sensitivity_levels: optionalStringArrayField(raw, "feedback_sensitivity_levels"),
+      intervention_feedback_supported: optionalBooleanField(raw, "intervention_feedback_supported"),
+      feedback_policy_ready: optionalBooleanField(raw, "feedback_policy_ready"),
+      safe_for_metadata_introspection: optionalBooleanField(raw, "safe_for_metadata_introspection"),
+      requires_user_state: optionalBooleanField(raw, "requires_user_state"),
+      requires_external_provider: optionalBooleanField(raw, "requires_external_provider"),
+    },
   };
 }
 
@@ -169,6 +223,12 @@ function passedResult(assertions, context = {}) {
   );
 }
 
+function coverageWith(status, reason) {
+  return Object.fromEntries(
+    COVERAGE_AREAS.map((area) => [area, { status, reason }]),
+  );
+}
+
 function nextRecommendedCommand(result) {
   if (result.status === "passed") {
     return "Record the result in the phase report and continue with normal verification.";
@@ -213,6 +273,16 @@ function renderLiveEvalReport(result, date = new Date()) {
   }
   if (typeof result.domainCount === "number") {
     lines.push(`- Domain count: \`${result.domainCount}\``);
+  }
+
+  lines.push("", "## Coverage", "");
+  if (result.coverage) {
+    for (const area of COVERAGE_AREAS) {
+      const item = result.coverage[area] || { status: "unknown", reason: "not reported" };
+      lines.push(`- ${area}: \`${item.status}\` - ${item.reason}`);
+    }
+  } else {
+    lines.push("- Coverage summary was not reported.");
   }
 
   lines.push("", "## Assertions", "");
@@ -264,6 +334,12 @@ function renderLiveEvalReport(result, date = new Date()) {
 function assertDomainMetadata(payload, expectedDomain = DEFAULT_EXPECTED_DOMAIN) {
   const assertions = [];
   const failures = [];
+  const coverage = {
+    domain_metadata: { status: "passed", reason: "core domain metadata assertions passed" },
+    event_taxonomy_metadata: { status: "not_exposed", reason: "event taxonomy fields were not exposed" },
+    feedback_policy_metadata: { status: "not_exposed", reason: "feedback policy fields were not exposed" },
+    capability_matrix_metadata: { status: "not_exposed", reason: "capability matrix fields were not exposed" },
+  };
 
   function record(name, passed, detail) {
     assertions.push({ name, passed, detail });
@@ -301,6 +377,9 @@ function assertDomainMetadata(payload, expectedDomain = DEFAULT_EXPECTED_DOMAIN)
         missing.length === 0 ? "all expected feedback labels present" : `missing=${missing.join(",")}`,
       );
     }
+    recordEventTaxonomyMetadata(expected, expectedDomain, record, coverage);
+    recordFeedbackPolicyMetadata(expected, expectedDomain, record, coverage);
+    recordCapabilityMatrixMetadata(expected, record, coverage);
   }
 
   record(
@@ -334,7 +413,175 @@ function assertDomainMetadata(payload, expectedDomain = DEFAULT_EXPECTED_DOMAIN)
     `side_effects.live_mic=${payload.side_effects.live_mic}`,
   );
 
-  return { assertions, failures };
+  if (failures.length > 0) {
+    coverage.domain_metadata = {
+      status: "failed",
+      reason: "one or more live domain metadata assertions failed",
+    };
+  }
+
+  return { assertions, failures, coverage };
+}
+
+function recordEventTaxonomyMetadata(domain, expectedDomain, record, coverage) {
+  const optional = domain.optional_metadata;
+  const eventTypeSource = optional.supported_event_types.present
+    ? optional.supported_event_types
+    : { present: domain.event_types.length > 0, valid: true, value: domain.event_types };
+  const categorySource = optional.supported_event_categories;
+
+  if (!eventTypeSource.present && !categorySource.present) {
+    return;
+  }
+
+  if (!eventTypeSource.valid || !categorySource.valid) {
+    coverage.event_taxonomy_metadata = {
+      status: "failed",
+      reason: "optional event taxonomy metadata was present but malformed",
+    };
+    record(
+      "event_taxonomy_optional_shape",
+      false,
+      `supported_event_types_valid=${eventTypeSource.valid}; supported_event_categories_valid=${categorySource.valid}`,
+    );
+    return;
+  }
+
+  record(
+    "event_taxonomy_event_types_array",
+    Array.isArray(eventTypeSource.value),
+    `event_type_count=${eventTypeSource.value.length}`,
+  );
+
+  if (expectedDomain === DEFAULT_EXPECTED_DOMAIN) {
+    const missing = EXPECTED_LATE_CAFFEINE_EVENT_TYPES.filter(
+      (eventType) => !eventTypeSource.value.includes(eventType),
+    );
+    record(
+      "late_caffeine_expected_event_types",
+      missing.length === 0,
+      missing.length === 0 ? "late caffeine event types present" : `missing=${missing.join(",")}`,
+    );
+  }
+
+  coverage.event_taxonomy_metadata = {
+    status: "passed",
+    reason: optional.supported_event_types.present
+      ? "explicit event taxonomy metadata fields validated"
+      : "event taxonomy validated through domain event_types",
+  };
+}
+
+function recordFeedbackPolicyMetadata(domain, expectedDomain, record, coverage) {
+  const optional = domain.optional_metadata;
+  const fields = [
+    optional.supported_feedback_signals,
+    optional.feedback_sources,
+    optional.feedback_learning_modes,
+    optional.feedback_sensitivity_levels,
+  ];
+  const present = fields.some((field) => field.present) || optional.intervention_feedback_supported.present || optional.feedback_policy_ready.present;
+  if (!present) return;
+
+  const malformed = fields.some((field) => field.present && !field.valid)
+    || (optional.intervention_feedback_supported.present && !optional.intervention_feedback_supported.valid)
+    || (optional.feedback_policy_ready.present && !optional.feedback_policy_ready.valid);
+  if (malformed) {
+    coverage.feedback_policy_metadata = {
+      status: "failed",
+      reason: "optional feedback policy metadata was present but malformed",
+    };
+    record(
+      "feedback_policy_optional_shape",
+      false,
+      "feedback policy arrays must be arrays and support flags must be booleans when present",
+    );
+    return;
+  }
+
+  record(
+    "feedback_policy_signals_array",
+    optional.supported_feedback_signals.present,
+    optional.supported_feedback_signals.present
+      ? `signal_count=${optional.supported_feedback_signals.value.length}`
+      : "supported_feedback_signals not exposed",
+  );
+
+  if (expectedDomain === DEFAULT_EXPECTED_DOMAIN && optional.supported_feedback_signals.present) {
+    const missing = EXPECTED_LATE_CAFFEINE_FEEDBACK_SIGNALS.filter(
+      (signal) => !optional.supported_feedback_signals.value.includes(signal),
+    );
+    record(
+      "late_caffeine_expected_feedback_policy_signals",
+      missing.length === 0,
+      missing.length === 0 ? "late caffeine feedback policy signals present" : `missing=${missing.join(",")}`,
+    );
+  }
+
+  if (optional.intervention_feedback_supported.present) {
+    record(
+      "feedback_policy_intervention_support_boolean",
+      optional.intervention_feedback_supported.valid,
+      `intervention_feedback_supported=${optional.intervention_feedback_supported.value}`,
+    );
+  }
+
+  coverage.feedback_policy_metadata = {
+    status: "passed",
+    reason: "optional feedback policy metadata fields validated",
+  };
+}
+
+function recordCapabilityMatrixMetadata(domain, record, coverage) {
+  const optional = domain.optional_metadata;
+  const fields = [
+    optional.safe_for_metadata_introspection,
+    optional.requires_user_state,
+    optional.requires_external_provider,
+  ];
+  const present = fields.some((field) => field.present);
+  if (!present) return;
+
+  const malformed = fields.some((field) => field.present && !field.valid);
+  if (malformed) {
+    coverage.capability_matrix_metadata = {
+      status: "failed",
+      reason: "optional capability matrix metadata was present but malformed",
+    };
+    record(
+      "capability_matrix_optional_shape",
+      false,
+      "capability matrix requirement/safety fields must be booleans when present",
+    );
+    return;
+  }
+
+  if (optional.safe_for_metadata_introspection.present) {
+    record(
+      "capability_matrix_metadata_introspection_safe",
+      optional.safe_for_metadata_introspection.value === true,
+      `safe_for_metadata_introspection=${optional.safe_for_metadata_introspection.value}`,
+    );
+  }
+  if (optional.requires_user_state.present) {
+    record(
+      "capability_matrix_requires_user_state_boolean",
+      typeof optional.requires_user_state.value === "boolean",
+      `requires_user_state=${optional.requires_user_state.value}`,
+    );
+  }
+  if (optional.requires_external_provider.present) {
+    record(
+      "capability_matrix_requires_external_provider_boolean",
+      typeof optional.requires_external_provider.value === "boolean",
+      `requires_external_provider=${optional.requires_external_provider.value}`,
+    );
+  }
+
+  coverage.capability_matrix_metadata = {
+    status: "passed",
+    reason: "optional capability matrix metadata fields validated",
+  };
 }
 
 async function fetchDomainMetadata({ backendUrl, token, fetchImpl = fetch }) {
@@ -374,6 +621,7 @@ async function runLiveEval(options, deps = {}) {
       notifications: false,
       memoryWrites: false,
     },
+    coverage: coverageWith("skipped", "live endpoint was unavailable or protected before assertions"),
   };
 
   let response;
@@ -428,16 +676,21 @@ async function runLiveEval(options, deps = {}) {
       "malformed_payload",
       "Domain metadata response was malformed.",
       [{ name: "registry_payload_normalized", passed: false, detail: "normalizeDomainRegistryResponse returned null" }],
-      { ...context, httpStatus: response.status },
+      {
+        ...context,
+        httpStatus: response.status,
+        coverage: coverageWith("failed", "domain metadata payload could not be normalized"),
+      },
     );
   }
 
-  const { assertions, failures } = assertDomainMetadata(payload, expectedDomain);
+  const { assertions, failures, coverage } = assertDomainMetadata(payload, expectedDomain);
   if (failures.length > 0) {
     return failedResult("assertion_failure", "Live domain metadata assertions failed.", assertions, {
       ...context,
       httpStatus: response.status,
       failures,
+      coverage,
     });
   }
 
@@ -445,6 +698,7 @@ async function runLiveEval(options, deps = {}) {
     ...context,
     httpStatus: response.status,
     domainCount: payload.domain_count,
+    coverage,
   });
 }
 
@@ -461,6 +715,14 @@ function printText(result) {
   console.log(`Reason: ${result.reason}`);
   if (typeof result.httpStatus === "number") console.log(`HTTP status: ${result.httpStatus}`);
   if (typeof result.domainCount === "number") console.log(`Domain count: ${result.domainCount}`);
+  if (result.coverage) {
+    console.log("");
+    console.log("Coverage:");
+    for (const area of COVERAGE_AREAS) {
+      const item = result.coverage[area] || { status: "unknown", reason: "not reported" };
+      console.log(`- ${area}: ${item.status} (${item.reason})`);
+    }
+  }
   if (result.assertions.length > 0) {
     console.log("");
     console.log("Assertions:");
@@ -478,7 +740,10 @@ function printText(result) {
 module.exports = {
   DEFAULT_BACKEND_URL,
   DEFAULT_EXPECTED_DOMAIN,
+  COVERAGE_AREAS,
+  EXPECTED_LATE_CAFFEINE_EVENT_TYPES,
   EXPECTED_LATE_CAFFEINE_FEEDBACK,
+  EXPECTED_LATE_CAFFEINE_FEEDBACK_SIGNALS,
   LIVE_EVAL_REPORT_SUFFIX,
   assertDomainMetadata,
   endpointUrl,

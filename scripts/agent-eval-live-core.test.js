@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const {
   DEFAULT_EXPECTED_DOMAIN,
+  EXPECTED_LATE_CAFFEINE_EVENT_TYPES,
   EXPECTED_LATE_CAFFEINE_FEEDBACK,
+  EXPECTED_LATE_CAFFEINE_FEEDBACK_SIGNALS,
   liveEvalReportFilename,
   liveEvalReportPath,
   parseArgs,
@@ -26,7 +28,7 @@ function registryPayload(overrides = {}) {
         description: "Metadata for late caffeine behavior.",
         lifecycle_stage: "proof_backed",
         privacy_level: "high",
-        event_types: ["caffeine_intake"],
+        event_types: EXPECTED_LATE_CAFFEINE_EVENT_TYPES,
         state_fields: ["cooldown", "tone"],
         prediction_types: ["sleep_risk"],
         intervention_types: ["timing_guidance"],
@@ -155,13 +157,117 @@ describe("agent live eval core", () => {
 
     expect(result.status).toBe("passed");
     expect(result.classification).toBe("live_domain_metadata_passed");
+    expect(result.coverage.domain_metadata.status).toBe("passed");
+    expect(result.coverage.event_taxonomy_metadata.status).toBe("passed");
+    expect(result.coverage.feedback_policy_metadata.status).toBe("not_exposed");
+    expect(result.coverage.capability_matrix_metadata.status).toBe("not_exposed");
     expect(result.assertions).toEqual(expect.arrayContaining([
       expect.objectContaining({ name: "registry_payload_normalized", passed: true }),
       expect.objectContaining({ name: "expected_domain_registered", passed: true }),
+      expect.objectContaining({ name: "late_caffeine_expected_event_types", passed: true }),
       expect.objectContaining({ name: "late_caffeine_expected_feedback_capabilities", passed: true }),
       expect.objectContaining({ name: "metadata_only_no_user_state", passed: true }),
       expect.objectContaining({ name: "metadata_only_no_supabase_side_effect", passed: true }),
     ]));
+  });
+
+  it("validates optional event taxonomy, feedback policy, and capability fields when present", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: true },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockResolvedValue(response(200, registryPayload({
+          domains: [
+            {
+              ...registryPayload().domains[0],
+              supported_event_categories: ["substance", "sleep", "feedback"],
+              supported_event_types: EXPECTED_LATE_CAFFEINE_EVENT_TYPES,
+              event_sources: ["manual_user_report", "derived_inference"],
+              event_sensitivity_levels: ["personal", "sensitive_health"],
+              supported_feedback_signals: EXPECTED_LATE_CAFFEINE_FEEDBACK_SIGNALS,
+              feedback_sources: ["manual_user_feedback", "intervention_response"],
+              feedback_learning_modes: ["domain_policy_update", "aggregate_only"],
+              feedback_sensitivity_levels: ["personal", "sensitive_inference"],
+              intervention_feedback_supported: true,
+              feedback_policy_ready: true,
+              safe_for_metadata_introspection: true,
+              requires_user_state: true,
+              requires_external_provider: false,
+            },
+          ],
+        }))),
+      },
+    );
+
+    expect(result.status).toBe("passed");
+    expect(result.coverage.event_taxonomy_metadata.status).toBe("passed");
+    expect(result.coverage.feedback_policy_metadata.status).toBe("passed");
+    expect(result.coverage.capability_matrix_metadata.status).toBe("passed");
+    expect(result.assertions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "late_caffeine_expected_feedback_policy_signals", passed: true }),
+      expect.objectContaining({ name: "feedback_policy_intervention_support_boolean", passed: true }),
+      expect.objectContaining({ name: "capability_matrix_metadata_introspection_safe", passed: true }),
+      expect.objectContaining({ name: "capability_matrix_requires_user_state_boolean", passed: true }),
+      expect.objectContaining({ name: "capability_matrix_requires_external_provider_boolean", passed: true }),
+    ]));
+  });
+
+  it("treats absent optional feedback policy and capability fields as not exposed, not failed", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: true },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockResolvedValue(response(200, registryPayload())),
+      },
+    );
+
+    expect(result.status).toBe("passed");
+    expect(result.coverage.feedback_policy_metadata).toEqual(expect.objectContaining({ status: "not_exposed" }));
+    expect(result.coverage.capability_matrix_metadata).toEqual(expect.objectContaining({ status: "not_exposed" }));
+  });
+
+  it("fails when optional event taxonomy metadata is present but malformed", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: true },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockResolvedValue(response(200, registryPayload({
+          domains: [
+            {
+              ...registryPayload().domains[0],
+              supported_event_types: "substance.caffeine_intake",
+            },
+          ],
+        }))),
+      },
+    );
+
+    expect(result.status).toBe("failed");
+    expect(result.classification).toBe("assertion_failure");
+    expect(result.coverage.event_taxonomy_metadata.status).toBe("failed");
+    expect(result.failures.join("\n")).toContain("event_taxonomy_optional_shape");
+  });
+
+  it("fails when optional feedback policy metadata is present but malformed", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: true },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockResolvedValue(response(200, registryPayload({
+          domains: [
+            {
+              ...registryPayload().domains[0],
+              supported_feedback_signals: "explicit_helpful",
+            },
+          ],
+        }))),
+      },
+    );
+
+    expect(result.status).toBe("failed");
+    expect(result.classification).toBe("assertion_failure");
+    expect(result.coverage.feedback_policy_metadata.status).toBe("failed");
+    expect(result.failures.join("\n")).toContain("feedback_policy_optional_shape");
   });
 
   it("generates timestamped live eval report paths", () => {
@@ -187,6 +293,7 @@ describe("agent live eval core", () => {
     expect(report).toContain("Timestamp: 2026-06-19T13:00:00.000Z");
     expect(report).toContain("Status: `skipped`");
     expect(report).toContain("Classification: `backend_unavailable`");
+    expect(report).toContain("domain_metadata: `skipped`");
     expect(report).toContain("No assertions were checked");
     expect(report).toContain("Start the local backend");
   });

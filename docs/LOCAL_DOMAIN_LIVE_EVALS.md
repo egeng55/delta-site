@@ -44,6 +44,10 @@ The site live eval checks the backend metadata endpoint when it is reachable:
 - expected late-caffeine feedback labels are present
 - the payload normalizes through the site contract parser
 - metadata-only and no-side-effect flags are preserved
+- event taxonomy metadata is checked through current `event_types`, including
+  `substance.caffeine_intake` for Late caffeine
+- optional event taxonomy, feedback policy, and capability-matrix fields are
+  validated when exposed and reported as `not_exposed` when absent
 
 ## What It Does Not Do
 
@@ -228,6 +232,18 @@ failed.
 : The endpoint returned domain metadata satisfying the local read-only
 assertions.
 
+Coverage status fields:
+
+- `domain_metadata`
+- `event_taxonomy_metadata`
+- `feedback_policy_metadata`
+- `capability_matrix_metadata`
+
+Each coverage area reports `passed`, `skipped`, `not_exposed`, or `failed`.
+`not_exposed` is not a failure; it means an optional metadata area is not part
+of the current endpoint response. `--require-live` requires the live backend
+and auth path only, not optional metadata fields.
+
 ## Troubleshooting
 
 Port 8000 already in use:
@@ -284,5 +300,12 @@ Still deferred:
 - CI or background live eval runners
 - multi-domain live eval expansion beyond `late_caffeine`
 - user-state or feedback-policy evals
+- CI live eval gating
+- production/service live checks
+- exposed feedback-policy/capability-matrix metadata checks beyond
+  `not_exposed` once a future backend phase intentionally exposes those fields
 
 Each deferred path needs a separate phase with explicit safety boundaries.
+
+For the current coverage inventory, see
+`docs/LIVE_EVAL_COVERAGE_INVENTORY.md`.
