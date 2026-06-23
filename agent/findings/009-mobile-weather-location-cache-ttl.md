@@ -2,22 +2,22 @@
 id: "009"
 title: "Mobile weather/location cache TTL"
 priority: "P2"
-status: "open"
+status: "resolved"
 repo: "mobile"
 routine: "mobile-cache-policy"
 slug: "mobile-weather-location-cache-ttl"
 agent_executable: true
 security_related: true
-source: "phase-96-reconciliation"
+source: "phase-96-reconciliation, phase-133-remediation"
 last_reviewed: "2026-06-23"
 owner: "mobile privacy maintenance"
-recommended_next_phase: "Review and merge the Phase 133 mobile weather/location cache TTL worktree, then mark this finding resolved only after integration verification passes."
+recommended_next_phase: "No further weather/location-cache-specific phase is needed. Use narrower findings for remaining mobile storage categories."
 evidence:
   - "/Users/egeng/delta-mobile/docs/MOBILE_SENSITIVE_STORAGE_PLAN.md"
+  - "/Users/egeng/delta-mobile/docs/MOBILE_WEATHER_LOCATION_CACHE.md"
   - "/Users/egeng/delta-mobile/src/services/weather.ts"
-  - "/Users/egeng/delta-worktrees/mobile-phase-133-mobile-weather-location-cache-ttl/docs/MOBILE_WEATHER_LOCATION_CACHE.md"
-  - "/Users/egeng/delta-worktrees/mobile-phase-133-mobile-weather-location-cache-ttl/src/services/storage/weatherLocationCache.ts"
-  - "/Users/egeng/delta-worktrees/mobile-phase-133-mobile-weather-location-cache-ttl/src/services/storage/weatherLocationCache.test.ts"
+  - "/Users/egeng/delta-mobile/src/services/storage/weatherLocationCache.ts"
+  - "/Users/egeng/delta-mobile/src/services/storage/weatherLocationCache.test.ts"
 likely_files:
   - "src/services/weather.ts"
   - "src/services/storage/weatherLocationCache.ts"
@@ -32,20 +32,26 @@ out_of_scope:
 Weather records can reveal location-adjacent context such as city, conditions,
 air quality, and timestamps.
 
-## Current State
+## Completed Work
 
-- Weather cache remains in AsyncStorage.
-- The cache is medium sensitivity and may be best handled with short TTL and
-  payload minimization rather than large encrypted storage.
-- Phase 133 implemented a scoped pending-merge worktree:
-  `/Users/egeng/delta-worktrees/mobile-phase-133-mobile-weather-location-cache-ttl`.
-- Worktree commit `a604c12` adds a weather/location cache helper for
-  `@delta_weather_cache`, preserving the existing 30-minute TTL while adding a
-  cache envelope, expired/malformed cleanup, legacy cache rewrite, recursive
-  token-like field stripping, and two-decimal coordinate rounding if coordinate
-  fields are accidentally present.
-- The finding remains open until the Phase 133 worktree is reviewed, merged
-  into `delta-mobile`, and verified from main.
+- Phase 133 added `docs/MOBILE_WEATHER_LOCATION_CACHE.md` with the weather and
+  location cache inventory.
+- The scoped worktree commit `a604c12` was merged into `delta-mobile` main by
+  merge commit `e42c73b`.
+- Weather cache remains in `AsyncStorage` because it is a high-volume,
+  short-lived display cache rather than a small preference for `SecureStore`.
+- Added `src/services/storage/weatherLocationCache.ts` for
+  `@delta_weather_cache`.
+- Preserved the existing 30-minute TTL while adding a schema-versioned cache
+  envelope.
+- Added expired and malformed cache cleanup on read.
+- Added fresh legacy `{ data, timestamp }` handling and rewrite into the
+  current cache envelope.
+- Added recursive token-like field stripping before storage or return.
+- Added defensive two-decimal coordinate rounding if coordinate fields are
+  accidentally present.
+- Did not change location permission prompts, provider behavior, backend,
+  site, Supabase, or broader location persistence strategy.
 
 ## Risk
 
@@ -53,9 +59,36 @@ Medium. Location-adjacent cache data can reveal routine or location context,
 but it is usually lower risk than chat transcripts, pending sync payloads, or
 health insight caches.
 
-## Verification Needed
+## Storage Keys And Payloads Found
 
-- Tests for TTL expiry and malformed cache fallback.
-- Tests that cache payloads do not grow beyond the intended weather context.
-- `npm test -- --runInBand` in `delta-mobile`.
-- Merge verification from `delta-mobile` main after reviewing the worktree diff.
+- `@delta_weather_cache`: current weather display payload with city-level
+  location, weather conditions, air quality, display timestamps, and no
+  intentional precise coordinates or location history.
+
+## Remaining Work
+
+Remaining mobile storage work is tracked by adjacent findings:
+
+- `011 Mobile notification preference storage`
+
+Do not reopen this finding for provider changes, location permission behavior,
+weather feature behavior, or broad encrypted large-cache strategy.
+
+## Verification
+
+Mobile verification passed from `delta-mobile` main with:
+
+```bash
+npm test -- --runInBand
+```
+
+Phase 133 added focused tests for:
+
+- TTL envelope creation,
+- valid cache reads,
+- expired cache cleanup,
+- malformed cache cleanup,
+- legacy cache read and rewrite,
+- token-like field stripping,
+- coordinate precision reduction,
+- display weather field preservation.
