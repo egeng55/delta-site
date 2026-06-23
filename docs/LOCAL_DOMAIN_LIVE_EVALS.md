@@ -48,6 +48,8 @@ The site live eval checks the backend metadata endpoint when it is reachable:
   `substance.caffeine_intake` for Late caffeine
 - optional event taxonomy, feedback policy, and capability-matrix fields are
   validated when exposed and reported as `not_exposed` when absent
+- partial optional feedback-policy metadata is allowed as long as each exposed
+  array or boolean field is well formed
 
 ## What It Does Not Do
 

@@ -110,7 +110,8 @@ asserts that:
   metadata; current `event_types` coverage checks that Late caffeine includes
   `substance.caffeine_intake`
 - feedback policy metadata is valid when optional fields are exposed; absent
-  optional fields are reported as `not_exposed`, not failed
+  optional fields are reported as `not_exposed`, not failed, and partial
+  feedback-policy field subsets are allowed when each exposed field is valid
 - capability matrix metadata is valid when optional fields are exposed; absent
   optional fields are reported as `not_exposed`, not failed
 

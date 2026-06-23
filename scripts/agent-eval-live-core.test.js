@@ -205,7 +205,8 @@ describe("agent live eval core", () => {
     expect(result.coverage.capability_matrix_metadata.status).toBe("passed");
     expect(result.assertions).toEqual(expect.arrayContaining([
       expect.objectContaining({ name: "late_caffeine_expected_feedback_policy_signals", passed: true }),
-      expect.objectContaining({ name: "feedback_policy_intervention_support_boolean", passed: true }),
+      expect.objectContaining({ name: "feedback_policy_intervention_feedback_supported_boolean", passed: true }),
+      expect.objectContaining({ name: "feedback_policy_feedback_policy_ready_boolean", passed: true }),
       expect.objectContaining({ name: "capability_matrix_metadata_introspection_safe", passed: true }),
       expect.objectContaining({ name: "capability_matrix_requires_user_state_boolean", passed: true }),
       expect.objectContaining({ name: "capability_matrix_requires_external_provider_boolean", passed: true }),
@@ -224,6 +225,34 @@ describe("agent live eval core", () => {
     expect(result.status).toBe("passed");
     expect(result.coverage.feedback_policy_metadata).toEqual(expect.objectContaining({ status: "not_exposed" }));
     expect(result.coverage.capability_matrix_metadata).toEqual(expect.objectContaining({ status: "not_exposed" }));
+  });
+
+  it("passes when feedback policy metadata exposes a safe subset of optional fields", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: true },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockResolvedValue(response(200, registryPayload({
+          domains: [
+            {
+              ...registryPayload().domains[0],
+              feedback_sources: ["manual_user_feedback"],
+              feedback_learning_modes: ["aggregate_only"],
+              feedback_policy_ready: false,
+            },
+          ],
+        }))),
+      },
+    );
+
+    expect(result.status).toBe("passed");
+    expect(result.coverage.feedback_policy_metadata.status).toBe("passed");
+    expect(result.assertions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: "feedback_policy_feedback_sources_array", passed: true }),
+      expect.objectContaining({ name: "feedback_policy_feedback_learning_modes_array", passed: true }),
+      expect.objectContaining({ name: "feedback_policy_feedback_policy_ready_boolean", passed: true }),
+    ]));
+    expect(result.failures || []).toEqual([]);
   });
 
   it("fails when optional event taxonomy metadata is present but malformed", async () => {
@@ -268,6 +297,28 @@ describe("agent live eval core", () => {
     expect(result.classification).toBe("assertion_failure");
     expect(result.coverage.feedback_policy_metadata.status).toBe("failed");
     expect(result.failures.join("\n")).toContain("feedback_policy_optional_shape");
+  });
+
+  it("fails when optional capability matrix metadata is present but malformed", async () => {
+    const result = await runLiveEval(
+      { backendUrl: "http://localhost:8000", expectedDomain: DEFAULT_EXPECTED_DOMAIN, requireLive: true },
+      {
+        env: {},
+        fetchImpl: jest.fn().mockResolvedValue(response(200, registryPayload({
+          domains: [
+            {
+              ...registryPayload().domains[0],
+              safe_for_metadata_introspection: "yes",
+            },
+          ],
+        }))),
+      },
+    );
+
+    expect(result.status).toBe("failed");
+    expect(result.classification).toBe("assertion_failure");
+    expect(result.coverage.capability_matrix_metadata.status).toBe("failed");
+    expect(result.failures.join("\n")).toContain("capability_matrix_optional_shape");
   });
 
   it("generates timestamped live eval report paths", () => {

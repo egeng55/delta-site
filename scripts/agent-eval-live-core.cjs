@@ -474,18 +474,21 @@ function recordEventTaxonomyMetadata(domain, expectedDomain, record, coverage) {
 
 function recordFeedbackPolicyMetadata(domain, expectedDomain, record, coverage) {
   const optional = domain.optional_metadata;
-  const fields = [
-    optional.supported_feedback_signals,
-    optional.feedback_sources,
-    optional.feedback_learning_modes,
-    optional.feedback_sensitivity_levels,
+  const arrayFields = [
+    ["supported_feedback_signals", optional.supported_feedback_signals],
+    ["feedback_sources", optional.feedback_sources],
+    ["feedback_learning_modes", optional.feedback_learning_modes],
+    ["feedback_sensitivity_levels", optional.feedback_sensitivity_levels],
   ];
-  const present = fields.some((field) => field.present) || optional.intervention_feedback_supported.present || optional.feedback_policy_ready.present;
+  const booleanFields = [
+    ["intervention_feedback_supported", optional.intervention_feedback_supported],
+    ["feedback_policy_ready", optional.feedback_policy_ready],
+  ];
+  const present = arrayFields.some(([, field]) => field.present) || booleanFields.some(([, field]) => field.present);
   if (!present) return;
 
-  const malformed = fields.some((field) => field.present && !field.valid)
-    || (optional.intervention_feedback_supported.present && !optional.intervention_feedback_supported.valid)
-    || (optional.feedback_policy_ready.present && !optional.feedback_policy_ready.valid);
+  const malformed = arrayFields.some(([, field]) => field.present && !field.valid)
+    || booleanFields.some(([, field]) => field.present && !field.valid);
   if (malformed) {
     coverage.feedback_policy_metadata = {
       status: "failed",
@@ -499,13 +502,15 @@ function recordFeedbackPolicyMetadata(domain, expectedDomain, record, coverage) 
     return;
   }
 
-  record(
-    "feedback_policy_signals_array",
-    optional.supported_feedback_signals.present,
-    optional.supported_feedback_signals.present
-      ? `signal_count=${optional.supported_feedback_signals.value.length}`
-      : "supported_feedback_signals not exposed",
-  );
+  for (const [name, field] of arrayFields) {
+    if (field.present) {
+      record(
+        `feedback_policy_${name}_array`,
+        Array.isArray(field.value),
+        `${name}_count=${field.value.length}`,
+      );
+    }
+  }
 
   if (expectedDomain === DEFAULT_EXPECTED_DOMAIN && optional.supported_feedback_signals.present) {
     const missing = EXPECTED_LATE_CAFFEINE_FEEDBACK_SIGNALS.filter(
@@ -518,12 +523,14 @@ function recordFeedbackPolicyMetadata(domain, expectedDomain, record, coverage) 
     );
   }
 
-  if (optional.intervention_feedback_supported.present) {
-    record(
-      "feedback_policy_intervention_support_boolean",
-      optional.intervention_feedback_supported.valid,
-      `intervention_feedback_supported=${optional.intervention_feedback_supported.value}`,
-    );
+  for (const [name, field] of booleanFields) {
+    if (field.present) {
+      record(
+        `feedback_policy_${name}_boolean`,
+        typeof field.value === "boolean",
+        `${name}=${field.value}`,
+      );
+    }
   }
 
   coverage.feedback_policy_metadata = {
