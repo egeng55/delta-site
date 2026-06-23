@@ -215,6 +215,11 @@
         margin: 12px 0 0;
         padding-left: 20px;
       }
+
+      .notice {
+        border-color: rgba(216, 185, 109, 0.45);
+        color: #f8e3a1;
+      }
     </style>
   </head>
   <body>
@@ -230,6 +235,13 @@
         <p><strong>Console URL:</strong> <span id="console-url">http://127.0.0.1:3000/os</span></p>
         <p><strong>Console status:</strong> <span id="console-status">checking</span></p>
         <p><strong>Reason:</strong> <span id="reason">OS Console unavailable</span></p>
+      </section>
+
+      <section id="packaged-note" class="card notice" style="margin-top: 20px" hidden>
+        <h2>Packaged mode</h2>
+        <p id="packaged-reason">
+          Packaged Delta OS does not start local development services. Start backend/site manually, then reload the console.
+        </p>
       </section>
 
       <div class="actions">
@@ -355,11 +367,20 @@ npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
       function renderStatus(status) {
         const backend = status?.services?.backend;
         const site = status?.services?.site;
+        const desktop = status?.desktop || {};
+        const serviceManagerEnabled = desktop.serviceManagerEnabled !== false;
         renderService("backend", backend);
         renderService("site", site);
         const consoleReady = site?.status === "running";
         document.getElementById("console-status").textContent = consoleReady ? "available" : "unavailable";
         document.getElementById("stop-all").disabled = !(backend?.stoppable || site?.stoppable);
+        document.getElementById("start-all").disabled = !serviceManagerEnabled;
+        document.getElementById("start-backend").disabled = !serviceManagerEnabled;
+        document.getElementById("start-site").disabled = !serviceManagerEnabled;
+        document.getElementById("packaged-note").hidden = serviceManagerEnabled;
+        document.getElementById("packaged-reason").textContent =
+          desktop.serviceManagerDisabledReason ||
+          "Packaged Delta OS does not start local development services. Start backend/site manually, then reload the console.";
         if (consoleReady && autoReloadWhenReady) {
           autoReloadWhenReady = false;
           window.setTimeout(() => api?.reloadConsole?.(), 700);

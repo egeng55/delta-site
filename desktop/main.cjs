@@ -4,28 +4,17 @@ const fs = require("node:fs");
 const http = require("node:http");
 const https = require("node:https");
 const path = require("node:path");
+const {
+  SERVICE_LOG_LIMIT,
+  resolveConsoleUrl,
+  resolveDesktopRuntime,
+} = require("./runtime-config.cjs");
 
-const DEFAULT_CONSOLE_URL = "http://127.0.0.1:3000/os";
 const SITE_ROOT = path.resolve(__dirname, "..");
 const BACKEND_ROOT = process.env.DELTA_BACKEND_DIR || path.resolve(SITE_ROOT, "..", "delta-backend");
-const SERVICE_LOG_LIMIT = 200;
 const isSmokeTest = process.argv.includes("--smoke-test");
-
-function resolveConsoleUrl() {
-  const configured = process.env.DELTA_OS_CONSOLE_URL || DEFAULT_CONSOLE_URL;
-  try {
-    const url = new URL(configured);
-    if (url.protocol !== "http:" && url.protocol !== "https:") {
-      throw new Error("Delta OS console URL must be http or https.");
-    }
-    return url.toString();
-  } catch (error) {
-    console.warn(`[Delta OS] Invalid DELTA_OS_CONSOLE_URL; falling back to ${DEFAULT_CONSOLE_URL}.`);
-    return DEFAULT_CONSOLE_URL;
-  }
-}
-
-const consoleUrl = resolveConsoleUrl();
+const desktopRuntime = resolveDesktopRuntime({ isPackaged: app.isPackaged });
+const consoleUrl = resolveConsoleUrl(process.env, console.warn);
 const serviceDefinitions = {
   backend: {
     label: "Backend",
@@ -33,6 +22,8 @@ const serviceDefinitions = {
     command: path.join(BACKEND_ROOT, ".venv", "bin", "python"),
     args: ["-m", "uvicorn", "api_server:app", "--host", "127.0.0.1", "--port", "8000"],
     healthUrl: "http://127.0.0.1:8000/health",
+    launchable: desktopRuntime.serviceManagerEnabled,
+    disabledReason: desktopRuntime.serviceManagerDisabledReason,
     env: () => ({ ...process.env, ...readDotenv(path.join(BACKEND_ROOT, ".env")) }),
   },
   site: {
@@ -41,6 +32,8 @@ const serviceDefinitions = {
     command: "npm",
     args: ["run", "dev", "--", "--hostname", "127.0.0.1", "--port", "3000"],
     healthUrl: consoleUrl,
+    launchable: desktopRuntime.serviceManagerEnabled,
+    disabledReason: desktopRuntime.serviceManagerDisabledReason,
     env: () => ({ ...process.env }),
   },
 };
@@ -176,6 +169,9 @@ async function getSingleServiceStatus(serviceName) {
   } else if (childRunning) {
     status = "starting";
     owner = "desktop";
+  } else if (!definition.launchable) {
+    status = "disabled";
+    error = definition.disabledReason;
   } else if (state.lastError) {
     status = "error";
   }
@@ -191,7 +187,9 @@ async function getSingleServiceStatus(serviceName) {
     lastCheckedAt: checkedAt,
     healthUrl: definition.healthUrl,
     cwd: definition.cwd,
-    commandPreview: [definition.command, ...definition.args].join(" "),
+    launchable: definition.launchable,
+    disabledReason: definition.disabledReason,
+    commandPreview: definition.launchable ? [definition.command, ...definition.args].join(" ") : null,
     error,
     lastExit: state.lastExit,
     logLines: state.logs.slice(-12),
@@ -207,6 +205,12 @@ async function getServiceStatus() {
     consoleUrl,
     generatedAt: new Date().toISOString(),
     services: { backend, site },
+    desktop: {
+      mode: desktopRuntime.mode,
+      productionPathStatus: desktopRuntime.productionPathStatus,
+      serviceManagerEnabled: desktopRuntime.serviceManagerEnabled,
+      serviceManagerDisabledReason: desktopRuntime.serviceManagerDisabledReason,
+    },
     safety: {
       arbitraryShellExecution: false,
       micEnabled: false,
@@ -222,6 +226,12 @@ async function startService(serviceName) {
   const definition = serviceDefinitions[serviceName];
   const state = services[serviceName];
   if (!definition || !state) throw new Error(`Unknown service: ${serviceName}`);
+
+  if (!definition.launchable) {
+    state.lastError = definition.disabledReason;
+    serviceLog(serviceName, "system", definition.disabledReason);
+    return getServiceStatus();
+  }
 
   const current = await getSingleServiceStatus(serviceName);
   if (current.status === "running" && current.owner === "external") {
@@ -323,6 +333,8 @@ function finishSmoke(status) {
     desktopSmoke: status,
     loadedUrl: mainWindow?.webContents.getURL() || null,
     consoleUrl,
+    runtimeMode: desktopRuntime.mode,
+    serviceManagerEnabled: desktopRuntime.serviceManagerEnabled,
   }));
   setTimeout(() => app.quit(), 250);
 }
@@ -511,7 +523,10 @@ app.whenReady().then(() => {
   ipcMain.handle("delta-os:get-config", () => ({
     consoleUrl,
     shellMode: false,
-    serviceManager: true,
+    desktopMode: desktopRuntime.mode,
+    productionPathStatus: desktopRuntime.productionPathStatus,
+    serviceManager: desktopRuntime.serviceManagerEnabled,
+    serviceManagerDisabledReason: desktopRuntime.serviceManagerDisabledReason,
     micEnabled: false,
     notificationEnabled: false,
     ttsEnabled: false,
