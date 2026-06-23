@@ -255,6 +255,8 @@ Examples:
 ```text
 desktop/main.cjs
 desktop/preload.cjs
+desktop/runtime-config.cjs
+desktop/runtime-config.test.js
 desktop/fallback.html
 desktop/smoke-check.cjs
 docs/DESKTOP_APP.md

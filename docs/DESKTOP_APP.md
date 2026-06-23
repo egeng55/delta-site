@@ -68,6 +68,13 @@ For optional local verification of that backend domain metadata contract, see
 manual uvicorn startup, site `agent:eval:live`, authenticated token handling,
 and skipped/protected/unavailable outcomes.
 
+Phase 132 makes the Electron production path explicit without adding release
+automation. Development mode keeps the local service manager enabled. Packaged
+mode is treated as a local shell only: it may display service status and load
+the configured console URL, but it does not launch the backend or Next.js
+development services. Signing, notarization, app updates, artifact upload, and
+release publishing remain deferred.
+
 You can override that URL for local development:
 
 ```bash
@@ -99,8 +106,23 @@ The desktop shell does not:
 - run migrations
 - create a wake word or always-on listener
 - stop unrelated processes that were already running before the desktop app opened
+- launch local development services from a packaged app
 
 The Electron window denies runtime permission requests, keeps `nodeIntegration` disabled, keeps `contextIsolation` enabled, and runs the renderer sandbox. The renderer does not receive arbitrary shell access. It can only call named IPC methods such as `startBackend`, `startSite`, `startAll`, `stopAll`, `getServiceStatus`, and `getServiceLogs`.
+
+## Runtime modes
+
+The desktop shell has two explicit runtime modes:
+
+- `development`: launched with `npm run desktop:dev`, `desktop:preview`, or
+  `desktop:smoke`; the local service manager may start only the fixed backend
+  and site development commands below.
+- `packaged`: launched from a packaged Electron binary; the service manager is
+  read-only and start actions are disabled. Start backend/site manually, then
+  reload the console.
+
+This split prevents a packaged app from claiming production service management
+while the release path is still unsigned, unnotarized, and unpublished.
 
 ## Allowlisted service commands
 
@@ -175,4 +197,4 @@ npm run desktop:smoke
 
 ## Current limits
 
-This is not a signed, notarized, or App Store-ready app. It does not bundle the Python backend into the app, does not manage production services, and does not package the Next.js site as offline static assets. It is a local developer desktop shell and service-manager foundation for Delta OS Console.
+This is not a signed, notarized, or App Store-ready app. It does not bundle the Python backend into the app, does not manage production services, and does not package the Next.js site as offline static assets. Packaged mode is intentionally limited to a read-only local shell around an externally started console. It is a local developer desktop shell and service-manager foundation for Delta OS Console.
