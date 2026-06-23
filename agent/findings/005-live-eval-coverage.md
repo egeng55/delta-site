@@ -70,6 +70,12 @@ live evals can check that Late caffeine includes
 are not currently exposed by that endpoint; live evals report those areas as
 `not_exposed`, not failed.
 
+Phase 130 dogfooded the `delta-agent` sprint runner against this finding and
+refined optional metadata handling. Future feedback-policy metadata may now be
+exposed incrementally; the live eval validates each present array/boolean field
+without requiring the entire future feedback-policy matrix to be present at
+once. Malformed exposed optional metadata still fails.
+
 ## Current State
 
 `npm run agent:eval` remains deterministic and service-free.

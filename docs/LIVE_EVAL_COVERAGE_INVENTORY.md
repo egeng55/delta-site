@@ -54,7 +54,8 @@ when a local backend is reachable and authorized. It checks:
 - metadata-only/no-user-state/no-side-effect flags are preserved
 - event taxonomy metadata through `event_types` when available
 - optional event taxonomy fields when exposed later
-- optional feedback policy metadata fields when exposed later
+- optional feedback policy metadata fields when exposed later, including partial
+  field subsets
 - optional capability matrix metadata fields when exposed later
 
 Current backend domain introspection exposes `event_types`, so live eval can
@@ -62,6 +63,11 @@ check that Late caffeine includes `substance.caffeine_intake`. It does not yet
 expose capability-matrix event categories, feedback policy signals, feedback
 learning modes, or capability-matrix readiness fields. Those optional areas
 are reported as `not_exposed`, not failed.
+
+Optional metadata can be exposed incrementally. If a future backend adds only
+one feedback-policy array or boolean, the live eval validates that exposed
+field without requiring the full future feedback-policy matrix. Malformed
+exposed optional fields still fail.
 
 ## Coverage Status Fields
 
