@@ -38,6 +38,10 @@ next gap is evidence tracking: future agents should know which proof, eval,
 privacy, access-boundary, and user-control evidence is present before claiming
 a domain is ready for `user_facing_alpha` or `production_ready`.
 
+In the Intelligence OS framing, promotion gates evaluate readiness evidence for
+capability packs and proof scenarios. They do not define general intelligence
+and do not promote runtime behavior automatically.
+
 ## Resolution Summary
 
 Phase 137 adds metadata-only promotion evidence gates in

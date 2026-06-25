@@ -9,7 +9,7 @@ slug: "behavioral-os-domain-event-taxonomy"
 agent_executable: true
 security_related: false
 source: "phase-114-reconciliation"
-last_reviewed: "2026-06-22"
+last_reviewed: "2026-06-24"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Event taxonomy metadata completed in Phase 122; future work should scope runtime event validation or site display separately."
 evidence:
@@ -39,6 +39,10 @@ The domain registry records per-domain `event_types`, but there is not yet a
 formal cross-domain event taxonomy. Future domains need shared vocabulary for
 event source, evidence quality, no-event filtering, privacy level, storage
 decision, and domain ownership before event model expansion becomes safe.
+
+In the Intelligence OS framing, this finding covered the `event/context`
+substrate layer for domain capability packs. It did not make domains the core
+architecture.
 
 ## Resolution Summary
 

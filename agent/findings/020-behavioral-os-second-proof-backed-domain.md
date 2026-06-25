@@ -1,17 +1,17 @@
 ---
 id: "020"
-title: "Behavioral OS second proof-backed domain"
+title: "Behavioral OS second proof scenario and capability pack"
 priority: "P2"
 status: "open"
 repo: "backend"
 routine: "backend-architecture-plan"
-slug: "behavioral-os-second-proof-backed-domain"
+slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
 source: "phase-114-reconciliation"
-last_reviewed: "2026-06-21"
+last_reviewed: "2026-06-24"
 owner: "behavioral-os architecture maintenance"
-recommended_next_phase: "Select and scaffold a second proof-backed domain only after event taxonomy, privacy, feedback, proof, and eval requirements are explicit."
+recommended_next_phase: "Select a second proof scenario/capability pack only if it demonstrates transferable Intelligence OS substrate behavior with explicit event, privacy, feedback, proof, and eval requirements."
 evidence:
   - "/Users/egeng/delta-backend/docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
   - "/Users/egeng/delta-backend/docs/DOMAIN_MODEL_IMPLEMENTATION_INVENTORY.md"
@@ -32,26 +32,34 @@ out_of_scope:
 ---
 
 `late_caffeine` is currently the only registered proof-backed Behavioral OS
-domain. A second domain would prove that the domain architecture generalizes,
-but it should not be added until the remaining metadata, privacy, feedback,
-proof, and eval requirements are clear.
+capability pack and proof scenario. The next useful step is not "add another
+domain" by itself. A second proof scenario should demonstrate that the
+Intelligence OS substrate transfers beyond late caffeine:
+
+```text
+event/context -> memory/state -> hypothesis -> plan/intervention/tool use -> feedback -> learning/evidence -> next action
+```
+
+It should not be added until the metadata, privacy, feedback, proof, and eval
+requirements are clear.
 
 ## Current State
 
-The architecture document lists candidate domains such as health/sleep
-recovery, fitness/training recovery, focus routines, mood/stress patterns,
-career/job-search operations, and finance later with explicit privacy
-controls. None of those are registered domains yet.
+The architecture document lists candidate capability-pack families such as
+health/sleep recovery, fitness/training recovery, focus routines, mood/stress
+patterns, career/job-search operations, and finance later with explicit privacy
+controls. None of those are registered beyond `late_caffeine`.
 
 ## Risk
 
-High if rushed. A second domain can create scope creep, privacy creep, or
-overbroad product claims before the Behavioral OS loop is proven outside late
-caffeine.
+High if rushed. A second scenario can create scope creep, privacy creep, or
+overbroad product claims if it is treated as architecture instead of a bounded
+proof fixture for substrate transfer.
 
 ## Verification Needed
 
-- Domain contract exists before runtime behavior.
+- Substrate capability rationale exists before runtime behavior.
+- Domain/capability-pack contract exists before runtime behavior.
 - Privacy and storage policy are explicit.
 - Deterministic evals cover positive event, no-event, feedback, suppression or
   opt-out, unavailable state, and proof labels.

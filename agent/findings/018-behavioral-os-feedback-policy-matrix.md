@@ -9,7 +9,7 @@ slug: "behavioral-os-feedback-policy-matrix"
 agent_executable: true
 security_related: false
 source: "phase-114-reconciliation"
-last_reviewed: "2026-06-22"
+last_reviewed: "2026-06-24"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Feedback policy matrix metadata is complete. Future runtime feedback policy validation and safety gates should be scoped separately."
 evidence:
@@ -40,6 +40,10 @@ out_of_scope:
 Phase 123 adds a backend metadata-only feedback policy matrix that states how
 domains classify feedback signals, sources, sensitivity, learning eligibility,
 intervention-feedback support, and promotion evidence.
+
+In the Intelligence OS framing, this finding covered the feedback and
+learning/evidence substrate layers for domain capability packs. It did not make
+the feedback matrix a runtime policy engine.
 
 ## Resolution Summary
 
