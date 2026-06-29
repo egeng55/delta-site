@@ -46,12 +46,12 @@ event/context -> memory/state -> hypothesis -> plan/intervention/tool use -> fee
 ```
 
 Phase 140 added a metadata-only scenario registry and selected
-`poor_sleep_workout_readiness` as the second scenario candidate. Phase 142
-promotes it in a backend worktree from scaffolded to evidence-collecting by
-adding metadata-only event taxonomy and feedback policy mappings plus
-deterministic fixture scaffolding. It is not proof-backed yet. Phase 141 merged
-the registry to backend main without runtime/API/auth/event/feedback behavior
-changes.
+`poor_sleep_workout_readiness` as the second scenario candidate. Phase 142 was
+merged to backend main in Phase 143 and promotes it from scaffolded to
+evidence-collecting by adding metadata-only event taxonomy and feedback policy
+mappings plus deterministic fixture scaffolding. It is not proof-backed yet.
+The merge did not change runtime/API/auth/event-ingestion/feedback-runtime
+behavior.
 
 ## Current State
 
@@ -61,8 +61,8 @@ Backend main now has `scenarios/registry.py` and
 Registered scenario fixtures:
 
 - `late_caffeine_sleep_disruption`: `proof_backed`
-- `poor_sleep_workout_readiness`: `evidence_collecting` in the Phase 142
-  backend worktree; not proof-backed or runtime-active
+- `poor_sleep_workout_readiness`: `evidence_collecting` on backend main; not
+  proof-backed or runtime-active
 
 `poor_sleep_workout_readiness` was selected because it tests substrate transfer
 across sleep context and exercise readiness instead of adding another
@@ -73,9 +73,9 @@ requirements, proof requirements, and refusal boundaries.
 It remains open because evidence-collecting metadata and fixture scaffolding
 are not proof evidence.
 
-Phase 141 merge verification kept this finding open. The merge proved that the
-registry and candidate-selection metadata are stable enough to land, not that a
-second scenario is proof-backed.
+Phase 143 merge verification kept this finding open. The merge proved that the
+event taxonomy, feedback policy, and deterministic fixture scaffolding are
+stable enough to land, not that a second scenario is proof-backed.
 
 ## Risk
 
