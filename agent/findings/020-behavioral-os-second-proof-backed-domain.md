@@ -8,10 +8,10 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals"
 last_reviewed: "2026-06-29"
 owner: "behavioral-os architecture maintenance"
-recommended_next_phase: "Add proof-grade deterministic eval evidence, proof data, live eval evidence, safety/privacy review, rollback planning, and user controls before calling the selected second scenario proof-backed."
+recommended_next_phase: "Add proof data, live eval evidence, safety/privacy review, rollback planning, and user controls before calling the selected second scenario proof-backed."
 evidence:
   - "/Users/egeng/delta-backend/docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
   - "/Users/egeng/delta-backend/docs/DOMAIN_MODEL_IMPLEMENTATION_INVENTORY.md"
@@ -19,11 +19,18 @@ evidence:
   - "/Users/egeng/delta-backend/domains/registry.py"
   - "/Users/egeng/delta-backend/domains/capabilities.py"
   - "/Users/egeng/delta-backend/scenarios/registry.py"
+  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/scripts/run_scenario_evals.py"
+  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/tests/test_scenario_eval_runner.py"
   - "/Users/egeng/delta-backend/tests/test_intelligence_scenarios.py"
 likely_files:
   - "docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
   - "docs/DOMAIN_MODEL_IMPLEMENTATION_INVENTORY.md"
   - "docs/INTELLIGENCE_SCENARIO_REGISTRY.md"
+  - "evals/intelligence_scenarios/"
+  - "scripts/run_scenario_evals.py"
+  - "agent/evidence/scenario-evals/"
   - "domains/"
   - "scenarios/"
   - "tests/"
@@ -53,6 +60,12 @@ mappings plus deterministic fixture scaffolding. It is not proof-backed yet.
 The merge did not change runtime/API/auth/event-ingestion/feedback-runtime
 behavior.
 
+Phase 144 adds a deterministic metadata-only scenario eval runner in a backend
+worktree. The runner validates the poor-sleep fixture schema, event mappings,
+feedback mappings, sample-response assertions, safety assertions, and proof
+tags without API calls, Supabase, providers, models, or runtime services. This
+adds deterministic eval evidence but does not add proof data or runtime proof.
+
 ## Current State
 
 Backend main now has `scenarios/registry.py` and
@@ -70,8 +83,8 @@ substance-timing loop. It has a bounded hypothesis, metadata-only event
 taxonomy links, feedback policy links, privacy/storage notes, eval
 requirements, proof requirements, and refusal boundaries.
 
-It remains open because evidence-collecting metadata and fixture scaffolding
-are not proof evidence.
+It remains open because deterministic eval evidence is not proof data, live
+eval evidence, safety/privacy approval, rollback planning, or user controls.
 
 Phase 143 merge verification kept this finding open. The merge proved that the
 event taxonomy, feedback policy, and deterministic fixture scaffolding are
@@ -80,17 +93,17 @@ stable enough to land, not that a second scenario is proof-backed.
 ## Risk
 
 Medium. The registry narrows the scope and prevents "second domain" drift, but
-proof-backed status still requires actual deterministic eval and proof
-evidence. Risk remains high if future phases treat evidence-collecting metadata
-as runtime behavior or product proof.
+proof-backed status still requires proof data and runtime-readiness evidence.
+Risk remains high if future phases treat evidence-collecting metadata as
+runtime behavior or product proof.
 
 ## Verification Needed
 
 - Substrate capability rationale exists before runtime behavior.
 - Domain/capability-pack contract exists before runtime behavior.
 - Privacy and storage policy are explicit.
-- Proof-grade deterministic evals cover positive event, no-event, feedback,
-  suppression or opt-out, unavailable state, and proof labels.
+- Deterministic scenario eval evidence covers positive event, no-event,
+  feedback, safety boundaries, proof tags, and proof-label refusal.
 - Event taxonomy and feedback policy mappings exist for the selected scenario.
 - Proof data shows substrate transfer beyond late caffeine.
 - Live eval, safety review, privacy review, rollback plan, and user controls
