@@ -8,7 +8,7 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge, phase-148-proof-data-pack"
 last_reviewed: "2026-06-29"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Add proof data, live eval evidence, and runtime user-control implementation if required before calling the selected second scenario proof-backed."
@@ -22,6 +22,7 @@ evidence:
   - "/Users/egeng/delta-backend/scripts/run_scenario_evals.py"
   - "/Users/egeng/delta-backend/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-worktrees/backend-phase-148-poor-sleep-workout-readiness-proof-data-pack/agent/evidence/scenario-proof-data/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_safety_review.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_privacy_review.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_rollback_plan.json"
@@ -78,13 +79,22 @@ specification. The safety/privacy/rollback reviews narrow promotion risk. The
 user-control artifact specifies future controls but does not implement runtime
 controls.
 
+Phase 148 adds a synthetic metadata-only proof-data pack in a backend worktree
+for `poor_sleep_workout_readiness`. The pack covers representative poor sleep,
+workout, readiness, fatigue, motivation, and feedback outcome cases. It narrows
+the proof-data gap but is fixture evidence only: not user data, not live eval
+evidence, and not runtime proof.
+
 ## Current State
 
 Backend main now has `scenarios/registry.py`,
 `docs/INTELLIGENCE_SCENARIO_REGISTRY.md`,
 `scripts/run_scenario_evals.py`, deterministic evidence at
-`agent/evidence/scenario-evals/poor_sleep_workout_readiness.json`, and proof
-review evidence under `agent/evidence/scenario-reviews/`.
+`agent/evidence/scenario-evals/poor_sleep_workout_readiness.json` and proof
+review evidence under `agent/evidence/scenario-reviews/`. The Phase 148
+worktree adds synthetic proof-data fixture evidence at
+`agent/evidence/scenario-proof-data/poor_sleep_workout_readiness.json`; it is
+not on backend main until merge.
 
 Registered scenario fixtures:
 
@@ -98,14 +108,19 @@ substance-timing loop. It has a bounded hypothesis, metadata-only event
 taxonomy links, feedback policy links, privacy/storage notes, eval
 requirements, proof requirements, and refusal boundaries.
 
-It remains open because deterministic eval evidence and proof review evidence
-are not proof data, live eval evidence, or runtime user-control implementation.
+It remains open because deterministic eval evidence, synthetic proof-data
+fixtures, and proof review evidence are not live eval evidence or runtime
+user-control implementation. If promotion policy later requires real/live proof
+data beyond synthetic fixtures, that also remains missing.
 
 Phase 143 merge verification kept this finding open. Phase 145 and Phase 147
 merge verification also keep this finding open. The merges proved that the
 event taxonomy, feedback policy, deterministic fixture scaffolding,
 deterministic scenario eval evidence, and metadata-only review evidence are
 stable enough to land, not that a second scenario is proof-backed.
+Phase 148 keeps the same boundary: synthetic proof-data fixture evidence is
+useful evidence, but it does not prove live behavior or activate runtime
+capabilities.
 
 ## Risk
 
@@ -121,10 +136,13 @@ runtime behavior or product proof.
 - Privacy and storage policy are explicit.
 - Deterministic scenario eval evidence covers positive event, no-event,
   feedback, safety boundaries, proof tags, and proof-label refusal.
+- Synthetic proof-data fixture evidence covers representative sleep/workout
+  readiness, fatigue, motivation, and feedback outcome cases.
 - Safety review, privacy review, rollback plan, and user-control specification
   exist as metadata evidence.
 - Event taxonomy and feedback policy mappings exist for the selected scenario.
-- Proof data shows substrate transfer beyond late caffeine.
 - Live eval and implemented user controls exist before runtime candidacy.
+- Real/live proof data exists if promotion policy does not treat synthetic
+  fixture proof data as sufficient.
 - No Supabase, LLM, notification, TTS, mic, or memory-write action in scaffold
   phases.
