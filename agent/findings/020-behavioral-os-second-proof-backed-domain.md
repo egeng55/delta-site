@@ -8,7 +8,7 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge"
 last_reviewed: "2026-06-29"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Add proof data, live eval evidence, safety/privacy review, rollback planning, and user controls before calling the selected second scenario proof-backed."
@@ -19,10 +19,10 @@ evidence:
   - "/Users/egeng/delta-backend/domains/registry.py"
   - "/Users/egeng/delta-backend/domains/capabilities.py"
   - "/Users/egeng/delta-backend/scenarios/registry.py"
-  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/scripts/run_scenario_evals.py"
-  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
-  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
-  - "/Users/egeng/delta-worktrees/backend-phase-144-deterministic-scenario-eval-runner/tests/test_scenario_eval_runner.py"
+  - "/Users/egeng/delta-backend/scripts/run_scenario_evals.py"
+  - "/Users/egeng/delta-backend/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-backend/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-backend/tests/test_scenario_eval_runner.py"
   - "/Users/egeng/delta-backend/tests/test_intelligence_scenarios.py"
 likely_files:
   - "docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
@@ -60,16 +60,19 @@ mappings plus deterministic fixture scaffolding. It is not proof-backed yet.
 The merge did not change runtime/API/auth/event-ingestion/feedback-runtime
 behavior.
 
-Phase 144 adds a deterministic metadata-only scenario eval runner in a backend
-worktree. The runner validates the poor-sleep fixture schema, event mappings,
-feedback mappings, sample-response assertions, safety assertions, and proof
-tags without API calls, Supabase, providers, models, or runtime services. This
-adds deterministic eval evidence but does not add proof data or runtime proof.
+Phase 144 added a deterministic metadata-only scenario eval runner. Phase 145
+merged it to backend main. The runner validates the poor-sleep fixture schema,
+event mappings, feedback mappings, sample-response assertions, safety
+assertions, and proof tags without API calls, Supabase, providers, models, or
+runtime services. This adds deterministic eval evidence but does not add proof
+data or runtime proof.
 
 ## Current State
 
-Backend main now has `scenarios/registry.py` and
-`docs/INTELLIGENCE_SCENARIO_REGISTRY.md`.
+Backend main now has `scenarios/registry.py`,
+`docs/INTELLIGENCE_SCENARIO_REGISTRY.md`,
+`scripts/run_scenario_evals.py`, and deterministic evidence at
+`agent/evidence/scenario-evals/poor_sleep_workout_readiness.json`.
 
 Registered scenario fixtures:
 
@@ -86,9 +89,11 @@ requirements, proof requirements, and refusal boundaries.
 It remains open because deterministic eval evidence is not proof data, live
 eval evidence, safety/privacy approval, rollback planning, or user controls.
 
-Phase 143 merge verification kept this finding open. The merge proved that the
-event taxonomy, feedback policy, and deterministic fixture scaffolding are
-stable enough to land, not that a second scenario is proof-backed.
+Phase 143 merge verification kept this finding open. Phase 145 merge
+verification also keeps this finding open. The merges proved that the event
+taxonomy, feedback policy, deterministic fixture scaffolding, and deterministic
+scenario eval evidence are stable enough to land, not that a second scenario is
+proof-backed.
 
 ## Risk
 
