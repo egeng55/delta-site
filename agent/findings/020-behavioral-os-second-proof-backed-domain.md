@@ -8,10 +8,10 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package"
 last_reviewed: "2026-06-29"
 owner: "behavioral-os architecture maintenance"
-recommended_next_phase: "Add proof data, live eval evidence, safety/privacy review, rollback planning, and user controls before calling the selected second scenario proof-backed."
+recommended_next_phase: "Add proof data, live eval evidence, and runtime user-control implementation if required before calling the selected second scenario proof-backed."
 evidence:
   - "/Users/egeng/delta-backend/docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
   - "/Users/egeng/delta-backend/docs/DOMAIN_MODEL_IMPLEMENTATION_INVENTORY.md"
@@ -22,6 +22,10 @@ evidence:
   - "/Users/egeng/delta-backend/scripts/run_scenario_evals.py"
   - "/Users/egeng/delta-backend/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_safety_review.json"
+  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_privacy_review.json"
+  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_rollback_plan.json"
+  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_user_controls.json"
   - "/Users/egeng/delta-backend/tests/test_scenario_eval_runner.py"
   - "/Users/egeng/delta-backend/tests/test_intelligence_scenarios.py"
 likely_files:
@@ -31,6 +35,7 @@ likely_files:
   - "evals/intelligence_scenarios/"
   - "scripts/run_scenario_evals.py"
   - "agent/evidence/scenario-evals/"
+  - "agent/evidence/scenario-reviews/"
   - "domains/"
   - "scenarios/"
   - "tests/"
@@ -67,6 +72,11 @@ assertions, and proof tags without API calls, Supabase, providers, models, or
 runtime services. This adds deterministic eval evidence but does not add proof
 data or runtime proof.
 
+Phase 146 adds a metadata-only proof review package in a backend worktree:
+safety review, privacy review, rollback plan, and user-control specification.
+The safety/privacy/rollback reviews narrow promotion risk. The user-control
+artifact specifies future controls but does not implement runtime controls.
+
 ## Current State
 
 Backend main now has `scenarios/registry.py`,
@@ -86,8 +96,8 @@ substance-timing loop. It has a bounded hypothesis, metadata-only event
 taxonomy links, feedback policy links, privacy/storage notes, eval
 requirements, proof requirements, and refusal boundaries.
 
-It remains open because deterministic eval evidence is not proof data, live
-eval evidence, safety/privacy approval, rollback planning, or user controls.
+It remains open because deterministic eval evidence and proof review evidence
+are not proof data, live eval evidence, or runtime user-control implementation.
 
 Phase 143 merge verification kept this finding open. Phase 145 merge
 verification also keeps this finding open. The merges proved that the event
@@ -109,9 +119,10 @@ runtime behavior or product proof.
 - Privacy and storage policy are explicit.
 - Deterministic scenario eval evidence covers positive event, no-event,
   feedback, safety boundaries, proof tags, and proof-label refusal.
+- Safety review, privacy review, rollback plan, and user-control specification
+  exist as metadata evidence.
 - Event taxonomy and feedback policy mappings exist for the selected scenario.
 - Proof data shows substrate transfer beyond late caffeine.
-- Live eval, safety review, privacy review, rollback plan, and user controls
-  exist before runtime candidacy.
+- Live eval and implemented user controls exist before runtime candidacy.
 - No Supabase, LLM, notification, TTS, mic, or memory-write action in scaffold
   phases.
