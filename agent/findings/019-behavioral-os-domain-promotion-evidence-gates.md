@@ -48,7 +48,8 @@ and do not promote runtime behavior automatically.
 Phase 137 added metadata-only promotion evidence gates in
 `domains/promotion_gates.py` and documents them in
 `docs/DOMAIN_PROMOTION_GATES.md`. Phase 139 merged the work to backend main at
-`bf7c0fbf` after reconciling the language with the Intelligence OS north star.
+`bf7c0fbf` and then landed the scanner-safe safety wording at `d8e1f60b`
+after reconciling the language with the Intelligence OS north star.
 
 The gates define stable promotion stages:
 
