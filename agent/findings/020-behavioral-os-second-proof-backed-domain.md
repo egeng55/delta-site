@@ -8,7 +8,7 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge"
 last_reviewed: "2026-06-29"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Add deterministic evals, event taxonomy entries, feedback policy entries, and proof data before calling the selected second scenario proof-backed."
@@ -47,11 +47,12 @@ event/context -> memory/state -> hypothesis -> plan/intervention/tool use -> fee
 
 Phase 140 added a metadata-only scenario registry and selected
 `poor_sleep_workout_readiness` as the scaffolded second scenario candidate. It
-is not proof-backed yet.
+is not proof-backed yet. Phase 141 merged the registry to backend main without
+runtime/API/auth/event/feedback behavior changes.
 
 ## Current State
 
-The backend now has `scenarios/registry.py` and
+Backend main now has `scenarios/registry.py` and
 `docs/INTELLIGENCE_SCENARIO_REGISTRY.md`.
 
 Registered scenario fixtures:
@@ -66,6 +67,10 @@ feedback links, privacy/storage notes, eval requirements, proof requirements,
 and refusal boundaries.
 
 It remains open because scaffolded metadata is not proof evidence.
+
+Phase 141 merge verification kept this finding open. The merge proved that the
+registry and candidate-selection metadata are stable enough to land, not that a
+second scenario is proof-backed.
 
 ## Risk
 
