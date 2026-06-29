@@ -8,7 +8,7 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge"
 last_reviewed: "2026-06-29"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Add proof data, live eval evidence, and runtime user-control implementation if required before calling the selected second scenario proof-backed."
@@ -22,10 +22,10 @@ evidence:
   - "/Users/egeng/delta-backend/scripts/run_scenario_evals.py"
   - "/Users/egeng/delta-backend/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
-  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_safety_review.json"
-  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_privacy_review.json"
-  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_rollback_plan.json"
-  - "/Users/egeng/delta-worktrees/backend-phase-146-poor-sleep-workout-readiness-proof-review-package/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_user_controls.json"
+  - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_safety_review.json"
+  - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_privacy_review.json"
+  - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_rollback_plan.json"
+  - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_user_controls.json"
   - "/Users/egeng/delta-backend/tests/test_scenario_eval_runner.py"
   - "/Users/egeng/delta-backend/tests/test_intelligence_scenarios.py"
 likely_files:
@@ -72,17 +72,19 @@ assertions, and proof tags without API calls, Supabase, providers, models, or
 runtime services. This adds deterministic eval evidence but does not add proof
 data or runtime proof.
 
-Phase 146 adds a metadata-only proof review package in a backend worktree:
-safety review, privacy review, rollback plan, and user-control specification.
-The safety/privacy/rollback reviews narrow promotion risk. The user-control
-artifact specifies future controls but does not implement runtime controls.
+Phase 146 added a metadata-only proof review package. Phase 147 merged it to
+backend main: safety review, privacy review, rollback plan, and user-control
+specification. The safety/privacy/rollback reviews narrow promotion risk. The
+user-control artifact specifies future controls but does not implement runtime
+controls.
 
 ## Current State
 
 Backend main now has `scenarios/registry.py`,
 `docs/INTELLIGENCE_SCENARIO_REGISTRY.md`,
-`scripts/run_scenario_evals.py`, and deterministic evidence at
-`agent/evidence/scenario-evals/poor_sleep_workout_readiness.json`.
+`scripts/run_scenario_evals.py`, deterministic evidence at
+`agent/evidence/scenario-evals/poor_sleep_workout_readiness.json`, and proof
+review evidence under `agent/evidence/scenario-reviews/`.
 
 Registered scenario fixtures:
 
@@ -99,11 +101,11 @@ requirements, proof requirements, and refusal boundaries.
 It remains open because deterministic eval evidence and proof review evidence
 are not proof data, live eval evidence, or runtime user-control implementation.
 
-Phase 143 merge verification kept this finding open. Phase 145 merge
-verification also keeps this finding open. The merges proved that the event
-taxonomy, feedback policy, deterministic fixture scaffolding, and deterministic
-scenario eval evidence are stable enough to land, not that a second scenario is
-proof-backed.
+Phase 143 merge verification kept this finding open. Phase 145 and Phase 147
+merge verification also keep this finding open. The merges proved that the
+event taxonomy, feedback policy, deterministic fixture scaffolding,
+deterministic scenario eval evidence, and metadata-only review evidence are
+stable enough to land, not that a second scenario is proof-backed.
 
 ## Risk
 
