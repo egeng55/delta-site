@@ -8,7 +8,7 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge, phase-148-proof-data-pack, phase-149-scenario-evidence-reframe, phase-150-merge"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge, phase-148-proof-data-pack, phase-149-scenario-evidence-reframe, phase-150-merge, phase-151-dev-only-live-eval-trace-fixtures"
 last_reviewed: "2026-06-30"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Add live eval traces, real-world proof data or real user feedback/outcome observations, and runtime user-control implementation if required before calling the selected second scenario proof-backed."
@@ -19,11 +19,14 @@ evidence:
   - "/Users/egeng/delta-backend/domains/registry.py"
   - "/Users/egeng/delta-backend/domains/capabilities.py"
   - "/Users/egeng/delta-backend/scenarios/registry.py"
+  - "/Users/egeng/delta-backend/scenarios/live_eval_traces.py"
   - "/Users/egeng/delta-backend/scripts/run_scenario_evals.py"
   - "/Users/egeng/delta-backend/scripts/run_scenario_evidence.py"
+  - "/Users/egeng/delta-backend/scripts/run_scenario_live_eval_traces.py"
   - "/Users/egeng/delta-backend/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-fixtures/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-backend/agent/evidence/scenario-live-evals/poor_sleep_workout_readiness.dev.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_safety_review.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_privacy_review.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_rollback_plan.json"
@@ -39,6 +42,7 @@ likely_files:
   - "agent/evidence/scenario-evals/"
   - "agent/evidence/scenario-reviews/"
   - "agent/evidence/scenario-fixtures/"
+  - "agent/evidence/scenario-live-evals/"
   - "domains/"
   - "scenarios/"
   - "tests/"
@@ -96,6 +100,14 @@ main. The merge preserved the Phase 149 boundary: the engine is generic
 metadata/test tooling, the poor-sleep cases are synthetic fixtures only, and
 `poor_sleep_workout_readiness` remains `evidence_collecting`.
 
+Phase 151 adds a dev-only live eval trace schema and fixture coverage for
+`poor_sleep_workout_readiness`. The new trace fixture is useful for validating
+future trace shape, safety boundaries, permission language, feedback
+placeholders, and outcome placeholders, but it is not real live eval evidence,
+not real user feedback, not an outcome observation, not real-world proof data,
+not runtime user-control implementation, and not a proof-backed promotion
+claim.
+
 ## Current State
 
 Backend main now has `scenarios/registry.py`,
@@ -105,7 +117,10 @@ Backend main now has `scenarios/registry.py`,
 review evidence under `agent/evidence/scenario-reviews/`. Backend main also now
 has `scenarios/evidence.py`, `scripts/run_scenario_evidence.py`, and synthetic
 fixture evidence at
-`agent/evidence/scenario-fixtures/poor_sleep_workout_readiness.json`.
+`agent/evidence/scenario-fixtures/poor_sleep_workout_readiness.json`. Phase 151
+adds `scenarios/live_eval_traces.py`,
+`scripts/run_scenario_live_eval_traces.py`, and dev-only trace fixture evidence
+at `agent/evidence/scenario-live-evals/poor_sleep_workout_readiness.dev.json`.
 
 Registered scenario fixtures:
 
@@ -120,9 +135,9 @@ taxonomy links, feedback policy links, privacy/storage notes, eval
 requirements, proof requirements, and refusal boundaries.
 
 It remains open because deterministic eval evidence, synthetic fixture
-coverage, and proof review evidence are not live eval traces, real-world proof
-data, real user feedback/outcome observations, or runtime user-control
-implementation.
+coverage, dev-only live eval trace fixtures, and proof review evidence are not
+real live eval traces, real-world proof data, real user feedback/outcome
+observations, or runtime user-control implementation.
 
 Phase 143 merge verification kept this finding open. Phase 145 and Phase 147
 merge verification also keep this finding open. The merges proved that the
@@ -132,6 +147,8 @@ stable enough to land, not that a second scenario is proof-backed.
 Phase 150 keeps the same boundary while merging the Phase 149 correction:
 synthetic fixture evidence is useful Scenario Evidence Engine coverage, but it
 does not prove live behavior or activate runtime capabilities.
+Phase 151 keeps that boundary for trace capture: dev-only trace fixtures are
+schema/safety coverage only and do not satisfy the live eval proof gate.
 
 ## Risk
 
@@ -150,6 +167,8 @@ runtime behavior or product proof.
 - Synthetic fixture evidence covers representative sleep/workout readiness,
   fatigue, motivation, and feedback outcome cases as generic Scenario Evidence
   Engine coverage only.
+- Dev-only live eval trace fixtures validate schema and safety boundaries but
+  remain separate from real live eval evidence.
 - Safety review, privacy review, rollback plan, and user-control specification
   exist as metadata evidence.
 - Event taxonomy and feedback policy mappings exist for the selected scenario.
