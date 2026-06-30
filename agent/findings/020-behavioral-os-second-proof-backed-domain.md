@@ -8,8 +8,8 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge, phase-148-proof-data-pack, phase-149-scenario-evidence-reframe"
-last_reviewed: "2026-06-29"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge, phase-148-proof-data-pack, phase-149-scenario-evidence-reframe, phase-150-merge"
+last_reviewed: "2026-06-30"
 owner: "behavioral-os architecture maintenance"
 recommended_next_phase: "Add live eval traces, real-world proof data or real user feedback/outcome observations, and runtime user-control implementation if required before calling the selected second scenario proof-backed."
 evidence:
@@ -20,9 +20,10 @@ evidence:
   - "/Users/egeng/delta-backend/domains/capabilities.py"
   - "/Users/egeng/delta-backend/scenarios/registry.py"
   - "/Users/egeng/delta-backend/scripts/run_scenario_evals.py"
+  - "/Users/egeng/delta-backend/scripts/run_scenario_evidence.py"
   - "/Users/egeng/delta-backend/evals/intelligence_scenarios/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-evals/poor_sleep_workout_readiness.json"
-  - "/Users/egeng/delta-worktrees/backend-phase-148-poor-sleep-workout-readiness-proof-data-pack/agent/evidence/scenario-fixtures/poor_sleep_workout_readiness.json"
+  - "/Users/egeng/delta-backend/agent/evidence/scenario-fixtures/poor_sleep_workout_readiness.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_safety_review.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_privacy_review.json"
   - "/Users/egeng/delta-backend/agent/evidence/scenario-reviews/poor_sleep_workout_readiness_rollback_plan.json"
@@ -90,18 +91,21 @@ fatigue, motivation, and feedback outcome cases. They are fixture coverage
 only: not user data, not real proof data, not live eval evidence, and not
 runtime proof.
 
+Phase 150 merged the corrected generic Scenario Evidence Engine to backend
+main. The merge preserved the Phase 149 boundary: the engine is generic
+metadata/test tooling, the poor-sleep cases are synthetic fixtures only, and
+`poor_sleep_workout_readiness` remains `evidence_collecting`.
+
 ## Current State
 
 Backend main now has `scenarios/registry.py`,
 `docs/INTELLIGENCE_SCENARIO_REGISTRY.md`,
 `scripts/run_scenario_evals.py`, deterministic evidence at
 `agent/evidence/scenario-evals/poor_sleep_workout_readiness.json` and proof
-review evidence under `agent/evidence/scenario-reviews/`. The Phase 148
-worktree, corrected by Phase 149 before merge, adds
-`scenarios/evidence.py`, `scripts/run_scenario_evidence.py`, and synthetic
+review evidence under `agent/evidence/scenario-reviews/`. Backend main also now
+has `scenarios/evidence.py`, `scripts/run_scenario_evidence.py`, and synthetic
 fixture evidence at
-`agent/evidence/scenario-fixtures/poor_sleep_workout_readiness.json`; these are
-not on backend main until merge.
+`agent/evidence/scenario-fixtures/poor_sleep_workout_readiness.json`.
 
 Registered scenario fixtures:
 
@@ -125,7 +129,7 @@ merge verification also keep this finding open. The merges proved that the
 event taxonomy, feedback policy, deterministic fixture scaffolding,
 deterministic scenario eval evidence, and metadata-only review evidence are
 stable enough to land, not that a second scenario is proof-backed.
-Phase 149 keeps the same boundary while correcting Phase 148's framing:
+Phase 150 keeps the same boundary while merging the Phase 149 correction:
 synthetic fixture evidence is useful Scenario Evidence Engine coverage, but it
 does not prove live behavior or activate runtime capabilities.
 
