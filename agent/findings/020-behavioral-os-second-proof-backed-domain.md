@@ -8,10 +8,10 @@ routine: "backend-architecture-plan"
 slug: "behavioral-os-second-proof-scenario-capability-pack"
 agent_executable: true
 security_related: false
-source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge, phase-148-proof-data-pack, phase-149-scenario-evidence-reframe, phase-150-merge, phase-151-dev-only-live-eval-trace-fixtures"
+source: "phase-114-reconciliation, phase-140-scenario-registry, phase-141-merge, phase-142-evidence-collecting, phase-144-deterministic-evals, phase-145-merge, phase-146-proof-review-package, phase-147-merge, phase-148-proof-data-pack, phase-149-scenario-evidence-reframe, phase-150-merge, phase-151-dev-only-live-eval-trace-fixtures, phase-152-full-suite-audit"
 last_reviewed: "2026-06-30"
 owner: "behavioral-os architecture maintenance"
-recommended_next_phase: "Add live eval traces, real-world proof data or real user feedback/outcome observations, and runtime user-control implementation if required before calling the selected second scenario proof-backed."
+recommended_next_phase: "Pause additional second-scenario proof work until a dev-only local Intelligence OS loop demonstrates event input, state update, hypothesis, recommendation, feedback, learning update, and changed next recommendation."
 evidence:
   - "/Users/egeng/delta-backend/docs/BEHAVIORAL_OS_DOMAIN_MODEL.md"
   - "/Users/egeng/delta-backend/docs/DOMAIN_MODEL_IMPLEMENTATION_INVENTORY.md"
@@ -149,6 +149,12 @@ synthetic fixture evidence is useful Scenario Evidence Engine coverage, but it
 does not prove live behavior or activate runtime capabilities.
 Phase 151 keeps that boundary for trace capture: dev-only trace fixtures are
 schema/safety coverage only and do not satisfy the live eval proof gate.
+
+Phase 152 requested a full-suite audit before further `020` implementation.
+The audit pivots the next action away from more second-scenario paperwork and
+toward a dev-only local Intelligence OS loop. This finding remains open, but it
+should not drive the next phase unless that work directly advances live
+learning/adaptation or validates the reusable substrate.
 
 ## Risk
 
