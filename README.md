@@ -1,5 +1,11 @@
 This is the Delta web app built with Next.js.
 
+The WHOOP-to-ChatGPT connector uses the authenticated
+`/integrations/whoop` page for WHOOP linking and `/oauth/consent` for ChatGPT
+OAuth approval. The remote read-only MCP endpoint is hosted by
+`delta-backend`; these site pages do not expose WHOOP credentials or raw
+provider responses.
+
 ## Delta OS Console
 
 The local command center lives at:

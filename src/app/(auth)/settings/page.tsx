@@ -28,14 +28,20 @@ export default function SettingsPage() {
           </ul>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
+              href="/integrations/whoop"
+              className="bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              Connect WHOOP
+            </Link>
+            <Link
               href="/account"
-              className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              className="border border-border px-4 py-2 text-sm font-medium transition-colors hover:border-foreground/40"
             >
               Open Account
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:border-foreground/40"
+              className="border border-border px-4 py-2 text-sm font-medium transition-colors hover:border-foreground/40"
             >
               Open Dashboard
             </Link>
