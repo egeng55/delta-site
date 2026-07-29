@@ -17,16 +17,26 @@ export default function WhoopIntegrationPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (authLoading) {
-      return;
-    }
     if (!session?.access_token) {
       return;
     }
-    getWhoopConnectionStatus(session.access_token).then((result) => {
-      setStatus(result);
-      setChecking(false);
-    });
+
+    let cancelled = false;
+    getWhoopConnectionStatus(session.access_token)
+      .then((result) => {
+        if (!cancelled) {
+          setStatus(result);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setChecking(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [authLoading, session?.access_token]);
 
   const connect = async () => {
@@ -46,7 +56,7 @@ export default function WhoopIntegrationPage() {
     window.location.assign(result.authorization_url);
   };
 
-  if (authLoading || (session && checking)) {
+  if ((!session && authLoading) || (session && checking)) {
     return (
       <main className="min-h-screen bg-background px-6 py-12">
         <div className="mx-auto max-w-2xl">
