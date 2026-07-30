@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { OAuthAuthorizationDetails } from "@supabase/supabase-js";
+import { useAuth } from "@/context/AuthContext";
 import { getSupabase } from "@/lib/supabase";
 
 export default function OAuthConsentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { session, isLoading } = useAuth();
   const authorizationId = searchParams.get("authorization_id");
   const [details, setDetails] = useState<OAuthAuthorizationDetails | null>(null);
   const [error, setError] = useState(
@@ -16,14 +18,10 @@ export default function OAuthConsentPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!authorizationId) {
+    if (!authorizationId || isLoading) {
       return;
     }
     const load = async () => {
-      const supabase = getSupabase();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
       if (!session) {
         const redirect = `/oauth/consent?authorization_id=${encodeURIComponent(
           authorizationId,
@@ -31,6 +29,7 @@ export default function OAuthConsentPage() {
         router.replace(`/login?redirect=${encodeURIComponent(redirect)}`);
         return;
       }
+      const supabase = getSupabase();
       const result =
         await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
       if (result.error || !result.data) {
@@ -46,7 +45,7 @@ export default function OAuthConsentPage() {
     load().catch(() => {
       setError("This authorization request could not be loaded.");
     });
-  }, [authorizationId, router]);
+  }, [authorizationId, isLoading, router, session]);
 
   const decide = async (approve: boolean) => {
     if (!authorizationId) {
