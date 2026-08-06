@@ -2,143 +2,126 @@ import LegalLayout from "@/components/LegalLayout";
 
 const sections = [
   {
-    title: "Agreement to Terms",
-    content: "By accessing or using Delta's services, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing our services. The materials contained in this application are protected by applicable copyright and trademark law.",
+    title: "Agreement and Current Status",
+    content:
+      "Delta is a limited personal-intelligence preview operated for private use and evaluation. By using it, you agree to these terms. Delta is not currently offered as a paid subscription, enterprise product, or generally available commercial service.",
   },
   {
-    title: "Description of Service",
+    title: "What Delta Does",
     content: (
       <div className="space-y-4">
-        <p>Delta provides an AI-powered health intelligence platform that offers:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Personalized health and fitness guidance through conversational AI</li>
-          <li>Automatic parsing and organization of wellness data from chat</li>
-          <li>Trend analysis with derivative calculations (momentum, direction, stability)</li>
-          <li>AI-generated personalized workout recommendations</li>
-          <li>Goal setting and progress tracking</li>
-          <li>Calendar view of logged data</li>
-          <li>Data export in PDF, CSV, and JSON formats</li>
+        <p>Current Delta surfaces may provide:</p>
+        <ul className="ml-4 list-inside list-disc space-y-2">
+          <li>Authenticated personal data and conversation tools</li>
+          <li>Read-only integrations that you explicitly authorize</li>
+          <li>Normalized WHOOP recovery, sleep, cycle, workout, and HRV data</li>
+          <li>A ChatGPT custom app that can request owner-scoped WHOOP summaries</li>
+          <li>Experimental wellness analysis, scenario evaluation, and supervised agent tooling</li>
         </ul>
-        <p className="text-sm text-gray-400 mt-2">Our service is intended for informational purposes only and should not be considered medical advice. Always consult with qualified healthcare providers for medical decisions.</p>
+        <p>
+          Some repository code and preview screens represent experiments or future
+          directions. They are not promises that every feature is available,
+          continuously running, or suitable for production use.
+        </p>
       </div>
     ),
   },
   {
-    title: "User Accounts",
+    title: "Account and Authorized Connections",
     content: (
       <div className="space-y-4">
-        <p>When you create an account with us, you must provide accurate, complete, and current information. You are responsible for:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Maintaining the security of your account and password</li>
-          <li>All activities that occur under your account</li>
-          <li>Notifying us immediately of any unauthorized access</li>
-          <li>Ensuring your account information remains accurate</li>
-        </ul>
-        <p>We reserve the right to terminate accounts that violate these terms.</p>
+        <p>
+          You are responsible for your account security and for the external
+          accounts you choose to connect. Delta scopes connector data to the Delta
+          account that authorized it.
+        </p>
+        <p>
+          Public account creation is closed. An access request does not create an
+          account or guarantee approval; approved requests require a separate
+          owner-issued invitation.
+        </p>
+        <p>
+          The initial WHOOP connector is read-only. Disconnecting it revokes Delta&apos;s
+          provider access and deletes stored OAuth credentials. Deleting normalized
+          WHOOP history is a separate explicit choice.
+        </p>
       </div>
     ),
+  },
+  {
+    title: "AI and Tool Limitations",
+    content: (
+      <div className="space-y-4">
+        <p>
+          AI-generated responses, summaries, classifications, and recommendations
+          can be incomplete or wrong. Verify important information independently.
+        </p>
+        <ul className="ml-4 list-inside list-disc space-y-2">
+          <li>Do not rely on Delta for emergencies or time-critical decisions.</li>
+          <li>Review any consequential tool action before approving it.</li>
+          <li>Do not assume an experimental agent completed work without evidence.</li>
+          <li>Do not treat generated output as professional medical, legal, or financial advice.</li>
+        </ul>
+      </div>
+    ),
+  },
+  {
+    title: "Health and Wellness Disclaimer",
+    content: (
+      <div className="space-y-4">
+        <p className="font-semibold text-red-400">
+          Delta is not a medical device and does not diagnose, treat, cure, or
+          prevent any disease or condition.
+        </p>
+        <p>
+          WHOOP data, trend calculations, readiness language, and workout guidance
+          are informational wellness signals. Consult a qualified professional for
+          medical concerns and use emergency services when appropriate.
+        </p>
+      </div>
+    ),
+  },
+  {
+    title: "Data Controls",
+    content:
+      "You can manage and disconnect WHOOP from the WHOOP integration page. You may request an account data export or deletion through the contact page. Automated account-wide export and deletion controls are still being completed; Delta does not represent an incomplete control as available.",
+  },
+  {
+    title: "No Paid Plans",
+    content:
+      "Delta does not currently sell subscriptions, trials, team plans, or payment services. Legacy plan labels or entitlement metadata in experimental code do not constitute an offer to sell. Commercial terms will be published separately before any paid service is offered.",
   },
   {
     title: "Acceptable Use",
-    content: (
-      <div className="space-y-4">
-        <p>You agree not to use the service to:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Violate any laws or regulations</li>
-          <li>Infringe on intellectual property rights</li>
-          <li>Transmit harmful code or malware</li>
-          <li>Attempt to gain unauthorized access to our systems</li>
-          <li>Harass, abuse, or harm others</li>
-          <li>Collect user information without consent</li>
-          <li>Use the service for any commercial purpose without permission</li>
-        </ul>
-      </div>
-    ),
+    content:
+      "Do not use Delta to violate law, access another person's data, interfere with systems, introduce malicious code, or bypass authentication and approval boundaries. Access may be suspended to protect the system or its data.",
   },
   {
-    title: "Health Disclaimer",
-    content: (
-      <div className="space-y-4">
-        <p className="font-semibold text-red-400">Delta is NOT a medical device and is NOT intended to diagnose, treat, cure, or prevent any disease or health condition.</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Delta provides general wellness information only</li>
-          <li>Trend indicators (↑ ↓ →) show relative patterns, NOT medical assessments</li>
-          <li>"Physiological momentum" and similar metrics are wellness observations, NOT diagnoses</li>
-          <li>AI-generated workout recommendations should be adapted to your fitness level</li>
-          <li>Always consult professionals before starting new exercise programs</li>
-        </ul>
-        <p>You should not rely on this information as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
-      </div>
-    ),
+    title: "Ownership",
+    content:
+      "You retain rights in the personal data you provide. Delta's source code, interface, documentation, and original system materials remain the property of their respective owner or licensor. Third-party services and data remain subject to their own terms.",
   },
   {
-    title: "AI-Generated Content",
-    content: (
-      <div className="space-y-4">
-        <p>Delta uses artificial intelligence to:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Parse and organize information from your conversations</li>
-          <li>Generate personalized workout recommendations</li>
-          <li>Calculate trend indicators and pattern analysis</li>
-          <li>Produce weekly wellness assessments</li>
-        </ul>
-        <p>You understand that AI-generated content may not always be accurate and should not be relied upon for health decisions without professional consultation.</p>
-      </div>
-    ),
+    title: "Availability and Liability",
+    content:
+      "Delta is provided as-is and as-available for personal evaluation, without a service-level guarantee. To the extent permitted by applicable law, the operator is not liable for indirect or consequential loss arising from unavailable services, inaccurate AI output, or decisions made from experimental guidance.",
   },
   {
-    title: "Data and Exports",
-    content: "Data logged through chat is parsed and stored as derived metrics. You may export your data at any time via Settings in PDF, CSV, or JSON format. Exports contain derived metrics only, not raw biometric data. You own your data and may delete it at any time.",
+    title: "Changes",
+    content:
+      "These terms may change as Delta's capabilities and access model change. The updated date on this page identifies the current version. Material commercial terms will not be introduced silently.",
   },
   {
-    title: "Subscription and Billing",
-    content: (
-      <div className="space-y-4">
-        <p>Some features of Delta require a paid subscription. By subscribing, you agree to:</p>
-        <ul className="list-disc list-inside space-y-2 ml-4">
-          <li>Pay all applicable fees at the prices in effect when charges are incurred</li>
-          <li>Automatic renewal of subscriptions unless cancelled before the renewal date</li>
-          <li>Provide accurate billing information</li>
-        </ul>
-        <p>Refunds are provided in accordance with our Refund Policy. You may cancel your subscription at any time through your account settings.</p>
-      </div>
-    ),
-  },
-  {
-    title: "Intellectual Property",
-    content: "The service and its original content, features, and functionality are owned by Delta Health, Inc. and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws. You may not copy, modify, distribute, sell, or lease any part of our services without explicit permission.",
-  },
-  {
-    title: "Limitation of Liability",
-    content: "In no event shall Delta Health, Inc., its directors, employees, partners, agents, suppliers, or affiliates be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service.",
-  },
-  {
-    title: "Indemnification",
-    content: "You agree to defend, indemnify, and hold harmless Delta Health, Inc. and its licensees and licensors, and their employees, contractors, agents, officers, and directors, from and against any and all claims, damages, obligations, losses, liabilities, costs, or debt, and expenses arising from your use of the service or violation of these Terms.",
-  },
-  {
-    title: "Termination",
-    content: "We may terminate or suspend your account immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the service will immediately cease. All provisions of the Terms which by their nature should survive termination shall survive termination.",
-  },
-  {
-    title: "Governing Law",
-    content: "These Terms shall be governed and construed in accordance with the laws of the State of California, United States, without regard to its conflict of law provisions. Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights.",
-  },
-  {
-    title: "Changes to Terms",
-    content: "We reserve the right to modify or replace these Terms at any time. If a revision is material, we will try to provide at least 30 days' notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion. By continuing to access or use our service after those revisions become effective, you agree to be bound by the revised terms.",
-  },
-  {
-    title: "Contact Us",
-    content: "If you have any questions about these Terms, please contact us at legal@delta.health.",
+    title: "Contact",
+    content: "Questions or requests can be submitted at /contact or sent to eric@egeng.co.",
   },
 ];
 
 export default function TermsPage() {
   return (
     <LegalLayout
-      title="Terms of Service"
-      lastUpdated="January 15, 2026"
+      title="Terms of Use"
+      lastUpdated="August 3, 2026"
       sections={sections}
     />
   );

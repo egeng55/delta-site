@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
-import { Session } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { getSupabase, Profile, ProfileUpdate, Subscription, isDeveloperEmail } from "@/lib/supabase";
 
 interface AuthUser {
@@ -28,7 +28,6 @@ interface AuthContextType {
   access: AccessInfo | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
   updatePassword: (password: string) => Promise<{ success: boolean; error?: string }>;
@@ -129,7 +128,7 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
 
     // Listen for auth changes
     const { data: { subscription: authSubscription } } = getSupabase().auth.onAuthStateChange(
-      async (event, newSession) => {
+      async (_event: AuthChangeEvent, newSession: Session | null) => {
         setSession(newSession);
 
         if (newSession?.user) {
@@ -167,41 +166,6 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
       if (data.session) {
         setSession(data.session);
         await fetchUserData(data.user.id, data.user.email || '');
-      }
-
-      return { success: true };
-    } catch {
-      return { success: false, error: 'An unexpected error occurred' };
-    }
-  };
-
-  const signup = async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    if (!enableAuth) {
-      return { success: false, error: 'Auth disabled in this context' };
-    }
-    try {
-      const { data, error } = await getSupabase().auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-          },
-        },
-      });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
-        return { success: true, error: 'Please check your email to confirm your account.' };
-      }
-
-      if (data.session) {
-        setSession(data.session);
-        await fetchUserData(data.user!.id, data.user!.email || '');
       }
 
       return { success: true };
@@ -328,7 +292,6 @@ export function AuthProvider({ children, enableAuth = true }: AuthProviderProps)
       access,
       isLoading,
       login,
-      signup,
       logout,
       resetPassword,
       updatePassword,

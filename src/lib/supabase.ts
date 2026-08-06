@@ -5,7 +5,6 @@
  * This ensures auth state and data are shared across platforms.
  */
 
-import { createClient } from '@supabase/supabase-js';
 import { createBrowserClient } from '@supabase/ssr';
 
 // Supabase credentials from environment variables
@@ -25,14 +24,14 @@ export function createSupabaseBrowserClient() {
 }
 
 // Lazy-initialized client to avoid build-time errors
-let _supabase: ReturnType<typeof createClient> | null = null;
+let _supabase: ReturnType<typeof createBrowserClient> | null = null;
 
 export function getSupabase() {
   if (!isSupabaseConfigured) {
     throw new Error('Supabase environment variables are not configured');
   }
   if (_supabase === null) {
-    _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    _supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
   return _supabase;
 }

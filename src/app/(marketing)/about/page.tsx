@@ -33,7 +33,7 @@ export default function AboutPage() {
               transition={{ delay: 0.1 }}
               className="text-primary font-medium text-sm tracking-wider uppercase"
             >
-              About Us
+              About Delta
             </motion.span>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -42,9 +42,9 @@ export default function AboutPage() {
               transition={{ delay: 0.15, duration: 0.5 }}
               className="text-5xl md:text-6xl font-bold mt-4 mb-6"
             >
-              Making Health
+              Building Personal
               <br />
-              <span className="text-primary">Personal</span>
+              <span className="text-primary">Intelligence</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -53,9 +53,9 @@ export default function AboutPage() {
               transition={{ delay: 0.2 }}
               className="text-muted text-lg leading-relaxed"
             >
-              We believe everyone deserves access to personalized health guidance.
-              Delta combines cutting-edge AI with deep behavioral science to help
-              you build lasting healthy habits.
+              Delta is a personal intelligence system: an effort to connect context,
+              memory, reasoning, action, and feedback without giving software more
+              authority than its owner intended.
             </motion.p>
           </motion.div>
         </ImageBackground>
@@ -68,18 +68,25 @@ export default function AboutPage() {
             viewport={{ once: false, amount: 0.4 }}
             className="p-8 bg-card rounded-3xl"
           >
-            <h2 className="text-2xl font-bold mb-6">Our Story</h2>
+            <h2 className="text-2xl font-bold mb-6">Why Delta</h2>
             <div className="space-y-4 text-muted leading-relaxed">
               <p>
-                Delta started from a personal constraint, not a market thesis.
-                While working in China at Geely Auto International's global AI research center on vision transformers, I was training seriously as a lifter in an environment that wasn't built for it. The cafeteria food was optimized for a typical local diet, not high-protein intake. To meet my nutrition needs, I walked daily to KFC and Starbucks, manually stripping chicken skin to control fat and piecing together meals through trial and error. I ran several kilometers each day to a small hotel gym because I didn't have a car, adapting my training to whatever equipment was available.
+                AI can answer a question without understanding the larger situation.
+                Personal intelligence requires more: relevant context, bounded state,
+                testable hypotheses, useful next actions, and evidence about what
+                actually helped.
               </p>
               <p>
-                I relied heavily on ChatGPT and search to manage nutrition, training, and recovery—but I kept running into the same fundamental problems. ChatGPT had no persistent memory. It forgot my goals, my diet, and my constraints unless I re-explained them. Its context window broke continuity. It had no real sense of time, so daily macros and patterns drifted. Long conversations degraded, hallucinations crept in, and restarting sessions meant rebuilding state from scratch.
-                That friction revealed the real problem: health intelligence can't live inside a stateless chatbot or generic search tool. It needs persistent memory, temporal awareness, and the ability to reason over patterns across days, weeks, and months without being reminded.
+                Health and behavior are early proving grounds because timing, feedback,
+                uncertainty, and personal constraints are visible there. WHOOP is an
+                early connector, and late caffeine is a bounded proof scenario. Neither
+                defines the product.
               </p>
               <p>
-                Delta was born as a dedicated health intelligence system—one that maintains continuity, understands personal constraints, tracks change over time, and generates insights from real patterns rather than one-off prompts. Not a generic health app, and not a chatbot wrapper, but a system designed from the ground up to support real life as it happens.
+                The current public product is a private preview with deliberately narrow
+                capabilities. The longer-term goal is a trustworthy intelligence layer
+                that helps its owner understand what matters, decide what to do next,
+                and improve from outcomes across domains.
               </p>
             </div>
           </motion.div>
@@ -103,8 +110,8 @@ export default function AboutPage() {
               >
                 <h3 className="text-xl font-bold mb-4">Our Mission</h3>
                 <p className="text-muted leading-relaxed">
-                  To make personalized health guidance accessible to everyone, helping
-                  people build sustainable habits that last a lifetime.
+                  Build a personal intelligence system that is useful to its owner
+                  before expanding its authority, audience, or commercial scope.
                 </p>
               </motion.div>
               <motion.div
@@ -115,15 +122,16 @@ export default function AboutPage() {
               >
                 <h3 className="text-xl font-bold mb-4">Our Vision</h3>
                 <p className="text-muted leading-relaxed">
-                  A world where everyone has a personal health companion that understands
-                  them deeply and guides them toward their best self.
+                  A personal intelligence layer that understands context, remembers
+                  selectively, reasons over time, recommends actions, and learns from
+                  outcomes under explicit owner control.
                 </p>
               </motion.div>
             </div>
           </div>
         </ImageBackground>
 
-        {/* Stats */}
+        {/* Founders */}
         <div className="py-20">
           <motion.div
             initial={{ opacity: 0 }}
@@ -131,24 +139,17 @@ export default function AboutPage() {
             viewport={{ once: false, amount: 0.4 }}
             className="max-w-4xl mx-auto px-8"
           >
-            <div className="flex justify-center gap-8 p-8 bg-card rounded-3xl border border-border">
-              {[
-                { value: "2026", label: "Founded" },
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: false, amount: 0.4 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="text-center"
-                >
-                  <div className="text-3xl font-bold text-primary mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-muted text-sm">{stat.label}</div>
-                </motion.div>
-              ))}
+            <p className="text-sm font-medium text-primary">Meet the Founders</p>
+            <h2 className="mt-3 text-3xl font-semibold">Building from Ann Arbor, Michigan.</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              <div className="py-5">
+                <h3 className="text-xl font-semibold">Eric Geng</h3>
+                <p className="mt-2 text-muted">University of Michigan</p>
+              </div>
+              <div className="py-5">
+                <h3 className="text-xl font-semibold">Rahib Malik</h3>
+                <p className="mt-2 text-muted">University of Michigan</p>
+              </div>
             </div>
           </motion.div>
         </div>

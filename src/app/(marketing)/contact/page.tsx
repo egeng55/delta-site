@@ -11,16 +11,16 @@ const contactMethods = [
   {
     icon: "email",
     title: "Email Us",
-    description: "We'll respond within 24-48 hours",
+    description: "Replies are handled manually",
     value: "eric@egeng.co",
     href: "mailto:eric@egeng.co",
   },
   {
     icon: "chat",
-    title: "In-App Support",
-    description: "Contact us directly from the app",
-    value: "Settings > Contact Support",
-    href: "#",
+    title: "Request Access",
+    description: "Use the dedicated request path",
+    value: "Private preview request",
+    href: "/signup",
   },
   {
     icon: "location",
@@ -137,7 +137,7 @@ export default function ContactPage() {
               transition={{ delay: 0.2 }}
               className="text-muted text-lg"
             >
-              Have a question, feedback, or just want to say hi? We'd love to hear from you.
+              Ask a question or share feedback. Private-preview requests use the dedicated access path.
             </motion.p>
           </motion.div>
         </ImageBackground>
@@ -183,7 +183,7 @@ export default function ContactPage() {
         </div>
 
         {/* Contact form */}
-        <div className="py-20 bg-card/30">
+        <div id="contact-form" className="py-20 bg-card/30">
           <div className="max-w-2xl mx-auto px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}

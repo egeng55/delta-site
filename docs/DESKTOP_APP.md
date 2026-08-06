@@ -2,15 +2,24 @@
 
 Phase 50 adds a local Mac desktop shell and narrow service manager for the Delta OS Console.
 
-The shell uses Electron because Tauri is blocked in the current development environment: Rust and Cargo are not installed. The shell loads the existing `/os` cockpit from:
+Phase 170 preserved the desktop app path for Delta HQ. The website is now the
+primary first-pass HQ surface at `/hq`; Delta.app later loads the same shared HQ
+experience with native/local-runtime capabilities. `/os` remains available as a
+separate local OS Console and must not become HQ. See
+`docs/DELTA_HQ_DESKTOP.md` for the HQ delivery architecture, view-model
+boundary, Event Bus and Observability seams, and deferred native macOS
+capabilities.
+
+The shell uses Electron because Tauri is blocked in the current development environment: Rust and Cargo are not installed. The desktop app now loads the Delta HQ renderer from:
 
 ```text
-http://127.0.0.1:3000/os
+http://127.0.0.1:3000/hq
 ```
 
-`/os` is local-development-only by default. The site middleware allows it for
-local Next.js/Electron development, but production builds return a clear 403 so
-the OS Console is not exposed as a public marketing route by accident.
+`/hq` is an owner web app route and should use the site authentication boundary
+in production. `/os` remains local-development-only by default. The site
+middleware returns 404 for `/os` in production so the OS Console is not exposed
+as a public route by accident.
 
 Phase 51 redesigns `/os` to feel more like a Mac desktop command center: the
 conversation workspace is primary, live readiness and Behavioral OS state are
@@ -78,22 +87,25 @@ release publishing remain deferred.
 You can override that URL for local development:
 
 ```bash
-DELTA_OS_CONSOLE_URL=http://127.0.0.1:3000/os npm run desktop:dev
+DELTA_HQ_URL=http://127.0.0.1:3000/hq npm run desktop:dev
 ```
+
+`DELTA_OS_CONSOLE_URL` is still accepted as a backward-compatible desktop URL
+override for older local workflows.
 
 ## Safety model
 
 The desktop shell may:
 
-- open a Mac desktop window titled `Delta OS`
-- load the existing OS Console URL
+- open a Mac desktop window titled `Delta HQ`
+- load the Delta HQ renderer URL
 - show a local service-manager page if the console is unavailable
 - start the allowlisted local backend development service
 - start the allowlisted local Next.js site development service
 - stop backend/site processes only if this desktop app launched them
 - show in-memory service logs
 - copy local start commands
-- open the OS Console URL in the system browser
+- open the configured HQ URL in the system browser
 - refresh the shell window
 
 The desktop shell does not:
@@ -197,4 +209,4 @@ npm run desktop:smoke
 
 ## Current limits
 
-This is not a signed, notarized, or App Store-ready app. It does not bundle the Python backend into the app, does not manage production services, and does not package the Next.js site as offline static assets. Packaged mode is intentionally limited to a read-only local shell around an externally started console. It is a local developer desktop shell and service-manager foundation for Delta OS Console.
+This is not a signed, notarized, or App Store-ready app. It does not bundle the Python backend into the app, does not manage production services, and does not package the Next.js site as offline static assets. Packaged mode is intentionally limited to a read-only local shell around an externally started HQ renderer. It is a local developer desktop shell and service-manager foundation for Delta HQ.

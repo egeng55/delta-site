@@ -41,8 +41,16 @@ assert(main.includes("serviceDefinitions"), "allowlisted service definitions are
 assert(main.includes('args: ["-m", "uvicorn", "api_server:app", "--host", "127.0.0.1", "--port", "8000"]'), "backend allowlisted command is missing");
 assert(main.includes('args: ["run", "dev", "--", "--hostname", "127.0.0.1", "--port", "3000"]'), "site allowlisted command is missing");
 assert(main.includes("resolveDesktopRuntime({ isPackaged: app.isPackaged })"), "packaged runtime resolution is missing");
+assert(main.includes("resolveDesktopEntryUrl(process.env"), "HQ desktop entry URL resolution is missing");
+assert(main.includes('title: "Delta HQ"'), "desktop window should be titled Delta HQ");
+assert(main.includes('app.setName("Delta HQ")'), "desktop app name should be Delta HQ");
+assert(main.includes('titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default"'), "macOS title bar should use native hidden-inset chrome");
 assert(main.includes("if (!definition.launchable)"), "packaged service start guard is missing");
 assert(main.includes("serviceManagerEnabled"), "service manager enabled status is missing");
+assert(main.includes('"delta-hq:start-backend"'), "HQ startBackend IPC handler is missing");
+assert(main.includes('"delta-hq:start-site"'), "HQ startSite IPC handler is missing");
+assert(main.includes('"delta-hq:start-all"'), "HQ startAll IPC handler is missing");
+assert(main.includes('"delta-hq:stop-all"'), "HQ stopAll IPC handler is missing");
 assert(main.includes('"delta-os:start-backend"'), "startBackend IPC handler is missing");
 assert(main.includes('"delta-os:start-site"'), "startSite IPC handler is missing");
 assert(main.includes('"delta-os:start-all"'), "startAll IPC handler is missing");
@@ -52,20 +60,22 @@ assert(main.includes("target.origin !== allowed.origin"), "external URL handling
 assert(preload.includes("contextBridge"), "preload must expose a narrow bridge");
 assert(!preload.includes("child_process"), "preload must not use child_process");
 assert(!preload.includes("exec"), "preload must not expose command execution");
+assert(preload.includes("openHqInBrowser"), "preload HQ browser bridge is missing");
+assert(preload.includes("reloadHq"), "preload HQ reload bridge is missing");
 assert(preload.includes("startBackend"), "preload startBackend bridge is missing");
 assert(preload.includes("getServiceStatus"), "preload service status bridge is missing");
 assert(!preload.includes("runCommand"), "preload must not expose arbitrary command APIs");
-assert(fallback.includes("Delta OS service manager"), "service manager fallback copy is missing");
+assert(fallback.includes("Delta HQ service manager"), "service manager fallback copy is missing");
 assert(fallback.includes("Start Services"), "service manager start action is missing");
 assert(fallback.includes("No microphone capture"), "service manager safety copy is missing");
 assert(fallback.includes("No backend TTS"), "service manager TTS safety copy is missing");
-assert(fallback.includes("Packaged Delta OS does not start local development services"), "packaged mode service-manager copy is missing");
+assert(fallback.includes("Packaged Delta HQ does not start local development services"), "packaged mode service-manager copy is missing");
 assert(fallback.includes("serviceManagerEnabled"), "fallback must render service-manager enabled state");
 assert(runtimeConfig.resolveDesktopRuntime({ isPackaged: false }).serviceManagerEnabled === true, "development runtime must allow local service manager");
 assert(runtimeConfig.resolveDesktopRuntime({ isPackaged: true }).serviceManagerEnabled === false, "packaged runtime must not launch local dev services");
 assert(
-  runtimeConfig.resolveConsoleUrl({ DELTA_OS_CONSOLE_URL: "delta://bad" }, () => {}) === runtimeConfig.DEFAULT_CONSOLE_URL,
-  "invalid console URL should fall back safely",
+  runtimeConfig.resolveDesktopEntryUrl({ DELTA_HQ_URL: "delta://bad" }, () => {}) === runtimeConfig.DEFAULT_HQ_URL,
+  "invalid HQ URL should fall back safely",
 );
 
 console.log("Desktop shell check passed.");

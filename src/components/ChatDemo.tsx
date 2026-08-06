@@ -55,7 +55,7 @@ export default function ChatDemo() {
         {
           id: Date.now().toString(),
           role: "assistant",
-          content: "You've reached the demo message limit. Sign up for the full Delta experience!",
+          content: "You've reached the demo message limit. Request access to learn what is currently included in the private preview.",
         },
       ]);
       return;
@@ -223,7 +223,7 @@ export default function ChatDemo() {
             </motion.button>
           </div>
           <p className="text-xs text-muted mt-2 text-center">
-            This is a demo. <a href="/signup" className="text-primary hover:underline">Sign up</a> for the full experience.
+            This is a demo. <a href="/signup" className="text-primary hover:underline">Request access</a> to the private preview.
           </p>
         </div>
       </div>

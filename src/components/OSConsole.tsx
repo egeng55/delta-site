@@ -11,6 +11,7 @@ import {
   formatFeedbackCapability,
 } from "@/lib/domainMetadataTypes";
 import { getSystemReadiness, type ReadinessStatus, type SystemReadinessResponse } from "@/lib/systemReadinessApi";
+import { resolveBrowserWeatherContext } from "@/lib/weatherContextApi";
 import {
   OS_CONSOLE_FALLBACK,
   OS_CONSOLE_LIVE_TTS_COMMAND,
@@ -73,6 +74,7 @@ const INSPECTOR_VIEWS: Array<{ id: InspectorView; label: string; description: st
 
 const SUGGESTED_PROMPTS = [
   "What did you learn about late caffeine?",
+  "How does the weather affect an outdoor workout today?",
   "What does good_call mean?",
   "What does cooldown mean here?",
   "Are you always listening?",
@@ -116,7 +118,7 @@ function initialConversationTurns(): ConversationDisplayTurn[] {
       role: "delta",
       orderLabel: "Ready",
       content:
-        "Welcome to Delta OS. Ask a typed, read-only question about what Delta has learned, why it would act, or which parts of the system are ready. This console explains state; it does not write memory, use the mic, send notifications, or run backend TTS.",
+        "Welcome to Delta OS. Ask a typed, read-only question about what Delta has learned, why it would act, which parts of the system are ready, or how current weather affects planning. This console explains state; it does not write memory, use the mic, send notifications, or run backend TTS.",
     },
   ];
 }
@@ -1486,6 +1488,7 @@ export default function OSConsole({
   const [resolvedSpeechControls, setResolvedSpeechControls] = useState<BrowserSpeechControls | null>(null);
   const [browserTtsStatus, setBrowserTtsStatus] = useState<BrowserSpeechStatus>("checking");
   const [activeInspectorView, setActiveInspectorView] = useState<InspectorView>("state");
+  const [weatherContext, setWeatherContext] = useState<string | null>(null);
 
   const loadStatus = useCallback(async (signal?: AbortSignal) => {
     setLoadState("checking");
@@ -1576,6 +1579,27 @@ export default function OSConsole({
   }, [loadDomainMetadata]);
 
   useEffect(() => {
+    let cancelled = false;
+    const timeoutId = window.setTimeout(() => {
+      void resolveBrowserWeatherContext()
+        .then((result) => {
+          if (!cancelled) {
+            setWeatherContext(result?.summary ?? null);
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setWeatherContext(null);
+          }
+        });
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  useEffect(() => {
     const openPalette = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -1658,6 +1682,7 @@ export default function OSConsole({
         userId,
         message,
         ...(conversationSessionId ? { sessionId: conversationSessionId } : {}),
+        ...(weatherContext ? { weatherContext } : {}),
       });
       setConversationSessionId(result.session_id);
       setLastConversationResponse(result);

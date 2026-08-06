@@ -440,7 +440,7 @@ export default function DashboardPage() {
       if (!user) {
         router.push("/login");
       } else if (!access?.hasPremiumAccess) {
-        router.push("/pricing");
+        router.push("/account");
       }
     }
   }, [user, access, isLoading, router, isLocalDemo]);

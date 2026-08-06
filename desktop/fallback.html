@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Delta OS Service Manager</title>
+    <title>Delta HQ Service Manager</title>
     <style>
       :root {
         color-scheme: dark;
@@ -224,23 +224,23 @@
   </head>
   <body>
     <main>
-      <div class="eyebrow">Delta OS service manager</div>
+      <div class="eyebrow">Delta HQ service manager</div>
       <h1>Start local Delta services safely.</h1>
       <p>
         The desktop shell is running. It can start only the allowlisted local backend and Next.js site
-        development services, then load the existing Delta OS Console.
+        development services, then load Delta HQ.
       </p>
 
       <section class="status stack">
-        <p><strong>Console URL:</strong> <span id="console-url">http://127.0.0.1:3000/os</span></p>
-        <p><strong>Console status:</strong> <span id="console-status">checking</span></p>
-        <p><strong>Reason:</strong> <span id="reason">OS Console unavailable</span></p>
+        <p><strong>HQ URL:</strong> <span id="console-url">http://127.0.0.1:3000/hq</span></p>
+        <p><strong>HQ status:</strong> <span id="console-status">checking</span></p>
+        <p><strong>Reason:</strong> <span id="reason">Delta HQ unavailable</span></p>
       </section>
 
       <section id="packaged-note" class="card notice" style="margin-top: 20px" hidden>
         <h2>Packaged mode</h2>
         <p id="packaged-reason">
-          Packaged Delta OS does not start local development services. Start backend/site manually, then reload the console.
+          Packaged Delta HQ does not start local development services. Start backend/site manually, then reload HQ.
         </p>
       </section>
 
@@ -250,7 +250,7 @@
         <button id="start-site" class="secondary">Start Site</button>
         <button id="stop-all" class="danger" disabled>Stop App-Launched Services</button>
         <button id="refresh" class="secondary">Refresh Status</button>
-        <button id="reload-console" class="secondary">Open Delta OS Console</button>
+        <button id="reload-console" class="secondary">Open Delta HQ</button>
         <button id="open-browser" class="secondary">Open in Browser</button>
       </div>
 
@@ -276,7 +276,7 @@
           <div class="detail">
             <p><span>Owner</span><strong id="site-owner">unknown</strong></p>
             <p><span>PID</span><strong id="site-pid">none</strong></p>
-            <p><span>Health</span><code id="site-health">http://127.0.0.1:3000/os</code></p>
+            <p><span>Health</span><code id="site-health">http://127.0.0.1:3000/hq</code></p>
             <p><span>Error</span><strong id="site-error">none</strong></p>
           </div>
         </section>
@@ -326,13 +326,13 @@ npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
 
     <script>
       const params = new URLSearchParams(window.location.search);
-      const consoleUrl = params.get("consoleUrl") || "http://127.0.0.1:3000/os";
-      const reason = params.get("reason") || "OS Console unavailable";
+      const hqUrl = params.get("hqUrl") || params.get("consoleUrl") || "http://127.0.0.1:3000/hq";
+      const reason = params.get("reason") || "Delta HQ unavailable";
       const api = window.deltaDesktop;
       let pollTimer = null;
       let autoReloadWhenReady = false;
 
-      document.getElementById("console-url").textContent = consoleUrl;
+      document.getElementById("console-url").textContent = hqUrl;
       document.getElementById("reason").textContent = reason;
 
       function text(value, fallback = "unknown") {
@@ -380,10 +380,10 @@ npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
         document.getElementById("packaged-note").hidden = serviceManagerEnabled;
         document.getElementById("packaged-reason").textContent =
           desktop.serviceManagerDisabledReason ||
-          "Packaged Delta OS does not start local development services. Start backend/site manually, then reload the console.";
+          "Packaged Delta HQ does not start local development services. Start backend/site manually, then reload HQ.";
         if (consoleReady && autoReloadWhenReady) {
           autoReloadWhenReady = false;
-          window.setTimeout(() => api?.reloadConsole?.(), 700);
+          window.setTimeout(() => api?.reloadHq?.() || api?.reloadConsole?.(), 700);
         }
       }
 
@@ -405,7 +405,7 @@ npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
           await action();
           const status = await refreshStatus();
           if (status?.services?.site?.status === "running") {
-            window.setTimeout(() => api?.reloadConsole?.(), 900);
+            window.setTimeout(() => api?.reloadHq?.() || api?.reloadConsole?.(), 900);
           }
         } finally {
           setButtonBusy(button, false);
@@ -436,12 +436,13 @@ npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
       });
       document.getElementById("refresh").addEventListener("click", () => refreshStatus());
       document.getElementById("reload-console").addEventListener("click", () => {
-        if (api?.reloadConsole) api.reloadConsole();
+        if (api?.reloadHq) api.reloadHq();
+        else if (api?.reloadConsole) api.reloadConsole();
         else window.location.reload();
       });
       document.getElementById("open-browser").addEventListener("click", () => {
-        if (api?.openExternal) api.openExternal(consoleUrl);
-        else window.open(consoleUrl, "_blank", "noopener,noreferrer");
+        if (api?.openExternal) api.openExternal(hqUrl);
+        else window.open(hqUrl, "_blank", "noopener,noreferrer");
       });
 
       document.querySelectorAll("[data-copy]").forEach((button) => {

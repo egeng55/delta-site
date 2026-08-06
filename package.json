@@ -31,6 +31,8 @@
     "agent:phase:brief": "node scripts/agent-phase-brief.mjs",
     "agent:phase:start": "node scripts/agent-phase-start.mjs",
     "agent:phase:handoff": "node scripts/agent-phase-handoff.mjs",
+    "access-policy:verify": "node scripts/request-only-auth-config.mjs",
+    "access-policy:enforce": "node scripts/request-only-auth-config.mjs --apply",
     "lint": "eslint",
     "test": "jest"
   },

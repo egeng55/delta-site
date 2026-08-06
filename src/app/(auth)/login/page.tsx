@@ -7,44 +7,41 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
+function getValidRedirect(redirect: string | null): string | null {
+  if (
+    redirect &&
+    redirect.startsWith("/") &&
+    !redirect.includes("//") &&
+    !redirect.match(/^\/.*https?:/i)
+  ) {
+    return redirect;
+  }
+  return null;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, user, isLoading: authLoading, access } = useAuth();
+  const { login, user, isLoading: authLoading } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Validate redirect param: must start with / and not contain // or protocol schemes
-  const getValidRedirect = (): string | null => {
-    const redirect = searchParams.get("redirect");
-    if (
-      redirect &&
-      redirect.startsWith("/") &&
-      !redirect.includes("//") &&
-      !redirect.match(/^\/.*https?:/i)
-    ) {
-      return redirect;
-    }
-    return null;
-  };
+  const requestedRedirect = searchParams.get("redirect");
 
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      const validRedirect = getValidRedirect();
+      const validRedirect = getValidRedirect(requestedRedirect);
       if (validRedirect) {
         router.push(validRedirect);
-      } else if (access?.hasPremiumAccess) {
-        router.push("/dashboard");
       } else {
-        router.push("/pricing");
+        router.push("/command");
       }
     }
-  }, [user, authLoading, access, router, searchParams]);
+  }, [user, authLoading, router, requestedRedirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,7 +105,7 @@ export default function LoginPage() {
         {/* Form card */}
         <div className="bg-card rounded-3xl border border-border p-8 shadow-xl">
           <h1 className="text-2xl font-bold text-center mb-2">Welcome back</h1>
-          <p className="text-muted text-center mb-8">Log in to continue your journey</p>
+          <p className="text-muted text-center mb-8">Continue to the Delta private preview</p>
 
           {error && (
             <motion.div
@@ -172,9 +169,9 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-muted text-sm mt-8">
-            Don't have an account?{" "}
+            Not approved yet?{" "}
             <Link href="/signup" className="text-primary hover:underline">
-              Sign up
+              Request access
             </Link>
           </p>
         </div>

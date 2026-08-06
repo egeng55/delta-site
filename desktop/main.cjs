@@ -6,7 +6,7 @@ const https = require("node:https");
 const path = require("node:path");
 const {
   SERVICE_LOG_LIMIT,
-  resolveConsoleUrl,
+  resolveDesktopEntryUrl,
   resolveDesktopRuntime,
 } = require("./runtime-config.cjs");
 
@@ -14,7 +14,8 @@ const SITE_ROOT = path.resolve(__dirname, "..");
 const BACKEND_ROOT = process.env.DELTA_BACKEND_DIR || path.resolve(SITE_ROOT, "..", "delta-backend");
 const isSmokeTest = process.argv.includes("--smoke-test");
 const desktopRuntime = resolveDesktopRuntime({ isPackaged: app.isPackaged });
-const consoleUrl = resolveConsoleUrl(process.env, console.warn);
+const hqUrl = resolveDesktopEntryUrl(process.env, console.warn);
+const consoleUrl = hqUrl;
 const serviceDefinitions = {
   backend: {
     label: "Backend",
@@ -31,7 +32,7 @@ const serviceDefinitions = {
     cwd: SITE_ROOT,
     command: "npm",
     args: ["run", "dev", "--", "--hostname", "127.0.0.1", "--port", "3000"],
-    healthUrl: consoleUrl,
+    healthUrl: hqUrl,
     launchable: desktopRuntime.serviceManagerEnabled,
     disabledReason: desktopRuntime.serviceManagerDisabledReason,
     env: () => ({ ...process.env }),
@@ -202,7 +203,8 @@ async function getServiceStatus() {
     getSingleServiceStatus("site"),
   ]);
   return {
-    consoleUrl,
+    hqUrl,
+    consoleUrl: hqUrl,
     generatedAt: new Date().toISOString(),
     services: { backend, site },
     desktop: {
@@ -332,40 +334,42 @@ function finishSmoke(status) {
   console.log(JSON.stringify({
     desktopSmoke: status,
     loadedUrl: mainWindow?.webContents.getURL() || null,
-    consoleUrl,
+    hqUrl,
+    consoleUrl: hqUrl,
     runtimeMode: desktopRuntime.mode,
     serviceManagerEnabled: desktopRuntime.serviceManagerEnabled,
   }));
   setTimeout(() => app.quit(), 250);
 }
 
-function safeOpenConsoleInBrowser() {
-  shell.openExternal(consoleUrl).catch((error) => {
-    console.error(`[Delta OS] Failed to open console URL: ${error.message}`);
+function safeOpenHqInBrowser() {
+  shell.openExternal(hqUrl).catch((error) => {
+    console.error(`[Delta HQ] Failed to open HQ URL: ${error.message}`);
   });
 }
 
 function safeOpenExternal(targetUrl) {
   try {
-    const target = new URL(targetUrl || consoleUrl);
-    const allowed = new URL(consoleUrl);
+    const target = new URL(targetUrl || hqUrl);
+    const allowed = new URL(hqUrl);
     if (!["http:", "https:"].includes(target.protocol) || target.origin !== allowed.origin) {
-      throw new Error("Only the configured local Delta OS origin can be opened from the desktop bridge.");
+      throw new Error("Only the configured local Delta HQ origin can be opened from the desktop bridge.");
     }
     shell.openExternal(target.toString()).catch((error) => {
-      console.error(`[Delta OS] Failed to open external URL: ${error.message}`);
+      console.error(`[Delta HQ] Failed to open external URL: ${error.message}`);
     });
     return true;
   } catch (error) {
-    console.warn(`[Delta OS] Blocked external URL: ${error.message}`);
+    console.warn(`[Delta HQ] Blocked external URL: ${error.message}`);
     return false;
   }
 }
 
 function fallbackUrl(reason) {
   const url = new URL(`file://${path.join(__dirname, "fallback.html")}`);
-  url.searchParams.set("consoleUrl", consoleUrl);
-  url.searchParams.set("reason", reason || "OS Console unavailable");
+  url.searchParams.set("hqUrl", hqUrl);
+  url.searchParams.set("consoleUrl", hqUrl);
+  url.searchParams.set("reason", reason || "Delta HQ unavailable");
   return url.toString();
 }
 
@@ -375,7 +379,7 @@ function loadFallback(reason) {
   mainWindow.loadURL(fallbackUrl(reason)).catch((error) => {
     const message = String(error.message || error);
     if (message.includes("ERR_ABORTED") || message.includes("(-3)")) return;
-    console.error(`[Delta OS] Failed to load fallback page: ${error.message}`);
+    console.error(`[Delta HQ] Failed to load fallback page: ${error.message}`);
     finishSmoke("failed");
   });
 }
@@ -383,11 +387,11 @@ function loadFallback(reason) {
 function buildMenu() {
   const template = [
     {
-      label: "Delta OS",
+      label: "Delta HQ",
       submenu: [
         { role: "about" },
         { type: "separator" },
-        { label: "Open OS Console in Browser", click: safeOpenConsoleInBrowser },
+        { label: "Open Delta HQ in Browser", click: safeOpenHqInBrowser },
         { label: "Show Service Manager", click: () => loadFallback("Service manager opened manually") },
         { type: "separator" },
         { role: "quit" },
@@ -400,7 +404,7 @@ function buildMenu() {
           label: "Refresh",
           accelerator: "CmdOrCtrl+R",
           click: () => {
-            if (mainWindow && !mainWindow.isDestroyed()) reloadConsoleWindow();
+            if (mainWindow && !mainWindow.isDestroyed()) reloadHqWindow();
           },
         },
       ],
@@ -411,7 +415,7 @@ function buildMenu() {
 
 function installSafetyGuards() {
   session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
-    console.warn(`[Delta OS] Blocked permission request: ${permission}`);
+    console.warn(`[Delta HQ] Blocked permission request: ${permission}`);
     callback(false);
   });
   session.defaultSession.setPermissionCheckHandler(() => false);
@@ -419,14 +423,16 @@ function installSafetyGuards() {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    title: "Delta OS",
-    width: 1280,
+    title: "Delta HQ",
+    width: 1440,
     height: 900,
-    minWidth: 960,
+    minWidth: 1060,
     minHeight: 720,
-    backgroundColor: "#0f1115",
+    backgroundColor: "#f4f6f8",
     icon: path.join(__dirname, "..", "public", "icon.png"),
     show: !isSmokeTest,
+    titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
+    trafficLightPosition: { x: 18, y: 18 },
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -438,7 +444,7 @@ function createWindow() {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith("http://") || url.startsWith("https://")) {
       shell.openExternal(url).catch((error) => {
-        console.error(`[Delta OS] Failed to open external URL: ${error.message}`);
+        console.error(`[Delta HQ] Failed to open external URL: ${error.message}`);
       });
     }
     return { action: "deny" };
@@ -448,7 +454,7 @@ function createWindow() {
     if (targetUrl.startsWith("file://")) return;
     try {
       const target = new URL(targetUrl);
-      const allowed = new URL(consoleUrl);
+      const allowed = new URL(hqUrl);
       if (target.origin === allowed.origin) return;
     } catch {
       // Fall through to blocking unknown navigations.
@@ -456,7 +462,7 @@ function createWindow() {
     event.preventDefault();
     if (targetUrl.startsWith("http://") || targetUrl.startsWith("https://")) {
       shell.openExternal(targetUrl).catch((error) => {
-        console.error(`[Delta OS] Failed to open external navigation: ${error.message}`);
+        console.error(`[Delta HQ] Failed to open external navigation: ${error.message}`);
       });
     }
   });
@@ -464,7 +470,7 @@ function createWindow() {
   mainWindow.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (!isMainFrame || errorCode === -3) return;
     consoleLoadFailed = true;
-    console.warn(`[Delta OS] Failed to load ${validatedURL}: ${errorDescription}`);
+    console.warn(`[Delta HQ] Failed to load ${validatedURL}: ${errorDescription}`);
     setTimeout(() => loadFallback(errorDescription), 50);
   });
 
@@ -475,53 +481,83 @@ function createWindow() {
       return;
     }
     if (consoleLoadFailed || fallbackLoading) return;
-    finishSmoke("console_loaded");
+    finishSmoke("hq_loaded");
   });
 
-  reloadConsoleWindow();
+  reloadHqWindow();
 }
 
-function reloadConsoleWindow() {
+function reloadHqWindow() {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   consoleLoadFailed = false;
   fallbackLoading = false;
-  mainWindow.loadURL(consoleUrl).catch((error) => {
+  mainWindow.loadURL(hqUrl).catch((error) => {
     loadFallback(error.message);
   });
 }
 
+function reloadConsoleWindow() {
+  reloadHqWindow();
+}
+
 app.whenReady().then(() => {
-  app.setName("Delta OS");
+  app.setName("Delta HQ");
   installSafetyGuards();
   buildMenu();
 
+  ipcMain.handle("delta-hq:copy-text", (_event, value) => {
+    clipboard.writeText(String(value || ""));
+    return true;
+  });
   ipcMain.handle("delta-os:copy-text", (_event, value) => {
     clipboard.writeText(String(value || ""));
     return true;
   });
-  ipcMain.handle("delta-os:open-console-in-browser", () => {
-    safeOpenConsoleInBrowser();
+  ipcMain.handle("delta-hq:open-hq-in-browser", () => {
+    safeOpenHqInBrowser();
     return true;
   });
-  ipcMain.handle("delta-os:open-external", (_event, targetUrl) => safeOpenExternal(String(targetUrl || consoleUrl)));
+  ipcMain.handle("delta-os:open-console-in-browser", () => {
+    safeOpenHqInBrowser();
+    return true;
+  });
+  ipcMain.handle("delta-hq:open-external", (_event, targetUrl) => safeOpenExternal(String(targetUrl || hqUrl)));
+  ipcMain.handle("delta-os:open-external", (_event, targetUrl) => safeOpenExternal(String(targetUrl || hqUrl)));
+  ipcMain.handle("delta-hq:reload-hq", () => {
+    reloadHqWindow();
+    return true;
+  });
   ipcMain.handle("delta-os:reload-console", () => {
-    reloadConsoleWindow();
+    reloadHqWindow();
+    return true;
+  });
+  ipcMain.handle("delta-hq:show-service-manager", () => {
+    loadFallback("Service manager opened manually");
     return true;
   });
   ipcMain.handle("delta-os:show-service-manager", () => {
     loadFallback("Service manager opened manually");
     return true;
   });
+  ipcMain.handle("delta-hq:get-service-status", () => getServiceStatus());
   ipcMain.handle("delta-os:get-service-status", () => getServiceStatus());
+  ipcMain.handle("delta-hq:start-backend", () => startService("backend"));
   ipcMain.handle("delta-os:start-backend", () => startService("backend"));
+  ipcMain.handle("delta-hq:start-site", () => startService("site"));
   ipcMain.handle("delta-os:start-site", () => startService("site"));
+  ipcMain.handle("delta-hq:start-all", () => startAllServices());
   ipcMain.handle("delta-os:start-all", () => startAllServices());
+  ipcMain.handle("delta-hq:stop-backend", () => stopService("backend"));
   ipcMain.handle("delta-os:stop-backend", () => stopService("backend"));
+  ipcMain.handle("delta-hq:stop-site", () => stopService("site"));
   ipcMain.handle("delta-os:stop-site", () => stopService("site"));
+  ipcMain.handle("delta-hq:stop-all", () => stopAllServices());
   ipcMain.handle("delta-os:stop-all", () => stopAllServices());
+  ipcMain.handle("delta-hq:get-service-logs", () => getServiceLogs());
   ipcMain.handle("delta-os:get-service-logs", () => getServiceLogs());
-  ipcMain.handle("delta-os:get-config", () => ({
-    consoleUrl,
+  const getDesktopConfig = () => ({
+    hqUrl,
+    consoleUrl: hqUrl,
     shellMode: false,
     desktopMode: desktopRuntime.mode,
     productionPathStatus: desktopRuntime.productionPathStatus,
@@ -531,7 +567,9 @@ app.whenReady().then(() => {
     notificationEnabled: false,
     ttsEnabled: false,
     memoryWritesEnabled: false,
-  }));
+  });
+  ipcMain.handle("delta-hq:get-config", getDesktopConfig);
+  ipcMain.handle("delta-os:get-config", getDesktopConfig);
 
   createWindow();
 

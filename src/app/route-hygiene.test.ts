@@ -2,14 +2,25 @@ import { existsSync, readFileSync } from "fs";
 import path from "path";
 
 describe("route hygiene", () => {
-  it("makes the OS Console route explicitly local-only in middleware", () => {
+  it("keeps internal technical surfaces local-only in middleware", () => {
     const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
 
-    expect(middlewareSource).toContain("OS_CONSOLE_ROUTE = '/os'");
-    expect(middlewareSource).toContain("Delta OS Console is a local developer cockpit");
+    expect(middlewareSource).toContain("LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard']");
     expect(middlewareSource).toContain("process.env.NODE_ENV === 'production'");
-    expect(middlewareSource).toContain("Delta OS Console is available only in local development.");
+    expect(middlewareSource).toContain("status: 404");
     expect(middlewareSource).toContain("'/os/:path*'");
+    expect(middlewareSource).toContain("'/demo/:path*'");
+    expect(middlewareSource).toContain("'/dashboard/:path*'");
+  });
+
+  it("treats HQ as a protected owner web app route", () => {
+    const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
+
+    expect(middlewareSource).toContain("OWNER_HQ_ROUTE = '/hq'");
+    expect(middlewareSource).toContain("PROTECTED_ROUTES = [");
+    expect(middlewareSource).toContain("OWNER_HQ_ROUTE,");
+    expect(middlewareSource).toContain("isDevelopmentOwnerHq");
+    expect(middlewareSource).toContain("'/hq/:path*'");
   });
 
   it("keeps the protected settings route backed by a page", () => {

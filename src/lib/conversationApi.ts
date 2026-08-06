@@ -4,6 +4,7 @@ export type ConversationTurnRequest = {
   userId: string;
   message: string;
   sessionId?: string;
+  weatherContext?: string;
 };
 
 export type ConversationTurnResponse = {
@@ -27,6 +28,7 @@ export async function askDeltaConversation({
   userId,
   message,
   sessionId,
+  weatherContext,
 }: ConversationTurnRequest): Promise<ConversationTurnResponse> {
   const response = await fetchWithRetry(
     `${DELTA_API_URL}/conversation/turn`,
@@ -38,6 +40,7 @@ export async function askDeltaConversation({
         message,
         read_only: true,
         ...(sessionId ? { session_id: sessionId } : {}),
+        ...(weatherContext ? { weather_context: weatherContext } : {}),
       }),
     },
     0,

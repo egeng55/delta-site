@@ -19,6 +19,20 @@ export interface WhoopConnectResponse {
   state_expires_in_seconds: number;
 }
 
+export interface WhoopSyncResponse {
+  status: "completed";
+  synced_at: string;
+  counts: Record<string, number>;
+  raw_provider_payloads_stored: false;
+}
+
+export interface WhoopDisconnectResponse {
+  status: "disconnected";
+  provider_access_revoked: boolean;
+  credentials_deleted: boolean;
+  history_deleted: boolean;
+}
+
 function authHeaders(accessToken: string): HeadersInit {
   return {
     Authorization: `Bearer ${accessToken}`,
@@ -79,6 +93,75 @@ export async function startWhoopConnection(
       return null;
     }
     return payload as WhoopConnectResponse;
+  } catch {
+    return null;
+  }
+}
+
+export async function syncWhoopConnection(
+  accessToken: string,
+): Promise<WhoopSyncResponse | null> {
+  try {
+    const response = await fetchWithRetry(
+      `${DELTA_API_URL}/integrations/whoop/sync`,
+      {
+        method: "POST",
+        headers: authHeaders(accessToken),
+      },
+      0,
+      30_000,
+    );
+    if (!response.ok) {
+      return null;
+    }
+    const payload: unknown = await response.json();
+    if (
+      !payload ||
+      typeof payload !== "object" ||
+      (payload as Record<string, unknown>).status !== "completed" ||
+      typeof (payload as Record<string, unknown>).synced_at !== "string" ||
+      (payload as Record<string, unknown>).raw_provider_payloads_stored !== false
+    ) {
+      return null;
+    }
+    return payload as WhoopSyncResponse;
+  } catch {
+    return null;
+  }
+}
+
+export async function disconnectWhoopConnection(
+  accessToken: string,
+  deleteHistory: boolean,
+): Promise<WhoopDisconnectResponse | null> {
+  try {
+    const response = await fetchWithRetry(
+      `${DELTA_API_URL}/integrations/whoop/disconnect`,
+      {
+        method: "POST",
+        headers: authHeaders(accessToken),
+        body: JSON.stringify({ delete_history: deleteHistory }),
+      },
+      0,
+      20_000,
+    );
+    if (!response.ok) {
+      return null;
+    }
+    const payload: unknown = await response.json();
+    if (
+      !payload ||
+      typeof payload !== "object" ||
+      (payload as Record<string, unknown>).status !== "disconnected" ||
+      typeof (payload as Record<string, unknown>).provider_access_revoked !==
+        "boolean" ||
+      typeof (payload as Record<string, unknown>).credentials_deleted !==
+        "boolean" ||
+      typeof (payload as Record<string, unknown>).history_deleted !== "boolean"
+    ) {
+      return null;
+    }
+    return payload as WhoopDisconnectResponse;
   } catch {
     return null;
   }
