@@ -1,0 +1,105 @@
+{
+  "excluded_local_only_artifacts": [
+    ".claude/",
+    ".env.example",
+    ".env.local",
+    ".next/",
+    "next-env.d.ts",
+    "node_modules/",
+    "tsconfig.tsbuildinfo"
+  ],
+  "generated_at": "2026-08-06Tconvergence-protection",
+  "protected_paths": [
+    {
+      "artifact_type": "specification",
+      "bytes": 6481,
+      "classification": "advanced uncommitted implementation",
+      "conflict_risk": "high",
+      "future_target": "delta-site/main after agent HQ projection and observability contracts",
+      "initiative": "Delta HQ / Analytics / Evolution",
+      "likely_owner": "HQ + Experience",
+      "path": "docs/DELTA_HQ_DESKTOP.md",
+      "sha256": "ea5290aad80293930b28fa940c8a179f5c529feffe078eefeb6b2656963db344",
+      "status": "dirty-current"
+    },
+    {
+      "artifact_type": "implementation",
+      "bytes": 14316,
+      "classification": "advanced uncommitted implementation",
+      "conflict_risk": "high",
+      "future_target": "delta-site/main after agent HQ projection and observability contracts",
+      "initiative": "Delta HQ / Analytics / Evolution",
+      "likely_owner": "HQ + Experience",
+      "path": "src/app/(hq)/hq/page.test.ts",
+      "sha256": "0e11137c831bf9d21a4ffa76983ffbd0f8b2c365029e3b7b2707669ffa21f177",
+      "status": "dirty-current"
+    },
+    {
+      "artifact_type": "implementation",
+      "bytes": 424,
+      "classification": "advanced uncommitted implementation",
+      "conflict_risk": "high",
+      "future_target": "delta-site/main after agent HQ projection and observability contracts",
+      "initiative": "Delta HQ / Analytics / Evolution",
+      "likely_owner": "HQ + Experience",
+      "path": "src/app/(hq)/hq/page.tsx",
+      "sha256": "4c1c228e66dbbefa5d9bc820460a0f42d21fd2f8b53b12ac4fe08bbc64d5da93",
+      "status": "dirty-current"
+    },
+    {
+      "artifact_type": "implementation",
+      "bytes": 102468,
+      "classification": "advanced uncommitted implementation",
+      "conflict_risk": "high",
+      "future_target": "delta-site/main after agent HQ projection and observability contracts",
+      "initiative": "Delta HQ / Analytics / Evolution",
+      "likely_owner": "HQ + Experience",
+      "path": "src/components/DeltaHQ.tsx",
+      "sha256": "4a9b09a733ea8a306a707c31ed8c6d2d82e4ab373441d066dbe9502a07b68f80",
+      "status": "dirty-current"
+    },
+    {
+      "artifact_type": "implementation",
+      "bytes": 6078,
+      "classification": "advanced uncommitted implementation",
+      "conflict_risk": "high",
+      "future_target": "delta-site/main after agent HQ projection and observability contracts",
+      "initiative": "Delta HQ / Analytics / Evolution",
+      "likely_owner": "HQ + Experience",
+      "path": "src/lib/deltaHqObservability.ts",
+      "sha256": "31c1764be37cd1355f449b8f3f657d06c228e1919177f01bb1e2ab7c584d7a15",
+      "status": "dirty-current"
+    },
+    {
+      "artifact_type": "implementation",
+      "bytes": 26206,
+      "classification": "advanced uncommitted implementation",
+      "conflict_risk": "high",
+      "future_target": "delta-site/main after agent HQ projection and observability contracts",
+      "initiative": "Delta HQ / Analytics / Evolution",
+      "likely_owner": "HQ + Experience",
+      "path": "src/lib/deltaHqServerViewModel.ts",
+      "sha256": "92f3517c1073d66ba6f2db823859f8da4cb4a7ab1042493b64d255761eeeae10",
+      "status": "dirty-current"
+    },
+    {
+      "artifact_type": "implementation",
+      "bytes": 60341,
+      "classification": "advanced uncommitted implementation",
+      "conflict_risk": "high",
+      "future_target": "delta-site/main after agent HQ projection and observability contracts",
+      "initiative": "Delta HQ / Analytics / Evolution",
+      "likely_owner": "HQ + Experience",
+      "path": "src/lib/deltaHqViewModel.ts",
+      "sha256": "1f17a5ea583017984da2382508953fbcaba23a7e29ef03c1ac67b63b9406500e",
+      "status": "dirty-current"
+    }
+  ],
+  "protection_branch": "protection/delta-site-hq-evolution-advanced-2026-08-06",
+  "purpose": "Protect newly advanced dirty state found during canonical convergence Phase 1",
+  "scan_hits_nonblocking": [],
+  "source_branch": "main",
+  "source_head": "d353d517279dd64e22cc9c753db52e463cee0b3d",
+  "source_repository": "delta-site",
+  "source_worktree": "/Users/egeng/delta/delta-site"
+}
