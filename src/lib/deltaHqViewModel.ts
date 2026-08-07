@@ -101,6 +101,8 @@ export type DeltaHqObservabilityFreshness = {
   sla_ms: number | null;
 };
 
+export type DeltaHqObservabilityDimensionValues = Record<string, string | number | boolean | null>;
+
 export type DeltaHqObservabilityMetric = {
   metric_id: string;
   metric_version: number;
@@ -112,8 +114,19 @@ export type DeltaHqObservabilityMetric = {
   value: number | null;
   unit: string;
   trust_state: DeltaHqObservabilityTrustState;
+  cost_trust_state: string | null;
   data_quality_state: string;
   missing_reason: string | null;
+  aggregation_window: {
+    from: string | null;
+    to: string | null;
+    mode: string;
+    qualification_epoch: string | null;
+  };
+  measurement_time_range: {
+    from: string | null;
+    to: string | null;
+  };
   source_freshness: DeltaHqObservabilityFreshness;
   latest_accepted_source_time: string | null;
   current_state_applicability: string;
@@ -121,6 +134,7 @@ export type DeltaHqObservabilityMetric = {
   current_qualification_epoch: string | null;
   source_event_count: number;
   producer_identities: string[];
+  dimensioned_points: DeltaHqObservabilityTimeSeriesPoint[];
 };
 
 export type DeltaHqObservabilityTimeSeriesPoint = {
@@ -132,7 +146,19 @@ export type DeltaHqObservabilityTimeSeriesPoint = {
   value: number | null;
   unit: string;
   trust_state: DeltaHqObservabilityTrustState;
+  cost_trust_state: string | null;
   data_quality_state: string;
+  dimension_values: DeltaHqObservabilityDimensionValues;
+  aggregation_window: {
+    from: string | null;
+    to: string | null;
+    mode: string;
+    qualification_epoch: string | null;
+  };
+  measurement_time_range: {
+    from: string | null;
+    to: string | null;
+  };
   source_freshness_state: string;
   latest_accepted_source_time: string | null;
   source_event_count: number;
@@ -146,6 +172,32 @@ export type DeltaHqObservabilityEpochProjection = {
   current_state_applicability: string;
   trust_summary: Record<string, number>;
   metrics: DeltaHqObservabilityMetric[];
+  time_series_points: DeltaHqObservabilityTimeSeriesPoint[];
+  dimensioned_time_series_points: DeltaHqObservabilityTimeSeriesPoint[];
+};
+
+export type DeltaHqObservabilityProjectionDiagnostics = {
+  repo_root: string | null;
+  repo_root_source: string;
+  repo_root_warning: string | null;
+  store_root: string | null;
+  projection_path: string | null;
+  projection_source: "stored_projection" | "dynamic_aggregation" | "unavailable";
+  aggregation_ran_dynamically: boolean;
+  stored_projection_used: boolean;
+  stored_projection_stale: boolean;
+  raw_event_count: number;
+  accepted_source_event_count: number;
+  rejected_source_event_count: number;
+  invalid_raw_event_count: number;
+  duplicate_source_event_count: number;
+  newest_raw_event_time: string | null;
+  newest_accepted_event_time: string | null;
+  projection_generated_at: string | null;
+  producer_keys_configured: boolean;
+  empty_state_reason: string | null;
+  next_event_owner: string | null;
+  historical_only: boolean;
 };
 
 export type DeltaHqObservabilityProjection = {
@@ -157,6 +209,7 @@ export type DeltaHqObservabilityProjection = {
   fixtureFallback: boolean;
   unavailableReason?: string;
   source_of_truth: string;
+  diagnostics: DeltaHqObservabilityProjectionDiagnostics;
   promotionScope: string;
   authorityLimitations: string[];
   registry_version: string | null;
@@ -189,6 +242,9 @@ export type DeltaHqObservabilityProjection = {
   historicalMetrics: DeltaHqObservabilityMetric[];
   qualificationEpochs: DeltaHqObservabilityEpochProjection[];
   time_series_points: DeltaHqObservabilityTimeSeriesPoint[];
+  historical_time_series_points: DeltaHqObservabilityTimeSeriesPoint[];
+  dimensioned_time_series_points: DeltaHqObservabilityTimeSeriesPoint[];
+  historical_dimensioned_time_series_points: DeltaHqObservabilityTimeSeriesPoint[];
 };
 
 export type DeltaHqLineageTrackId = "product_intelligence" | "engineering_agentic" | "converged_platform";
@@ -419,11 +475,33 @@ export const DELTA_HQ_VIEW_MODEL: DeltaHqViewModel = {
       fixtureFallback: true,
       unavailableReason: "Organizational Observability projection has not been loaded by the HQ server adapter.",
       source_of_truth: "delta-agent/src/observability/aggregate.mjs",
+      diagnostics: {
+        repo_root: null,
+        repo_root_source: "unresolved",
+        repo_root_warning: null,
+        store_root: null,
+        projection_path: null,
+        projection_source: "unavailable",
+        aggregation_ran_dynamically: false,
+        stored_projection_used: false,
+        stored_projection_stale: false,
+        raw_event_count: 0,
+        accepted_source_event_count: 0,
+        rejected_source_event_count: 0,
+        invalid_raw_event_count: 0,
+        duplicate_source_event_count: 0,
+        newest_raw_event_time: null,
+        newest_accepted_event_time: null,
+        projection_generated_at: null,
+        producer_keys_configured: false,
+        empty_state_reason: "HQ server adapter has not attempted to load the Organizational Observability projection.",
+        next_event_owner: "Organizational Observability telemetry producers",
+        historical_only: false,
+      },
       promotionScope: "trust-labeled read-only display",
       authorityLimitations: [
         "Not an executive health authority.",
         "Not a Mission Control reasoning input.",
-        "Not an Organizational Context reasoning input.",
         "Not an anomaly-triggered Event Bus input.",
       ],
       registry_version: null,
@@ -460,6 +538,9 @@ export const DELTA_HQ_VIEW_MODEL: DeltaHqViewModel = {
       historicalMetrics: [],
       qualificationEpochs: [],
       time_series_points: [],
+      historical_time_series_points: [],
+      dimensioned_time_series_points: [],
+      historical_dimensioned_time_series_points: [],
     },
     briefTrends: [
       {

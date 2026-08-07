@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, type CSSProperties, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   DELTA_HQ_OWNER_ID,
   type DeltaHqActivityEvent,
@@ -11,6 +12,7 @@ import {
   type DeltaHqInitiative,
   type DeltaHqLineageTrackId,
   type DeltaHqObservabilityMetric,
+  type DeltaHqObservabilityTimeSeriesPoint,
   type DeltaHqOwnerReview,
   type DeltaHqSeverity,
   type DeltaHqSourceKind,
@@ -18,6 +20,22 @@ import {
   type DeltaHqViewModel,
 } from "@/lib/deltaHqViewModel";
 import { askDeltaConversation } from "@/lib/conversationApi";
+import {
+  AGENT_ECONOMICS_METRIC_IDS,
+  QUALIFICATION_FUNNEL_STAGES,
+  buildAgentEconomicsProfile,
+  buildAgentEconomicsProfiles,
+  canonicalEconomicsMetricValue,
+  economicsCostTrustLabel,
+  economicsCostTrustState,
+  economicsCurrentMetrics,
+  economicsHistoricalMetrics,
+  economicsMetricById,
+  economicsPhaseForDatum,
+  formatEconomicsDatumValue,
+  isEconomicsCostDatum,
+  summarizeAgentEconomicsForAsk,
+} from "@/lib/deltaHqAgentEconomics";
 import {
   canRenderAsCurrentOperationalMeasurement,
   currentApplicabilityLabel,
@@ -89,6 +107,8 @@ type AskDeltaMessage = {
   body: string;
   meta?: string;
 };
+
+type AskDeltaAvailability = "unknown" | "available" | "failed";
 
 const views: Array<{ id: HqView; label: string }> = [
   { id: "brief", label: "Brief" },
@@ -267,6 +287,26 @@ function formatOptionalTime(value: string | null) {
   return value ? formatTime(value) : "Unavailable";
 }
 
+function ageLabel(value: string | null, now = new Date()) {
+  if (!value) return "Unavailable";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Unknown age";
+  const diffMs = Math.max(0, now.getTime() - date.getTime());
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m old`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 48) return `${hours}h old`;
+  const days = Math.floor(hours / 24);
+  return `${days}d old`;
+}
+
+function projectionFreshnessLabel(projection: DeltaHqViewModel["observability"]["projection"]) {
+  if (projection.status !== "available") return "Projection unavailable";
+  if (!projection.generated_at) return "Projection generated time unavailable";
+  return `Generated ${formatOptionalTime(projection.generated_at)} (${ageLabel(projection.generated_at)})`;
+}
+
 function formatDate(value: string | null) {
   if (!value) return "Unavailable";
   const date = new Date(value);
@@ -285,11 +325,11 @@ function milestoneById(entries: DeltaHqEvolutionMilestone[]) {
 function runtimeStatusLabel(status: DeltaDesktopStatus | null) {
   const backend = status?.services?.backend?.status;
   const site = status?.services?.site?.status;
-  if (!status) return "Web HQ initializing";
-  if (status.desktop?.mode === "browser-preview" && site === "running") return "Web HQ connected";
+  if (!status) return "Runtime status pending";
+  if (status.desktop?.mode === "browser-preview") return "Runtime bridge unavailable";
   if (backend === "running" && site === "running") return "Runtime connected";
   if (backend === "running") return "Backend connected";
-  if (site === "running") return "HQ renderer connected";
+  if (site === "running") return "HQ renderer only";
   return "Runtime unavailable";
 }
 
@@ -487,6 +527,66 @@ function ObservabilityMetricGrid({
   );
 }
 
+function ConnectionStatesPanel({
+  model,
+  runtimeStatus,
+  askDeltaStatus,
+}: {
+  model: DeltaHqViewModel;
+  runtimeStatus: DeltaDesktopStatus | null;
+  askDeltaStatus: AskDeltaAvailability;
+}) {
+  const projection = model.observability.projection;
+  const states: Array<{ label: string; value: string; severity: DeltaHqSeverity; detail: string }> = [
+    {
+      label: "HQ web shell",
+      value: "Connected",
+      severity: "good",
+      detail: `Rendered ${formatOptionalTime(model.generatedAt)}`,
+    },
+    {
+      label: "Delta runtime",
+      value: runtimeStatusLabel(runtimeStatus),
+      severity: runtimeSeverity(runtimeStatus),
+      detail: runtimeStatus?.desktop?.mode === "browser-preview"
+        ? "Browser preview has no native runtime bridge."
+        : "Reported by desktop runtime bridge when available.",
+    },
+    {
+      label: "Observability projection",
+      value: projection.status === "available" ? "Available" : "Unavailable",
+      severity: projection.status === "available" && projection.event_acceptance_summary.accepted_source_event_count > 0
+        ? "good"
+        : projection.status === "available"
+          ? "attention"
+          : "blocked",
+      detail: projection.diagnostics.empty_state_reason || projectionFreshnessLabel(projection),
+    },
+    {
+      label: "Ask Delta",
+      value: askDeltaStatus === "available" ? "Available" : askDeltaStatus === "failed" ? "Unavailable" : "Not checked",
+      severity: askDeltaStatus === "available" ? "good" : askDeltaStatus === "failed" ? "blocked" : "notice",
+      detail: askDeltaStatus === "available"
+        ? "Last request completed through the read-only conversation API."
+        : askDeltaStatus === "failed"
+          ? "Last request failed or runtime did not answer."
+          : "Availability is checked when a question is submitted.",
+    },
+  ];
+
+  return (
+    <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      {states.map((state) => (
+        <article key={state.label} className={`rounded-lg border p-4 ${severityStyles[state.severity]}`}>
+          <p className="text-xs font-semibold uppercase tracking-wide">{state.label}</p>
+          <p className="mt-2 text-base font-semibold leading-6">{state.value}</p>
+          <p className="mt-2 text-xs leading-5 opacity-80">{state.detail}</p>
+        </article>
+      ))}
+    </section>
+  );
+}
+
 function ObservabilityProjectionSummary({ model }: { model: DeltaHqViewModel }) {
   const projection = model.observability.projection;
 
@@ -519,8 +619,166 @@ function ObservabilityProjectionSummary({ model }: { model: DeltaHqViewModel }) 
         <p className="mt-2 text-sm font-semibold leading-6 text-zinc-950">
           {formatOptionalTime(projection.latest_accepted_source_time)}
         </p>
+        <p className="mt-2 text-xs leading-5 text-zinc-500">
+          {ageLabel(projection.latest_accepted_source_time)}
+        </p>
       </div>
     </section>
+  );
+}
+
+function ObservabilityDataPathPanel({ projection }: { projection: DeltaHqViewModel["observability"]["projection"] }) {
+  const diagnostics = projection.diagnostics;
+  return (
+    <section className="rounded-lg border border-zinc-200 bg-white p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold text-zinc-950">Projection data path</h3>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            HQ reads this projection as a consumer. It does not seed telemetry, write projections, or recalculate metrics.
+          </p>
+        </div>
+        <Badge className={diagnostics.aggregation_ran_dynamically ? "border-sky-300 bg-sky-50 text-sky-950" : "border-zinc-300 bg-zinc-50 text-zinc-800"}>
+          {diagnostics.projection_source.replaceAll("_", " ")}
+        </Badge>
+      </div>
+      <dl className="mt-4 grid gap-x-4 md:grid-cols-2 xl:grid-cols-3">
+        <KeyValue label="Agent repo" value={diagnostics.repo_root || "Unavailable"} />
+        <KeyValue label="Repo source" value={diagnostics.repo_root_source} />
+        <KeyValue label="Measurement root" value={diagnostics.store_root || "Unavailable"} />
+        <KeyValue label="Projection path" value={diagnostics.projection_path || "No stored projection"} />
+        <KeyValue label="Projection generated" value={formatOptionalTime(diagnostics.projection_generated_at)} />
+        <KeyValue label="Latest accepted source" value={formatOptionalTime(diagnostics.newest_accepted_event_time)} />
+        <KeyValue label="Newest raw event" value={formatOptionalTime(diagnostics.newest_raw_event_time)} />
+        <KeyValue label="Raw events" value={diagnostics.raw_event_count} />
+        <KeyValue label="Accepted / rejected" value={`${diagnostics.accepted_source_event_count} / ${diagnostics.rejected_source_event_count}`} />
+        <KeyValue label="Invalid / duplicate" value={`${diagnostics.invalid_raw_event_count} / ${diagnostics.duplicate_source_event_count}`} />
+        <KeyValue label="Producer keys configured" value={diagnostics.producer_keys_configured ? "Yes" : "No"} />
+        <KeyValue label="Stored projection stale" value={diagnostics.stored_projection_stale ? "Yes" : "No"} />
+      </dl>
+      {diagnostics.repo_root_warning && (
+        <p className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm leading-6 text-amber-950">
+          {diagnostics.repo_root_warning}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function ObservabilityEmptyState({ projection }: { projection: DeltaHqViewModel["observability"]["projection"] }) {
+  const reason = projection.diagnostics.empty_state_reason;
+  if (!reason || projection.event_acceptance_summary.accepted_source_event_count > 0) return null;
+  const projectionAvailable = projection.status === "available";
+
+  return (
+    <section className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-amber-950">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em]">No accepted current telemetry</p>
+          <h3 className="mt-2 text-lg font-semibold">
+            {projectionAvailable
+              ? "Analytics is connected, but there is no canonical current data to display."
+              : "Analytics cannot load the canonical Organizational Observability projection."}
+          </h3>
+          <p className="mt-3 text-sm leading-6">{reason}</p>
+        </div>
+        <Badge className="border-amber-400 bg-white text-amber-950">
+          {projectionAvailable
+            ? projection.diagnostics.historical_only ? "Historical only" : "No current events"
+            : "Projection unavailable"}
+        </Badge>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <p className="rounded-md border border-amber-300 bg-white/70 p-3 text-sm leading-6">
+          Measurement root: {projection.diagnostics.store_root || "Unavailable"}
+        </p>
+        <p className="rounded-md border border-amber-300 bg-white/70 p-3 text-sm leading-6">
+          Raw events: {projection.diagnostics.raw_event_count}; accepted current events: {projection.diagnostics.accepted_source_event_count}
+        </p>
+        <p className="rounded-md border border-amber-300 bg-white/70 p-3 text-sm leading-6">
+          Next producer: {projection.diagnostics.next_event_owner || "Canonical telemetry producer"}
+        </p>
+      </div>
+      <details className="mt-4 rounded-md border border-amber-300 bg-white/70 p-3">
+        <summary className="cursor-pointer text-sm font-semibold">Registered unavailable metrics</summary>
+        <div className="mt-3">
+          <ObservabilityMetricGrid
+            metrics={projection.metrics.filter((metric) => metric.source_event_count === 0).slice(0, 9)}
+            compact
+            showScope
+            emptyLabel="No registered unavailable metrics are present."
+          />
+        </div>
+      </details>
+    </section>
+  );
+}
+
+function ControlsAuditPanel({
+  runtimeStatus,
+  askDeltaStatus,
+}: {
+  runtimeStatus: DeltaDesktopStatus | null;
+  askDeltaStatus: AskDeltaAvailability;
+}) {
+  const serviceManagerEnabled = runtimeStatus?.desktop?.serviceManagerEnabled === true;
+  const controls = [
+    {
+      label: "Refresh",
+      state: "functional",
+      detail: "Calls router.refresh() and rereads the server-side HQ view model.",
+    },
+    {
+      label: "Navigation",
+      state: "functional",
+      detail: "Switches first-class HQ views and updates the location hash.",
+    },
+    {
+      label: "Agent and chart selectors",
+      state: "functional",
+      detail: "Update local HQ selection context without mutating canonical state.",
+    },
+    {
+      label: "Provenance expanders",
+      state: "functional",
+      detail: "Reveal projection provenance, dimensions, trust, and freshness.",
+    },
+    {
+      label: "Ask Delta",
+      state: askDeltaStatus === "failed" ? "functional with unavailable backend" : "functional",
+      detail: "Submits read-only HQ context to the conversation API; availability is independent of Observability.",
+    },
+    {
+      label: "Operator runtime controls",
+      state: serviceManagerEnabled ? "functional in Delta.app" : "intentionally disabled",
+      detail: serviceManagerEnabled
+        ? "Available through the Electron service manager bridge."
+        : "Disabled in browser preview because the Electron service manager bridge is absent.",
+    },
+    {
+      label: "Browser HQ badge",
+      state: "status indicator",
+      detail: "Non-interactive shell indicator; it does not imply runtime or Observability connectivity.",
+    },
+  ];
+
+  return (
+    <details className="rounded-lg border border-zinc-200 bg-white p-5">
+      <summary className="cursor-pointer text-base font-semibold text-zinc-950">Functional controls audit</summary>
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        {controls.map((control) => (
+          <div key={control.label} className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-zinc-950">{control.label}</p>
+              <Badge className={control.state.includes("disabled") ? "border-amber-300 bg-amber-50 text-amber-950" : "border-emerald-300 bg-emerald-50 text-emerald-950"}>
+                {control.state}
+              </Badge>
+            </div>
+            <p className="mt-2 text-sm leading-6 text-zinc-600">{control.detail}</p>
+          </div>
+        ))}
+      </div>
+    </details>
   );
 }
 
@@ -549,6 +807,478 @@ function ObservabilitySurfaceSection({
           emptyLabel={`No ${title} metrics are available in the projection.`}
         />
       </div>
+    </section>
+  );
+}
+
+type EconomicsDatum = DeltaHqObservabilityMetric | DeltaHqObservabilityTimeSeriesPoint;
+
+function economicsDatumTitle(datum: Pick<EconomicsDatum, "metric_id">) {
+  return datum.metric_id
+    .split(".")
+    .slice(1)
+    .join(" ")
+    .replaceAll("_", " ");
+}
+
+function CostTrustBadge({ datum }: { datum: EconomicsDatum }) {
+  const state = economicsCostTrustState(datum);
+  if (!state) return null;
+  return <Badge className={trustStateClassName(state)}>{economicsCostTrustLabel(state)}</Badge>;
+}
+
+function EconomicsMetricTile({
+  metric,
+  label,
+}: {
+  metric: DeltaHqObservabilityMetric | null;
+  label: string;
+}) {
+  const value = canonicalEconomicsMetricValue(metric);
+  return (
+    <article className="rounded-lg border border-zinc-200 bg-white p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{label}</p>
+          <h4 className="mt-2 text-sm font-semibold leading-6 text-zinc-950">
+            {metric ? metricDisplayTitle(metric) : "Unavailable"}
+          </h4>
+        </div>
+        {metric && <CostTrustBadge datum={metric} />}
+      </div>
+      <p className="mt-4 text-2xl font-semibold text-zinc-950">
+        {metric ? formatEconomicsDatumValue(metric) : "Unavailable"}
+      </p>
+      <p className="mt-2 text-xs leading-5 text-zinc-500">
+        {metric
+          ? `${titleCaseState(metric.trust_state)} / ${titleCaseState(metric.data_quality_state)}; canonical value ${value === null ? "unavailable" : "supplied"}`
+          : "Metric not present in the projection."}
+      </p>
+    </article>
+  );
+}
+
+function EconomicsBarChart({
+  title,
+  detail,
+  items,
+}: {
+  title: string;
+  detail: string;
+  items: Array<{ label: string; datum: EconomicsDatum | null }>;
+}) {
+  const numericValues = items
+    .map((item) => item.datum)
+    .filter((datum): datum is EconomicsDatum => Boolean(datum))
+    .filter((datum) => datum.value !== null && economicsCostTrustState(datum) !== "unpriced")
+    .map((datum) => datum.value || 0);
+  const max = Math.max(...numericValues, 0);
+
+  return (
+    <article className="rounded-lg border border-zinc-200 bg-white p-5">
+      <h3 className="text-base font-semibold text-zinc-950">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-zinc-600">{detail}</p>
+      <div className="mt-5 grid gap-3">
+        {items.map((item) => {
+          const datum = item.datum;
+          const width = datum && datum.value !== null && max > 0 && economicsCostTrustState(datum) !== "unpriced"
+            ? Math.max(4, (datum.value / max) * 100)
+            : 0;
+          return (
+            <div key={item.label} className="grid gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-zinc-900">{item.label}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  {datum && <CostTrustBadge datum={datum} />}
+                  <span className="text-sm font-semibold text-zinc-950">
+                    {datum ? formatEconomicsDatumValue(datum) : "Unavailable"}
+                  </span>
+                </div>
+              </div>
+              <div className="h-3 overflow-hidden rounded-full border border-zinc-200 bg-zinc-100">
+                <div
+                  className="h-full rounded-full bg-zinc-900"
+                  style={{ width: `${width}%` }}
+                  aria-label={`${item.label} ${datum ? formatEconomicsDatumValue(datum) : "unavailable"}`}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </article>
+  );
+}
+
+function EconomicsTrendChart({
+  title,
+  detail,
+  points,
+}: {
+  title: string;
+  detail: string;
+  points: DeltaHqObservabilityTimeSeriesPoint[];
+}) {
+  const numericPoints = points.filter((point) => point.value !== null && economicsCostTrustState(point) !== "unpriced");
+  const values = numericPoints.map((point) => point.value || 0);
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 0);
+  const range = max - min || 1;
+  const coordinates = numericPoints.map((point, index) => {
+    const x = numericPoints.length <= 1 ? 50 : (index / (numericPoints.length - 1)) * 100;
+    const y = 92 - (((point.value || 0) - min) / range) * 72;
+    return `${x},${y}`;
+  });
+
+  return (
+    <article className="rounded-lg border border-zinc-200 bg-white p-5">
+      <h3 className="text-base font-semibold text-zinc-950">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-zinc-600">{detail}</p>
+      <div className="mt-5 h-40 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+        {numericPoints.length === 0 ? (
+          <div className="flex h-full items-center justify-center text-sm font-semibold text-zinc-600">
+            Trend unavailable
+          </div>
+        ) : (
+          <svg viewBox="0 0 100 100" role="img" aria-label={title} className="h-full w-full">
+            <polyline
+              points={coordinates.join(" ")}
+              fill="none"
+              stroke="#18181b"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {numericPoints.map((point, index) => {
+              const [x, y] = coordinates[index].split(",").map(Number);
+              return <circle key={`${point.timestamp}-${point.metric_id}-${index}`} cx={x} cy={y} r="2.6" fill="#18181b" />;
+            })}
+          </svg>
+        )}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {points.slice(0, 4).map((point) => (
+          <Badge key={`${point.current_state_applicability}-${point.metric_id}-${point.timestamp}`} className={trustStateClassName(point.trust_state)}>
+            {titleCaseState(point.current_state_applicability)} {formatEconomicsDatumValue(point)}
+          </Badge>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function EconomySliceList({
+  title,
+  points,
+  emptyLabel,
+}: {
+  title: string;
+  points: DeltaHqObservabilityTimeSeriesPoint[];
+  emptyLabel: string;
+}) {
+  return (
+    <article className="rounded-lg border border-zinc-200 bg-white p-5">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <h3 className="text-base font-semibold text-zinc-950">{title}</h3>
+        <Badge className="border-zinc-300 bg-zinc-50 text-zinc-800">{points.length} slices</Badge>
+      </div>
+      <div className="mt-4 grid gap-3">
+        {points.length === 0 ? (
+          <p className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm leading-6 text-zinc-600">{emptyLabel}</p>
+        ) : (
+          points.slice(0, 8).map((point) => (
+            <div key={`${point.current_state_applicability}-${point.metric_id}-${stablePointKey(point)}`} className="rounded-md border border-zinc-200 bg-zinc-50 p-3">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-zinc-950">{economicsDatumTitle(point)}</p>
+                  <p className="mt-1 text-xs leading-5 text-zinc-500">{point.metric_id}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <CostTrustBadge datum={point} />
+                  <TrustStateBadge state={point.trust_state} />
+                </div>
+              </div>
+              <p className="mt-3 text-xl font-semibold text-zinc-950">{formatEconomicsDatumValue(point)}</p>
+              <p className="mt-2 text-xs leading-5 text-zinc-600">
+                {titleCaseState(economicsPhaseForDatum(point))}; {titleCaseState(point.current_state_applicability)}
+              </p>
+              <details className="mt-3 border-t border-zinc-200 pt-3">
+                <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                  Dimensions
+                </summary>
+                <dl className="mt-3 grid gap-x-4 md:grid-cols-2">
+                  {Object.entries(point.dimension_values).map(([key, value]) => (
+                    <KeyValue key={key} label={titleCaseState(key)} value={value === null ? "None" : String(value)} />
+                  ))}
+                </dl>
+              </details>
+            </div>
+          ))
+        )}
+      </div>
+    </article>
+  );
+}
+
+function stablePointKey(point: DeltaHqObservabilityTimeSeriesPoint) {
+  return Object.entries(point.dimension_values)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}:${String(value)}`)
+    .join("|");
+}
+
+function QualificationFunnel({
+  selectedAgentLabel,
+  points,
+}: {
+  selectedAgentLabel: string;
+  points: DeltaHqObservabilityTimeSeriesPoint[];
+}) {
+  return (
+    <article className="rounded-lg border border-zinc-200 bg-white p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold text-zinc-950">Qualification funnel</h3>
+          <p className="mt-2 text-sm leading-6 text-zinc-600">
+            {selectedAgentLabel} stage slices are rendered only where the projection supplies matching dimensions.
+          </p>
+        </div>
+        <Badge className="border-zinc-300 bg-zinc-50 text-zinc-800">No avoided spend inferred</Badge>
+      </div>
+      <div className="mt-5 grid gap-3 xl:grid-cols-6">
+        {QUALIFICATION_FUNNEL_STAGES.map((stage) => {
+          const stagePoints = points.filter((point) => {
+            const stageValue = point.dimension_values.evaluation_stage;
+            const spendClass = point.dimension_values.spend_class;
+            if (stage.id === "operation") return spendClass === "operation";
+            return stageValue === stage.id;
+          });
+          const primary = stagePoints.find(isEconomicsCostDatum) || stagePoints[0] || null;
+          return (
+            <div key={stage.id} className="min-h-44 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <p className="text-sm font-semibold leading-6 text-zinc-950">{stage.label}</p>
+              <p className="mt-3 text-lg font-semibold text-zinc-950">
+                {primary ? formatEconomicsDatumValue(primary) : "Unavailable"}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-zinc-600">
+                {stagePoints.length > 0 ? `${stagePoints.length} canonical slice${stagePoints.length === 1 ? "" : "s"}` : "No matching evidence"}
+              </p>
+              {primary && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <CostTrustBadge datum={primary} />
+                  <TrustStateBadge state={primary.trust_state} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </article>
+  );
+}
+
+function AgentEconomicsSurface({
+  model,
+  selectedAgentId,
+  onSelectAgent,
+}: {
+  model: DeltaHqViewModel;
+  selectedAgentId: string;
+  onSelectAgent: (agentId: string) => void;
+}) {
+  const projection = model.observability.projection;
+  const currentMetrics = economicsCurrentMetrics(projection);
+  const historicalMetrics = economicsHistoricalMetrics(projection);
+  const profiles = buildAgentEconomicsProfiles(projection);
+  const selectedProfile = profiles.find((profile) => profile.agentId === selectedAgentId)
+    || buildAgentEconomicsProfile(projection, selectedAgentId);
+  const cumulativeTrendPoints = [
+    ...projection.historical_time_series_points,
+    ...projection.time_series_points,
+  ].filter((point) => point.metric_id === AGENT_ECONOMICS_METRIC_IDS.cumulativeCost);
+  const costClassItems = [
+    { label: "Development", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.developmentCost) },
+    { label: "Qualification", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.qualificationCost) },
+    { label: "Operation", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.operatingCost) },
+  ];
+  const evaluationStageItems = [
+    { label: "Progressive screen", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.progressiveScreenSpend) },
+    { label: "Full qualification", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.fullGateSpend) },
+    { label: "Failed evaluation", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.failedEvaluationSpend) },
+  ];
+  const tokenItems = [
+    { label: "Input", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.inputTokens) },
+    { label: "Output", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.outputTokens) },
+    { label: "Cached", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.cachedTokens) },
+    { label: "Reasoning", datum: economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.reasoningTokens) },
+  ];
+  const hasEconomicsEvidence = [...currentMetrics, ...historicalMetrics].some((metric) =>
+    metric.source_event_count > 0 || metric.value !== null || metric.trust_state !== "missing"
+  );
+
+  return (
+    <section className="grid gap-5">
+      <SectionTitle
+        kicker="Agent Economics"
+        title="Intelligent-agent cost and operating economics"
+        detail="Costs, tokens, latency, and qualification economics are rendered from Organizational Observability projection values and dimensions. HQ does not price, replay, or recompute runs."
+      />
+
+      {!hasEconomicsEvidence && (
+        <section className="rounded-lg border border-amber-300 bg-amber-50 p-5 text-amber-950">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="max-w-3xl">
+              <h3 className="text-base font-semibold">No accepted Agent Economics telemetry</h3>
+              <p className="mt-2 text-sm leading-6">
+                The registry exposes Agent Intelligence Economics metrics, but the current canonical measurement store has no accepted economics events. HQ is not reconstructing Mission Control or Failure Triage costs from narrative summaries.
+              </p>
+            </div>
+            <Badge className="border-amber-400 bg-white text-amber-950">Economics unavailable</Badge>
+          </div>
+          <p className="mt-4 rounded-md border border-amber-300 bg-white/70 p-3 text-sm leading-6">
+            Mission Control historical qualification costs will render here once an approved Observability import writes structured `agent_economics.run_observed` evidence or a canonical stored projection supplies those values. Failure Triage remains unavailable until structured telemetry exists.
+          </p>
+        </section>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-4">
+        <EconomicsMetricTile
+          label="Total measured spend"
+          metric={economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.cumulativeCost)}
+        />
+        <EconomicsMetricTile
+          label="Qualification spend"
+          metric={economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.qualificationSpend)}
+        />
+        <EconomicsMetricTile
+          label="Failed evaluation spend"
+          metric={economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.failedEvaluationSpend)}
+        />
+        <EconomicsMetricTile
+          label="Cost per successful task"
+          metric={economicsMetricById(currentMetrics, AGENT_ECONOMICS_METRIC_IDS.costPerSuccessfulTask)}
+        />
+      </div>
+
+      <section className="grid gap-4 xl:grid-cols-2">
+        <EconomicsTrendChart
+          title="Cumulative spend over time"
+          detail="Uses projection time-series points where available; missing or unpriced points remain out of the line."
+          points={cumulativeTrendPoints}
+        />
+        <EconomicsBarChart
+          title="Development vs qualification vs operation"
+          detail="Current projection metrics stay separated by spend class."
+          items={costClassItems}
+        />
+        <EconomicsBarChart
+          title="Evaluation-stage spend"
+          detail="Stage-specific costs are displayed only for canonical stage metrics."
+          items={evaluationStageItems}
+        />
+        <EconomicsBarChart
+          title="Token composition"
+          detail="Provider token categories are displayed as supplied projection totals."
+          items={tokenItems}
+        />
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-base font-semibold text-zinc-950">Agent drilldown</h3>
+            <p className="mt-2 text-sm leading-6 text-zinc-600">
+              Mission Control is shown first. Failure Triage remains unavailable until structured economics evidence exists.
+            </p>
+          </div>
+          <Badge className="border-zinc-300 bg-zinc-50 text-zinc-800">
+            {currentMetrics.length} current economics metrics
+          </Badge>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {profiles.map((profile) => (
+            <button
+              key={profile.agentId}
+              type="button"
+              onClick={() => onSelectAgent(profile.agentId)}
+              className={`rounded-md border px-3 py-2 text-sm font-semibold ${
+                selectedProfile.agentId === profile.agentId
+                  ? "border-zinc-950 bg-zinc-950 text-white"
+                  : "border-zinc-300 bg-white text-zinc-900"
+              }`}
+            >
+              {profile.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-[0.8fr_1fr]">
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Selected agent</p>
+                <h4 className="mt-2 text-xl font-semibold text-zinc-950">{selectedProfile.label}</h4>
+              </div>
+              <Badge className={selectedProfile.evidenceState === "available" ? "border-emerald-300 bg-emerald-50 text-emerald-950" : "border-zinc-300 bg-zinc-50 text-zinc-800"}>
+                {selectedProfile.evidenceState}
+              </Badge>
+            </div>
+            <dl className="mt-4">
+              <KeyValue label="Current operation slices" value={selectedProfile.currentOperationPoints.length} />
+              <KeyValue label="Qualification slices" value={selectedProfile.qualificationPoints.length} />
+              <KeyValue label="Development slices" value={selectedProfile.developmentPoints.length} />
+              <KeyValue label="Window starts" value={formatOptionalTime(selectedProfile.measurementWindow.from)} />
+              <KeyValue label="Window ends" value={formatOptionalTime(selectedProfile.measurementWindow.to)} />
+              <KeyValue
+                label="Cost trust"
+                value={selectedProfile.costTrustStates.length === 0
+                  ? "No agent-specific cost evidence"
+                  : selectedProfile.costTrustStates.map(economicsCostTrustLabel).join(", ")}
+              />
+            </dl>
+          </div>
+
+          <div className="grid gap-4">
+            <EconomySliceList
+              title="Current operation"
+              points={selectedProfile.currentOperationPoints}
+              emptyLabel="No current operating-cost slice exists for this agent."
+            />
+            <EconomySliceList
+              title="Historical qualification and development"
+              points={[...selectedProfile.qualificationPoints, ...selectedProfile.developmentPoints]}
+              emptyLabel="No qualification or development slice exists for this agent."
+            />
+          </div>
+        </div>
+      </section>
+
+      <QualificationFunnel selectedAgentLabel={selectedProfile.label} points={selectedProfile.allPoints} />
+
+      <section className="rounded-lg border border-zinc-200 bg-white p-5">
+        <h3 className="text-base font-semibold text-zinc-950">Current vs historical separation</h3>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <p className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
+            Current operation requires operation-class evidence with current applicability.
+          </p>
+          <p className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
+            Historical qualification remains qualification evidence, including prior full-gate and failed-evaluation spend.
+          </p>
+          <p className="rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
+            Development experimentation is shown separately and is not blended into operating cost.
+          </p>
+        </div>
+        <details className="mt-5 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-zinc-950">Historical economics metrics</summary>
+          <div className="mt-4">
+            <ObservabilityMetricGrid
+              metrics={historicalMetrics}
+              compact
+              emptyLabel="No historical agent economics metrics are available."
+            />
+          </div>
+        </details>
+      </section>
     </section>
   );
 }
@@ -1577,10 +2307,18 @@ function EvolutionView({
 
 function AnalyticsView({
   model,
+  runtimeStatus,
+  askDeltaStatus,
   onOpenDepartment,
+  selectedEconomicsAgentId,
+  onSelectEconomicsAgent,
 }: {
   model: DeltaHqViewModel;
+  runtimeStatus: DeltaDesktopStatus | null;
+  askDeltaStatus: AskDeltaAvailability;
   onOpenDepartment: (departmentId: string) => void;
+  selectedEconomicsAgentId: string;
+  onSelectEconomicsAgent: (agentId: string) => void;
 }) {
   const projection = model.observability.projection;
   const eventBusMetrics = metricsForScope(projection, "event_bus");
@@ -1589,6 +2327,7 @@ function AnalyticsView({
   const historicalEvidenceMetrics = projection.historicalMetrics
     .filter((metric) => metric.source_event_count > 0 || metric.value !== null || metric.trust_state !== "missing")
     .slice(0, 8);
+  const hasAcceptedCurrentData = projection.event_acceptance_summary.accepted_source_event_count > 0;
 
   return (
     <div className="grid gap-6">
@@ -1599,6 +2338,20 @@ function AnalyticsView({
       />
 
       <ObservabilityProjectionSummary model={model} />
+
+      <ConnectionStatesPanel model={model} runtimeStatus={runtimeStatus} askDeltaStatus={askDeltaStatus} />
+
+      <ObservabilityDataPathPanel projection={projection} />
+
+      <ObservabilityEmptyState projection={projection} />
+
+      <ControlsAuditPanel runtimeStatus={runtimeStatus} askDeltaStatus={askDeltaStatus} />
+
+      <AgentEconomicsSurface
+        model={model}
+        selectedAgentId={selectedEconomicsAgentId}
+        onSelectAgent={onSelectEconomicsAgent}
+      />
 
       <section className="grid gap-4 xl:grid-cols-[0.8fr_1fr]">
         <div className="rounded-lg border border-zinc-200 bg-white p-5">
@@ -1644,21 +2397,48 @@ function AnalyticsView({
           title="Read-only operational measurements"
           detail="Current cards render only the supplied projection states. Missing, stale, untrusted, conflicted, unpriced, partial, and fixture states remain visible."
         />
-        <ObservabilitySurfaceSection
-          title="Event Bus"
-          detail="Events received, dispatches, wake success, queue depth, dispatch latency, blocked dispatch, backpressure, and failure measures where supplied."
-          metrics={eventBusMetrics}
-        />
-        <ObservabilitySurfaceSection
-          title="Mission Control"
-          detail="Current Mission Control metrics render only when current trusted evidence exists. Qualification evidence is separated below."
-          metrics={missionControlMetrics}
-        />
-        <ObservabilitySurfaceSection
-          title="Organization"
-          detail="Organization-level metrics are limited to accepted evidence from the projection; HQ does not fabricate autonomy or health."
-          metrics={organizationMetrics}
-        />
+        {hasAcceptedCurrentData ? (
+          <>
+            <ObservabilitySurfaceSection
+              title="Event Bus"
+              detail="Events received, dispatches, wake success, queue depth, dispatch latency, blocked dispatch, backpressure, and failure measures where supplied."
+              metrics={eventBusMetrics}
+            />
+            <ObservabilitySurfaceSection
+              title="Mission Control"
+              detail="Current Mission Control metrics render only when current trusted evidence exists. Qualification evidence is separated below."
+              metrics={missionControlMetrics}
+            />
+            <ObservabilitySurfaceSection
+              title="Organization"
+              detail="Organization-level metrics are limited to accepted evidence from the projection; HQ does not fabricate autonomy or health."
+              metrics={organizationMetrics}
+            />
+          </>
+        ) : (
+          <details className="rounded-lg border border-zinc-200 bg-white p-5">
+            <summary className="cursor-pointer text-base font-semibold text-zinc-950">
+              Inspect registered current metrics
+            </summary>
+            <div className="mt-4 grid gap-4">
+              <ObservabilitySurfaceSection
+                title="Event Bus"
+                detail="Registered current metrics are unavailable until canonical Event Bus telemetry is accepted."
+                metrics={eventBusMetrics}
+              />
+              <ObservabilitySurfaceSection
+                title="Mission Control"
+                detail="Registered current metrics are unavailable until canonical Mission Control telemetry is accepted."
+                metrics={missionControlMetrics}
+              />
+              <ObservabilitySurfaceSection
+                title="Organization"
+                detail="Registered current metrics are unavailable until supported organizational evidence is accepted."
+                metrics={organizationMetrics}
+              />
+            </div>
+          </details>
+        )}
       </section>
 
       <section className="grid gap-4">
@@ -1831,8 +2611,8 @@ function OperatorView({
       />
 
       <section className="grid gap-4 lg:grid-cols-2">
-        {[backend, site].map((service) => (
-          <div key={service?.name || "unknown"} className="rounded-lg border border-zinc-200 bg-white p-5">
+        {[backend, site].map((service, index) => (
+          <div key={service?.name || `unknown-${index}`} className="rounded-lg border border-zinc-200 bg-white p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{service?.label || "Service"}</p>
@@ -1871,14 +2651,16 @@ function OperatorView({
             <button
               type="button"
               onClick={onStopRuntime}
-              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900"
+              disabled={!serviceManagerEnabled}
+              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 disabled:opacity-45"
             >
               Stop app-launched runtime
             </button>
             <button
               type="button"
               onClick={onShowServiceManager}
-              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900"
+              disabled={!serviceManagerEnabled}
+              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900 disabled:opacity-45"
             >
               Service manager
             </button>
@@ -1957,10 +2739,12 @@ function AskDeltaPanel({
   runtimeStatus,
   currentView,
   askContext,
+  onAvailabilityChange,
 }: {
   runtimeStatus: DeltaDesktopStatus | null;
   currentView: HqView;
   askContext: string;
+  onAvailabilityChange: (status: AskDeltaAvailability) => void;
 }) {
   const [messages, setMessages] = useState<AskDeltaMessage[]>([
     {
@@ -1989,6 +2773,7 @@ function AskDeltaPanel({
         message: `[Delta HQ ${currentView}${askContext ? ` | ${askContext}` : ""}] ${message}`,
         sessionId,
       });
+      onAvailabilityChange("available");
       setSessionId(response.session_id);
       setMessages((items) => [
         ...items,
@@ -2000,6 +2785,7 @@ function AskDeltaPanel({
         },
       ]);
     } catch (error) {
+      onAvailabilityChange("failed");
       setMessages((items) => [
         ...items,
         {
@@ -2121,13 +2907,35 @@ function DeliveryPlanView({ model }: { model: DeltaHqViewModel }) {
   );
 }
 
+type RefreshState = "idle" | "refreshing" | "updated" | "no-newer-data" | "failed";
+
+function projectionRefreshSignature(model: DeltaHqViewModel) {
+  const projection = model.observability.projection;
+  return [
+    model.generatedAt,
+    projection.projection_id || "none",
+    projection.generated_at || "none",
+    projection.latest_accepted_source_time || "none",
+    projection.event_acceptance_summary.accepted_source_event_count,
+    projection.event_acceptance_summary.rejected_source_event_count,
+    projection.diagnostics.projection_source,
+    projection.diagnostics.raw_event_count,
+  ].join("|");
+}
+
 export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
+  const router = useRouter();
   const [currentView, setCurrentView] = useState<HqView>("brief");
   const [selectedAgentId, setSelectedAgentId] = useState(model.organization[0]?.id || "");
   const [selectedDepartmentId, setSelectedDepartmentId] = useState(model.observability.departments[0]?.id || "");
   const [selectedReviewId, setSelectedReviewId] = useState(model.reviews[0]?.id || "");
   const [selectedMilestoneId, setSelectedMilestoneId] = useState(model.evolution.entries[0]?.milestone_id || "");
   const [selectedEvolutionTrack, setSelectedEvolutionTrack] = useState<EvolutionTrackFilter>("all");
+  const [selectedEconomicsAgentId, setSelectedEconomicsAgentId] = useState("mission_control");
+  const [refreshState, setRefreshState] = useState<RefreshState>("idle");
+  const refreshBaselineRef = useRef<string | null>(null);
+  const refreshTimeoutRef = useRef<number | null>(null);
+  const [askDeltaAvailability, setAskDeltaAvailability] = useState<AskDeltaAvailability>("unknown");
   const [runtimeStatus, setRuntimeStatus] = useState<DeltaDesktopStatus | null>(null);
   const [serviceLogs, setServiceLogs] = useState<Record<string, DeltaDesktopServiceStatus["logLines"]> | null>(null);
 
@@ -2140,6 +2948,33 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
     () => model.evolution.entries.find((entry) => entry.milestone_id === selectedMilestoneId) || model.evolution.entries[0],
     [model.evolution.entries, selectedMilestoneId],
   );
+
+  useEffect(() => {
+    if (refreshState !== "refreshing" || !refreshBaselineRef.current) return;
+    const currentSignature = projectionRefreshSignature(model);
+    const baseline = refreshBaselineRef.current;
+    if (currentSignature === baseline) return;
+
+    if (refreshTimeoutRef.current) {
+      window.clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
+    }
+    const [, baselineProjectionId, baselineGenerated, baselineLatest, baselineAccepted, baselineRejected, baselineSource, baselineRaw] = baseline.split("|");
+    const [, currentProjectionId, currentGenerated, currentLatest, currentAccepted, currentRejected, currentSource, currentRaw] = currentSignature.split("|");
+    const projectionChanged = [
+      baselineProjectionId !== currentProjectionId,
+      baselineGenerated !== currentGenerated,
+      baselineLatest !== currentLatest,
+      baselineAccepted !== currentAccepted,
+      baselineRejected !== currentRejected,
+      baselineSource !== currentSource,
+      baselineRaw !== currentRaw,
+    ].some(Boolean);
+    refreshBaselineRef.current = null;
+    window.setTimeout(() => {
+      setRefreshState(projectionChanged ? "updated" : "no-newer-data");
+    }, 0);
+  }, [model, refreshState]);
 
   const askDeltaContext = useMemo(() => {
     const projection = model.observability.projection;
@@ -2154,12 +2989,14 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
       ].join("; ");
     }
     if (currentView === "analytics") {
+      const selectedEconomics = buildAgentEconomicsProfile(projection, selectedEconomicsAgentId);
       return [
         `Observability projection: ${projection.status}`,
         `promotion: ${projection.promotionScope}`,
         `current applicability: ${projection.current_state_applicability}`,
         `trust summary: ${observabilitySummaryLabel(projection.trust_summary)}`,
         `accepted sources: ${projection.event_acceptance_summary.accepted_source_event_count}`,
+        `selected economics: ${summarizeAgentEconomicsForAsk(selectedEconomics)}`,
         "no composite executive health authority",
       ].join("; ");
     }
@@ -2180,6 +3017,7 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
     model.observability.departments,
     model.observability.projection,
     selectedDepartmentId,
+    selectedEconomicsAgentId,
     selectedMilestone,
   ]);
 
@@ -2221,6 +3059,12 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
           setSelectedEvolutionTrack(milestone.lineage_tracks[0] || "all");
           setCurrentView("evolution");
         }
+        return;
+      }
+      if (hash.startsWith("economics-agent-")) {
+        const agentId = hash.replace(/^economics-agent-/, "");
+        setSelectedEconomicsAgentId(agentId);
+        setCurrentView("analytics");
         return;
       }
       if (hash.startsWith("event-")) {
@@ -2285,8 +3129,32 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
     return () => {
       window.clearTimeout(initialTimer);
       window.clearInterval(timer);
+      if (refreshTimeoutRef.current) window.clearTimeout(refreshTimeoutRef.current);
     };
   }, [refreshRuntime]);
+
+  async function refreshHq() {
+    if (refreshState === "refreshing") return;
+    setRefreshState("refreshing");
+    refreshBaselineRef.current = projectionRefreshSignature(model);
+    if (refreshTimeoutRef.current) window.clearTimeout(refreshTimeoutRef.current);
+    refreshTimeoutRef.current = window.setTimeout(() => {
+      refreshBaselineRef.current = null;
+      setRefreshState("failed");
+    }, 8000);
+
+    try {
+      await refreshRuntime();
+      router.refresh();
+    } catch {
+      if (refreshTimeoutRef.current) {
+        window.clearTimeout(refreshTimeoutRef.current);
+        refreshTimeoutRef.current = null;
+      }
+      refreshBaselineRef.current = null;
+      setRefreshState("failed");
+    }
+  }
 
   function openView(view: HqView) {
     setCurrentView(view);
@@ -2323,6 +3191,12 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
     window.history.replaceState(null, "", `#milestone-${milestoneId}`);
   }
 
+  function openEconomicsAgent(agentId: string) {
+    setSelectedEconomicsAgentId(agentId);
+    setCurrentView("analytics");
+    window.history.replaceState(null, "", `#economics-agent-${agentId}`);
+  }
+
   async function startRuntime() {
     if (window.deltaDesktop?.startAll) {
       setRuntimeStatus(await window.deltaDesktop.startAll());
@@ -2340,6 +3214,17 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
   function showServiceManager() {
     window.deltaDesktop?.showServiceManager?.();
   }
+
+  const projection = model.observability.projection;
+  const refreshLabel = refreshState === "refreshing"
+    ? "Refreshing..."
+    : refreshState === "updated"
+      ? "Updated"
+      : refreshState === "no-newer-data"
+        ? "No newer data"
+        : refreshState === "failed"
+          ? "Refresh failed"
+          : "Refresh";
 
   return (
     <div className="min-h-screen bg-[#f4f6f8] text-zinc-950">
@@ -2382,16 +3267,26 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
             <div className="flex min-h-10 flex-wrap items-center justify-between gap-3 pl-16 xl:pl-0">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">{selectedViewLabel}</p>
-                <p className="text-sm font-semibold text-zinc-950">Generated from HQ adapter snapshot {formatTime(model.generatedAt)}</p>
+                <p className="text-sm font-semibold text-zinc-950">HQ rendered {formatTime(model.generatedAt)}</p>
+                <p className="mt-1 text-xs leading-5 text-zinc-500">
+                  {projectionFreshnessLabel(projection)}; latest source {formatOptionalTime(projection.latest_accepted_source_time)}
+                </p>
               </div>
               <div className="flex flex-wrap items-center gap-2" style={noDragRegionStyle}>
                 <Badge className="border-zinc-300 bg-white text-zinc-800">{runtimeSurfaceLabel(runtimeStatus)}</Badge>
+                <Badge className={projection.status === "available" ? "border-emerald-300 bg-emerald-50 text-emerald-950" : "border-rose-300 bg-rose-50 text-rose-950"}>
+                  Observability {projection.status}
+                </Badge>
+                <Badge className={runtimeSeverity(runtimeStatus) === "good" ? "border-emerald-300 bg-emerald-50 text-emerald-950" : "border-amber-300 bg-amber-50 text-amber-950"}>
+                  Runtime {runtimeStatusLabel(runtimeStatus)}
+                </Badge>
                 <button
                   type="button"
-                  onClick={refreshRuntime}
-                  className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-900"
+                  onClick={refreshHq}
+                  disabled={refreshState === "refreshing"}
+                  className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-900 disabled:opacity-45"
                 >
-                  Refresh
+                  {refreshLabel}
                 </button>
               </div>
             </div>
@@ -2447,7 +3342,11 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
             {currentView === "analytics" && (
               <AnalyticsView
                 model={model}
+                runtimeStatus={runtimeStatus}
+                askDeltaStatus={askDeltaAvailability}
                 onOpenDepartment={openDepartment}
+                selectedEconomicsAgentId={selectedEconomicsAgentId}
+                onSelectEconomicsAgent={openEconomicsAgent}
               />
             )}
             {currentView === "operator" && (
@@ -2474,7 +3373,12 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
           </div>
         </main>
 
-        <AskDeltaPanel runtimeStatus={runtimeStatus} currentView={currentView} askContext={askDeltaContext} />
+        <AskDeltaPanel
+          runtimeStatus={runtimeStatus}
+          currentView={currentView}
+          askContext={askDeltaContext}
+          onAvailabilityChange={setAskDeltaAvailability}
+        />
       </div>
     </div>
   );

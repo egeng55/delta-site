@@ -8,10 +8,12 @@ import {
   type DeltaHqLineageTrackId,
   type DeltaHqMilestoneClaims,
   type DeltaHqMilestoneEvidenceReference,
+  type DeltaHqObservabilityDimensionValues,
   type DeltaHqObservabilityEpochProjection,
   type DeltaHqObservabilityFreshness,
   type DeltaHqObservabilityMetric,
   type DeltaHqObservabilityProjection,
+  type DeltaHqObservabilityProjectionDiagnostics,
   type DeltaHqObservabilityTimeSeriesPoint,
   type DeltaHqViewModel,
 } from "./deltaHqViewModel";
@@ -95,6 +97,23 @@ type OrganizationalObservabilityModule = {
   }) => JsonRecord;
 };
 
+type AgentRepoRootInfo = {
+  repoRoot: string;
+  source: string;
+  warning: string | null;
+};
+
+type RawStoreInspection = {
+  raw_event_count: number;
+  invalid_raw_event_count: number;
+  newest_raw_event_time: string | null;
+};
+
+type StoredProjectionRead = {
+  projection: JsonRecord;
+  path: string;
+};
+
 const TRACKS: Array<{
   id: DeltaHqLineageTrackId;
   label: string;
@@ -165,14 +184,25 @@ function agentWorktreeCandidates(workspaceRoot: string): string[] {
     .map((name) => path.join(worktreesRoot, name));
 }
 
-function hasAgentRuntimeArtifacts(candidate: string): boolean {
+function validateAgentRepoRoot(candidate: string): boolean {
   return existsSync(path.join(candidate, "src", "historian", "milestones.mjs"))
-    && existsSync(path.join(candidate, "src", "observability", "aggregate.mjs"));
+    && existsSync(path.join(candidate, "src", "observability", "aggregate.mjs"))
+    && existsSync(path.join(candidate, "config", "organizational-metrics.json"));
 }
 
-function resolveAgentRepoRoot(): string {
-  const candidates = [
-    process.env.DELTA_AGENT_REPO_ROOT,
+function resolveAgentRepoRootInfo(): AgentRepoRootInfo {
+  if (process.env.DELTA_AGENT_REPO_ROOT) {
+    const repoRoot = process.env.DELTA_AGENT_REPO_ROOT;
+    return {
+      repoRoot,
+      source: "DELTA_AGENT_REPO_ROOT",
+      warning: validateAgentRepoRoot(repoRoot)
+        ? null
+        : "Configured DELTA_AGENT_REPO_ROOT does not expose required Historian and Observability contracts.",
+    };
+  }
+
+  const candidates = uniqueStrings([
     process.env.DELTA_HQ_AGENT_REPO_ROOT,
     ...deltaWorkspaceRootCandidates().flatMap((workspaceRoot) => [
       path.join(workspaceRoot, "delta-worktrees", "agent-main-promotion-2026-08-06"),
@@ -181,9 +211,28 @@ function resolveAgentRepoRoot(): string {
     ]),
     path.resolve(process.cwd(), "..", "delta-agent"),
     path.resolve(process.cwd(), "delta-agent"),
-  ];
+  ]);
 
-  return uniqueStrings(candidates).find(hasAgentRuntimeArtifacts) || path.resolve(process.cwd(), "..", "delta-agent");
+  const resolved = candidates.find(validateAgentRepoRoot);
+  if (resolved) {
+    return {
+      repoRoot: resolved,
+      source: "workspace sibling",
+      warning: resolved.includes(`${path.sep}delta-worktrees${path.sep}`)
+        ? "Resolved repo is inside delta-worktrees; verify this is the intended canonical agent worktree."
+        : null,
+    };
+  }
+
+  return {
+    repoRoot: candidates[0],
+    source: "workspace sibling fallback",
+    warning: "No candidate exposed required Historian and Observability contracts.",
+  };
+}
+
+function resolveAgentRepoRoot(): string {
+  return resolveAgentRepoRootInfo().repoRoot;
 }
 
 async function loadHistorianMilestoneModule(repoRoot: string): Promise<HistorianMilestoneModule> {
@@ -202,6 +251,10 @@ function defaultObservabilityStoreRoot(repoRoot: string): string {
 
 function resolveObservabilityStoreRoot(): string | null {
   return process.env.DELTA_OBSERVABILITY_STORE_ROOT || null;
+}
+
+function actualObservabilityStoreRoot(repoRoot: string, storeRoot: string | null): string {
+  return storeRoot || defaultObservabilityStoreRoot(repoRoot);
 }
 
 function strings(value: unknown): string[] {
@@ -252,6 +305,48 @@ function normalizeFreshness(value: unknown): DeltaHqObservabilityFreshness {
   };
 }
 
+function normalizeAggregationWindow(value: unknown): DeltaHqObservabilityMetric["aggregation_window"] {
+  const aggregationWindow = record(value);
+  return {
+    from: nullableString(aggregationWindow.from),
+    to: nullableString(aggregationWindow.to),
+    mode: stringValue(aggregationWindow.mode, "unavailable"),
+    qualification_epoch: nullableString(aggregationWindow.qualification_epoch),
+  };
+}
+
+function normalizeMeasurementTimeRange(value: unknown): DeltaHqObservabilityMetric["measurement_time_range"] {
+  const measurementTimeRange = record(value);
+  return {
+    from: nullableString(measurementTimeRange.from),
+    to: nullableString(measurementTimeRange.to),
+  };
+}
+
+function normalizeDimensionValues(value: unknown): DeltaHqObservabilityDimensionValues {
+  const dimensions: DeltaHqObservabilityDimensionValues = {};
+  for (const [key, dimensionValue] of Object.entries(record(value))) {
+    if (
+      typeof dimensionValue === "string"
+      || typeof dimensionValue === "number"
+      || typeof dimensionValue === "boolean"
+      || dimensionValue === null
+    ) {
+      dimensions[key] = dimensionValue;
+    }
+  }
+  return dimensions;
+}
+
+function normalizeDimensionedPoints(
+  value: unknown,
+  projectionRecord: JsonRecord,
+): DeltaHqObservabilityTimeSeriesPoint[] {
+  return Array.isArray(value)
+    ? value.map((point) => normalizeTimeSeriesPoint(point, projectionRecord))
+    : [];
+}
+
 function normalizeMetric(value: unknown, projectionRecord: JsonRecord): DeltaHqObservabilityMetric {
   const metric = record(value);
   const dataQuality = record(metric.data_quality);
@@ -270,8 +365,11 @@ function normalizeMetric(value: unknown, projectionRecord: JsonRecord): DeltaHqO
     value: nullableNumber(metric.value),
     unit: stringValue(metric.unit, "unknown"),
     trust_state: trustState,
+    cost_trust_state: nullableString(metric.cost_trust_state),
     data_quality_state: stringValue(metric.data_quality_state, stringValue(dataQuality.state, trustState)),
     missing_reason: nullableString(metric.missing_reason) || nullableString(dataQuality.missing_reason),
+    aggregation_window: normalizeAggregationWindow(metric.aggregation_window),
+    measurement_time_range: normalizeMeasurementTimeRange(metric.measurement_time_range),
     source_freshness: normalizeFreshness(metric.source_freshness),
     latest_accepted_source_time: nullableString(metric.latest_accepted_source_time),
     current_state_applicability: stringValue(
@@ -283,6 +381,7 @@ function normalizeMetric(value: unknown, projectionRecord: JsonRecord): DeltaHqO
       || nullableString(projectionRecord.current_qualification_epoch),
     source_event_count: finiteNumber(metric.source_event_count, 0),
     producer_identities: strings(metric.producer_identities),
+    dimensioned_points: normalizeDimensionedPoints(metric.dimensioned_points, projectionRecord),
   };
 }
 
@@ -306,7 +405,11 @@ function normalizeTimeSeriesPoint(value: unknown, projectionRecord: JsonRecord):
     value: nullableNumber(point.value),
     unit: stringValue(point.unit, "unknown"),
     trust_state: stringValue(point.trust_state, "missing"),
+    cost_trust_state: nullableString(point.cost_trust_state),
     data_quality_state: stringValue(point.data_quality_state, stringValue(point.trust_state, "missing")),
+    dimension_values: normalizeDimensionValues(point.dimension_values),
+    aggregation_window: normalizeAggregationWindow(point.aggregation_window),
+    measurement_time_range: normalizeMeasurementTimeRange(point.measurement_time_range),
     source_freshness_state: stringValue(point.source_freshness_state, "missing"),
     latest_accepted_source_time: nullableString(point.latest_accepted_source_time),
     source_event_count: finiteNumber(point.source_event_count, 0),
@@ -343,20 +446,157 @@ function normalizeEventAcceptanceSummary(value: unknown): DeltaHqObservabilityPr
   };
 }
 
-function readStoredObservabilityProjection(repoRoot: string, storeRoot: string | null): JsonRecord | null {
-  const configuredPath = process.env.DELTA_OBSERVABILITY_PROJECTION_PATH;
-  const defaultPath = path.join(
-    storeRoot || defaultObservabilityStoreRoot(repoRoot),
+function emptyObservabilityReason({
+  currentProjection,
+  historicalProjection,
+  rawStore,
+}: {
+  currentProjection: JsonRecord;
+  historicalProjection: JsonRecord | null;
+  rawStore: RawStoreInspection;
+}): { reason: string | null; nextOwner: string | null; historicalOnly: boolean } {
+  const currentAcceptance = normalizeEventAcceptanceSummary(currentProjection.event_acceptance_summary);
+  const historicalAcceptance = historicalProjection
+    ? normalizeEventAcceptanceSummary(historicalProjection.event_acceptance_summary)
+    : null;
+
+  if (currentAcceptance.accepted_source_event_count > 0) {
+    return { reason: null, nextOwner: null, historicalOnly: false };
+  }
+
+  if (rawStore.raw_event_count === 0) {
+    return {
+      reason: "No raw Organizational Observability telemetry files exist in the configured measurement store.",
+      nextOwner: "Canonical telemetry producers must emit signed events, or an approved Observability import must generate the projection.",
+      historicalOnly: Boolean(historicalAcceptance && historicalAcceptance.accepted_source_event_count > 0),
+    };
+  }
+
+  if (historicalAcceptance && historicalAcceptance.accepted_source_event_count > 0) {
+    return {
+      reason: "Canonical telemetry exists only as historical or qualification evidence; no accepted current-state events are available.",
+      nextOwner: "Current-state eligible runtime, Event Bus, Governance, Provider Usage, or Evaluation producer.",
+      historicalOnly: true,
+    };
+  }
+
+  return {
+    reason: "Raw telemetry exists, but no events were accepted for current display. Check producer signatures, current-state applicability, and qualification epoch state.",
+    nextOwner: "Organizational Observability producer authentication and current-state eligibility.",
+    historicalOnly: false,
+  };
+}
+
+function buildProjectionDiagnostics({
+  repoInfo,
+  storeRoot,
+  projectionPath,
+  projectionSource,
+  aggregationRanDynamically,
+  storedProjectionUsed,
+  storedProjectionStale,
+  currentProjection,
+  historicalProjection,
+  rawStore,
+  producerKeysConfigured,
+}: {
+  repoInfo: AgentRepoRootInfo;
+  storeRoot: string;
+  projectionPath: string | null;
+  projectionSource: DeltaHqObservabilityProjectionDiagnostics["projection_source"];
+  aggregationRanDynamically: boolean;
+  storedProjectionUsed: boolean;
+  storedProjectionStale: boolean;
+  currentProjection: JsonRecord;
+  historicalProjection: JsonRecord | null;
+  rawStore: RawStoreInspection;
+  producerKeysConfigured: boolean;
+}): DeltaHqObservabilityProjectionDiagnostics {
+  const currentAcceptance = normalizeEventAcceptanceSummary(currentProjection.event_acceptance_summary);
+  const empty = emptyObservabilityReason({ currentProjection, historicalProjection, rawStore });
+  return {
+    repo_root: repoInfo.repoRoot,
+    repo_root_source: repoInfo.source,
+    repo_root_warning: repoInfo.warning,
+    store_root: storeRoot,
+    projection_path: projectionPath,
+    projection_source: projectionSource,
+    aggregation_ran_dynamically: aggregationRanDynamically,
+    stored_projection_used: storedProjectionUsed,
+    stored_projection_stale: storedProjectionStale,
+    raw_event_count: rawStore.raw_event_count,
+    accepted_source_event_count: currentAcceptance.accepted_source_event_count,
+    rejected_source_event_count: currentAcceptance.rejected_source_event_count,
+    invalid_raw_event_count: Math.max(currentAcceptance.invalid_raw_event_count, rawStore.invalid_raw_event_count),
+    duplicate_source_event_count: currentAcceptance.duplicate_source_event_count,
+    newest_raw_event_time: rawStore.newest_raw_event_time,
+    newest_accepted_event_time: nullableString(currentProjection.latest_accepted_source_time),
+    projection_generated_at: nullableString(currentProjection.generated_at),
+    producer_keys_configured: producerKeysConfigured,
+    empty_state_reason: empty.reason,
+    next_event_owner: empty.nextOwner,
+    historical_only: empty.historicalOnly,
+  };
+}
+
+function inspectRawTelemetryStore(storeRoot: string): RawStoreInspection {
+  const rawRoot = path.join(storeRoot, "raw");
+  if (!existsSync(rawRoot)) {
+    return { raw_event_count: 0, invalid_raw_event_count: 0, newest_raw_event_time: null };
+  }
+
+  let rawEventCount = 0;
+  let invalidRawEventCount = 0;
+  let newestRawEventTime: string | null = null;
+  for (const name of readdirSync(rawRoot).filter((entry) => /^\d{4}-\d{2}-\d{2}\.jsonl$/.test(entry)).sort()) {
+    const file = path.join(rawRoot, name);
+    for (const line of readFileSync(file, "utf8").split(/\r?\n/).filter(Boolean)) {
+      try {
+        const event = record(JSON.parse(line) as unknown);
+        rawEventCount += 1;
+        const occurredAt = nullableString(event.occurred_at);
+        if (occurredAt && (!newestRawEventTime || Date.parse(occurredAt) > Date.parse(newestRawEventTime))) {
+          newestRawEventTime = occurredAt;
+        }
+      } catch {
+        invalidRawEventCount += 1;
+      }
+    }
+  }
+
+  return {
+    raw_event_count: rawEventCount,
+    invalid_raw_event_count: invalidRawEventCount,
+    newest_raw_event_time: newestRawEventTime,
+  };
+}
+
+function projectionIsOlderThanRaw(projection: JsonRecord, rawStore: RawStoreInspection): boolean {
+  const generatedAt = nullableString(projection.generated_at);
+  if (!generatedAt || !rawStore.newest_raw_event_time) return false;
+  const generatedMs = Date.parse(generatedAt);
+  const newestRawMs = Date.parse(rawStore.newest_raw_event_time);
+  return Number.isFinite(generatedMs) && Number.isFinite(newestRawMs) && newestRawMs > generatedMs;
+}
+
+function observabilityProjectionPath(repoRoot: string, storeRoot: string | null): string {
+  return path.join(
+    actualObservabilityStoreRoot(repoRoot, storeRoot),
     "projections",
     "organizational-observability.json",
   );
+}
+
+function readStoredObservabilityProjection(repoRoot: string, storeRoot: string | null): StoredProjectionRead | null {
+  const configuredPath = process.env.DELTA_OBSERVABILITY_PROJECTION_PATH;
+  const defaultPath = observabilityProjectionPath(repoRoot, storeRoot);
   const candidates = [configuredPath, defaultPath].filter((candidate): candidate is string => Boolean(candidate));
 
   for (const candidate of candidates) {
     if (!existsSync(candidate)) continue;
     const parsed = JSON.parse(readFileSync(candidate, "utf8")) as unknown;
     const projection = record(parsed);
-    if (projection.projection_type === "organizational_observability") return projection;
+    if (projection.projection_type === "organizational_observability") return { projection, path: candidate };
   }
 
   return null;
@@ -377,12 +617,20 @@ function normalizeEpochProjection(epochId: string, projection: JsonRecord): Delt
   const metrics = Array.isArray(projection.metrics)
     ? projection.metrics.map((metric) => normalizeMetric(metric, projection))
     : [];
+  const timeSeriesPoints = Array.isArray(projection.time_series_points)
+    ? projection.time_series_points.map((point) => normalizeTimeSeriesPoint(point, projection))
+    : [];
+  const dimensionedTimeSeriesPoints = Array.isArray(projection.dimensioned_time_series_points)
+    ? projection.dimensioned_time_series_points.map((point) => normalizeTimeSeriesPoint(point, projection))
+    : [];
   return {
     epoch_id: epochId,
     generated_at: nullableString(projection.generated_at),
     current_state_applicability: stringValue(projection.current_state_applicability, "qualification_epoch"),
     trust_summary: numberRecord(projection.trust_summary),
     metrics,
+    time_series_points: timeSeriesPoints,
+    dimensioned_time_series_points: dimensionedTimeSeriesPoints,
   };
 }
 
@@ -390,10 +638,12 @@ function normalizeOrganizationalObservabilityProjection({
   currentProjection,
   historicalProjection = null,
   qualificationProjections = [],
+  diagnostics,
 }: {
   currentProjection: JsonRecord;
   historicalProjection?: JsonRecord | null;
   qualificationProjections?: Array<{ epochId: string; projection: JsonRecord }>;
+  diagnostics: DeltaHqObservabilityProjectionDiagnostics;
 }): DeltaHqObservabilityProjection {
   const metrics = Array.isArray(currentProjection.metrics)
     ? currentProjection.metrics.map((metric) => normalizeMetric(metric, currentProjection))
@@ -403,6 +653,15 @@ function normalizeOrganizationalObservabilityProjection({
     : [];
   const timeSeriesPoints = Array.isArray(currentProjection.time_series_points)
     ? currentProjection.time_series_points.map((point) => normalizeTimeSeriesPoint(point, currentProjection))
+    : [];
+  const historicalTimeSeriesPoints = historicalProjection && Array.isArray(historicalProjection.time_series_points)
+    ? historicalProjection.time_series_points.map((point) => normalizeTimeSeriesPoint(point, historicalProjection))
+    : [];
+  const dimensionedTimeSeriesPoints = Array.isArray(currentProjection.dimensioned_time_series_points)
+    ? currentProjection.dimensioned_time_series_points.map((point) => normalizeTimeSeriesPoint(point, currentProjection))
+    : [];
+  const historicalDimensionedTimeSeriesPoints = historicalProjection && Array.isArray(historicalProjection.dimensioned_time_series_points)
+    ? historicalProjection.dimensioned_time_series_points.map((point) => normalizeTimeSeriesPoint(point, historicalProjection))
     : [];
   const currentEpochs = strings(currentProjection.available_qualification_epochs);
   const historicalEpochs = strings(historicalProjection?.available_qualification_epochs);
@@ -415,6 +674,7 @@ function normalizeOrganizationalObservabilityProjection({
     evaluated_at: nullableString(currentProjection.evaluated_at),
     fixtureFallback: false,
     source_of_truth: "delta-agent/src/observability/aggregate.mjs",
+    diagnostics,
     promotionScope: OBSERVABILITY_PROMOTION_SCOPE,
     authorityLimitations: OBSERVABILITY_AUTHORITY_LIMITATIONS,
     registry_version: nullableString(currentProjection.registry_version),
@@ -434,14 +694,31 @@ function normalizeOrganizationalObservabilityProjection({
       normalizeEpochProjection(epochId, projection),
     ),
     time_series_points: timeSeriesPoints,
+    historical_time_series_points: historicalTimeSeriesPoints,
+    dimensioned_time_series_points: dimensionedTimeSeriesPoints,
+    historical_dimensioned_time_series_points: historicalDimensionedTimeSeriesPoints,
   };
 }
 
 function unavailableObservabilityProjection(reason: string): DeltaHqObservabilityProjection {
+  const repoInfo = resolveAgentRepoRootInfo();
+  const configuredStoreRoot = resolveObservabilityStoreRoot();
+  const storeRoot = actualObservabilityStoreRoot(repoInfo.repoRoot, configuredStoreRoot);
   return {
     ...DELTA_HQ_VIEW_MODEL.observability.projection,
     unavailableReason: reason,
     fixtureFallback: true,
+    diagnostics: {
+      ...DELTA_HQ_VIEW_MODEL.observability.projection.diagnostics,
+      repo_root: repoInfo.repoRoot,
+      repo_root_source: repoInfo.source,
+      repo_root_warning: repoInfo.warning,
+      store_root: storeRoot,
+      projection_path: observabilityProjectionPath(repoInfo.repoRoot, configuredStoreRoot),
+      projection_source: "unavailable",
+      empty_state_reason: reason,
+      producer_keys_configured: Boolean(loadObservabilityProducerKeys()),
+    },
   };
 }
 
@@ -575,7 +852,7 @@ function buildEvolutionProjection(
       .map((entry) => entry.milestone_id),
   }));
   const convergenceMilestoneIds = entries
-    .filter((entry) => entry.lineage_tracks.includes("converged_platform"))
+    .filter((entry) => entry.lineage_tracks.includes("converged_platform") || entry.lineage_tracks.length > 1)
     .map((entry) => entry.milestone_id);
 
   return {
@@ -595,7 +872,7 @@ function buildEvolutionProjection(
       status: convergenceMilestoneIds.length > 0 ? "evidenced" : "not_evidenced_in_current_projection",
       milestone_ids: convergenceMilestoneIds,
       explanation: convergenceMilestoneIds.length > 0
-        ? "Historian explicitly marks these milestones as converged."
+        ? "Historian explicitly marks these milestones as converged or multi-track."
         : "Current Historian projection keeps product/intelligence and engineering/agentic lineages separate. HQ leaves the convergence lane empty until Historian supplies a converged milestone.",
     },
     analyticsAnnotationSeams: [
@@ -610,15 +887,7 @@ function buildEvolutionProjection(
       "When did the engineering-agent lineage begin?",
       "Which early ideas still exist today?",
     ],
-    read_only_boundary: {
-      canonical_mutation_performed: timeline.read_only_boundary?.canonical_mutation_performed
-        || inspection.read_only_boundary?.canonical_mutation_performed
-        || false,
-      architecture_decision_performed: false,
-      runtime_authority_assigned: timeline.read_only_boundary?.runtime_authority_assigned
-        || inspection.read_only_boundary?.runtime_authority_assigned
-        || false,
-    },
+    read_only_boundary: timeline.read_only_boundary || inspection.read_only_boundary,
   };
 }
 
@@ -634,7 +903,7 @@ export async function getHistorianEvolutionProjection(): Promise<DeltaHqEvolutio
   try {
     const repoRoot = resolveAgentRepoRoot();
     const historian = await loadHistorianMilestoneModule(repoRoot);
-    const inspection = historian.inspectHistorianMilestones({ repoRoot, significance: "all", limit: 50 });
+    const inspection = historian.inspectHistorianMilestones({ repoRoot, track: "all", significance: "all", limit: 50 });
     const timeline = historian.buildEvolutionTimeline
       ? historian.buildEvolutionTimeline({ repoRoot, track: "all", limit: 50 })
       : historian.generateExecutiveMilestoneReport?.({
@@ -653,19 +922,27 @@ export async function getHistorianEvolutionProjection(): Promise<DeltaHqEvolutio
 
 export async function getOrganizationalObservabilityProjection(): Promise<DeltaHqObservabilityProjection> {
   try {
-    const repoRoot = resolveAgentRepoRoot();
-    const storeRoot = resolveObservabilityStoreRoot();
+    const repoInfo = resolveAgentRepoRootInfo();
+    const repoRoot = repoInfo.repoRoot;
+    const configuredStoreRoot = resolveObservabilityStoreRoot();
+    const storeRoot = actualObservabilityStoreRoot(repoRoot, configuredStoreRoot);
     const producerKeys = loadObservabilityProducerKeys();
-    const storedCurrentProjection = readStoredObservabilityProjection(repoRoot, storeRoot);
+    const rawStore = inspectRawTelemetryStore(storeRoot);
+    const storedCurrentProjection = readStoredObservabilityProjection(repoRoot, configuredStoreRoot);
+    const storedProjectionStale = storedCurrentProjection
+      ? projectionIsOlderThanRaw(storedCurrentProjection.projection, rawStore)
+      : false;
     let observabilityModule: OrganizationalObservabilityModule | null = null;
 
-    if (!storedCurrentProjection) {
+    if (!storedCurrentProjection || storedProjectionStale) {
       observabilityModule = await loadOrganizationalObservabilityModule(repoRoot);
     }
 
-    const currentProjection = storedCurrentProjection || record(observabilityModule?.aggregateFromStore({
+    const currentProjection = storedCurrentProjection && !storedProjectionStale
+      ? storedCurrentProjection.projection
+      : record(observabilityModule?.aggregateFromStore({
       repoRoot,
-      storeRoot,
+      storeRoot: configuredStoreRoot,
       producerKeys,
       mode: "current",
     }));
@@ -683,7 +960,7 @@ export async function getOrganizationalObservabilityProjection(): Promise<DeltaH
       }
       historicalProjection = record(observabilityModule.aggregateFromStore({
         repoRoot,
-        storeRoot,
+        storeRoot: configuredStoreRoot,
         producerKeys,
         mode: "historical",
       }));
@@ -697,7 +974,7 @@ export async function getOrganizationalObservabilityProjection(): Promise<DeltaH
         epochId,
         projection: record(observabilityModule?.aggregateFromStore({
           repoRoot,
-          storeRoot,
+          storeRoot: configuredStoreRoot,
           producerKeys,
           mode: "qualification_epoch",
           qualificationEpoch: epochId,
@@ -708,10 +985,25 @@ export async function getOrganizationalObservabilityProjection(): Promise<DeltaH
       qualificationProjections = [];
     }
 
+    const diagnostics = buildProjectionDiagnostics({
+      repoInfo,
+      storeRoot,
+      projectionPath: storedCurrentProjection?.path || observabilityProjectionPath(repoRoot, configuredStoreRoot),
+      projectionSource: storedCurrentProjection && !storedProjectionStale ? "stored_projection" : "dynamic_aggregation",
+      aggregationRanDynamically: !storedCurrentProjection || storedProjectionStale,
+      storedProjectionUsed: Boolean(storedCurrentProjection && !storedProjectionStale),
+      storedProjectionStale,
+      currentProjection,
+      historicalProjection,
+      rawStore,
+      producerKeysConfigured: Boolean(producerKeys),
+    });
+
     return normalizeOrganizationalObservabilityProjection({
       currentProjection,
       historicalProjection,
       qualificationProjections,
+      diagnostics,
     });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "Organizational Observability projection unavailable";
@@ -727,6 +1019,7 @@ export async function getDeltaHqViewModel(): Promise<DeltaHqViewModel> {
   ]);
   return {
     ...base,
+    generatedAt: new Date().toISOString(),
     evolution,
     observability: {
       ...base.observability,

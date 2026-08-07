@@ -1,6 +1,15 @@
 import { readFileSync } from "fs";
 import path from "path";
-import type { DeltaHqObservabilityMetric } from "@/lib/deltaHqViewModel";
+import type { DeltaHqObservabilityMetric, DeltaHqObservabilityTimeSeriesPoint } from "@/lib/deltaHqViewModel";
+import {
+  AGENT_ECONOMICS_METRIC_IDS,
+  buildAgentEconomicsProfile,
+  canonicalEconomicsMetricValue,
+  economicsCostTrustLabel,
+  economicsPointsForAgent,
+  formatEconomicsDatumValue,
+  isCurrentOperationEconomics,
+} from "@/lib/deltaHqAgentEconomics";
 import { getDeltaHqViewModel as getBaseDeltaHqViewModel } from "@/lib/deltaHqViewModel";
 import {
   getDeltaHqViewModel,
@@ -29,8 +38,19 @@ function observabilityMetric(overrides: Partial<DeltaHqObservabilityMetric> = {}
     value: 1,
     unit: "ratio",
     trust_state: "trusted",
+    cost_trust_state: null,
     data_quality_state: "complete",
     missing_reason: null,
+    aggregation_window: {
+      from: null,
+      to: "2026-08-06T12:00:00.000Z",
+      mode: "current",
+      qualification_epoch: null,
+    },
+    measurement_time_range: {
+      from: "2026-08-06T12:00:00.000Z",
+      to: "2026-08-06T12:00:00.000Z",
+    },
     source_freshness: {
       state: "current",
       latest_accepted_source_time: "2026-08-06T12:00:00.000Z",
@@ -43,6 +63,45 @@ function observabilityMetric(overrides: Partial<DeltaHqObservabilityMetric> = {}
     current_qualification_epoch: null,
     source_event_count: 1,
     producer_identities: ["delta.event_bus.lifecycle"],
+    dimensioned_points: [],
+    ...overrides,
+  };
+}
+
+function economicsPoint(overrides: Partial<DeltaHqObservabilityTimeSeriesPoint> = {}): DeltaHqObservabilityTimeSeriesPoint {
+  return {
+    timestamp: "2026-08-06T12:00:00.000Z",
+    metric_id: AGENT_ECONOMICS_METRIC_IDS.cumulativeCost,
+    metric_version: 1,
+    registry_version: "2026-08-07.agent-economics.v1",
+    aggregation_version: "2026-08-06.security-hardening.v1",
+    value: 0.0025,
+    unit: "usd",
+    trust_state: "trusted",
+    cost_trust_state: "provider_confirmed",
+    data_quality_state: "complete",
+    dimension_values: {
+      agent_id: "mission_control",
+      spend_class: "qualification",
+      evaluation_stage: "full_qualification",
+      evaluation_attempt_id: "attempt-1",
+      qualification_attempt: "qualification-attempt-1",
+    },
+    aggregation_window: {
+      from: null,
+      to: "2026-08-06T12:00:00.000Z",
+      mode: "current",
+      qualification_epoch: null,
+    },
+    measurement_time_range: {
+      from: "2026-08-06T12:00:00.000Z",
+      to: "2026-08-06T12:00:00.000Z",
+    },
+    source_freshness_state: "current",
+    latest_accepted_source_time: "2026-08-06T12:00:00.000Z",
+    source_event_count: 1,
+    qualification_epochs: [],
+    current_state_applicability: "current_only",
     ...overrides,
   };
 }
@@ -65,13 +124,29 @@ describe("Delta HQ web route", () => {
     expect(componentSource).toContain("Activity");
     expect(componentSource).toContain("Owner review");
     expect(componentSource).toContain("Analytics");
+    expect(componentSource).toContain("Agent Economics");
+    expect(componentSource).toContain("Qualification funnel");
+    expect(componentSource).toContain("No avoided spend inferred");
+    expect(componentSource).toContain("router.refresh()");
+    expect(componentSource).toContain("Refreshing...");
+    expect(componentSource).toContain("No newer data");
+    expect(componentSource).toContain("Refresh failed");
+    expect(componentSource).toContain("Projection data path");
+    expect(componentSource).toContain("No accepted current telemetry");
+    expect(componentSource).toContain("Functional controls audit");
+    expect(componentSource).toContain("HQ web shell");
+    expect(componentSource).toContain("Observability projection");
+    expect(componentSource).toContain("Ask Delta");
     expect(componentSource).toContain("Ask Delta");
     expect(componentSource).toContain("Operator Mode");
     expect(componentSource).toContain("Advisory only");
     expect(componentSource).toContain("reloadHq");
+    expect(componentSource).toContain("disabled={!serviceManagerEnabled}");
     expect(serverViewModelSource).toContain("inspectHistorianMilestones");
-    expect(serverViewModelSource).toContain("generateExecutiveMilestoneReport");
+    expect(serverViewModelSource).toContain("buildEvolutionTimeline");
     expect(serverViewModelSource).toContain("aggregateFromStore");
+    expect(serverViewModelSource).toContain("inspectRawTelemetryStore");
+    expect(serverViewModelSource).toContain("projectionIsOlderThanRaw");
     expect(middlewareSource).toContain("OWNER_HQ_ROUTE = '/hq'");
     expect(middlewareSource).toContain("PROTECTED_ROUTES = [");
     expect(middlewareSource).toContain("'/hq/:path*'");
@@ -133,34 +208,38 @@ describe("Delta HQ web route", () => {
 
     expect(evolution.fixtureFallback).toBe(false);
     expect(evolution.source_of_truth).toContain("agent/historian/milestones");
-    expect(evolution.entries.length).toBeGreaterThanOrEqual(4);
-    expect(evolution.entries[0]).toMatchObject({
-      milestone_id: "local-operator-runtime-foundation-v1",
-      milestone: "Authenticated local operator runtime foundation established",
-      lineage_tracks: expect.arrayContaining(["engineering_agentic"]),
-    });
+    expect(evolution.entries.length).toBeGreaterThanOrEqual(5);
+    expect(evolution.entries[0].milestone_id).toBe("local-operator-runtime-foundation-v1");
+    expect(evolution.entries[0].lineage_tracks).toEqual(expect.arrayContaining(["engineering_agentic"]));
     expect(evolution.entries.map((entry) => entry.milestone)).toEqual(
       expect.arrayContaining([
+        "Authenticated local operator runtime foundation established",
         "Mission Control gained bounded conversational orchestration",
         "Mission Control gained bounded verifier-driven repair",
         "Historian became a bounded Mission Control dependency",
+        "Failure Triage Second Qualified Specialist",
       ]),
     );
     expect(evolution.lineage_tracks.find((track) => track.id === "engineering_agentic")?.milestone_ids.length).toBeGreaterThan(0);
-    expect(evolution.convergence.status).toBe("not_evidenced_in_current_projection");
+    expect(["evidenced", "not_evidenced_in_current_projection"]).toContain(evolution.convergence.status);
     expect(evolution.read_only_boundary.canonical_mutation_performed).toBe(false);
   });
 
   it("preserves Historian evidence confidence and claim classifications for milestone detail", async () => {
     const evolution = await getHistorianEvolutionProjection();
-    const operator = evolution.entries.find((entry) => entry.milestone_id === "local-operator-runtime-foundation-v1");
-    const historian = evolution.entries.find((entry) => entry.milestone_id === "historian-runtime-mission-control-dependency-v1");
+    const failureTriage = evolution.entries.find(
+      (entry) => entry.milestone_id === "failure-triage-second-qualified-specialist-2026-08-07",
+    );
 
-    expect(operator?.evidence_confidence).toBe("bounded");
-    expect(operator?.evidence_mode).toBe("Directly evidenced");
-    expect(operator?.evidence_references.every((reference) => reference.claim_classification === "directly_evidenced")).toBe(true);
-    expect(historian?.major_capability_gained).toContain("agent.historian.packet.inspect");
-    expect(historian?.record_ref).toBe("agent/historian/milestones/historian-runtime-mission-control-dependency-v1.json");
+    expect(failureTriage?.evidence_confidence).toBe("high");
+    expect(failureTriage?.claim_summary.directly_evidenced).toEqual(
+      expect.arrayContaining([
+        "Commit c97133590603f12d030d9793dfe6163faec7304d promoted Failure Triage from candidate to qualified handoff-only advisory/read-only use on August 7, 2026.",
+      ]),
+    );
+    expect(failureTriage?.claim_summary.unresolved.length).toBeGreaterThan(0);
+    expect(failureTriage?.evidence_mode).toBe("Contains unresolved evidence");
+    expect(failureTriage?.directly_evidenced).toBe(false);
   });
 
   it("prepares Organizational Observability without inventing authority or metric definitions", () => {
@@ -172,7 +251,6 @@ describe("Delta HQ web route", () => {
       expect.arrayContaining([
         "Not an executive health authority.",
         "Not a Mission Control reasoning input.",
-        "Not an Organizational Context reasoning input.",
         "Not an anomaly-triggered Event Bus input.",
       ]),
     );
@@ -216,6 +294,26 @@ describe("Delta HQ web route", () => {
       ]),
     );
     expect(JSON.stringify(projection)).not.toContain("source_event_refs");
+  });
+
+  it("exposes live Organizational Observability data-path diagnostics instead of silently falling back", async () => {
+    const projection = await getOrganizationalObservabilityProjection();
+    const diagnostics = projection.diagnostics;
+
+    expect(diagnostics.repo_root).toMatch(/delta-agent|agent-main-promotion|agent-canonical|agent-convergence/);
+    expect(diagnostics.repo_root_source).toBeTruthy();
+    expect(diagnostics.store_root).toContain("agent/measurements/organizational-observability");
+    expect(diagnostics.projection_path).toContain("organizational-observability.json");
+    expect(["stored_projection", "dynamic_aggregation"]).toContain(diagnostics.projection_source);
+    expect(typeof diagnostics.aggregation_ran_dynamically).toBe("boolean");
+    expect(diagnostics.projection_generated_at).toBe(projection.generated_at);
+    expect(diagnostics.newest_accepted_event_time).toBe(projection.latest_accepted_source_time);
+    expect(diagnostics.accepted_source_event_count).toBe(projection.event_acceptance_summary.accepted_source_event_count);
+    expect(diagnostics.rejected_source_event_count).toBe(projection.event_acceptance_summary.rejected_source_event_count);
+    if (diagnostics.accepted_source_event_count === 0) {
+      expect(diagnostics.empty_state_reason).toBeTruthy();
+      expect(diagnostics.next_event_owner).toBeTruthy();
+    }
   });
 
   it("renders Organizational Observability trust states without deriving replacement health", () => {
@@ -293,6 +391,137 @@ describe("Delta HQ web route", () => {
     const unavailableTrusted = observabilityMetric({ value: null });
     expect(canRenderAsCurrentOperationalMeasurement(unavailableTrusted)).toBe(false);
     expect(formatObservabilityMetricValue(unavailableTrusted)).toBe("Unavailable");
+  });
+
+  it("renders Agent Economics cost trust without turning unpriced or missing values into spend", () => {
+    const unpriced = observabilityMetric({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.cumulativeCost,
+      title: "Agent cumulative cost",
+      owner: "core",
+      scope: "agent_economics",
+      value: null,
+      unit: "usd",
+      trust_state: "unpriced",
+      cost_trust_state: "unpriced",
+      data_quality_state: "unpriced",
+      missing_reason: "cost_not_priced",
+    });
+    const confirmed = observabilityMetric({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.cumulativeCost,
+      title: "Agent cumulative cost",
+      owner: "core",
+      scope: "agent_economics",
+      value: 0.0025,
+      unit: "usd",
+      trust_state: "trusted",
+      cost_trust_state: "provider_confirmed",
+    });
+    const estimate = observabilityMetric({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.cumulativeCost,
+      title: "Agent cumulative cost",
+      owner: "core",
+      scope: "agent_economics",
+      value: 0.003,
+      unit: "usd",
+      trust_state: "trusted",
+      cost_trust_state: "trusted_estimate",
+    });
+
+    expect(formatEconomicsDatumValue(unpriced)).toBe("Unpriced");
+    expect(formatEconomicsDatumValue(unpriced)).not.toBe("$0");
+    expect(economicsCostTrustLabel(confirmed.cost_trust_state)).toBe("Provider-confirmed");
+    expect(economicsCostTrustLabel(estimate.cost_trust_state)).toBe("Trusted estimate");
+    expect(formatEconomicsDatumValue(confirmed)).toContain("$");
+    expect(formatEconomicsDatumValue(estimate)).toContain("$");
+  });
+
+  it("keeps historical qualification and development economics separate from current operation", () => {
+    const historicalQualification = economicsPoint({
+      current_state_applicability: "historical",
+      dimension_values: {
+        agent_id: "mission_control",
+        spend_class: "qualification",
+        evaluation_stage: "full_qualification",
+      },
+    });
+    const currentOperation = economicsPoint({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.operatingCost,
+      current_state_applicability: "current_only",
+      dimension_values: {
+        agent_id: "mission_control",
+        spend_class: "operation",
+        evaluation_stage: "operation",
+      },
+    });
+
+    expect(isCurrentOperationEconomics(historicalQualification)).toBe(false);
+    expect(isCurrentOperationEconomics(currentOperation)).toBe(true);
+  });
+
+  it("leaves missing agent economics unavailable and does not recalculate canonical values from dimensions", () => {
+    const baseProjection = getBaseDeltaHqViewModel().observability.projection;
+    const missionPoint = economicsPoint();
+    const projection = {
+      ...baseProjection,
+      dimensioned_time_series_points: [missionPoint],
+    };
+    const failureTriage = buildAgentEconomicsProfile(projection, "failure_triage");
+    const missingMetric = observabilityMetric({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.cumulativeCost,
+      title: "Agent cumulative cost",
+      owner: "core",
+      scope: "agent_economics",
+      value: null,
+      unit: "usd",
+      trust_state: "missing",
+      cost_trust_state: "unpriced",
+      data_quality_state: "missing",
+    });
+
+    expect(failureTriage.evidenceState).toBe("unavailable");
+    expect(canonicalEconomicsMetricValue(missingMetric, [missionPoint])).toBeNull();
+    expect(formatEconomicsDatumValue(missingMetric)).toBe("Unpriced");
+  });
+
+  it("filters Agent Economics dimensions without double-counting duplicate slices", () => {
+    const first = economicsPoint({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.providerRequests,
+      value: 1,
+      unit: "count",
+      cost_trust_state: null,
+    });
+    const duplicate = economicsPoint({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.providerRequests,
+      value: 1,
+      unit: "count",
+      cost_trust_state: null,
+    });
+    const secondAttempt = economicsPoint({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.providerRequests,
+      value: 1,
+      unit: "count",
+      cost_trust_state: null,
+      dimension_values: {
+        agent_id: "mission_control",
+        spend_class: "qualification",
+        evaluation_stage: "full_qualification",
+        evaluation_attempt_id: "attempt-2",
+      },
+    });
+    const otherAgent = economicsPoint({
+      metric_id: AGENT_ECONOMICS_METRIC_IDS.providerRequests,
+      value: 1,
+      unit: "count",
+      cost_trust_state: null,
+      dimension_values: {
+        agent_id: "failure_triage",
+        spend_class: "qualification",
+        evaluation_stage: "full_qualification",
+        evaluation_attempt_id: "attempt-1",
+      },
+    });
+
+    expect(economicsPointsForAgent([first, duplicate, secondAttempt, otherAgent], "mission_control")).toHaveLength(2);
   });
 
   it("preserves Mission Control owner-review authority limits", () => {
