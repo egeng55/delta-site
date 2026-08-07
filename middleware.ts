@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
-const PROTECTED_ROUTES = ['/dashboard', '/settings', '/account', '/insights'];
+const OWNER_HQ_ROUTE = '/hq';
+const PROTECTED_ROUTES = [
+  OWNER_HQ_ROUTE,
+  '/dashboard',
+  '/settings',
+  '/account',
+  '/insights',
+];
 const AUTH_ROUTES = ['/login', '/signup'];
 const OS_CONSOLE_ROUTE = '/os';
 
@@ -77,5 +84,14 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/os/:path*', '/dashboard/:path*', '/settings/:path*', '/account/:path*', '/insights/:path*', '/login', '/signup'],
+  matcher: [
+    '/hq/:path*',
+    '/os/:path*',
+    '/dashboard/:path*',
+    '/settings/:path*',
+    '/account/:path*',
+    '/insights/:path*',
+    '/login',
+    '/signup',
+  ],
 };
