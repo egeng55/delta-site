@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import DeltaHQ from "@/components/DeltaHQ";
-import type { DeltaHqViewModel } from "@/lib/deltaHqViewModel";
+import type { DeltaHqIssue, DeltaHqIssueProjection, DeltaHqViewModel } from "@/lib/deltaHqViewModel";
 import { getDeltaHqViewModel as getBaseDeltaHqViewModel } from "@/lib/deltaHqViewModel";
 
 const mockRouterRefresh = jest.fn();
@@ -95,6 +95,117 @@ function liveProjectionModel({
   return model;
 }
 
+function testIssue(overrides: Partial<DeltaHqIssue> = {}): DeltaHqIssue {
+  return {
+    id: "issue-blocker",
+    title: "Credential rotation confirmation",
+    severity: "critical",
+    priority: "P0",
+    state: "blocked",
+    source_state: "pending-human",
+    canonical_owner: "Security",
+    diagnosed_by: {
+      source_system: "site_finding",
+      source_label: "Canonical site finding / security-review",
+      source_ref: "agent/findings/001-credential-rotation-confirmation.md",
+    },
+    concise_diagnosis:
+      "Provider-side credential rotation still requires human confirmation outside the repository.",
+    evidence_refs: [
+      "/Users/egeng/delta-backend/docs/SECURITY_ROTATION_CHECKLIST.md",
+      "/Users/egeng/delta-backend/scripts/secret_scan.py",
+    ],
+    affected: {
+      capabilities: ["credential-rotation-confirmation"],
+      repos: ["backend"],
+      domains: ["security-review"],
+    },
+    impact: "blocker",
+    recommended_next_action:
+      "Confirm provider-side rotation status without printing or committing secrets.",
+    last_updated: "2026-08-07T12:00:00.000Z",
+    resolution: null,
+    sourceKind: "real",
+    ...overrides,
+  };
+}
+
+function issuesProjectionModel(): DeltaHqViewModel {
+  const model = liveProjectionModel();
+  const issues = [
+    testIssue(),
+    testIssue({
+      id: "issue-observability-missing",
+      title: "No accepted current Observability telemetry",
+      severity: "medium",
+      priority: "P2",
+      state: "monitoring",
+      source_state: "missing_current_measurement",
+      canonical_owner: "Organizational Observability telemetry producers",
+      diagnosed_by: {
+        source_system: "observability",
+        source_label: "Organizational Observability gaps",
+        source_ref: "agent/measurements/organizational-observability/projections/organizational-observability.json",
+      },
+      concise_diagnosis:
+        "The projection reports no accepted current-state telemetry. HQ treats this as unavailable measurement evidence and does not infer a healthy state.",
+      evidence_refs: ["No accepted current-state telemetry."],
+      affected: {
+        capabilities: ["organizational_observability", "analytics"],
+        repos: ["agent"],
+        domains: ["observability"],
+      },
+      impact: "advisory",
+      recommended_next_action:
+        "Emit accepted current-state Observability events through the canonical producer path.",
+    }),
+    testIssue({
+      id: "issue-resolved-history",
+      title: "Resolved checkout cleanup",
+      severity: "low",
+      priority: "P3",
+      state: "resolved",
+      source_state: "resolved",
+      resolution: "Source marked resolved.",
+      impact: "advisory",
+    }),
+  ];
+  const projection: DeltaHqIssueProjection = {
+    status: "partial",
+    generated_at: "2026-08-07T12:01:00.000Z",
+    source_of_truth: "Read-only test projection",
+    authority_limits: [
+      "HQ does not create a canonical issue registry.",
+      "HQ does not expose remediation actions, mutate sources, or change the Event Bus.",
+    ],
+    issues,
+    default_issue_ids: ["issue-blocker", "issue-observability-missing"],
+    history_issue_ids: ["issue-resolved-history"],
+    source_counts: {
+      site_finding: 2,
+      observability: 1,
+    },
+    source_gaps: [
+      {
+        source_system: "failure_triage",
+        source_label: "Failure Triage",
+        reason: "Only qualification/regression evidence was found; HQ did not convert nested evaluation scenarios into current issues.",
+        source_ref: "agent/runs/*failure-triage*.json",
+      },
+    ],
+    read_only_boundary: {
+      canonical_issue_registry_created: false,
+      lifecycle_authority_created: false,
+      mutation_performed: false,
+      remediation_performed: false,
+      event_bus_changed: false,
+      automatic_dedupe_claimed_as_truth: false,
+    },
+  };
+  model.issues = projection;
+  return model;
+}
+
 describe("DeltaHQ live Analytics UI", () => {
   beforeEach(() => {
     mockRouterRefresh.mockClear();
@@ -171,5 +282,46 @@ describe("DeltaHQ live Analytics UI", () => {
       expect(screen.getByRole("button", { name: "Stop app-launched runtime" })).toBeDisabled();
       expect(screen.getByRole("button", { name: "Service manager" })).toBeDisabled();
     });
+  });
+});
+
+describe("DeltaHQ Issues UI", () => {
+  beforeEach(() => {
+    mockRouterRefresh.mockClear();
+    window.history.replaceState(null, "", "/hq#issues");
+    (window as typeof window & { deltaDesktop?: unknown }).deltaDesktop = undefined;
+  });
+
+  it("shows default open issues with blockers first and keeps resolved history secondary", async () => {
+    render(<DeltaHQ model={issuesProjectionModel()} />);
+
+    expect(await screen.findByText("Known problems and diagnosis")).toBeInTheDocument();
+    const bodyText = document.body.textContent || "";
+    expect(bodyText.indexOf("Credential rotation confirmation")).toBeLessThan(
+      bodyText.indexOf("No accepted current Observability telemetry"),
+    );
+    expect(screen.queryByText("Resolved checkout cleanup")).not.toBeInTheDocument();
+  });
+
+  it("exposes evidence refs and source gaps without mutation controls", async () => {
+    render(<DeltaHQ model={issuesProjectionModel()} />);
+
+    expect(await screen.findByText("/Users/egeng/delta-backend/docs/SECURITY_ROTATION_CHECKLIST.md")).toBeInTheDocument();
+    expect(screen.getByText("/Users/egeng/delta-backend/scripts/secret_scan.py")).toBeInTheDocument();
+    expect(screen.getByText("Only qualification/regression evidence was found; HQ did not convert nested evaluation scenarios into current issues.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /resolve issue/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /remediate/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /start repair/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /mark resolved/i })).not.toBeInTheDocument();
+  });
+
+  it("renders missing Observability as unavailable evidence instead of inferred health", async () => {
+    render(<DeltaHQ model={issuesProjectionModel()} />);
+
+    fireEvent.click(await screen.findByRole("button", { name: /No accepted current Observability telemetry/i }));
+
+    expect(screen.getByText(/unavailable measurement evidence/)).toBeInTheDocument();
+    expect(screen.getByText(/does not infer a healthy state/)).toBeInTheDocument();
+    expect(screen.getByText("missing_current_measurement")).toBeInTheDocument();
   });
 });

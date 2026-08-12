@@ -316,6 +316,79 @@ export type DeltaHqEvolutionProjection = {
   };
 };
 
+export type DeltaHqIssueSeverity = "critical" | "high" | "medium" | "low";
+export type DeltaHqIssuePriority = "P0" | "P1" | "P2" | "P3";
+export type DeltaHqIssueState = "open" | "monitoring" | "blocked" | "resolved" | "accepted-risk";
+export type DeltaHqIssueImpact = "blocker" | "advisory";
+
+export type DeltaHqIssueSourceSystem =
+  | "failure_triage"
+  | "architecture_review"
+  | "evaluation"
+  | "quality_gate"
+  | "site_finding"
+  | "security"
+  | "governance"
+  | "observability";
+
+export type DeltaHqIssueSource = {
+  source_system: DeltaHqIssueSourceSystem;
+  source_label: string;
+  source_ref: string | null;
+};
+
+export type DeltaHqIssueAffectedArea = {
+  capabilities: string[];
+  repos: string[];
+  domains: string[];
+};
+
+export type DeltaHqIssue = {
+  id: string;
+  title: string;
+  severity: DeltaHqIssueSeverity;
+  priority: DeltaHqIssuePriority;
+  state: DeltaHqIssueState;
+  source_state: string;
+  canonical_owner: string;
+  diagnosed_by: DeltaHqIssueSource;
+  concise_diagnosis: string;
+  evidence_refs: string[];
+  affected: DeltaHqIssueAffectedArea;
+  impact: DeltaHqIssueImpact;
+  recommended_next_action: string;
+  last_updated: string;
+  resolution: string | null;
+  sourceKind: DeltaHqSourceKind;
+};
+
+export type DeltaHqIssueSourceGap = {
+  source_system: DeltaHqIssueSourceSystem;
+  source_label: string;
+  reason: string;
+  source_ref: string | null;
+};
+
+export type DeltaHqIssueProjection = {
+  status: "available" | "partial" | "unavailable";
+  generated_at: string | null;
+  source_of_truth: string;
+  authority_limits: string[];
+  issues: DeltaHqIssue[];
+  default_issue_ids: string[];
+  history_issue_ids: string[];
+  source_counts: Record<string, number>;
+  source_gaps: DeltaHqIssueSourceGap[];
+  read_only_boundary: {
+    canonical_issue_registry_created: boolean;
+    lifecycle_authority_created: boolean;
+    mutation_performed: boolean;
+    remediation_performed: boolean;
+    event_bus_changed: boolean;
+    automatic_dedupe_claimed_as_truth: boolean;
+  };
+};
+
 export type DeltaHqInitiative = {
   id: string;
   objective: string;
@@ -395,6 +468,7 @@ export type DeltaHqViewModel = {
     guardedSemantics: string[];
   };
   evolution: DeltaHqEvolutionProjection;
+  issues: DeltaHqIssueProjection;
   organization: DeltaHqAgent[];
   initiatives: DeltaHqInitiative[];
   activity: DeltaHqActivityEvent[];
@@ -931,6 +1005,39 @@ export const DELTA_HQ_VIEW_MODEL: DeltaHqViewModel = {
       canonical_mutation_performed: false,
       architecture_decision_performed: false,
       runtime_authority_assigned: false,
+    },
+  },
+  issues: {
+    status: "unavailable",
+    generated_at: null,
+    source_of_truth:
+      "Read-only adapters over existing Failure Triage, Architecture Review, Evaluation, Quality Gate, site findings, Security/Governance findings, and Organizational Observability projections.",
+    authority_limits: [
+      "HQ does not create a canonical issue registry.",
+      "HQ does not own cross-source lifecycle state.",
+      "HQ does not assign accepted-risk unless the source explicitly says so.",
+      "HQ does not dedupe issues as source truth.",
+      "HQ does not execute remediation or Event Bus changes.",
+    ],
+    issues: [],
+    default_issue_ids: [],
+    history_issue_ids: [],
+    source_counts: {},
+    source_gaps: [
+      {
+        source_system: "observability",
+        source_label: "Organizational Observability gaps",
+        reason: "HQ server adapter has not loaded the read-only Issues projection.",
+        source_ref: null,
+      },
+    ],
+    read_only_boundary: {
+      canonical_issue_registry_created: false,
+      lifecycle_authority_created: false,
+      mutation_performed: false,
+      remediation_performed: false,
+      event_bus_changed: false,
+      automatic_dedupe_claimed_as_truth: false,
     },
   },
   organization: [

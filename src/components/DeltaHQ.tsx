@@ -9,6 +9,11 @@ import {
   type DeltaHqDepartment,
   type DeltaHqDepartmentPerformancePanel,
   type DeltaHqEvolutionMilestone,
+  type DeltaHqIssue,
+  type DeltaHqIssuePriority,
+  type DeltaHqIssueProjection,
+  type DeltaHqIssueSeverity,
+  type DeltaHqIssueState,
   type DeltaHqInitiative,
   type DeltaHqLineageTrackId,
   type DeltaHqObservabilityMetric,
@@ -98,7 +103,7 @@ declare global {
   }
 }
 
-type HqView = "brief" | "organization" | "initiatives" | "evolution" | "analytics" | "activity" | "reviews" | "operator";
+type HqView = "brief" | "organization" | "initiatives" | "issues" | "evolution" | "analytics" | "activity" | "reviews" | "operator";
 type EvolutionTrackFilter = DeltaHqLineageTrackId | "all";
 
 type AskDeltaMessage = {
@@ -114,6 +119,7 @@ const views: Array<{ id: HqView; label: string }> = [
   { id: "brief", label: "Brief" },
   { id: "organization", label: "Organization" },
   { id: "initiatives", label: "Initiatives" },
+  { id: "issues", label: "Issues" },
   { id: "evolution", label: "Evolution" },
   { id: "analytics", label: "Analytics" },
   { id: "activity", label: "Activity" },
@@ -137,6 +143,28 @@ const severityDots: Record<DeltaHqSeverity, string> = {
   notice: "bg-sky-500",
   blocked: "bg-rose-500",
   attention: "bg-amber-500",
+};
+
+const issueSeverityStyles: Record<DeltaHqIssueSeverity, string> = {
+  critical: "border-rose-300 bg-rose-50 text-rose-950",
+  high: "border-orange-300 bg-orange-50 text-orange-950",
+  medium: "border-amber-300 bg-amber-50 text-amber-950",
+  low: "border-zinc-300 bg-zinc-50 text-zinc-800",
+};
+
+const issueStateStyles: Record<DeltaHqIssueState, string> = {
+  open: "border-sky-300 bg-sky-50 text-sky-950",
+  monitoring: "border-amber-300 bg-amber-50 text-amber-950",
+  blocked: "border-rose-300 bg-rose-50 text-rose-950",
+  resolved: "border-emerald-300 bg-emerald-50 text-emerald-950",
+  "accepted-risk": "border-zinc-300 bg-zinc-100 text-zinc-800",
+};
+
+const issuePriorityStyles: Record<DeltaHqIssuePriority, string> = {
+  P0: "border-rose-300 bg-rose-50 text-rose-950",
+  P1: "border-orange-300 bg-orange-50 text-orange-950",
+  P2: "border-amber-300 bg-amber-50 text-amber-950",
+  P3: "border-zinc-300 bg-zinc-50 text-zinc-800",
 };
 
 const lifecycleStyles: Record<string, string> = {
@@ -217,6 +245,28 @@ function trustStateClassName(state: string) {
 
 function titleCaseState(state: string) {
   return state.replaceAll("_", " ");
+}
+
+function issueSourceLabel(issue: DeltaHqIssue) {
+  return issue.diagnosed_by.source_label || titleCaseState(issue.diagnosed_by.source_system);
+}
+
+function issueDisplayState(state: string) {
+  return titleCaseState(state.replaceAll("-", " "));
+}
+
+function issueList(values: string[], empty = "Unavailable") {
+  return values.length > 0 ? values.join(", ") : empty;
+}
+
+function issueStatusCounts(projection: DeltaHqIssueProjection) {
+  return projection.issues.reduce(
+    (counts, issue) => ({
+      ...counts,
+      [issue.state]: (counts[issue.state] || 0) + 1,
+    }),
+    {} as Record<string, number>,
+  );
 }
 
 function observabilitySummaryLabel(summary: Record<string, number>) {
@@ -1327,6 +1377,11 @@ function ExecutiveBrief({
   const notableBriefGaps = degradedObservabilityMetrics(projection)
     .filter((metric) => briefMetricIds.has(metric.metric_id))
     .slice(0, 4);
+  const issueCounts = issueStatusCounts(model.issues);
+  const knownIssues = model.issues.default_issue_ids
+    .map((issueId) => model.issues.issues.find((issue) => issue.id === issueId))
+    .filter((issue): issue is DeltaHqIssue => Boolean(issue))
+    .slice(0, 3);
 
   return (
     <div className="grid gap-6">
@@ -1410,6 +1465,50 @@ function ExecutiveBrief({
           </p>
           <p className="mt-2 text-sm text-zinc-600">fields intentionally not invented</p>
         </div>
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <SectionTitle
+            kicker="Known issues"
+            title="High-value open diagnosis"
+            detail="Read-only source projections only. HQ does not own issue lifecycle, assign accepted risk, dedupe as truth, or offer remediation actions."
+          />
+          <div className="flex flex-wrap gap-2">
+            <Badge className="border-rose-300 bg-rose-50 text-rose-950">
+              {issueCounts.blocked || 0} blocked
+            </Badge>
+            <Badge className="border-zinc-300 bg-zinc-50 text-zinc-800">
+              {model.issues.source_gaps.length} source gaps
+            </Badge>
+            <button
+              type="button"
+              onClick={() => onOpenView("issues")}
+              className="rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm font-semibold text-zinc-900"
+            >
+              Issues
+            </button>
+          </div>
+        </div>
+        {knownIssues.length > 0 ? (
+          <div className="mt-4 grid gap-3 xl:grid-cols-3">
+            {knownIssues.map((issue) => (
+              <div key={issue.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={issueSeverityStyles[issue.severity]}>{issue.severity}</Badge>
+                  <Badge className={issueStateStyles[issue.state]}>{issueDisplayState(issue.state)}</Badge>
+                  <Badge className={issuePriorityStyles[issue.priority]}>{issue.priority}</Badge>
+                </div>
+                <p className="mt-3 text-sm font-semibold leading-6 text-zinc-950">{issue.title}</p>
+                <p className="mt-2 text-xs leading-5 text-zinc-600">{issueSourceLabel(issue)}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
+            No high-value open issues are present in the current read-only projection.
+          </p>
+        )}
       </section>
 
       <section>
@@ -1707,6 +1806,336 @@ function InitiativesView({
         ))}
       </div>
     </div>
+  );
+}
+
+type IssueFilterState = {
+  owner: string;
+  severity: string;
+  priority: string;
+  state: string;
+  source: string;
+  repo: string;
+  domain: string;
+  capability: string;
+};
+
+const defaultIssueFilters: IssueFilterState = {
+  owner: "all",
+  severity: "all",
+  priority: "all",
+  state: "all",
+  source: "all",
+  repo: "all",
+  domain: "all",
+  capability: "all",
+};
+
+function issueOptionValues(projection: DeltaHqIssueProjection, selector: (issue: DeltaHqIssue) => string | string[]) {
+  return [...new Set(
+    projection.issues.flatMap((issue) => {
+      const value = selector(issue);
+      return Array.isArray(value) ? value : [value];
+    }).filter(Boolean),
+  )].sort((left, right) => left.localeCompare(right));
+}
+
+function IssueFilterSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="grid gap-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+      {label}
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm font-semibold normal-case tracking-normal text-zinc-900"
+      >
+        <option value="all">All</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {issueDisplayState(option)}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function IssuesView({
+  projection,
+  selectedIssueId,
+  onSelectIssue,
+}: {
+  projection: DeltaHqIssueProjection;
+  selectedIssueId: string;
+  onSelectIssue: (issueId: string) => void;
+}) {
+  const [filters, setFilters] = useState<IssueFilterState>(defaultIssueFilters);
+  const [includeHistory, setIncludeHistory] = useState(false);
+  const hasFilter = Object.entries(filters).some(([key, value]) => value !== defaultIssueFilters[key as keyof IssueFilterState]);
+  const candidates = hasFilter || includeHistory
+    ? projection.issues
+    : projection.default_issue_ids
+        .map((issueId) => projection.issues.find((issue) => issue.id === issueId))
+        .filter((issue): issue is DeltaHqIssue => Boolean(issue));
+
+  const visibleIssues = candidates.filter((issue) => {
+    if (!includeHistory && filters.state === "all" && (issue.state === "resolved" || issue.state === "accepted-risk")) return false;
+    if (filters.owner !== "all" && issue.canonical_owner !== filters.owner) return false;
+    if (filters.severity !== "all" && issue.severity !== filters.severity) return false;
+    if (filters.priority !== "all" && issue.priority !== filters.priority) return false;
+    if (filters.state !== "all" && issue.state !== filters.state) return false;
+    if (filters.source !== "all" && issue.diagnosed_by.source_system !== filters.source) return false;
+    if (filters.repo !== "all" && !issue.affected.repos.includes(filters.repo)) return false;
+    if (filters.domain !== "all" && !issue.affected.domains.includes(filters.domain)) return false;
+    if (filters.capability !== "all" && !issue.affected.capabilities.includes(filters.capability)) return false;
+    return true;
+  });
+
+  const selectedIssue = projection.issues.find((issue) => issue.id === selectedIssueId)
+    || visibleIssues[0]
+    || projection.issues[0];
+  const counts = issueStatusCounts(projection);
+  const historyIssues = projection.history_issue_ids
+    .map((issueId) => projection.issues.find((issue) => issue.id === issueId))
+    .filter((issue): issue is DeltaHqIssue => Boolean(issue));
+
+  function updateFilter(key: keyof IssueFilterState, value: string) {
+    setFilters((current) => ({ ...current, [key]: value }));
+  }
+
+  return (
+    <div className="grid gap-6">
+      <SectionTitle
+        kicker="Issues"
+        title="Known problems and diagnosis"
+        detail="HQ reads structured source projections only. Canonical owners remain responsible for issue truth, lifecycle, accepted risk, and remediation."
+      />
+
+      <section className="grid gap-4 lg:grid-cols-4">
+        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Default open set</p>
+          <p className="mt-2 text-3xl font-semibold text-zinc-950">{projection.default_issue_ids.length}</p>
+          <p className="mt-2 text-sm text-zinc-600">open, blocked, or meaningful monitoring</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Blockers</p>
+          <p className="mt-2 text-3xl font-semibold text-rose-700">{counts.blocked || 0}</p>
+          <p className="mt-2 text-sm text-zinc-600">rendered first</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">History</p>
+          <p className="mt-2 text-3xl font-semibold text-zinc-950">{historyIssues.length}</p>
+          <p className="mt-2 text-sm text-zinc-600">resolved or accepted risk</p>
+        </div>
+        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Source gaps</p>
+          <p className="mt-2 text-3xl font-semibold text-amber-700">{projection.source_gaps.length}</p>
+          <p className="mt-2 text-sm text-zinc-600">truth currently missing</p>
+        </div>
+      </section>
+
+      <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <aside className="grid content-start gap-4">
+          <section className="rounded-lg border border-zinc-200 bg-white p-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+              <IssueFilterSelect
+                label="Owner"
+                value={filters.owner}
+                options={issueOptionValues(projection, (issue) => issue.canonical_owner)}
+                onChange={(value) => updateFilter("owner", value)}
+              />
+              <IssueFilterSelect
+                label="Severity"
+                value={filters.severity}
+                options={issueOptionValues(projection, (issue) => issue.severity)}
+                onChange={(value) => updateFilter("severity", value)}
+              />
+              <IssueFilterSelect
+                label="Priority"
+                value={filters.priority}
+                options={issueOptionValues(projection, (issue) => issue.priority)}
+                onChange={(value) => updateFilter("priority", value)}
+              />
+              <IssueFilterSelect
+                label="State"
+                value={filters.state}
+                options={issueOptionValues(projection, (issue) => issue.state)}
+                onChange={(value) => updateFilter("state", value)}
+              />
+              <IssueFilterSelect
+                label="Source"
+                value={filters.source}
+                options={issueOptionValues(projection, (issue) => issue.diagnosed_by.source_system)}
+                onChange={(value) => updateFilter("source", value)}
+              />
+              <IssueFilterSelect
+                label="Repo"
+                value={filters.repo}
+                options={issueOptionValues(projection, (issue) => issue.affected.repos)}
+                onChange={(value) => updateFilter("repo", value)}
+              />
+              <IssueFilterSelect
+                label="Domain"
+                value={filters.domain}
+                options={issueOptionValues(projection, (issue) => issue.affected.domains)}
+                onChange={(value) => updateFilter("domain", value)}
+              />
+              <IssueFilterSelect
+                label="Capability"
+                value={filters.capability}
+                options={issueOptionValues(projection, (issue) => issue.affected.capabilities)}
+                onChange={(value) => updateFilter("capability", value)}
+              />
+            </div>
+            <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-zinc-700">
+              <input
+                type="checkbox"
+                checked={includeHistory}
+                onChange={(event) => setIncludeHistory(event.target.checked)}
+                className="h-4 w-4 rounded border-zinc-300"
+              />
+              Include resolved/history
+            </label>
+          </section>
+
+          <section className="grid gap-3">
+            {visibleIssues.length > 0 ? visibleIssues.map((issue) => (
+              <button
+                key={issue.id}
+                type="button"
+                onClick={() => onSelectIssue(issue.id)}
+                className={`rounded-lg border bg-white p-4 text-left ${
+                  selectedIssue?.id === issue.id ? "border-zinc-950 shadow-sm" : "border-zinc-200 hover:border-zinc-400"
+                }`}
+              >
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={issueSeverityStyles[issue.severity]}>{issue.severity}</Badge>
+                  <Badge className={issueStateStyles[issue.state]}>{issueDisplayState(issue.state)}</Badge>
+                  <Badge className={issuePriorityStyles[issue.priority]}>{issue.priority}</Badge>
+                </div>
+                <p className="mt-3 text-sm font-semibold leading-6 text-zinc-950">{issue.title}</p>
+                <p className="mt-2 text-xs leading-5 text-zinc-600">{issueSourceLabel(issue)}</p>
+              </button>
+            )) : (
+              <p className="rounded-lg border border-zinc-200 bg-white p-4 text-sm leading-6 text-zinc-700">
+                No issues match the selected filters.
+              </p>
+            )}
+          </section>
+        </aside>
+
+        <div className="grid content-start gap-5">
+          {selectedIssue ? <IssueDetail issue={selectedIssue} /> : (
+            <section className="rounded-lg border border-zinc-200 bg-white p-5">
+              <p className="text-sm leading-6 text-zinc-700">No structured issues are available in the current projection.</p>
+            </section>
+          )}
+
+          <section className="rounded-lg border border-zinc-200 bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-base font-semibold text-zinc-950">Source gaps</h3>
+              <Badge className={projection.status === "available" ? "border-emerald-300 bg-emerald-50 text-emerald-950" : "border-amber-300 bg-amber-50 text-amber-950"}>
+                Projection {projection.status}
+              </Badge>
+            </div>
+            {projection.source_gaps.length > 0 ? (
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {projection.source_gaps.map((gap) => (
+                  <div key={`${gap.source_system}-${gap.source_ref || gap.reason}`} className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                    <p className="text-sm font-semibold text-zinc-950">{gap.source_label}</p>
+                    <p className="mt-2 text-sm leading-6 text-zinc-700">{gap.reason}</p>
+                    {gap.source_ref && <p className="mt-2 break-words text-xs text-zinc-500">{gap.source_ref}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm leading-6 text-zinc-700">No source gaps are reported by the current Issues projection.</p>
+            )}
+          </section>
+
+          <details className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-zinc-950">Read-only authority limits</summary>
+            <ul className="mt-3 grid gap-2 text-sm leading-6 text-zinc-700">
+              {projection.authority_limits.map((limit) => (
+                <li key={limit}>{limit}</li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IssueDetail({ issue }: { issue: DeltaHqIssue }) {
+  return (
+    <article id={`issue-${issue.id}`} className="rounded-lg border border-zinc-200 bg-white p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">Issue detail</p>
+          <h3 className="mt-2 text-2xl font-semibold leading-8 text-zinc-950">{issue.title}</h3>
+          <p className="mt-3 text-sm leading-6 text-zinc-700">{issue.concise_diagnosis}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge className={issueSeverityStyles[issue.severity]}>{issue.severity}</Badge>
+          <Badge className={issueStateStyles[issue.state]}>{issueDisplayState(issue.state)}</Badge>
+          <Badge className={issuePriorityStyles[issue.priority]}>{issue.priority}</Badge>
+          <Badge className={issue.impact === "blocker" ? "border-rose-300 bg-rose-50 text-rose-950" : "border-zinc-300 bg-zinc-50 text-zinc-800"}>
+            {issue.impact}
+          </Badge>
+        </div>
+      </div>
+
+      <dl className="mt-5 grid gap-x-6 md:grid-cols-2">
+        <KeyValue label="Canonical owner" value={issue.canonical_owner} />
+        <KeyValue label="Diagnosed by" value={issueSourceLabel(issue)} />
+        <KeyValue label="Source state" value={issue.source_state} />
+        <KeyValue label="Last updated" value={formatOptionalTime(issue.last_updated)} />
+        <KeyValue label="Affected repos" value={issueList(issue.affected.repos)} />
+        <KeyValue label="Affected domains" value={issueList(issue.affected.domains)} />
+        <KeyValue label="Affected capabilities" value={issueList(issue.affected.capabilities)} />
+        <KeyValue label="Source ref" value={issue.diagnosed_by.source_ref || "Unavailable"} />
+      </dl>
+
+      <section className="mt-6">
+        <h4 className="text-sm font-semibold text-zinc-950">Recommended next action</h4>
+        <p className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
+          {issue.recommended_next_action}
+        </p>
+      </section>
+
+      <section className="mt-6">
+        <h4 className="text-sm font-semibold text-zinc-950">Evidence refs</h4>
+        {issue.evidence_refs.length > 0 ? (
+          <ul className="mt-3 grid gap-2 text-sm leading-6 text-zinc-700">
+            {issue.evidence_refs.map((ref) => (
+              <li key={ref} className="break-words rounded-lg border border-zinc-200 bg-zinc-50 p-3">{ref}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
+            No evidence refs supplied by the source.
+          </p>
+        )}
+      </section>
+
+      <section className="mt-6">
+        <h4 className="text-sm font-semibold text-zinc-950">Resolution / disposition</h4>
+        <p className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm leading-6 text-zinc-700">
+          {issue.resolution || "No closed-state disposition is supplied by the source."}
+        </p>
+      </section>
+    </article>
   );
 }
 
@@ -2930,6 +3359,7 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
   const [selectedDepartmentId, setSelectedDepartmentId] = useState(model.observability.departments[0]?.id || "");
   const [selectedReviewId, setSelectedReviewId] = useState(model.reviews[0]?.id || "");
   const [selectedMilestoneId, setSelectedMilestoneId] = useState(model.evolution.entries[0]?.milestone_id || "");
+  const [selectedIssueId, setSelectedIssueId] = useState(model.issues.default_issue_ids[0] || model.issues.issues[0]?.id || "");
   const [selectedEvolutionTrack, setSelectedEvolutionTrack] = useState<EvolutionTrackFilter>("all");
   const [selectedEconomicsAgentId, setSelectedEconomicsAgentId] = useState("mission_control");
   const [refreshState, setRefreshState] = useState<RefreshState>("idle");
@@ -3000,6 +3430,23 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
         "no composite executive health authority",
       ].join("; ");
     }
+    if (currentView === "issues") {
+      const selectedIssue = model.issues.issues.find((issue) => issue.id === selectedIssueId);
+      return selectedIssue
+        ? [
+            `Selected issue: ${selectedIssue.title}`,
+            `state: ${selectedIssue.state}`,
+            `severity: ${selectedIssue.severity}`,
+            `owner: ${selectedIssue.canonical_owner}`,
+            `source: ${issueSourceLabel(selectedIssue)}`,
+            "read-only projection; no remediation authority",
+          ].join("; ")
+        : [
+            `Issues projection: ${model.issues.status}`,
+            `source gaps: ${model.issues.source_gaps.length}`,
+            "read-only projection; no remediation authority",
+          ].join("; ");
+    }
     if (currentView === "organization") {
       const department = model.observability.departments.find((item) => item.id === selectedDepartmentId);
       const departmentMetrics = metricsForDepartment(projection, selectedDepartmentId);
@@ -3016,8 +3463,10 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
     model.evolution.timeline_window.to,
     model.observability.departments,
     model.observability.projection,
+    model.issues,
     selectedDepartmentId,
     selectedEconomicsAgentId,
+    selectedIssueId,
     selectedMilestone,
   ]);
 
@@ -3051,6 +3500,14 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
         setCurrentView("initiatives");
         return;
       }
+      if (hash.startsWith("issue-")) {
+        const issueId = hash.replace(/^issue-/, "");
+        if (model.issues.issues.some((issue) => issue.id === issueId)) {
+          setSelectedIssueId(issueId);
+          setCurrentView("issues");
+        }
+        return;
+      }
       if (hash.startsWith("milestone-")) {
         const milestoneId = hash.replace(/^milestone-/, "");
         const milestone = model.evolution.entries.find((entry) => entry.milestone_id === milestoneId);
@@ -3080,7 +3537,7 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [model.evolution.entries, model.observability.departments, model.organization, model.reviews]);
+  }, [model.evolution.entries, model.issues.issues, model.observability.departments, model.organization, model.reviews]);
 
   const refreshRuntime = useCallback(async () => {
     if (!window.deltaDesktop?.getServiceStatus) {
@@ -3181,6 +3638,12 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
     setSelectedReviewId(reviewId);
     setCurrentView("reviews");
     window.history.replaceState(null, "", `#review-${reviewId}`);
+  }
+
+  function openIssue(issueId: string) {
+    setSelectedIssueId(issueId);
+    setCurrentView("issues");
+    window.history.replaceState(null, "", `#issue-${issueId}`);
   }
 
   function openMilestone(milestoneId: string) {
@@ -3313,6 +3776,13 @@ export default function DeltaHQ({ model }: { model: DeltaHqViewModel }) {
             )}
             {currentView === "initiatives" && (
               <InitiativesView initiatives={model.initiatives} onOpenReview={openReview} />
+            )}
+            {currentView === "issues" && (
+              <IssuesView
+                projection={model.issues}
+                selectedIssueId={selectedIssueId}
+                onSelectIssue={openIssue}
+              />
             )}
             {currentView === "evolution" && (
               <EvolutionView

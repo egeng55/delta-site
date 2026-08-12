@@ -14,6 +14,7 @@ import { getDeltaHqViewModel as getBaseDeltaHqViewModel } from "@/lib/deltaHqVie
 import {
   getDeltaHqViewModel,
   getHistorianEvolutionProjection,
+  getIssuesProjection,
   getOrganizationalObservabilityProjection,
 } from "@/lib/deltaHqServerViewModel";
 import {
@@ -120,6 +121,7 @@ describe("Delta HQ web route", () => {
     expect(componentSource).toContain("Executive brief");
     expect(componentSource).toContain("Organization");
     expect(componentSource).toContain("Initiatives");
+    expect(componentSource).toContain("Issues");
     expect(componentSource).toContain("Evolution");
     expect(componentSource).toContain("Activity");
     expect(componentSource).toContain("Owner review");
@@ -144,6 +146,7 @@ describe("Delta HQ web route", () => {
     expect(componentSource).toContain("disabled={!serviceManagerEnabled}");
     expect(serverViewModelSource).toContain("inspectHistorianMilestones");
     expect(serverViewModelSource).toContain("buildEvolutionTimeline");
+    expect(serverViewModelSource).toContain("getIssuesProjection");
     expect(serverViewModelSource).toContain("aggregateFromStore");
     expect(serverViewModelSource).toContain("inspectRawTelemetryStore");
     expect(serverViewModelSource).toContain("projectionIsOlderThanRaw");
@@ -178,6 +181,19 @@ describe("Delta HQ web route", () => {
     );
     expect(model.currentRealDataIntegrations.some(source => source.kind === "real")).toBe(true);
     expect(model.mockedOrAwaitingCoreFields.some(source => source.kind === "awaiting_core")).toBe(true);
+    expect(model.issues.authority_limits).toEqual(
+      expect.arrayContaining([
+        "HQ does not create a canonical issue registry.",
+        "HQ does not execute remediation or Event Bus changes.",
+      ]),
+    );
+    expect(model.issues.read_only_boundary).toMatchObject({
+      canonical_issue_registry_created: false,
+      lifecycle_authority_created: false,
+      mutation_performed: false,
+      remediation_performed: false,
+      event_bus_changed: false,
+    });
     expect(model.eventBusIntegrationPoints).toEqual(
       expect.arrayContaining([
         "event.id, version, type, occurred_at, received_at, completed_at",
@@ -391,6 +407,73 @@ describe("Delta HQ web route", () => {
     const unavailableTrusted = observabilityMetric({ value: null });
     expect(canRenderAsCurrentOperationalMeasurement(unavailableTrusted)).toBe(false);
     expect(formatObservabilityMetricValue(unavailableTrusted)).toBe("Unavailable");
+  });
+
+  it("builds the read-only Issues projection without creating lifecycle authority", async () => {
+    const projection = await getIssuesProjection();
+
+    expect(projection.status).toMatch(/available|partial/);
+    expect(projection.issues.length).toBeGreaterThan(0);
+    expect(projection.read_only_boundary).toMatchObject({
+      canonical_issue_registry_created: false,
+      lifecycle_authority_created: false,
+      mutation_performed: false,
+      remediation_performed: false,
+      event_bus_changed: false,
+      automatic_dedupe_claimed_as_truth: false,
+    });
+    expect(projection.authority_limits.join(" ")).toContain("does not create a canonical issue registry");
+    expect(projection.authority_limits.join(" ")).toContain("does not expose remediation actions");
+  });
+
+  it("excludes resolved issues from the default Issues set and surfaces blockers first", async () => {
+    const projection = await getIssuesProjection();
+    const issuesById = new Map(projection.issues.map((issue) => [issue.id, issue]));
+    const defaultIssues = projection.default_issue_ids.map((issueId) => issuesById.get(issueId));
+
+    expect(defaultIssues.every((issue) => issue?.state !== "resolved")).toBe(true);
+    expect(defaultIssues.every((issue) => issue?.state !== "accepted-risk")).toBe(true);
+    expect(defaultIssues[0]?.impact).toBe("blocker");
+    expect(defaultIssues[0]?.state).toBe("blocked");
+  });
+
+  it("preserves evidence refs and ignores stale worktree-only issue sources", async () => {
+    const projection = await getIssuesProjection();
+    const credentialRotation = projection.issues.find((issue) => issue.id === "site-finding-001");
+
+    expect(credentialRotation?.evidence_refs).toEqual(
+      expect.arrayContaining([
+        "/Users/egeng/delta-backend/docs/SECURITY_ROTATION_CHECKLIST.md",
+        "/Users/egeng/delta-backend/scripts/secret_scan.py",
+      ]),
+    );
+    expect(JSON.stringify(projection.issues)).not.toContain(`${path.sep}delta-worktrees${path.sep}`);
+  });
+
+  it("keeps missing Observability as an evidence gap rather than inferred health", async () => {
+    const baseProjection = getBaseDeltaHqViewModel().observability.projection;
+    const projection = await getIssuesProjection(baseProjection);
+    const observabilityIssue = projection.issues.find((issue) => issue.id === "observability-projection-unavailable");
+
+    expect(observabilityIssue?.title).toBe("Observability projection unavailable");
+    expect(observabilityIssue?.concise_diagnosis).toContain("data availability issue");
+    expect(observabilityIssue?.concise_diagnosis).toContain("not as inferred operational health");
+    expect(observabilityIssue?.source_state).toBe("unavailable");
+  });
+
+  it("preserves source gaps where canonical structured issue truth is missing", async () => {
+    const projection = await getIssuesProjection();
+
+    expect(projection.source_gaps.map((gap) => gap.source_system)).toEqual(
+      expect.arrayContaining([
+        "failure_triage",
+        "architecture_review",
+        "evaluation",
+        "security",
+        "governance",
+      ]),
+    );
+    expect(projection.source_gaps.map((gap) => gap.reason).join(" ")).toContain("did not convert nested evaluation scenarios into current issues");
   });
 
   it("renders Agent Economics cost trust without turning unpriced or missing values into spend", () => {

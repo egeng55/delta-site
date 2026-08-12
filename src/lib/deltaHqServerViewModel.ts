@@ -1,10 +1,17 @@
 import path from "node:path";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import {
   DELTA_HQ_VIEW_MODEL,
   type DeltaHqEvolutionMilestone,
   type DeltaHqEvolutionProjection,
+  type DeltaHqIssue,
+  type DeltaHqIssuePriority,
+  type DeltaHqIssueProjection,
+  type DeltaHqIssueSeverity,
+  type DeltaHqIssueSourceGap,
+  type DeltaHqIssueSourceSystem,
+  type DeltaHqIssueState,
   type DeltaHqLineageTrackId,
   type DeltaHqMilestoneClaims,
   type DeltaHqMilestoneEvidenceReference,
@@ -899,6 +906,784 @@ function unavailableEvolutionProjection(reason: string): DeltaHqEvolutionProject
   };
 }
 
+const ISSUE_AUTHORITY_LIMITS = [
+  "HQ renders existing structured issue/diagnosis evidence only.",
+  "HQ does not create a canonical issue registry or cross-source lifecycle owner.",
+  "HQ preserves source labels, source states, and evidence refs.",
+  "HQ does not assign accepted-risk unless the source explicitly says so.",
+  "HQ does not treat automatic grouping or repeated IDs as dedupe truth.",
+  "HQ does not expose remediation actions, mutate sources, or change the Event Bus.",
+];
+
+const prioritySeverity: Record<DeltaHqIssuePriority, DeltaHqIssueSeverity> = {
+  P0: "critical",
+  P1: "high",
+  P2: "medium",
+  P3: "low",
+};
+
+const severityRank: Record<DeltaHqIssueSeverity, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
+
+const priorityRank: Record<DeltaHqIssuePriority, number> = {
+  P0: 0,
+  P1: 1,
+  P2: 2,
+  P3: 3,
+};
+
+function validateSiteRepoRoot(candidate: string): boolean {
+  return existsSync(path.join(candidate, "package.json"))
+    && existsSync(path.join(candidate, "src", "components", "DeltaHQ.tsx"))
+    && existsSync(path.join(candidate, "agent", "findings"));
+}
+
+function resolveSiteRepoRoot(): string {
+  if (process.env.DELTA_SITE_REPO_ROOT && validateSiteRepoRoot(process.env.DELTA_SITE_REPO_ROOT)) {
+    return process.env.DELTA_SITE_REPO_ROOT;
+  }
+
+  const candidates = uniqueStrings([
+    process.cwd(),
+    ...ancestorDirs(process.cwd()),
+    ...deltaWorkspaceRootCandidates().map((workspaceRoot) => path.join(workspaceRoot, "delta-site")),
+    path.resolve(process.cwd(), "..", "delta-site"),
+  ]).filter((candidate) => !candidate.includes(`${path.sep}delta-worktrees${path.sep}`));
+
+  return candidates.find(validateSiteRepoRoot) || process.cwd();
+}
+
+function relativeSourceRef(repoRoot: string, file: string): string {
+  const relative = path.relative(repoRoot, file);
+  return relative.startsWith("..") ? file : relative;
+}
+
+function latestFile(dir: string, pattern: RegExp): string | null {
+  if (!existsSync(dir)) return null;
+  const files = readdirSync(dir)
+    .filter((name) => pattern.test(name))
+    .sort()
+    .reverse();
+  return files[0] ? path.join(dir, files[0]) : null;
+}
+
+function jsonFiles(dir: string, pattern: RegExp): string[] {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((name) => pattern.test(name))
+    .sort()
+    .map((name) => path.join(dir, name));
+}
+
+function readJsonRecord(file: string): JsonRecord | null {
+  try {
+    return record(JSON.parse(readFileSync(file, "utf8")) as unknown);
+  } catch {
+    return null;
+  }
+}
+
+function stripQuotes(value: string): string {
+  return value.trim().replace(/^["']|["']$/g, "");
+}
+
+function parseFindingFrontmatter(text: string): JsonRecord {
+  if (!text.startsWith("---\n")) return {};
+  const end = text.indexOf("\n---", 4);
+  if (end === -1) return {};
+
+  const frontmatter: JsonRecord = {};
+  let currentArrayKey: string | null = null;
+  for (const rawLine of text.slice(4, end).split(/\r?\n/)) {
+    const arrayItem = rawLine.match(/^\s*-\s*(.+)$/);
+    if (arrayItem && currentArrayKey) {
+      const list = Array.isArray(frontmatter[currentArrayKey]) ? frontmatter[currentArrayKey] as string[] : [];
+      list.push(stripQuotes(arrayItem[1]));
+      frontmatter[currentArrayKey] = list;
+      continue;
+    }
+
+    const entry = rawLine.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
+    if (!entry) continue;
+    const [, key, rawValue] = entry;
+    if (!rawValue.trim()) {
+      frontmatter[key] = [];
+      currentArrayKey = key;
+      continue;
+    }
+
+    currentArrayKey = null;
+    const value = stripQuotes(rawValue);
+    if (value === "true") {
+      frontmatter[key] = true;
+    } else if (value === "false") {
+      frontmatter[key] = false;
+    } else {
+      frontmatter[key] = value;
+    }
+  }
+
+  return frontmatter;
+}
+
+function markdownBodyAfterFrontmatter(text: string): string {
+  if (!text.startsWith("---\n")) return text;
+  const end = text.indexOf("\n---", 4);
+  return end === -1 ? text : text.slice(end + 4);
+}
+
+function compactText(value: string, fallback: string, maxLength = 420): string {
+  const compact = value
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!compact) return fallback;
+  return compact.length > maxLength ? `${compact.slice(0, maxLength - 1).trim()}...` : compact;
+}
+
+function firstMeaningfulParagraph(markdown: string, fallback: string): string {
+  const paragraphs = markdownBodyAfterFrontmatter(markdown)
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph && !paragraph.startsWith("#"));
+  return compactText(paragraphs[0] || "", fallback);
+}
+
+function normalizePriority(value: unknown, fallback: DeltaHqIssuePriority = "P2"): DeltaHqIssuePriority {
+  const priority = typeof value === "string" ? value.toUpperCase() : "";
+  return priority === "P0" || priority === "P1" || priority === "P2" || priority === "P3" ? priority : fallback;
+}
+
+function normalizeIssueState(value: unknown): DeltaHqIssueState {
+  const state = typeof value === "string" ? value.toLowerCase().replaceAll("_", "-") : "";
+  if (state === "resolved" || state === "closed" || state === "done") return "resolved";
+  if (state === "accepted-risk" || state === "risk-accepted") return "accepted-risk";
+  if (state === "pending-human" || state === "blocked" || state === "owner-decision-required") return "blocked";
+  if (state === "monitoring" || state === "deferred" || state === "watching") return "monitoring";
+  return "open";
+}
+
+function statusResolution(value: unknown): string | null {
+  const state = typeof value === "string" ? value.toLowerCase().replaceAll("_", "-") : "";
+  if (state === "resolved" || state === "closed" || state === "done") return "Source marked resolved.";
+  if (state === "accepted-risk" || state === "risk-accepted") return "Source explicitly marked accepted risk.";
+  return null;
+}
+
+function sourceArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string" && item.length > 0);
+  if (typeof value === "string" && value.length > 0) return [value];
+  return [];
+}
+
+function findingOwner(finding: JsonRecord): string {
+  const owner = nullableString(finding.owner);
+  if (owner) return owner;
+  if (finding.security_related === true) return "Security";
+  return stringValue(finding.routine, "Source owner unavailable");
+}
+
+function sourceSystemFromFinding(): DeltaHqIssueSourceSystem {
+  return "site_finding";
+}
+
+function findingToIssue(file: string, siteRoot: string): DeltaHqIssue {
+  const text = readFileSync(file, "utf8");
+  const finding = parseFindingFrontmatter(text);
+  const priority = normalizePriority(finding.priority);
+  const state = normalizeIssueState(finding.status);
+  const routine = nullableString(finding.routine);
+  const repo = nullableString(finding.repo);
+  const id = stringValue(finding.id, path.basename(file, ".md"));
+  const title = stringValue(finding.title, id);
+  const lastReviewed = nullableString(finding.last_reviewed);
+  const lastUpdated = lastReviewed || statSync(file).mtime.toISOString();
+  const sourceSystem = sourceSystemFromFinding();
+
+  return {
+    id: `site-finding-${id}`,
+    title,
+    severity: prioritySeverity[priority],
+    priority,
+    state,
+    source_state: stringValue(finding.status, "unknown"),
+    canonical_owner: findingOwner(finding),
+    diagnosed_by: {
+      source_system: sourceSystem,
+      source_label: routine ? `Canonical site finding / ${routine}` : "Canonical site finding",
+      source_ref: relativeSourceRef(siteRoot, file),
+    },
+    concise_diagnosis: firstMeaningfulParagraph(text, "Structured site finding did not include a body diagnosis."),
+    evidence_refs: sourceArray(finding.evidence),
+    affected: {
+      capabilities: sourceArray(finding.slug).concat(sourceArray(finding.source)).slice(0, 6),
+      repos: repo ? [repo] : [],
+      domains: routine ? [routine] : [],
+    },
+    impact: state === "blocked" || priority === "P0" ? "blocker" : "advisory",
+    recommended_next_action: stringValue(
+      finding.recommended_next_phase,
+      "Inspect the canonical finding source for the next approved action.",
+    ),
+    last_updated: lastUpdated,
+    resolution: statusResolution(finding.status),
+    sourceKind: "real",
+  };
+}
+
+function adaptSiteFindings(siteRoot: string): { issues: DeltaHqIssue[]; sourceGaps: DeltaHqIssueSourceGap[] } {
+  const findingsRoot = path.join(siteRoot, "agent", "findings");
+  if (!existsSync(findingsRoot)) {
+    return {
+      issues: [],
+      sourceGaps: [
+        {
+          source_system: "site_finding",
+          source_label: "Canonical site findings",
+          reason: "No canonical site findings directory was found for this HQ checkout.",
+          source_ref: relativeSourceRef(siteRoot, findingsRoot),
+        },
+      ],
+    };
+  }
+
+  const files = readdirSync(findingsRoot)
+    .filter((name) => name.endsWith(".md"))
+    .sort()
+    .map((name) => path.join(findingsRoot, name));
+
+  return {
+    issues: files.map((file) => findingToIssue(file, siteRoot)),
+    sourceGaps: files.length > 0
+      ? []
+      : [
+          {
+            source_system: "site_finding",
+            source_label: "Canonical site findings",
+            reason: "The canonical site findings directory is present but empty.",
+            source_ref: relativeSourceRef(siteRoot, findingsRoot),
+          },
+        ],
+  };
+}
+
+function qualityIssueTitle(repo: string, blockers: string[]): string {
+  return blockers.length > 0 ? `${repo} release readiness blocked` : `${repo} production proof gaps`;
+}
+
+function adaptQualityGate(agentRoot: string): { issues: DeltaHqIssue[]; sourceGaps: DeltaHqIssueSourceGap[] } {
+  const reportPath = latestFile(path.join(agentRoot, "agent", "runs"), /production-quality\.json$/);
+  if (!reportPath) {
+    return {
+      issues: [],
+      sourceGaps: [
+        {
+          source_system: "quality_gate",
+          source_label: "Quality Gate / Production Quality",
+          reason: "No structured production-quality JSON report was found in canonical agent runs.",
+          source_ref: "agent/runs/*production-quality.json",
+        },
+      ],
+    };
+  }
+
+  const report = readJsonRecord(reportPath);
+  if (!report) {
+    return {
+      issues: [],
+      sourceGaps: [
+        {
+          source_system: "quality_gate",
+          source_label: "Quality Gate / Production Quality",
+          reason: "Latest production-quality JSON report could not be parsed.",
+          source_ref: relativeSourceRef(agentRoot, reportPath),
+        },
+      ],
+    };
+  }
+
+  const authority = record(report.authority);
+  const issues = Array.isArray(report.repositories)
+    ? report.repositories.flatMap((repoRecord: unknown): DeltaHqIssue[] => {
+        const repo = record(repoRecord);
+        const repoName = stringValue(repo.repo, "unknown");
+        const releaseBlockers = sourceArray(repo.release_blockers);
+        const proofGaps = sourceArray(repo.proof_gaps);
+        if (releaseBlockers.length === 0 && proofGaps.length === 0) return [];
+
+        const priority: DeltaHqIssuePriority = releaseBlockers.length > 0 ? "P1" : "P2";
+        const state: DeltaHqIssueState = releaseBlockers.length > 0 ? "blocked" : "monitoring";
+        return [
+          {
+            id: `quality-gate-${repoName}-${releaseBlockers.length > 0 ? "release-blocked" : "proof-gaps"}`,
+            title: qualityIssueTitle(repoName, releaseBlockers),
+            severity: prioritySeverity[priority],
+            priority,
+            state,
+            source_state: releaseBlockers.length > 0 ? "release_blockers_present" : "proof_gaps_present",
+            canonical_owner: stringValue(authority.verdict_owner, "verifier"),
+            diagnosed_by: {
+              source_system: "quality_gate",
+              source_label: "Quality Gate / Production Quality",
+              source_ref: relativeSourceRef(agentRoot, reportPath),
+            },
+            concise_diagnosis: compactText(
+              [...releaseBlockers, ...proofGaps].join("; "),
+              "Production quality report marked this repository as not release-ready.",
+            ),
+            evidence_refs: [
+              relativeSourceRef(agentRoot, reportPath),
+              ...sourceArray(repo.path),
+              ...releaseBlockers.map((blocker) => `${repoName}: ${blocker}`),
+              ...proofGaps.map((gap) => `${repoName}: ${gap}`),
+            ],
+            affected: {
+              capabilities: ["release_readiness", "production_parity"],
+              repos: [repoName],
+              domains: ["quality_gate"],
+            },
+            impact: releaseBlockers.length > 0 ? "blocker" : "advisory",
+            recommended_next_action: stringValue(
+              report.next_safe_command,
+              "Use the Quality Gate next-safe-command from the canonical report.",
+            ),
+            last_updated: stringValue(report.timestamp, statSync(reportPath).mtime.toISOString()),
+            resolution: null,
+            sourceKind: "real",
+          },
+        ];
+      })
+    : [];
+
+  return {
+    issues,
+    sourceGaps: issues.length > 0
+      ? []
+      : [
+          {
+            source_system: "quality_gate",
+            source_label: "Quality Gate / Production Quality",
+            reason: "The latest production-quality report contains no structured release blockers or proof gaps.",
+            source_ref: relativeSourceRef(agentRoot, reportPath),
+          },
+        ],
+  };
+}
+
+function evidenceRefsFromRecord(value: JsonRecord): string[] {
+  return uniqueStrings([
+    ...sourceArray(value.evidence_refs),
+    ...sourceArray(record(value.evidence).refs),
+    ...sourceArray(record(value.likely_root_cause).evidence_refs),
+    ...sourceArray(value.authoritative_contract_refs),
+    ...sourceArray(value.source_inputs).map((item) => typeof item === "string" ? item : JSON.stringify(item)),
+  ]);
+}
+
+function adaptFailureTriage(agentRoot: string): { issues: DeltaHqIssue[]; sourceGaps: DeltaHqIssueSourceGap[] } {
+  const files = jsonFiles(path.join(agentRoot, "agent", "runs"), /failure-triage.*\.json$/);
+  const issues: DeltaHqIssue[] = [];
+  let qualificationEvidenceSeen = false;
+
+  for (const file of files) {
+    const triage = readJsonRecord(file);
+    if (!triage) continue;
+    const reportType = stringValue(triage.report_type, "");
+    if (reportType.includes("qualification") || reportType.includes("validation") || Array.isArray(triage.runs)) {
+      qualificationEvidenceSeen = true;
+      continue;
+    }
+    const failureId = nullableString(triage.failure_id) || nullableString(triage.issue_id);
+    if (!failureId) continue;
+
+    const priority = normalizePriority(triage.priority, "P2");
+    const stopReason = stringValue(triage.stop_reason, stringValue(triage.state, "open"));
+    const state = normalizeIssueState(stopReason);
+    issues.push({
+      id: `failure-triage-${failureId}`,
+      title: stringValue(triage.title, `Failure triage diagnosis ${failureId}`),
+      severity: prioritySeverity[priority],
+      priority,
+      state,
+      source_state: stopReason,
+      canonical_owner: stringValue(triage.canonical_owner, stringValue(triage.owner, "Failure Triage")),
+      diagnosed_by: {
+        source_system: "failure_triage",
+        source_label: "Failure Triage",
+        source_ref: relativeSourceRef(agentRoot, file),
+      },
+      concise_diagnosis: compactText(
+        stringValue(triage.concise_diagnosis, stringValue(triage.diagnosis, stringValue(record(triage.likely_root_cause).summary, ""))),
+        "Failure Triage result did not include a concise diagnosis.",
+      ),
+      evidence_refs: evidenceRefsFromRecord(triage),
+      affected: {
+        capabilities: sourceArray(triage.affected_capabilities),
+        repos: sourceArray(triage.affected_repos),
+        domains: sourceArray(triage.affected_domains),
+      },
+      impact: state === "blocked" ? "blocker" : "advisory",
+      recommended_next_action: stringValue(triage.recommended_next_action, "Inspect Failure Triage source result for next action."),
+      last_updated: stringValue(triage.generated_at, statSync(file).mtime.toISOString()),
+      resolution: statusResolution(triage.state),
+      sourceKind: "real",
+    });
+  }
+
+  return {
+    issues,
+    sourceGaps: issues.length > 0
+      ? []
+      : [
+          {
+            source_system: "failure_triage",
+            source_label: "Failure Triage",
+            reason: qualificationEvidenceSeen
+              ? "Only qualification/regression evidence was found; HQ did not convert nested evaluation scenarios into current issues."
+              : "No current structured Failure Triage issue/result record was found.",
+            source_ref: "agent/runs/*failure-triage*.json",
+          },
+        ],
+  };
+}
+
+function adaptArchitectureReview(agentRoot: string): { issues: DeltaHqIssue[]; sourceGaps: DeltaHqIssueSourceGap[] } {
+  const searchRoots = [
+    path.join(agentRoot, "agent", "architecture-reviews"),
+    path.join(agentRoot, "agent", "reviews"),
+    path.join(agentRoot, "agent", "runs"),
+  ];
+  const files = searchRoots.flatMap((root) => jsonFiles(root, /architecture-review.*\.json$/));
+  const issues: DeltaHqIssue[] = [];
+
+  for (const file of files) {
+    if (file.includes(`${path.sep}qualification-evidence${path.sep}`)) continue;
+    const review = readJsonRecord(file);
+    if (!review || !review.review_id || !review.recommended_review_outcome) continue;
+    const outcome = stringValue(review.recommended_review_outcome, "request_evidence");
+    const priority: DeltaHqIssuePriority = outcome === "owner_decision_required" ? "P1" : "P2";
+    const state = outcome === "accept" || outcome === "reject" ? "resolved" : normalizeIssueState(outcome);
+    issues.push({
+      id: `architecture-review-${stringValue(review.review_id, path.basename(file, ".json"))}`,
+      title: stringValue(review.subject, "Architecture review issue"),
+      severity: prioritySeverity[priority],
+      priority,
+      state,
+      source_state: outcome,
+      canonical_owner: stringValue(review.canonical_owner, "Architecture Review"),
+      diagnosed_by: {
+        source_system: "architecture_review",
+        source_label: "Architecture Review",
+        source_ref: relativeSourceRef(agentRoot, file),
+      },
+      concise_diagnosis: compactText(stringValue(review.review_summary, ""), "Architecture review did not include a summary."),
+      evidence_refs: evidenceRefsFromRecord(review),
+      affected: {
+        capabilities: sourceArray(review.required_preservation),
+        repos: [],
+        domains: [stringValue(review.conflict_classification, "architecture_review")],
+      },
+      impact: outcome === "owner_decision_required" ? "blocker" : "advisory",
+      recommended_next_action: stringValue(review.owner_question, "Inspect Architecture Review result for the requested owner decision or evidence."),
+      last_updated: statSync(file).mtime.toISOString(),
+      resolution: outcome === "accept" || outcome === "reject" ? `Source outcome: ${outcome}.` : null,
+      sourceKind: "real",
+    });
+  }
+
+  return {
+    issues,
+    sourceGaps: issues.length > 0
+      ? []
+      : [
+          {
+            source_system: "architecture_review",
+            source_label: "Architecture Review",
+            reason: "No current ArchitectureReviewResult records were found outside qualification evidence.",
+            source_ref: "agent/architecture-reviews/*.json",
+          },
+        ],
+  };
+}
+
+function adaptEvaluation(agentRoot: string): { issues: DeltaHqIssue[]; sourceGaps: DeltaHqIssueSourceGap[] } {
+  const searchRoots = [
+    path.join(agentRoot, "agent", "evaluation-reviews"),
+    path.join(agentRoot, "agent", "reviews"),
+    path.join(agentRoot, "agent", "runs"),
+  ];
+  const files = searchRoots.flatMap((root) => jsonFiles(root, /evaluation-review.*\.json$/));
+  const issues: DeltaHqIssue[] = [];
+
+  for (const file of files) {
+    if (file.includes(`${path.sep}qualification-evidence${path.sep}`)) continue;
+    const evaluation = readJsonRecord(file);
+    if (!evaluation || !evaluation.review_id || !evaluation.outcome) continue;
+    const priority = normalizePriority(evaluation.priority, "P2");
+    const outcome = stringValue(evaluation.outcome, "needs_review");
+    const missingScenarios = Array.isArray(evaluation.missing_scenarios) ? evaluation.missing_scenarios : [];
+    const state: DeltaHqIssueState = outcome === "fully_evaluated" ? "resolved" : missingScenarios.length > 0 ? "open" : "monitoring";
+    const change = record(evaluation.change);
+    const scope = record(evaluation.affected_scope);
+    issues.push({
+      id: `evaluation-${stringValue(evaluation.review_id, path.basename(file, ".json"))}`,
+      title: stringValue(change.title, "Evaluation coverage issue"),
+      severity: prioritySeverity[priority],
+      priority,
+      state,
+      source_state: outcome,
+      canonical_owner: stringValue(evaluation.reviewer, "Evaluation"),
+      diagnosed_by: {
+        source_system: "evaluation",
+        source_label: "Evaluation Review",
+        source_ref: relativeSourceRef(agentRoot, file),
+      },
+      concise_diagnosis: compactText(stringValue(change.summary, ""), "Evaluation review did not include a change summary."),
+      evidence_refs: evidenceRefsFromRecord(evaluation),
+      affected: {
+        capabilities: sourceArray(scope.capabilities),
+        repos: sourceArray(scope.contracts),
+        domains: sourceArray(scope.agents),
+      },
+      impact: priority === "P0" || priority === "P1" ? "blocker" : "advisory",
+      recommended_next_action: stringValue(evaluation.next_review_trigger, "Inspect Evaluation review for the next review trigger."),
+      last_updated: stringValue(evaluation.reviewed_at, statSync(file).mtime.toISOString()),
+      resolution: state === "resolved" ? "Source outcome is fully evaluated." : null,
+      sourceKind: "real",
+    });
+  }
+
+  return {
+    issues,
+    sourceGaps: issues.length > 0
+      ? []
+      : [
+          {
+            source_system: "evaluation",
+            source_label: "Evaluation Review",
+            reason: "No current DeltaEvaluationReview records were found outside schemas and qualification evidence.",
+            source_ref: "agent/evaluation-reviews/*.json",
+          },
+        ],
+  };
+}
+
+function adaptSecurityGovernance(agentRoot: string): { issues: DeltaHqIssue[]; sourceGaps: DeltaHqIssueSourceGap[] } {
+  const roots = [
+    { system: "security" as const, label: "Structured Security findings", dir: path.join(agentRoot, "agent", "security-findings") },
+    { system: "governance" as const, label: "Structured Governance findings", dir: path.join(agentRoot, "agent", "governance-findings") },
+  ];
+  const sourceGaps: DeltaHqIssueSourceGap[] = [];
+
+  for (const root of roots) {
+    sourceGaps.push({
+      source_system: root.system,
+      source_label: root.label,
+      reason: existsSync(root.dir)
+        ? "No current structured issue records were found in this source directory."
+        : "No structured source directory exists yet; HQ uses other canonical findings when present and does not scan raw warning walls.",
+      source_ref: relativeSourceRef(agentRoot, root.dir),
+    });
+  }
+
+  return { issues: [], sourceGaps };
+}
+
+function adaptObservabilityGaps(
+  projection: DeltaHqObservabilityProjection,
+): { issues: DeltaHqIssue[]; sourceGaps: DeltaHqIssueSourceGap[] } {
+  const sourceRef = projection.diagnostics.projection_path || projection.source_of_truth;
+  if (projection.status !== "available") {
+    return {
+      issues: [
+        {
+          id: "observability-projection-unavailable",
+          title: "Observability projection unavailable",
+          severity: "medium",
+          priority: "P2",
+          state: "monitoring",
+          source_state: "unavailable",
+          canonical_owner: "Organizational Observability",
+          diagnosed_by: {
+            source_system: "observability",
+            source_label: "Organizational Observability gaps",
+            source_ref: sourceRef,
+          },
+          concise_diagnosis:
+            "HQ cannot load the read-only Organizational Observability projection. This is shown as a data availability issue, not as inferred operational health.",
+          evidence_refs: [projection.unavailableReason || "Projection unavailable", sourceRef].filter(Boolean) as string[],
+          affected: {
+            capabilities: ["organizational_observability", "analytics"],
+            repos: ["agent"],
+            domains: ["observability"],
+          },
+          impact: "advisory",
+          recommended_next_action: projection.diagnostics.next_event_owner || "Restore the canonical read-only Observability projection.",
+          last_updated: projection.generated_at || new Date().toISOString(),
+          resolution: null,
+          sourceKind: "real",
+        },
+      ],
+      sourceGaps: [],
+    };
+  }
+
+  if (projection.event_acceptance_summary.accepted_source_event_count === 0) {
+    return {
+      issues: [
+        {
+          id: "observability-current-telemetry-gap",
+          title: "No accepted current Observability telemetry",
+          severity: "medium",
+          priority: "P2",
+          state: "monitoring",
+          source_state: "missing_current_measurement",
+          canonical_owner: projection.diagnostics.next_event_owner || "Organizational Observability telemetry producers",
+          diagnosed_by: {
+            source_system: "observability",
+            source_label: "Organizational Observability gaps",
+            source_ref: sourceRef,
+          },
+          concise_diagnosis:
+            "The projection reports no accepted current-state telemetry. HQ treats this as unavailable measurement evidence and does not infer a healthy or unhealthy operating state.",
+          evidence_refs: [
+            projection.diagnostics.empty_state_reason || "No accepted current-state telemetry.",
+            sourceRef,
+          ].filter(Boolean) as string[],
+          affected: {
+            capabilities: ["organizational_observability", "analytics"],
+            repos: ["agent"],
+            domains: ["observability"],
+          },
+          impact: "advisory",
+          recommended_next_action: projection.diagnostics.next_event_owner || "Emit accepted current-state Observability events through the canonical producer path.",
+          last_updated: projection.generated_at || projection.evaluated_at || new Date().toISOString(),
+          resolution: null,
+          sourceKind: "real",
+        },
+      ],
+      sourceGaps: [],
+    };
+  }
+
+  const degradedMetrics = projection.metrics.filter((metric) =>
+    ["stale", "untrusted", "conflicted", "missing"].includes(String(metric.trust_state)),
+  );
+  if (degradedMetrics.length === 0) return { issues: [], sourceGaps: [] };
+
+  const states = uniqueStrings(degradedMetrics.map((metric) => String(metric.trust_state)));
+  return {
+    issues: [
+      {
+        id: "observability-degraded-current-metrics",
+        title: "Some Observability metrics are degraded or unavailable",
+        severity: states.includes("conflicted") || states.includes("untrusted") ? "high" : "medium",
+        priority: states.includes("conflicted") || states.includes("untrusted") ? "P1" : "P2",
+        state: "monitoring",
+        source_state: states.join(", "),
+        canonical_owner: "Organizational Observability",
+        diagnosed_by: {
+          source_system: "observability",
+          source_label: "Organizational Observability gaps",
+          source_ref: sourceRef,
+        },
+        concise_diagnosis:
+          "The canonical projection marks one or more current metrics as missing, stale, untrusted, or conflicted. HQ preserves those labels and does not calculate replacement health.",
+        evidence_refs: degradedMetrics.slice(0, 8).map((metric) =>
+          `${metric.metric_id}: ${metric.trust_state}${metric.missing_reason ? ` (${metric.missing_reason})` : ""}`,
+        ),
+        affected: {
+          capabilities: uniqueStrings(degradedMetrics.map((metric) => metric.metric_id).slice(0, 8)),
+          repos: ["agent"],
+          domains: uniqueStrings(degradedMetrics.map((metric) => metric.scope)),
+        },
+        impact: "advisory",
+        recommended_next_action: "Inspect the canonical Observability projection and producer freshness for the listed metric IDs.",
+        last_updated: projection.generated_at || projection.evaluated_at || new Date().toISOString(),
+        resolution: null,
+        sourceKind: "real",
+      },
+    ],
+    sourceGaps: [],
+  };
+}
+
+function sortIssues(issues: DeltaHqIssue[]): DeltaHqIssue[] {
+  return [...issues].sort((left, right) => {
+    const blocker = Number(right.impact === "blocker") - Number(left.impact === "blocker");
+    if (blocker !== 0) return blocker;
+    const severity = severityRank[left.severity] - severityRank[right.severity];
+    if (severity !== 0) return severity;
+    const priority = priorityRank[left.priority] - priorityRank[right.priority];
+    if (priority !== 0) return priority;
+    return Date.parse(right.last_updated) - Date.parse(left.last_updated);
+  });
+}
+
+function highValueDefaultIssue(issue: DeltaHqIssue): boolean {
+  if (issue.state === "resolved" || issue.state === "accepted-risk") return false;
+  if (issue.impact === "blocker") return true;
+  if (issue.state !== "open" && issue.state !== "blocked" && issue.state !== "monitoring") return false;
+  return issue.priority === "P0" || issue.priority === "P1" || issue.priority === "P2";
+}
+
+function issueSourceCounts(issues: DeltaHqIssue[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const issue of issues) {
+    const source = issue.diagnosed_by.source_system;
+    counts[source] = (counts[source] || 0) + 1;
+  }
+  return counts;
+}
+
+export async function getIssuesProjection(
+  observabilityProjection?: DeltaHqObservabilityProjection,
+): Promise<DeltaHqIssueProjection> {
+  const generatedAt = new Date().toISOString();
+  const siteRoot = resolveSiteRepoRoot();
+  const agentRoot = resolveAgentRepoRoot();
+  const projection = observabilityProjection || await getOrganizationalObservabilityProjection();
+  const adapterResults = [
+    adaptSiteFindings(siteRoot),
+    adaptQualityGate(agentRoot),
+    adaptFailureTriage(agentRoot),
+    adaptArchitectureReview(agentRoot),
+    adaptEvaluation(agentRoot),
+    adaptSecurityGovernance(agentRoot),
+    adaptObservabilityGaps(projection),
+  ];
+  const issues = sortIssues(adapterResults.flatMap((result) => result.issues));
+  const sourceGaps = adapterResults.flatMap((result) => result.sourceGaps);
+  const defaultIssues = issues.filter(highValueDefaultIssue);
+  const historyIssues = issues.filter((issue) => issue.state === "resolved" || issue.state === "accepted-risk");
+
+  return {
+    status: issues.length > 0 && sourceGaps.length === 0 ? "available" : sourceGaps.length > 0 ? "partial" : "available",
+    generated_at: generatedAt,
+    source_of_truth:
+      "Read-only projection over existing structured Delta issue/diagnosis sources. Canonical source records remain authoritative.",
+    authority_limits: ISSUE_AUTHORITY_LIMITS,
+    issues,
+    default_issue_ids: defaultIssues.map((issue) => issue.id),
+    history_issue_ids: historyIssues.map((issue) => issue.id),
+    source_counts: issueSourceCounts(issues),
+    source_gaps: sourceGaps,
+    read_only_boundary: {
+      canonical_issue_registry_created: false,
+      lifecycle_authority_created: false,
+      mutation_performed: false,
+      remediation_performed: false,
+      event_bus_changed: false,
+      automatic_dedupe_claimed_as_truth: false,
+    },
+  };
+}
+
 export async function getHistorianEvolutionProjection(): Promise<DeltaHqEvolutionProjection> {
   try {
     const repoRoot = resolveAgentRepoRoot();
@@ -1017,10 +1802,12 @@ export async function getDeltaHqViewModel(): Promise<DeltaHqViewModel> {
     getHistorianEvolutionProjection(),
     getOrganizationalObservabilityProjection(),
   ]);
+  const issues = await getIssuesProjection(observabilityProjection);
   return {
     ...base,
     generatedAt: new Date().toISOString(),
     evolution,
+    issues,
     observability: {
       ...base.observability,
       status: observabilityProjection.status === "available"
@@ -1031,7 +1818,18 @@ export async function getDeltaHqViewModel(): Promise<DeltaHqViewModel> {
     currentRealDataIntegrations: base.currentRealDataIntegrations.some((source) =>
       source.label === "Organizational Observability projection"
     )
-      ? base.currentRealDataIntegrations
+      ? base.currentRealDataIntegrations.some((source) => source.label === "Issues & Diagnosis projection")
+        ? base.currentRealDataIntegrations
+        : [
+            ...base.currentRealDataIntegrations,
+            {
+              label: "Issues & Diagnosis projection",
+              kind: "real",
+              path: "delta-site/src/lib/deltaHqServerViewModel.ts",
+              detail:
+                "Builds read-only known-issue display records from structured source artifacts without creating a registry, lifecycle authority, remediation action, or Event Bus change.",
+            },
+          ]
       : [
           ...base.currentRealDataIntegrations,
           {
@@ -1040,6 +1838,13 @@ export async function getDeltaHqViewModel(): Promise<DeltaHqViewModel> {
             path: "delta-agent/src/observability/aggregate.mjs",
             detail:
               "Supplies read-only metric_id, value, trust_state, data_quality_state, freshness, qualification epoch, source count, and producer identity fields for HQ display.",
+          },
+          {
+            label: "Issues & Diagnosis projection",
+            kind: "real",
+            path: "delta-site/src/lib/deltaHqServerViewModel.ts",
+            detail:
+              "Builds read-only known-issue display records from structured source artifacts without creating a registry, lifecycle authority, remediation action, or Event Bus change.",
           },
         ],
     mockedOrAwaitingCoreFields: base.mockedOrAwaitingCoreFields.filter((source) =>
