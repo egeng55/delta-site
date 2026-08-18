@@ -222,7 +222,7 @@ describe("OSConsole command center", () => {
     mockGetBehavioralDomains.mockImplementation(() => new Promise<BehavioralDomainRegistryResponse>(() => undefined));
     global.fetch = jest.fn(
       () => new Promise<Response>(() => undefined),
-    ) as jest.MockedFunction<typeof fetch>;
+    ) as unknown as jest.MockedFunction<typeof fetch>;
     Object.defineProperty(Object.getPrototypeOf(window.navigator), "clipboard", {
       configurable: true,
       get: () => ({

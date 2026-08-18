@@ -31,7 +31,7 @@ describe("OAuth consent page", () => {
           getAuthorizationDetails,
         },
       },
-    } as ReturnType<typeof getSupabase>);
+    } as unknown as ReturnType<typeof getSupabase>);
   });
 
   it("waits for the shared auth provider before loading authorization details", () => {
