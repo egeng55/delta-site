@@ -2,31 +2,44 @@
 
 Last verified: August 18, 2026.
 
-## Canonical location
+## Public identity
+
+- Canonical public identity URL: `https://deltahealthintelligence.com`
+- Current domain-serving state: restoration pending a separate owner-approved
+  production action
+- Production probe: disabled for the canonical identity URL until restoration
+
+The custom domain remains Delta's canonical public identity. Its current
+serving state does not retire, replace, or demote it. Domain restoration and
+public-access policy are separate from repository verification.
+
+## Operational deployment
 
 - Provider: Vercel
 - Team: `egeng55's projects` (`team_oaFcSu6azBmCRvDAwXdQU0DD`)
 - Project: `delta-site` (`prj_6PkSxsnFP8tGiFdliRC9kw9P13HL`)
 - Repository: `egeng55/delta-site`
 - Deployment branch: `main`
-- Canonical project alias: `https://delta-site-egeng55s-projects.vercel.app`
-- Health path: `/api/health`
-- Current access state: Vercel Authentication protected
+- Operational deployment URL: `https://delta-site-egeng55s-projects.vercel.app`
+- Operational probe URL:
+  `https://delta-site-egeng55s-projects.vercel.app/api/health`
+- Current access mode: Vercel Authentication
+- Public reachability: not currently expected
+- Expected revision: the exact full SHA of the inspected release candidate
 
-The project alias is Delta's canonical deployment location even while it is
-not publicly reachable. A protected response is an access-state result, not
-proof that the deployment is absent.
+The Vercel alias identifies the deployed application and supplies a stable
+read-only probe. It is not Delta's canonical public identity.
 
-## Custom-domain status
+## Protection-state interpretation
 
-`deltahealthintelligence.com` is intentionally unavailable to Delta. Its
-relevant provider production/domain slot is temporarily serving an unrelated
-deployment. Do not attach, detach, promote, alias, or otherwise mutate that
-domain or the unrelated deployment as part of Delta verification.
+A `401` from the operational probe means the deployment exists and Vercel
+Authentication is enforcing the current protection state. It does not prove
+healthy public reachability, source parity, or deployment absence. Parity
+remains unverified until the protected deployment returns revision JSON through
+an approved verification path.
 
-Health checks and production-parity audits must use the canonical project
-alias above. They must not classify the intentional custom-domain absence as a
-Delta outage.
+Do not attach, detach, promote, alias, or otherwise mutate the canonical domain
+or any unrelated Vercel project as part of verification.
 
 ## Revision contract
 
@@ -62,4 +75,5 @@ curl -sS https://delta-site-egeng55s-projects.vercel.app/api/health
 ```
 
 The commits match only when the local full SHA exactly equals
-`revision.commit`. HTTP reachability by itself does not prove source parity.
+`revision.commit`. HTTP reachability or a protected response by itself does not
+prove source parity.
