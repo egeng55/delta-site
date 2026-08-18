@@ -1,5 +1,24 @@
 This is the Delta web app built with Next.js.
 
+## Deployment identity
+
+Delta's canonical public identity URL is
+`https://deltahealthintelligence.com`. The operational Vercel deployment and
+health-probe URL is `https://delta-site-egeng55s-projects.vercel.app`; it does
+not replace the canonical product identity. Vercel Authentication currently
+protects that deployment, so it is not yet a public launch surface.
+
+Restoring the custom domain and changing public access are separate
+owner-approved production actions. This repository must not attach, detach,
+promote, or otherwise mutate domains or unrelated Vercel projects during
+verification.
+
+`GET /api/health` reports the running repository commit, branch, deployment
+environment, and deployment URL. Compare `revision.commit` with
+`git rev-parse HEAD` to establish exact source parity. See
+[`docs/DEPLOYMENT_TOPOLOGY.md`](docs/DEPLOYMENT_TOPOLOGY.md) for the provider
+identity, deployment, and access-state record.
+
 The WHOOP-to-ChatGPT connector uses the authenticated
 `/integrations/whoop` page for WHOOP linking and `/oauth/consent` for ChatGPT
 OAuth approval. The remote read-only MCP endpoint is hosted by

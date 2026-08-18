@@ -1,4 +1,23 @@
 import type { NextConfig } from "next";
+import { execFileSync } from "node:child_process";
+
+function gitValue(args: string[]) {
+  try {
+    return execFileSync("git", args, {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
+}
+
+const siteBuildRevision =
+  process.env.VERCEL_GIT_COMMIT_SHA?.trim() || gitValue(["rev-parse", "HEAD"]) || "unknown";
+const siteBuildBranch =
+  process.env.VERCEL_GIT_COMMIT_REF?.trim() || gitValue(["branch", "--show-current"]) || "unknown";
+const siteBuildSource = process.env.VERCEL_GIT_COMMIT_SHA ? "vercel" : siteBuildRevision === "unknown" ? "unknown" : "git";
 
 function getDeltaApiOrigin() {
   if (!process.env.NEXT_PUBLIC_DELTA_API_URL) return null;
@@ -16,6 +35,12 @@ if (deltaApiOrigin && !connectSrc.includes(deltaApiOrigin)) {
 }
 
 const nextConfig: NextConfig = {
+  env: {
+    DELTA_SITE_BUILD_REVISION: siteBuildRevision,
+    DELTA_SITE_BUILD_BRANCH: siteBuildBranch,
+    DELTA_SITE_BUILD_SOURCE: siteBuildSource,
+  },
+
   async headers() {
     return [
       {
