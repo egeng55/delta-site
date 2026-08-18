@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description:
     "Your AI-powered health companion that learns your patterns, understands your goals, and provides personalized guidance for lasting results.",
   keywords: ["health", "AI", "fitness", "wellness", "personal trainer", "nutrition"],
-  metadataBase: new URL("https://deltahealthintelligence.com"),
+  metadataBase: new URL("https://delta-site-egeng55s-projects.vercel.app"),
   icons: {
     icon: [
       { url: "/delta-logo.svg", type: "image/svg+xml" },
