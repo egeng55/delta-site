@@ -1,4 +1,4 @@
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import path from "path";
 import type { DeltaHqObservabilityMetric, DeltaHqObservabilityTimeSeriesPoint } from "@/lib/deltaHqViewModel";
 import {
@@ -26,6 +26,15 @@ import {
 function readSource(relativePath: string): string {
   return readFileSync(path.join(process.cwd(), relativePath), "utf8");
 }
+
+const siblingAgentRoot = process.env.DELTA_AGENT_REPO_ROOT
+  ?? path.resolve(process.cwd(), "..", "delta-agent");
+const hasSiblingAgentContracts = [
+  "src/historian/milestones.mjs",
+  "src/observability/aggregate.mjs",
+  "config/organizational-metrics.json",
+].every((relativePath) => existsSync(path.join(siblingAgentRoot, relativePath)));
+const itWithSiblingAgent = hasSiblingAgentContracts ? it : it.skip;
 
 function observabilityMetric(overrides: Partial<DeltaHqObservabilityMetric> = {}): DeltaHqObservabilityMetric {
   return {
@@ -218,7 +227,7 @@ describe("Delta HQ web route", () => {
     );
   });
 
-  it("loads the Historian-backed Evolution projection without creating a second history store", async () => {
+  itWithSiblingAgent("loads the Historian-backed Evolution projection without creating a second history store", async () => {
     const model = await getDeltaHqViewModel();
     const evolution = model.evolution;
 
@@ -241,7 +250,7 @@ describe("Delta HQ web route", () => {
     expect(evolution.read_only_boundary.canonical_mutation_performed).toBe(false);
   });
 
-  it("preserves Historian evidence confidence and claim classifications for milestone detail", async () => {
+  itWithSiblingAgent("preserves Historian evidence confidence and claim classifications for milestone detail", async () => {
     const evolution = await getHistorianEvolutionProjection();
     const failureTriage = evolution.entries.find(
       (entry) => entry.milestone_id === "failure-triage-second-qualified-specialist-2026-08-07",
@@ -289,7 +298,7 @@ describe("Delta HQ web route", () => {
     expect(model.mockedOrAwaitingCoreFields.map(source => source.label)).not.toContain("Organizational Observability metrics");
   });
 
-  it("loads the Organizational Observability projection as read-only HQ display evidence", async () => {
+  itWithSiblingAgent("loads the Organizational Observability projection as read-only HQ display evidence", async () => {
     const projection = await getOrganizationalObservabilityProjection();
 
     expect(projection.fixtureFallback).toBe(false);
@@ -312,7 +321,7 @@ describe("Delta HQ web route", () => {
     expect(JSON.stringify(projection)).not.toContain("source_event_refs");
   });
 
-  it("exposes live Organizational Observability data-path diagnostics instead of silently falling back", async () => {
+  itWithSiblingAgent("exposes live Organizational Observability data-path diagnostics instead of silently falling back", async () => {
     const projection = await getOrganizationalObservabilityProjection();
     const diagnostics = projection.diagnostics;
 
@@ -461,7 +470,7 @@ describe("Delta HQ web route", () => {
     expect(observabilityIssue?.source_state).toBe("unavailable");
   });
 
-  it("preserves source gaps where canonical structured issue truth is missing", async () => {
+  itWithSiblingAgent("preserves source gaps where canonical structured issue truth is missing", async () => {
     const projection = await getIssuesProjection();
 
     expect(projection.source_gaps.map((gap) => gap.source_system)).toEqual(
@@ -474,6 +483,25 @@ describe("Delta HQ web route", () => {
       ]),
     );
     expect(projection.source_gaps.map((gap) => gap.reason).join(" ")).toContain("did not convert nested evaluation scenarios into current issues");
+  });
+
+  it("fails visibly to bounded fallbacks when the external agent contracts are unavailable", async () => {
+    const previousRoot = process.env.DELTA_AGENT_REPO_ROOT;
+    process.env.DELTA_AGENT_REPO_ROOT = path.join(process.cwd(), ".missing-delta-agent");
+
+    try {
+      const evolution = await getHistorianEvolutionProjection();
+      const observability = await getOrganizationalObservabilityProjection();
+
+      expect(evolution.fixtureFallback).toBe(true);
+      expect(evolution.unavailableReason).toContain("unavailable");
+      expect(observability.fixtureFallback).toBe(true);
+      expect(observability.diagnostics.projection_source).toBe("unavailable");
+      expect(observability.authorityLimitations).toContain("Not a Mission Control reasoning input.");
+    } finally {
+      if (previousRoot === undefined) delete process.env.DELTA_AGENT_REPO_ROOT;
+      else process.env.DELTA_AGENT_REPO_ROOT = previousRoot;
+    }
   });
 
   it("renders Agent Economics cost trust without turning unpriced or missing values into spend", () => {
