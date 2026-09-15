@@ -1,0 +1,7 @@
+project_id = "delta-site"
+
+[auth]
+enable_signup = false
+
+[auth.email]
+enable_signup = false

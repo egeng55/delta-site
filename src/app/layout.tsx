@@ -7,11 +7,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Delta - AI Health Intelligence",
+  title: "Delta Personal Intelligence",
   description:
-    "Your AI-powered health companion that learns your patterns, understands your goals, and provides personalized guidance for lasting results.",
-  keywords: ["health", "AI", "fitness", "wellness", "personal trainer", "nutrition"],
-  metadataBase: new URL("https://deltahealthintelligence.com"),
+    "A private personal-intelligence preview for owner-authorized context, bounded reasoning, feedback, and better next actions over time.",
+  keywords: ["personal intelligence", "AI", "context", "reasoning", "feedback"],
   icons: {
     icon: [
       { url: "/delta-logo.svg", type: "image/svg+xml" },
@@ -20,11 +19,10 @@ export const metadata: Metadata = {
     apple: "/icon.png",
   },
   openGraph: {
-    title: "Delta - AI Health Intelligence",
+    title: "Delta Personal Intelligence",
     description:
-      "Transform your health journey with AI that understands you.",
+      "Personal intelligence built around context, state, action, feedback, and learning.",
     type: "website",
-    images: ["/icon.png"],
   },
 };
 

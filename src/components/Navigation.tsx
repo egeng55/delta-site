@@ -27,13 +27,11 @@ const DeltaLogo = memo(function DeltaLogo({ className }: { className?: string })
   );
 });
 
-const navItems = [
+const publicNavItems = [
   { label: "Home", href: "/" },
+  { label: "Product", href: "/product" },
   { label: "About", href: "/about" },
   { label: "Research", href: "/research" },
-  { label: "Business", href: "/business" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Team", href: "/team" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -105,6 +103,14 @@ export default function Navigation() {
   const [etTime, setEtTime] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navItems = user
+    ? [
+      ...publicNavItems,
+        { label: "Command", href: "/command" },
+        { label: "WHOOP", href: "/integrations/whoop" },
+        { label: "Account", href: "/account" },
+      ]
+    : publicNavItems;
 
   // Update time every minute instead of every second to reduce re-renders
   useEffect(() => {
@@ -176,11 +182,11 @@ export default function Navigation() {
         </Link>
       </motion.div>
 
-      {/* Desktop Nav - Fixed left, vertically centered (hidden until xl screens) */}
+      {/* Desktop Nav - Fixed top center (hidden until xl screens) */}
       <motion.nav
-        className="fixed left-8 top-1/2 -translate-y-1/2 z-50 hidden xl:block"
+        className="fixed left-1/2 top-9 z-50 hidden -translate-x-1/2 xl:block"
       >
-        <ul className="flex flex-col gap-3">
+        <ul className="flex items-center gap-6">
           {navItems.map((item) => (
             <motion.li
               key={item.label}
@@ -195,7 +201,7 @@ export default function Navigation() {
                   {isActive(item.href) && (
                     <motion.span
                       layoutId="navIndicator"
-                      className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-primary rounded-full"
+                      className="absolute -bottom-2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-primary"
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                   )}
@@ -213,7 +219,7 @@ export default function Navigation() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Link href="/dashboard">
+              <Link href="/command">
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -238,7 +244,7 @@ export default function Navigation() {
                 href="/signup"
                 className="px-5 py-2.5 bg-primary text-white text-sm rounded-full font-medium transition-colors hover:bg-primary-dark"
               >
-                Sign up
+                Request access
               </Link>
             </>
           )}
@@ -289,7 +295,7 @@ export default function Navigation() {
                 {user ? (
                   <div className="space-y-2">
                     <Link
-                      href="/dashboard"
+                      href="/command"
                       onClick={handleNavClick}
                       className="text-xs text-muted hover:text-foreground transition-colors block"
                     >
@@ -316,7 +322,7 @@ export default function Navigation() {
                       onClick={handleNavClick}
                       className="text-sm font-medium text-muted hover:text-foreground transition-colors"
                     >
-                      Sign up
+                      Request access
                     </Link>
                   </div>
                 )}

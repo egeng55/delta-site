@@ -1,6 +1,8 @@
 import {
+  disconnectWhoopConnection,
   getWhoopConnectionStatus,
   startWhoopConnection,
+  syncWhoopConnection,
 } from "./whoopIntegrationApi";
 
 describe("WHOOP integration API", () => {
@@ -52,5 +54,50 @@ describe("WHOOP integration API", () => {
 
     await expect(getWhoopConnectionStatus("token")).resolves.toBeNull();
     await expect(getWhoopConnectionStatus("token")).resolves.toBeNull();
+  });
+
+  it("refreshes normalized WHOOP data without accepting raw storage", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "completed",
+        synced_at: "2026-08-03T12:00:00Z",
+        counts: { recoveries: 1 },
+        raw_provider_payloads_stored: false,
+      }),
+    } as Response);
+
+    await expect(syncWhoopConnection("token")).resolves.toMatchObject({
+      status: "completed",
+      raw_provider_payloads_stored: false,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/integrations/whoop/sync"),
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  it("disconnects with explicit history deletion intent", async () => {
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "disconnected",
+        provider_access_revoked: true,
+        credentials_deleted: true,
+        history_deleted: true,
+      }),
+    } as Response);
+
+    await expect(disconnectWhoopConnection("token", true)).resolves.toMatchObject({
+      status: "disconnected",
+      history_deleted: true,
+    });
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("/integrations/whoop/disconnect"),
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ delete_history: true }),
+      }),
+    );
   });
 });

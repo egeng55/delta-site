@@ -1,20 +1,25 @@
-const DEFAULT_CONSOLE_URL = "http://127.0.0.1:3000/os";
+const DEFAULT_HQ_URL = "http://127.0.0.1:3000/hq";
+const DEFAULT_CONSOLE_URL = DEFAULT_HQ_URL;
 const SERVICE_LOG_LIMIT = 200;
 const PACKAGED_SERVICE_MANAGER_DISABLED_REASON =
-  "Packaged Delta OS does not start local development services. Start backend/site manually, then reload the console.";
+  "Packaged Delta HQ does not start local development services. Start backend/site manually, then reload HQ.";
 
-function resolveConsoleUrl(env = process.env, warn = () => {}) {
-  const configured = env.DELTA_OS_CONSOLE_URL || DEFAULT_CONSOLE_URL;
+function resolveDesktopEntryUrl(env = process.env, warn = () => {}) {
+  const configured = env.DELTA_HQ_URL || env.DELTA_DESKTOP_URL || env.DELTA_OS_CONSOLE_URL || DEFAULT_HQ_URL;
   try {
     const url = new URL(configured);
     if (url.protocol !== "http:" && url.protocol !== "https:") {
-      throw new Error("Delta OS console URL must be http or https.");
+      throw new Error("Delta HQ URL must be http or https.");
     }
     return url.toString();
   } catch {
-    warn(`[Delta OS] Invalid DELTA_OS_CONSOLE_URL; falling back to ${DEFAULT_CONSOLE_URL}.`);
-    return DEFAULT_CONSOLE_URL;
+    warn(`[Delta HQ] Invalid desktop URL; falling back to ${DEFAULT_HQ_URL}.`);
+    return DEFAULT_HQ_URL;
   }
+}
+
+function resolveConsoleUrl(env = process.env, warn = () => {}) {
+  return resolveDesktopEntryUrl(env, warn);
 }
 
 function resolveDesktopRuntime({ isPackaged = false } = {}) {
@@ -29,9 +34,11 @@ function resolveDesktopRuntime({ isPackaged = false } = {}) {
 }
 
 module.exports = {
+  DEFAULT_HQ_URL,
   DEFAULT_CONSOLE_URL,
   PACKAGED_SERVICE_MANAGER_DISABLED_REASON,
   SERVICE_LOG_LIMIT,
+  resolveDesktopEntryUrl,
   resolveConsoleUrl,
   resolveDesktopRuntime,
 };

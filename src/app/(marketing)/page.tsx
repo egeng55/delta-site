@@ -1,457 +1,157 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { motion, easeInOut } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
 import Navigation from "@/components/Navigation";
-import { ScrollReveal, StaggerContainer, StaggerItem } from "@/components/ScrollSection";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import Footer from "@/components/Footer";
+import { useAuth } from "@/context/AuthContext";
+import {
+  INTELLIGENCE_LOOP,
+  PUBLIC_ACCESS_POLICY,
+  PUBLIC_CAPABILITY_STATE_DEFINITIONS,
+  getPublicCapabilitiesForSurface,
+} from "@/lib/publicCapabilityManifest";
 
-// Lazy load Footer since it's always below the fold
-const Footer = dynamic(() => import("@/components/Footer"), {
-  loading: () => <div className="h-64 bg-card" />,
-});
-
-const ChatDemo = dynamic(() => import("@/components/ChatDemo"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full max-w-3xl h-[320px] rounded-xl border border-border bg-card/50 animate-pulse" />
-  ),
-});
-
-// Wrapped ChatDemo with error boundary
-function ChatDemoWithErrorBoundary() {
-  return (
-    <ErrorBoundary
-      fallback={
-        <div className="w-full max-w-3xl h-[320px] rounded-xl border border-border bg-card/50 flex items-center justify-center">
-          <p className="text-muted text-sm">Chat demo unavailable. Please refresh the page.</p>
-        </div>
-      }
-    >
-      <ChatDemo />
-    </ErrorBoundary>
-  );
-}
-
-const features = [
-  {
-    icon: "🧠",
-    title: "Intelligent Memory",
-    description: "Delta remembers your preferences, patterns, and progress over time.",
-  },
-  {
-    icon: "📊",
-    title: "Pattern Recognition",
-    description: "Advanced AI analyzes your habits to identify what works best for you.",
-  },
-  {
-    icon: "💬",
-    title: "Natural Conversations",
-    description: "Chat naturally about your health goals. No complicated forms.",
-  },
-  {
-    icon: "🎯",
-    title: "Adaptive Goals",
-    description: "Your targets evolve with you based on your progress and feedback.",
-  },
-  {
-    icon: "🔒",
-    title: "Private & Secure",
-    description: "Your health data stays yours with end-to-end encryption.",
-  },
-  {
-    icon: "⚡",
-    title: "Real-time Insights",
-    description: "Get instant feedback and suggestions based on your current state.",
-  },
-];
-
-const steps = [
-  {
-    number: "01",
-    title: "Start a Conversation",
-    description: "Tell Delta about your health goals and what you want to achieve.",
-  },
-  {
-    number: "02",
-    title: "Delta Learns You",
-    description: "As you interact, Delta builds understanding of your patterns and preferences.",
-  },
-  {
-    number: "03",
-    title: "Get Personalized Guidance",
-    description: "Receive tailored recommendations that evolve as you progress.",
-  },
-  {
-    number: "04",
-    title: "Achieve Your Goals",
-    description: "Build lasting habits and see real, sustainable results.",
-  },
-];
+const publicStates = getPublicCapabilitiesForSurface("home");
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <>
       <Navigation />
       <main>
-        {/* Hero with Chat */}
-        <section id="home" className="min-h-screen flex flex-col items-center justify-center py-32 px-8 relative overflow-hidden">
-          {/* Animated background gradients */}
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.2, 0.3, 0.2],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: easeInOut,
-            }}
-            className="absolute top-1/4 -right-32 w-96 h-96 bg-primary/20 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{
-              scale: [1.2, 1, 1.2],
-              opacity: [0.15, 0.25, 0.15],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: easeInOut,
-            }}
-            className="absolute bottom-1/4 -left-32 w-96 h-96 bg-accent/20 rounded-full blur-3xl"
-          />
-
-          {/* Header content */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.6 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-8 relative z-10"
-          >
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, amount: 0.6 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-              className="text-4xl md:text-6xl font-bold mb-4"
-            >
-              Your AI Health
-              <br />
-              <span className="text-primary">Companion</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: false, amount: 0.6 }}
-              transition={{ delay: 0.15 }}
-              className="text-muted text-lg max-w-xl mx-auto"
-            >
-              Ask Delta anything about nutrition, fitness, sleep, or building healthy habits.
-            </motion.p>
-          </motion.div>
-
-          {/* Chat interface */}
-          <div className="w-full max-w-3xl relative z-10">
-            <ChatDemoWithErrorBoundary />
-          </div>
-
-          {/* Scroll indicator */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: false, amount: 0.8 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          >
-            <motion.div
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: easeInOut }}
-              className="w-6 h-10 border-2 border-muted/30 rounded-full flex justify-center pt-2"
-            >
-              <motion.div className="w-1.5 h-1.5 bg-primary rounded-full" />
-            </motion.div>
-          </motion.div>
-        </section>
-
-        {/* Features Section */}
-        <section id="features" className="py-32 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent pointer-events-none" />
-
-          <div className="max-w-6xl mx-auto px-8">
-            <ScrollReveal>
-              <div className="text-center mb-16">
-                <span className="text-primary font-medium text-sm tracking-wider uppercase">
-                  Features
-                </span>
-                <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                  Everything You Need to
-                  <br />
-                  <span className="text-primary">Succeed</span>
-                </h2>
-                <p className="text-muted text-lg max-w-2xl mx-auto">
-                  Powerful features designed to make your health journey effortless and effective.
-                </p>
-              </div>
-            </ScrollReveal>
-
-            <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((feature) => (
-                <StaggerItem key={feature.title}>
-                  <motion.div
-                    whileHover={{ y: -8 }}
-                    transition={{ duration: 0.3 }}
-                    className="group p-8 bg-card rounded-2xl border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all h-full"
-                  >
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: [0, -10, 10, 0] }}
-                      transition={{ duration: 0.4 }}
-                      className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-2xl mb-6"
-                    >
-                      {feature.icon}
-                    </motion.div>
-                    <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted leading-relaxed">{feature.description}</p>
-                  </motion.div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section id="how-it-works" className="py-32 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-card to-background" />
-
-          <div className="max-w-5xl mx-auto px-8 relative">
-            <ScrollReveal>
-              <div className="text-center mb-20">
-                <span className="text-primary font-medium text-sm tracking-wider uppercase">
-                  How It Works
-                </span>
-                <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                  Simple Steps to a
-                  <br />
-                  <span className="text-primary">Healthier You</span>
-                </h2>
-              </div>
-            </ScrollReveal>
-
-            <div className="space-y-12">
-              {steps.map((step, index) => (
-                <ScrollReveal
-                  key={step.number}
-                  delay={index * 0.1}
-                  direction={index % 2 === 0 ? "left" : "right"}
+        <section className="flex min-h-[76vh] items-center border-b border-border px-6 pb-16 pt-28">
+          <div className="mx-auto grid w-full max-w-6xl gap-12 lg:grid-cols-[1.3fr_0.7fr] lg:items-end">
+            <div>
+              <Image
+                src="/delta-logo.svg"
+                alt="Delta"
+                width={72}
+                height={72}
+                priority
+              />
+              <p className="mt-8 text-sm font-medium text-primary">
+                Private preview
+              </p>
+              <h1 className="mt-3 max-w-3xl text-5xl font-semibold leading-tight md:text-7xl">
+                Personal intelligence that improves with evidence.
+              </h1>
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
+                Delta is a personal intelligence system designed to understand
+                context, maintain useful state, reason about what matters, help
+                choose a next action, and learn from outcomes. Its available
+                public surface is intentionally narrower than that vision.
+              </p>
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link
+                  href={user ? "/command" : "/signup"}
+                  className="bg-foreground px-5 py-3 text-sm font-medium text-background"
                 >
-                  <div className="flex gap-8 items-start">
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      className="relative flex-shrink-0"
-                    >
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg shadow-primary/30">
-                        <span className="text-white text-2xl font-bold">
-                          {step.number}
-                        </span>
-                      </div>
-                    </motion.div>
+                  {user ? "Open private preview" : PUBLIC_ACCESS_POLICY.label}
+                </Link>
+                <Link
+                  href="/product"
+                  className="border border-border px-5 py-3 text-sm font-medium"
+                >
+                  How Delta works
+                </Link>
+              </div>
+            </div>
 
-                    <div className="flex-1 pt-2">
-                      <h3 className="text-2xl font-semibold mb-3">{step.title}</h3>
-                      <p className="text-muted text-lg leading-relaxed">
-                        {step.description}
-                      </p>
-                    </div>
+            <dl className="border-t border-border text-sm lg:border-l lg:border-t-0 lg:pl-8">
+              <div className="border-b border-border py-5">
+                <dt className="text-muted">Product identity</dt>
+                <dd className="mt-1 font-medium">Personal intelligence</dd>
+              </div>
+              <div className="border-b border-border py-5">
+                <dt className="text-muted">Access policy</dt>
+                <dd className="mt-1 font-medium">Request access</dd>
+              </div>
+              <div className="border-b border-border py-5">
+                <dt className="text-muted">Private preview</dt>
+                <dd className="mt-1 font-medium">WHOOP connected context</dd>
+              </div>
+              <div className="py-5">
+                <dt className="text-muted">Generally available</dt>
+                <dd className="mt-1 font-medium">No capabilities yet</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+
+        <section className="px-6 py-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="max-w-2xl">
+              <p className="text-sm font-medium text-primary">Intelligence loop</p>
+              <h2 className="mt-3 text-3xl font-semibold md:text-4xl">
+                Better next actions require more than one answer.
+              </h2>
+              <p className="mt-4 leading-7 text-muted">
+                Delta&apos;s defining loop connects what is happening now to what
+                should happen next, then carries the result forward as evidence.
+              </p>
+            </div>
+            <ol className="mt-10 grid border-y border-border sm:grid-cols-2 lg:grid-cols-6">
+              {INTELLIGENCE_LOOP.map((step, index) => (
+                <li
+                  key={step.id}
+                  className="border-b border-border py-5 sm:border-r sm:px-4 lg:border-b-0"
+                >
+                  <p className="text-xs text-muted">{String(index + 1).padStart(2, "0")}</p>
+                  <p className="mt-2 font-medium">{step.label}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section className="px-6 pb-20">
+          <div className="mx-auto max-w-6xl">
+            <div className="max-w-2xl">
+              <p className="text-sm font-medium text-primary">Public capability state</p>
+              <h2 className="mt-3 text-3xl font-semibold md:text-4xl">
+                Available, proven, and researched are different claims.
+              </h2>
+            </div>
+            <div className="mt-12 border-t border-border">
+              {publicStates.map((capability) => (
+                <article
+                  key={capability.id}
+                  className="grid gap-3 border-b border-border py-7 md:grid-cols-[0.35fr_0.65fr]"
+                >
+                  <p className="text-sm text-muted">
+                    {PUBLIC_CAPABILITY_STATE_DEFINITIONS[capability.state].label}
+                  </p>
+                  <div>
+                    <h3 className="text-xl font-semibold">{capability.name}</h3>
+                    <p className="mt-2 max-w-2xl leading-7 text-muted">
+                      {capability.summary}
+                    </p>
                   </div>
-                </ScrollReveal>
+                </article>
               ))}
             </div>
           </div>
         </section>
 
-        {/* About Section */}
-        <section id="about" className="py-32 relative overflow-hidden">
-          <div className="max-w-6xl mx-auto px-8">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Left - Visual */}
-              <ScrollReveal direction="left">
-                <div className="relative">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="relative z-10 bg-gradient-to-br from-card to-background p-8 rounded-3xl border border-border shadow-2xl"
-                  >
-                    {/* Simulated chat interface */}
-                    <div className="space-y-4">
-                      <div className="flex justify-end">
-                        <div className="bg-primary text-white px-4 py-3 rounded-2xl rounded-tr-md max-w-[80%]">
-                          I've been feeling tired lately and want to improve my energy
-                        </div>
-                      </div>
-                      <div className="flex justify-start">
-                        <div className="bg-border px-4 py-3 rounded-2xl rounded-tl-md max-w-[80%]">
-                          I understand. Based on our previous conversations, I noticed
-                          you've been sleeping less than 6 hours. Let's work on a sleep
-                          optimization plan together.
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <div className="bg-primary text-white px-4 py-3 rounded-2xl rounded-tr-md max-w-[80%]">
-                          That sounds great, what should I start with?
-                        </div>
-                      </div>
-                      {/* Typing indicator */}
-                      <div className="flex gap-1 px-4 py-3">
-                        {[0, 1, 2].map((i) => (
-                          <motion.div
-                            key={i}
-                            animate={{ y: [0, -6, 0] }}
-                            transition={{
-                              duration: 0.6,
-                              repeat: Infinity,
-                              delay: i * 0.15,
-                            }}
-                            className="w-2 h-2 rounded-full bg-primary/60"
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-
-                  {/* Decorative elements */}
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 20, repeat: Infinity, ease: easeInOut }}
-                    className="absolute -top-8 -right-8 w-32 h-32 border border-primary/20 rounded-full"
-                  />
-                  <motion.div
-                    animate={{ rotate: [360, 0] }}
-                    transition={{ duration: 25, repeat: Infinity, ease: easeInOut }}
-                    className="absolute -bottom-4 -left-4 w-24 h-24 border border-accent/20 rounded-full"
-                  />
-                </div>
-              </ScrollReveal>
-
-              {/* Right - Content */}
-              <ScrollReveal direction="right">
-                <div>
-                  <span className="text-primary font-medium text-sm tracking-wider uppercase">
-                    About Delta
-                  </span>
-                  <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                    Your Health, <span className="text-primary">Understood</span>
-                  </h2>
-                  <p className="text-muted text-lg leading-relaxed mb-6">
-                    We built Delta because we believe health guidance should be
-                    personal, adaptive, and accessible to everyone. Traditional apps
-                    treat you like a number. Delta treats you like a person.
-                  </p>
-                  <p className="text-muted text-lg leading-relaxed mb-8">
-                    By combining advanced AI with a deep understanding of behavioral
-                    science, Delta provides guidance that actually sticks.
-                  </p>
-
-                  {/* Stats */}
-                  <div className="flex justify-center gap-8">
-                    {[
-                      { value: "2026", label: "Founded" },
-                    ].map((stat) => (
-                      <div key={stat.label}>
-                        <div className="text-3xl font-bold text-primary">
-                          {stat.value}
-                        </div>
-                        <div className="text-muted text-sm">{stat.label}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollReveal>
+        <section className="border-y border-border bg-card px-6 py-16">
+          <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-2">
+            <div>
+              <p className="text-sm font-medium text-primary">Current limits</p>
+              <h2 className="mt-3 text-2xl font-semibold">What Delta does not claim today</h2>
             </div>
+            <ul className="space-y-3 text-sm leading-6 text-muted">
+              <li>No general persistent personal memory available as a public product</li>
+              <li>No always-listening assistant, continuous background agent, or autonomous action</li>
+              <li>No medical diagnosis, treatment, or guaranteed recommendation quality</li>
+              <li>No paid subscription, broad mobile launch, or production service-level guarantee</li>
+              <li>Internal engineering systems are not personal-intelligence product capabilities</li>
+            </ul>
           </div>
         </section>
-
-        {/* CTA Section */}
-        <section id="download" className="py-32 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-dark to-accent opacity-90" />
-
-          {/* Animated shapes */}
-          <motion.div
-            animate={{
-              x: [0, 100, 0],
-              y: [0, -50, 0],
-              rotate: [0, 180, 360],
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: easeInOut }}
-            className="absolute top-10 left-10 w-64 h-64 border border-white/10 rounded-full"
-          />
-          <motion.div
-            animate={{
-              x: [0, -80, 0],
-              y: [0, 80, 0],
-              rotate: [360, 180, 0],
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: easeInOut }}
-            className="absolute bottom-10 right-10 w-48 h-48 border border-white/10 rounded-full"
-          />
-
-          <ScrollReveal className="max-w-4xl mx-auto px-8 relative z-10 text-center">
-            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Ready to Transform
-              <br />
-              Your Health?
-            </h2>
-            <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-              Join thousands of people who have already started their journey with
-              Delta. Your future self will thank you.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <motion.a
-                href="/signup"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-white text-primary rounded-xl font-semibold shadow-xl hover:shadow-2xl transition-shadow"
-              >
-                Get Started Free
-              </motion.a>
-              <motion.a
-                href="/pricing"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-white/10 text-white border border-white/20 rounded-xl font-semibold hover:bg-white/20 transition-colors"
-              >
-                View Pricing
-              </motion.a>
-            </div>
-
-            {/* Trust badges */}
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-white/60 text-sm">
-              <span className="flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                Secure & Private
-              </span>
-              <span className="flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Free 14-Day Trial
-              </span>
-              <span className="flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                Cancel Anytime
-              </span>
-            </div>
-          </ScrollReveal>
-        </section>
-
-        <Footer />
       </main>
+      <Footer />
     </>
   );
 }
