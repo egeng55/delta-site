@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -43,6 +43,7 @@ export default function CommandPage() {
   const [checking, setChecking] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState("");
+  const refreshInFlight = useRef(false);
 
   const loadStatus = async (accessToken: string) => {
     const result = await getWhoopConnectionStatus(accessToken);
@@ -68,20 +69,26 @@ export default function CommandPage() {
   }, [session?.access_token]);
 
   const refreshWhoop = async () => {
-    if (!session?.access_token) {
+    if (!session?.access_token || refreshInFlight.current) {
       return;
     }
+    refreshInFlight.current = true;
     setRefreshing(true);
     setMessage("");
-    const result = await syncWhoopConnection(session.access_token);
-    if (!result) {
-      setMessage("Refresh failed. Existing normalized data remains available.");
+    try {
+      const result = await syncWhoopConnection(session.access_token);
+      if (!result) {
+        setMessage("Refresh failed. Existing normalized data remains available.");
+        return;
+      }
+      await loadStatus(session.access_token);
+      setMessage("WHOOP data refreshed for future ChatGPT requests.");
+    } catch {
+      setMessage("Refresh could not be confirmed. Check connector status before retrying.");
+    } finally {
+      refreshInFlight.current = false;
       setRefreshing(false);
-      return;
     }
-    await loadStatus(session.access_token);
-    setMessage("WHOOP data refreshed for future ChatGPT requests.");
-    setRefreshing(false);
   };
 
   const connected = status?.connected === true;
@@ -125,6 +132,8 @@ export default function CommandPage() {
           </section>
 
           <section className="py-12">
+            {!checking && status === null && <p role="alert">Connector status is unavailable. Reload this page to try again.</p>}
+            {!checking && status?.connected === false && <p>No connector data yet. Connect WHOOP to begin.</p>}
             <div className="grid gap-8 md:grid-cols-[0.35fr_0.65fr]">
               <div>
                 <p className="text-sm font-medium text-primary">Connector</p>

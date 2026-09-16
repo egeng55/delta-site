@@ -19,6 +19,19 @@ function chatRequest(headers: Record<string, string> = {}) {
 }
 
 describe("/api/chat proxy", () => {
+  it("rejects oversized bodies before dispatch", async () => {
+    const fetchSpy = jest.spyOn(global, "fetch");
+    const response = await POST(chatRequest({ Authorization: "Bearer fixture", "Content-Length": "65537" }));
+    expect(response.status).toBe(413);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns a bounded failure without forwarding upstream error details", async () => {
+    jest.spyOn(global, "fetch").mockRejectedValue(new Error("private upstream detail"));
+    const response = await POST(chatRequest({ Authorization: "Bearer fixture" }));
+    expect(response.status).toBe(502);
+    expect(JSON.stringify(await response.json())).not.toContain("private upstream detail");
+  });
   beforeEach(() => {
     process.env.NEXT_PUBLIC_DELTA_API_URL = "http://127.0.0.1:8000";
   });

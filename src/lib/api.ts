@@ -26,6 +26,10 @@ export async function fetchWithRetry(
   timeout = API_COLD_START_TIMEOUT
 ): Promise<Response> {
   const controller = new AbortController();
+  const callerSignal = options.signal;
+  const abortFromCaller = () => controller.abort();
+  if (callerSignal?.aborted) throw new DOMException('Request cancelled', 'AbortError');
+  callerSignal?.addEventListener('abort', abortFromCaller, { once: true });
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
@@ -39,14 +43,18 @@ export async function fetchWithRetry(
     clearTimeout(timeoutId);
 
     // If we have retries left and it's a timeout/network error, retry
-    if (retries > 0 && (error instanceof Error && (error.name === 'AbortError' || error.message.includes('fetch')))) {
+    const safeToRetry = ['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase());
+    if (safeToRetry && !callerSignal?.aborted && retries > 0 && (error instanceof Error && (error.name === 'AbortError' || error.message.includes('fetch')))) {
       console.log(`Request failed, retrying... (${retries} retries left)`);
       // Wait a bit before retrying (exponential backoff)
       await new Promise(resolve => setTimeout(resolve, 1000 * (3 - retries)));
-      return fetchWithRetry(url, options, retries - 1, API_NORMAL_TIMEOUT);
+      return await fetchWithRetry(url, options, retries - 1, API_NORMAL_TIMEOUT);
     }
 
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
+    callerSignal?.removeEventListener('abort', abortFromCaller);
   }
 }
 

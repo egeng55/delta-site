@@ -28,6 +28,21 @@ describe("isLikelyRenderColdStart", () => {
 });
 
 describe("fetchWithRetry", () => {
+  it("never retries a mutation after an ambiguous network failure", async () => {
+    const fetchMock = jest.fn().mockRejectedValue(new Error("Failed to fetch"));
+    global.fetch = fetchMock as unknown as typeof fetch;
+    await expect(fetchWithRetry("https://example.com", { method: "POST", body: "{}" }, 2)).rejects.toThrow("Failed to fetch");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not dispatch an already cancelled request", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchMock = jest.fn();
+    global.fetch = fetchMock as unknown as typeof fetch;
+    await expect(fetchWithRetry("https://example.com", { signal: controller.signal })).rejects.toThrow("cancelled");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     jest.useFakeTimers();
   });
