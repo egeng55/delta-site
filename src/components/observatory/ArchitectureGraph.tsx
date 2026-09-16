@@ -3,6 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { Maximize2, Minus, Plus, RotateCcw } from "lucide-react";
 import type { Network } from "vis-network";
 import type { Graph, GraphNode } from "@/lib/observatory";
+import {
+  boundedGraphScale,
+  MIN_GRAPH_SCALE,
+  MAX_GRAPH_SCALE,
+} from "@/lib/graphViewport";
 import styles from "./Observatory.module.css";
 
 export default function ArchitectureGraph({
@@ -22,6 +27,17 @@ export default function ArchitectureGraph({
   const network = useRef<Network | null>(null);
   const select = useRef(onSelect);
   const [failed, setFailed] = useState(false);
+  const [scale, setScale] = useState(1);
+  const initialView = useRef<{
+    scale: number;
+    position: { x: number; y: number };
+  } | null>(null);
+  const fit = useRef<() => void>(() => {});
+  function zoomTo(value: number) {
+    const bounded = boundedGraphScale(value);
+    network.current?.moveTo({ scale: bounded });
+    setScale(bounded);
+  }
   useEffect(() => {
     select.current = onSelect;
   }, [onSelect]);
@@ -61,7 +77,10 @@ export default function ArchitectureGraph({
           {
             nodes: filtered.map((node) => ({
               id: node.id,
-              label: node.label,
+              label:
+                node.label.length > 28
+                  ? node.label.slice(0, 25) + "..."
+                  : node.label,
               shape: node.kind === "repository" ? "hexagon" : "dot",
               size:
                 node.kind === "repository"
@@ -71,7 +90,7 @@ export default function ArchitectureGraph({
                     : 5,
               color: {
                 background: palette[node.group] || "#adb9be",
-                border: "#121c18",
+                border: "#182127",
                 highlight: { background: "#fff", border: "#78dab3" },
               },
               font: {
@@ -100,6 +119,7 @@ export default function ArchitectureGraph({
             },
             interaction: {
               hover: true,
+              zoomSpeed: 0.35,
               keyboard: { enabled: true, bindToWindow: false },
               tooltipDelay: 500,
             },
@@ -116,16 +136,31 @@ export default function ArchitectureGraph({
           },
         );
         network.current = instance;
+        const clamp = () => {
+          const actual = instance.getScale();
+          const bounded = boundedGraphScale(actual);
+          if (actual !== bounded) instance.moveTo({ scale: bounded });
+          setScale(bounded);
+        };
+        fit.current = () => {
+          instance.fit({ animation: false });
+          clamp();
+        };
+        instance.on("zoom", clamp);
         instance.on("selectNode", (event) =>
           select.current(
             graph.nodes.find((node) => node.id === event.nodes[0]) || null,
           ),
         );
         instance.on("deselectNode", () => select.current(null));
-        instance.on("resize", () => instance.fit({ animation: false }));
+        instance.on("resize", () => fit.current());
         instance.once("stabilizationIterationsDone", () => {
           instance.setOptions({ physics: false });
-          instance.fit({ animation: false });
+          fit.current();
+          initialView.current = {
+            scale: boundedGraphScale(instance.getScale()),
+            position: instance.getViewPosition(),
+          };
         });
       })
       .catch(() => {
@@ -135,6 +170,8 @@ export default function ArchitectureGraph({
       disposed = true;
       network.current?.destroy();
       network.current = null;
+      initialView.current = null;
+      fit.current = () => {};
     };
   }, [graph, query, repo, revision]);
   return (
@@ -154,26 +191,28 @@ export default function ArchitectureGraph({
         </div>
       )}
       <div className={styles.graphCaption}>
-        <span className={styles.dot} /> {nodes.length} nodes <span>/</span>{" "}
-        {links.length} edges <span>/</span> static evidence
+        {nodes.length} nodes · {links.length} static edges
       </div>
       <div className={styles.graphControls}>
         <button
           title="Zoom in"
           aria-label="Zoom in"
+          disabled={scale >= MAX_GRAPH_SCALE || !nodes.length}
           onClick={() => {
             const n = network.current;
-            if (n) n.moveTo({ scale: Math.min(3, n.getScale() * 1.25) });
+            if (n) zoomTo(n.getScale() * 1.25);
           }}
         >
           <Plus size={16} />
         </button>
+        <output aria-label="Graph zoom">{Math.round(scale * 100)}%</output>
         <button
           title="Zoom out"
           aria-label="Zoom out"
+          disabled={scale <= MIN_GRAPH_SCALE || !nodes.length}
           onClick={() => {
             const n = network.current;
-            if (n) n.moveTo({ scale: Math.max(0.15, n.getScale() / 1.25) });
+            if (n) zoomTo(n.getScale() / 1.25);
           }}
         >
           <Minus size={16} />
@@ -181,14 +220,22 @@ export default function ArchitectureGraph({
         <button
           title="Fit graph"
           aria-label="Fit graph"
-          onClick={() => network.current?.fit({ animation: false })}
+          disabled={!nodes.length}
+          onClick={() => fit.current()}
         >
           <Maximize2 size={16} />
         </button>
         <button
           title="Reset viewport"
           aria-label="Reset viewport"
-          onClick={() => network.current?.fit({ animation: false })}
+          disabled={!nodes.length}
+          onClick={() => {
+            const view = initialView.current;
+            if (view) {
+              network.current?.moveTo({ ...view, animation: false });
+              setScale(view.scale);
+            } else fit.current();
+          }}
         >
           <RotateCcw size={16} />
         </button>

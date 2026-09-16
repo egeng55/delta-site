@@ -10,8 +10,7 @@ Missing configuration fails closed. The report is never a public asset, static
 page, browser-storage entry, or client environment variable.
 
 The design-only `/observatory-preview` route uses conspicuously synthetic data
-and invokes the not-found boundary outside development. Next's streamed response
-may retain HTTP 200, but it contains no preview/report content. It cannot fetch
+and is blocked with HTTP 404 by middleware outside development. It cannot fetch
 the private report.
 
 ## Data and daily updates
@@ -60,10 +59,22 @@ this implementation does not configure or change production secrets.
 ## Interaction and privacy
 
 Graphs support search, repository filters, selection, zoom, fitting and seeded
-layout rebuilds. Rebuild changes the client layout only. Refresh rereads the last
+layout rebuilds. Wheel, touch, keyboard, and button zoom share a 15%-300% limit.
+Fit frames the current graph; Reset restores its initial viewport. The original
+`/delta-logo.svg` is used unchanged. Overview, Architecture, Activity & quality,
+and Settings are separate destinations with browser history support. Node
+selection opens a dismissible inspector. Chat starts closed.
+Rebuild changes the client layout only. Refresh rereads the last
 validated report; it does not scan repositories. The chat panel is deterministic
 local view control, not an LLM: no provider cost, execution, authority changes,
 or arbitrary commands. Chat is ephemeral and is not persisted.
+
+Sign-in acknowledges missing Supabase configuration before collecting credentials.
+Configured sign-in prevents duplicate submission, has a bounded deadline, and
+performs a full navigation after session establishment. Optional profile queries
+run outside the Supabase auth callback lock; they cannot hold login open. Server
+authorization remains mandatory. Sign-out requires a same-origin POST, clears
+the displayed report, and revokes only the local session with cleared cookies.
 
 Private pages have no-store/noindex headers, restricted CSP and no third-party
 visual embeds. Monte's spacing/motion/clock treatment informed the design;
@@ -82,11 +93,18 @@ lint and production build before promotion. Browser verification must include
 desktop/mobile graph rendering, filtering, empty results, clock, chat, and the
 unauthenticated gate. No live Supabase session or production mutation is required.
 
-Candidate verification on 2026-09-16: 35 Jest suites passed (199 tests passed,
-5 existing skips); production build/typecheck passed; lint passed with four
-pre-existing warnings in unchanged files; production dependency audit reported
-zero advisories. Browser checks passed at 320, 390, 768, 1440 and 1920 pixels,
-including nonblank graph pixels, filtering, tabs, zoom, clock, local commands and
-the unconfigured owner gate. Production rendering exposed no preview data.
-Preflight and the advisory safety scan ran; neither is a security certification.
+The fixture-only browser journey is reproducible with:
+
+```sh
+node scripts/observatory-journey-smoke.cjs
+```
+
+It requires Playwright (or `PLAYWRIGHT_MODULE` pointing to the installed module)
+and Chrome. It starts a loopback auth fixture and a separate dev server on 3112;
+stop other dev servers in this worktree first. It checks real browser cookies,
+owner/non-owner access, sign-out, navigation, wheel zoom limits, filters, node
+inspection, history, local chat and responsive overflow. It does not authenticate
+a real account or use real report data. Temporary fixture files are removed.
+
 Real owner sign-in and hosted daily delivery remain untested/unactivated.
+Neither the mock journey nor advisory scans are a security certification.

@@ -2,20 +2,34 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import Observatory from './Observatory';
 import { observatoryPreview } from '@/lib/observatoryPreview';
 jest.mock('./ArchitectureGraph', () => ({ __esModule: true, default: () => <div>Graph canvas</div> }));
+beforeEach(() => window.history.replaceState(null, '', '/'));
 it('shows truthful source counts, unknown runtime health, and local chat controls', () => {
   const originalFetch = global.fetch;
   const fetch = jest.fn(() => { throw new Error('No network allowed'); });
   global.fetch = fetch;
   render(<Observatory initialReport={observatoryPreview()} preview />);
-  expect(screen.getByText(/SYNTHETIC DESIGN PREVIEW/)).toBeInTheDocument();
-  expect(screen.getByText('Runtime participation & spending')).toBeInTheDocument();
+  expect(screen.getByText(/Synthetic design sandbox/)).toBeInTheDocument();
+  expect(screen.getByRole('img', { name: 'Delta' })).toHaveAttribute('src', '/delta-logo.svg');
+  expect(screen.queryByLabelText('Report command')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Ask Delta' }));
   fireEvent.click(screen.getByRole('button', { name: 'Show census for 7 days' }));
   expect(screen.getByRole('combobox', { name: 'History timeframe' })).toHaveValue('7');
   fireEvent.change(screen.getByLabelText('Report command'), { target: { value: 'execute deploy' } });
   fireEvent.click(screen.getByRole('button', { name: 'Send command' }));
   expect(screen.getByText('This panel cannot execute operations or change authority.')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Refresh report' }));
+  expect(screen.getByRole('button', { name: 'Refresh report' })).toBeDisabled();
   expect(fetch).not.toHaveBeenCalled(); global.fetch = originalFetch;
+});
+it('navigates the directory, inspector and settings without dead controls', () => {
+  render(<Observatory initialReport={observatoryPreview()} preview />);
+  fireEvent.click(screen.getByRole('button', { name: /delta-backend/ }));
+  expect(window.location.hash).toBe('#architecture');
+  expect(screen.getByLabelText('Repository filter')).toHaveValue('backend');
+  fireEvent.click(screen.getByRole('link', { name: 'Settings' }));
+  expect(screen.getByRole('heading', { name: 'Workspace settings' })).toBeInTheDocument();
+  expect(screen.getByText('Not activated')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('link', { name: 'Overview' }));
+  expect(screen.getByRole('heading', { name: 'System directory' })).toBeInTheDocument();
 });
 it('does not invent data when a report is absent', () => {
   render(<Observatory initialReport={null} />);

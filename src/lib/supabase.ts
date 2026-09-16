@@ -15,6 +15,8 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 // Check if Supabase is configured
 const isSupabaseConfigured = SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== '';
 
+export function hasSupabaseConfiguration() { return isSupabaseConfigured; }
+
 // Browser client for client-side usage
 export function createSupabaseBrowserClient() {
   if (!isSupabaseConfigured) {
@@ -31,7 +33,9 @@ export function getSupabase() {
     throw new Error('Supabase environment variables are not configured');
   }
   if (_supabase === null) {
-    _supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    _supabase = createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { fetch: (input, init) => fetch(input, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(10000)]) : AbortSignal.timeout(10000) }) },
+    });
   }
   return _supabase;
 }
