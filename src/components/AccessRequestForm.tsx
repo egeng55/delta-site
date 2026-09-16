@@ -1,21 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { requestJson } from "@/lib/requestJson";
 
 type FormStatus = "idle" | "submitting" | "submitted" | "error";
 
 export default function AccessRequestForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [error, setError] = useState("");
+  const inFlight = useRef(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (inFlight.current) return;
+    inFlight.current = true;
     setStatus("submitting");
     setError("");
 
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const response = await fetch("/api/access-requests", {
+    const response = await requestJson("/api/access-requests", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -27,14 +31,27 @@ export default function AccessRequestForm() {
     }).catch(() => null);
 
     if (!response) {
-      setError("Access requests are temporarily unavailable.");
+      inFlight.current = false;
+      setError(
+        "We could not confirm your request. Your entries are preserved. Submitting again will not create a second request for the same email.",
+      );
       setStatus("error");
       return;
     }
 
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      setError(typeof payload.error === "string" ? payload.error : "Could not submit request.");
+    if (
+      !response.ok ||
+      response.status !== 202 ||
+      !response.data ||
+      typeof response.data !== "object" ||
+      Reflect.get(response.data, "accepted") !== true
+    ) {
+      inFlight.current = false;
+      setError(
+        response.status === 429
+          ? "Too many requests. Please wait before trying again."
+          : "Could not confirm your request. Please check your entries and try again later.",
+      );
       setStatus("error");
       return;
     }
@@ -56,7 +73,12 @@ export default function AccessRequestForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      aria-label="Request access"
+      aria-busy={status === "submitting"}
+      className="mt-8 space-y-5"
+    >
       <div>
         <label htmlFor="access-name" className="mb-2 block text-sm font-medium">
           Name
@@ -74,7 +96,10 @@ export default function AccessRequestForm() {
       </div>
 
       <div>
-        <label htmlFor="access-email" className="mb-2 block text-sm font-medium">
+        <label
+          htmlFor="access-email"
+          className="mb-2 block text-sm font-medium"
+        >
           Email
         </label>
         <input
@@ -89,8 +114,12 @@ export default function AccessRequestForm() {
       </div>
 
       <div>
-        <label htmlFor="access-reason" className="mb-2 block text-sm font-medium">
-          What would you like to explore? <span className="text-muted">(optional)</span>
+        <label
+          htmlFor="access-reason"
+          className="mb-2 block text-sm font-medium"
+        >
+          What would you like to explore?{" "}
+          <span className="text-muted">(optional)</span>
         </label>
         <textarea
           id="access-reason"
@@ -103,7 +132,13 @@ export default function AccessRequestForm() {
 
       <div className="absolute left-[-10000px]" aria-hidden="true">
         <label htmlFor="access-company">Company</label>
-        <input id="access-company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+        <input
+          id="access-company"
+          name="company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
 
       {error && (
@@ -122,8 +157,11 @@ export default function AccessRequestForm() {
 
       <p className="text-xs leading-5 text-muted">
         Delta stores this request so it can be reviewed and, if approved, linked
-        to an invitation. See the <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a> for
-        data controls. No approval or response time is promised.
+        to an invitation. See the{" "}
+        <a href="/privacy" className="text-primary hover:underline">
+          Privacy Policy
+        </a>{" "}
+        for data controls. No approval or response time is promised.
       </p>
     </form>
   );

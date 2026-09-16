@@ -115,7 +115,9 @@ describe("contact submission", () => {
     });
   }
   it("uses the existing support contract once and confirms success only after acceptance", async () => {
-    global.fetch = jest.fn().mockResolvedValue({ ok: true });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, status: 200, json: async () => ({}) });
     render(<ContactPage />);
     fillForm();
     fireEvent.submit(screen.getByRole("form", { name: "Contact Delta" }));
@@ -135,13 +137,11 @@ describe("contact submission", () => {
     );
   });
   it("retains the message on rejection and never renders private server errors", async () => {
-    global.fetch = jest
-      .fn()
-      .mockResolvedValue({
-        ok: false,
-        status: 500,
-        json: async () => ({ detail: "private server payload" }),
-      });
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ detail: "private server payload" }),
+    });
     render(<ContactPage />);
     fillForm();
     fireEvent.submit(screen.getByRole("form", { name: "Contact Delta" }));

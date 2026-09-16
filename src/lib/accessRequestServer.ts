@@ -1,4 +1,8 @@
-import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import {
+  createClient,
+  type SupabaseClient,
+  type User,
+} from "@supabase/supabase-js";
 
 interface AccessOwnerAuthorization {
   ok: true;
@@ -18,13 +22,26 @@ export type AccessOwnerAuthorizationResult =
 
 export function createAccessAdminClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secretKey = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const secretKey =
+    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !secretKey) {
     throw new Error("Access request storage is not configured");
   }
 
   return createClient(url, secretKey, {
+    global: {
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          cache: "no-store",
+          signal: AbortSignal.any([
+            AbortSignal.timeout(10000),
+            ...(init?.signal ? [init.signal] : []),
+            ...(input instanceof Request ? [input.signal] : []),
+          ]),
+        }),
+    },
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -35,7 +52,7 @@ export function createAccessAdminClient(): SupabaseClient {
 function getOwnerEmails(): string[] {
   return (process.env.DELTA_ACCESS_OWNER_EMAILS ?? "")
     .split(",")
-    .map(email => email.trim().toLowerCase())
+    .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
 }
 
@@ -47,7 +64,11 @@ export async function authorizeAccessOwner(
   try {
     client = createAccessAdminClient();
   } catch {
-    return { ok: false, status: 503, error: "Access review is not configured." };
+    return {
+      ok: false,
+      status: 503,
+      error: "Access review is not configured.",
+    };
   }
 
   const authorization = request.headers.get("authorization");
@@ -56,7 +77,17 @@ export async function authorizeAccessOwner(
   }
 
   const token = authorization.slice("Bearer ".length).trim();
-  const { data, error } = await client.auth.getUser(token);
+  let result;
+  try {
+    result = await client.auth.getUser(token);
+  } catch {
+    return {
+      ok: false,
+      status: 503,
+      error: "Access review is temporarily unavailable.",
+    };
+  }
+  const { data, error } = result;
 
   if (error || !data.user?.email) {
     return { ok: false, status: 401, error: "Authentication required." };
@@ -64,7 +95,11 @@ export async function authorizeAccessOwner(
 
   const ownerEmails = getOwnerEmails();
   if (ownerEmails.length === 0) {
-    return { ok: false, status: 503, error: "Access review is not configured." };
+    return {
+      ok: false,
+      status: 503,
+      error: "Access review is not configured.",
+    };
   }
 
   if (!ownerEmails.includes(data.user.email.toLowerCase())) {

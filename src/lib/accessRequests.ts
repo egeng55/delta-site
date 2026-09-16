@@ -7,6 +7,11 @@ export const ACCESS_REQUEST_STATUSES = [
 ] as const;
 
 export type AccessRequestStatus = (typeof ACCESS_REQUEST_STATUSES)[number];
+export const ACCESS_REQUEST_PAGE_SIZE = 50;
+export type AccessRequestListRecord = Pick<
+  AccessRequestRecord,
+  "id" | "email" | "name" | "reason" | "status" | "submitted_at"
+>;
 
 export interface AccessRequestRecord {
   id: string;
@@ -53,7 +58,9 @@ export function normalizeAccessRequestEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-export function parseAccessRequestInput(input: unknown): AccessRequestValidationResult {
+export function parseAccessRequestInput(
+  input: unknown,
+): AccessRequestValidationResult {
   const name = readString(input, "name");
   const email = normalizeAccessRequestEmail(readString(input, "email"));
   const reason = readString(input, "reason");
@@ -68,7 +75,10 @@ export function parseAccessRequestInput(input: unknown): AccessRequestValidation
   }
 
   if (reason.length > 1200) {
-    return { ok: false, error: "Keep the optional note under 1,200 characters." };
+    return {
+      ok: false,
+      error: "Keep the optional note under 1,200 characters.",
+    };
   }
 
   return {
@@ -82,8 +92,13 @@ export function parseAccessRequestInput(input: unknown): AccessRequestValidation
   };
 }
 
-export function isAccessRequestStatus(value: unknown): value is AccessRequestStatus {
-  return typeof value === "string" && ACCESS_REQUEST_STATUSES.some(status => status === value);
+export function isAccessRequestStatus(
+  value: unknown,
+): value is AccessRequestStatus {
+  return (
+    typeof value === "string" &&
+    ACCESS_REQUEST_STATUSES.some((status) => status === value)
+  );
 }
 
 export function canOwnerTransitionAccessRequest(

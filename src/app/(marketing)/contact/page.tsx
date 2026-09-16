@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Arrow,
   PageIntro,
@@ -9,6 +9,7 @@ import {
   styles,
 } from "@/components/public/PublicSite";
 import { DELTA_API_URL } from "@/lib/api";
+import { requestJson } from "@/lib/requestJson";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -21,22 +22,21 @@ export default function ContactPage() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [error, setError] = useState("");
+  const inFlight = useRef(false);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (status === "loading") return;
+    if (inFlight.current) return;
     if (form.message.trim().length < 10) {
       setError("Please enter at least 10 characters in your message.");
       setStatus("error");
       return;
     }
     setStatus("loading");
+    inFlight.current = true;
     setError("");
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
-      const response = await fetch(`${DELTA_API_URL}/support/submit`, {
+      const response = await requestJson(`${DELTA_API_URL}/support/submit`, {
         method: "POST",
-        signal: controller.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: `web-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -63,7 +63,7 @@ export default function ContactPage() {
       );
       setStatus("error");
     } finally {
-      clearTimeout(timeout);
+      inFlight.current = false;
     }
   }
   return (
