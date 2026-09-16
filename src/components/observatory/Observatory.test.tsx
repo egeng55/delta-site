@@ -10,6 +10,8 @@ it('shows truthful source counts, unknown runtime health, and local chat control
   render(<Observatory initialReport={observatoryPreview()} preview />);
   expect(screen.getByText(/Synthetic design sandbox/)).toBeInTheDocument();
   expect(screen.getByRole('img', { name: 'Delta' })).toHaveAttribute('src', '/delta-logo.svg');
+  expect(screen.getByRole('heading', { name: 'Inside Delta' })).toBeInTheDocument();
+  expect(screen.getByText('Graph canvas')).toBeInTheDocument();
   expect(screen.queryByLabelText('Report command')).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Ask Delta' }));
   fireEvent.click(screen.getByRole('button', { name: 'Show census for 7 days' }));
@@ -30,6 +32,13 @@ it('navigates the directory, inspector and settings without dead controls', () =
   expect(screen.getByText('Not activated')).toBeInTheDocument();
   fireEvent.click(screen.getByRole('link', { name: 'Overview' }));
   expect(screen.getByRole('heading', { name: 'System directory' })).toBeInTheDocument();
+});
+it('opens the full architecture workspace from the overview map', () => {
+  render(<Observatory initialReport={observatoryPreview()} preview />);
+  fireEvent.click(screen.getByRole('button', { name: 'Open architecture map' }));
+  expect(window.location.hash).toBe('#architecture');
+  expect(screen.getByRole('heading', { name: 'Architecture' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Architecture' })).toHaveAttribute('aria-current', 'page');
 });
 it('does not invent data when a report is absent', () => {
   render(<Observatory initialReport={null} />);

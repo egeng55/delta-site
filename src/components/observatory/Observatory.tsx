@@ -270,7 +270,7 @@ export default function Observatory({
           </span>
         </Link>
         <nav aria-label="Workspace navigation">
-          {navigation.map((item) => (
+          {navigation.map((item, index) => (
             <a
               key={item.id}
               href={"#" + item.id}
@@ -285,8 +285,10 @@ export default function Observatory({
                 navigate(item.id);
               }}
             >
-              <item.icon size={18} />
-              {item.label}
+              <span className={styles.navIndex} aria-hidden="true">
+                0{index + 1}
+              </span>
+              <span>{item.label}</span>
             </a>
           ))}
         </nav>
@@ -340,7 +342,7 @@ export default function Observatory({
             </Link>
           </div>
         )}
-        <main id="workspace-content" className={styles.main}>
+        <main key={section} id="workspace-content" className={styles.main}>
           <div className={styles.heading}>
             <div>
               <p className={styles.eyebrow}>
@@ -524,22 +526,66 @@ export default function Observatory({
                           </p>
                         </div>
                       </div>
+                      <div className={styles.changeSummary}>
+                        <span className={styles.eyebrow}>
+                          SINCE THE PREVIOUS SNAPSHOT
+                        </span>
+                        <strong>
+                          {delta === null
+                            ? "--"
+                            : (delta > 0 ? "+" : "") + delta}
+                        </strong>
+                        <p>
+                          {delta === null
+                            ? "One snapshot. No change history yet."
+                            : "Net change in registered capabilities."}
+                        </p>
+                        <button onClick={() => navigate("quality")}>
+                          Open history <ArrowRight size={15} />
+                        </button>
+                      </div>
                     </div>
-                    <div className={styles.changeSummary}>
-                      <span className={styles.eyebrow}>
-                        SINCE THE PREVIOUS SNAPSHOT
-                      </span>
-                      <strong>
-                        {delta === null ? "--" : (delta > 0 ? "+" : "") + delta}
-                      </strong>
-                      <p>
-                        {delta === null
-                          ? "One snapshot. No change history yet."
-                          : "Net change in registered capabilities."}
+                    <div className={styles.overviewMap}>
+                      <div className={styles.sectionHead}>
+                        <div>
+                          <p className={styles.eyebrow}>
+                            01 / CONNECTED STRUCTURE
+                          </p>
+                          <h2>Inside Delta</h2>
+                        </div>
+                        <button
+                          title="Open architecture map"
+                          aria-label="Open architecture map"
+                          onClick={() => {
+                            setRepo("all");
+                            navigate("architecture");
+                          }}
+                        >
+                          <ArrowUpRight size={20} />
+                        </button>
+                      </div>
+                      <ArchitectureGraph
+                        graph={
+                          report.graphs.find((item) => item.id === "systems") ||
+                          report.graphs[0]
+                        }
+                        query=""
+                        repo="all"
+                        revision={revision}
+                        onSelect={(node) => {
+                          setSelected(node);
+                          setGraphId("systems");
+                          setRepo("all");
+                          setQuery("");
+                          navigate("architecture");
+                        }}
+                      />
+                      <p className={styles.mapNote}>
+                        Declared relationships ·{" "}
+                        {preview
+                          ? "Synthetic preview"
+                          : "Committed source snapshot"}
                       </p>
-                      <button onClick={() => navigate("quality")}>
-                        Open history <ArrowRight size={15} />
-                      </button>
                     </div>
                   </section>
                   <div className={styles.sectionHead}>

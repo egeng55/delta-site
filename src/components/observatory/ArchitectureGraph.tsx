@@ -64,11 +64,11 @@ export default function ArchitectureGraph({
         );
         const ids = new Set(filtered.map((node) => node.id));
         const palette: Record<string, string> = {
-          agent: "#78dab3",
-          backend: "#eaba82",
-          site: "#bbc4fb",
-          mobile: "#edaca7",
-          jobs: "#d2df8b",
+          agent: "#b5c9a9",
+          backend: "#92b6ca",
+          site: "#cec9e8",
+          mobile: "#dca9bc",
+          jobs: "#d5ca94",
           runtime: "#adb9be",
           unmapped: "#737d79",
         };
@@ -90,8 +90,8 @@ export default function ArchitectureGraph({
                     : 5,
               color: {
                 background: palette[node.group] || "#adb9be",
-                border: "#182127",
-                highlight: { background: "#fff", border: "#78dab3" },
+                border: "#191d1b",
+                highlight: { background: "#fff", border: "#b5c9a9" },
               },
               font: {
                 color: "#dbe3df",
@@ -106,7 +106,7 @@ export default function ArchitectureGraph({
                 id,
                 from: link.source,
                 to: link.target,
-                color: "#39463f",
+                color: "#556252",
                 width: 1,
                 arrows: { to: { enabled: true, scaleFactor: 0.35 } },
               })),
@@ -144,6 +144,8 @@ export default function ArchitectureGraph({
         };
         fit.current = () => {
           instance.fit({ animation: false });
+          // Leave breathing room for labels at the viewport edge.
+          instance.moveTo({ scale: boundedGraphScale(instance.getScale() * 0.9) });
           clamp();
         };
         instance.on("zoom", clamp);

@@ -1,6 +1,6 @@
 .page {
-  background: #fafbfc;
-  color: #24282f;
+  background: #f5f6f2;
+  color: #181a18;
   min-height: 100vh;
   font-family: var(--font-inter), Arial, sans-serif;
   letter-spacing: 0;
@@ -27,8 +27,10 @@
   text-decoration: underline;
 }
 .page .brand {
-  font-size: 24px;
-  font-weight: 600;
+  font:
+    400 29px Georgia,
+    "Times New Roman",
+    serif;
   gap: 10px;
 }
 .page :is(a, button, input):focus-visible {
@@ -51,8 +53,10 @@
   color: #727984;
 }
 .content h1 {
-  font-size: 36px;
-  font-weight: 550;
+  font:
+    400 46px Georgia,
+    "Times New Roman",
+    serif;
   margin: 22px 0 10px;
   line-height: 1.2;
 }
@@ -73,9 +77,9 @@
 .content input {
   width: 100%;
   min-width: 0;
-  border: 1px solid #cdd2d9;
-  border-radius: 5px;
-  background: white;
+  border: 1px solid #cdd2c9;
+  border-radius: 2px;
+  background: #fcfcfa;
   color: #20242a;
   font: 14px inherit;
   padding: 13px 12px;
@@ -92,9 +96,9 @@
 }
 .password {
   display: flex;
-  border: 1px solid #cdd2d9;
-  border-radius: 5px;
-  background: white;
+  border: 1px solid #cdd2c9;
+  border-radius: 2px;
+  background: #fcfcfa;
 }
 .password input {
   border: 0;
@@ -112,8 +116,8 @@
   justify-content: space-between;
   align-items: center;
   border: 0;
-  border-radius: 5px;
-  background: #23282f;
+  border-radius: 2px;
+  background: #1d211e;
   color: white;
   padding: 14px;
   font-size: 14px;
@@ -137,7 +141,10 @@
   padding: 24px 0;
 }
 .unavailable h2 {
-  font-size: 17px;
+  font:
+    400 24px Georgia,
+    "Times New Roman",
+    serif;
 }
 .unavailable p {
   font-size: 13px;
@@ -160,8 +167,9 @@
 }
 .page footer {
   font-size: 11px;
-  color: #727984;
-  border-top: 1px solid #e3e5e8;
+  color: #c4cec1;
+  background: #1d211e;
+  border-top: 1px solid #3d463e;
 }
 @media (max-width: 600px) {
   .page header,

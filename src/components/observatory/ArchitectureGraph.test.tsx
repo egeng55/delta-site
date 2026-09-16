@@ -22,7 +22,7 @@ it('clamps wheel/touch/keyboard zoom events and button zoom to the same limits',
   act(() => { mockScale = 0.0001; mockEvents.zoom(); });
   expect(mockScale).toBe(.15); expect(screen.getByRole('button', { name: 'Zoom out' })).toBeDisabled();
   fireEvent.click(screen.getByRole('button', { name: 'Reset viewport' }));
-  expect(mockMove).toHaveBeenLastCalledWith({ scale: .8, position: { x: 12, y: 23 }, animation: false });
+  expect(mockMove).toHaveBeenLastCalledWith({ scale: .8 * .9, position: { x: 12, y: 23 }, animation: false });
   fireEvent.click(screen.getByRole('button', { name: 'Fit graph' })); expect(mockFit).toHaveBeenCalled();
   unmount(); expect(mockDestroy).toHaveBeenCalled();
 });

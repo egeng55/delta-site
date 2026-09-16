@@ -77,7 +77,14 @@ authorization remains mandatory. Sign-out requires a same-origin POST, clears
 the displayed report, and revokes only the local session with cleared cookies.
 
 Private pages have no-store/noindex headers, restricted CSP and no third-party
-visual embeds. Monte's spacing/motion/clock treatment informed the design;
+visual embeds. The Monte reference was inspected directly at
+`/Users/egeng/Documents/Monte Management` without modifying its source. The
+workspace uses its numbered top-navigation, Georgia/Inter typography contrast,
+fine dividing rules, understated hover motion and clock treatment. The actual
+Delta SVG remains unchanged. The overview now includes an interactive source
+map; the detailed Architecture view retains filtering and node inspection.
+No Monte portraits, private data, external scripts, custom cursor, or blocking
+intro animation were copied. Reduced-motion preferences are preserved.
 Unicorn is not integrated. Navigation clears private data after a rejected
 refresh. Previously delivered browser content cannot be remotely erased.
 The CSP retains Next's inline script allowance; this is not a claim of complete
