@@ -1252,7 +1252,7 @@ function adaptQualityGate(agentRoot: string): { issues: DeltaHqIssue[]; sourceGa
               report.next_safe_command,
               "Use the Quality Gate next-safe-command from the canonical report.",
             ),
-            last_updated: stringValue(report.timestamp, statSync(reportPath).mtime.toISOString()),
+            last_updated: stringValue(report.timestamp, statSync(/* turbopackIgnore: true */ reportPath).mtime.toISOString()),
             resolution: null,
             sourceKind: "real",
           },
@@ -1484,7 +1484,7 @@ function adaptSecurityGovernance(agentRoot: string): { issues: DeltaHqIssue[]; s
     sourceGaps.push({
       source_system: root.system,
       source_label: root.label,
-      reason: existsSync(root.dir)
+      reason: existsSync(/* turbopackIgnore: true */ root.dir)
         ? "No current structured issue records were found in this source directory."
         : "No structured source directory exists yet; HQ uses other canonical findings when present and does not scan raw warning walls.",
       source_ref: relativeSourceRef(agentRoot, root.dir),

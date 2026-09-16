@@ -5,7 +5,7 @@
  */
 
 import sharp from 'sharp';
-import { readdir, stat, mkdir } from 'fs/promises';
+import { readdir, stat } from 'fs/promises';
 import { join, extname, basename } from 'path';
 
 const QUALITY = 80; // JPEG/WebP quality (80 is good balance)

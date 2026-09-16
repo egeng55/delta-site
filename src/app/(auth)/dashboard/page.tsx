@@ -449,7 +449,7 @@ export default function DashboardPage() {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
     return headers;
-  }, [session?.access_token]);
+  }, [session]);
 
   const fetchLocalDemoStatus = useCallback(async () => {
     if (!activeUser) throw new Error(LOCAL_DEMO_BACKEND_UNAVAILABLE);
