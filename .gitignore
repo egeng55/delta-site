@@ -44,3 +44,6 @@ screenshots/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Private owner report projections; never put these in public/ or client imports.
+/.owner-reports/

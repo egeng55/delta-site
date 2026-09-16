@@ -124,7 +124,9 @@ describe("Delta HQ web route", () => {
     const middlewareSource = readSource("middleware.ts");
 
     expect(pageSource).toContain("Delta HQ");
-    expect(pageSource).toContain("<DeltaHQ model={await getDeltaHqViewModel()} />");
+    expect(pageSource).toContain("requireObservatoryOwner()");
+    expect(pageSource).toContain("<Observatory initialReport={await readObservatoryReport()} />");
+    expect(pageSource).not.toContain("getDeltaHqViewModel");
     expect(pageSource).toContain('dynamic = "force-dynamic"');
     expect(componentSource).toContain("Owner HQ");
     expect(componentSource).toContain("Executive brief");
