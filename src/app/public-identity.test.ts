@@ -8,7 +8,7 @@ import {
 } from "@/lib/publicCapabilityManifest";
 
 function readSource(relativePath: string): string {
-  return readFileSync(path.join(process.cwd(), relativePath), "utf8");
+  return readFileSync(path.join(process.cwd(), relativePath), "utf8").replace(/\s+/g, " ");
 }
 
 describe("Delta public identity", () => {
@@ -52,22 +52,24 @@ describe("Delta public identity", () => {
     expect(pricing).toContain('redirect("/access")');
   });
 
-  it("presents the product loop and only the two curated public proofs", () => {
+  it("describes current implementation without expanding preview entitlement or autonomy claims", () => {
     const homepage = readSource("src/app/(marketing)/page.tsx");
     const product = readSource("src/app/(marketing)/product/page.tsx");
     const metadata = readSource("src/app/layout.tsx");
 
-    expect(homepage).toContain("Personal intelligence that improves with evidence.");
-    expect(homepage).toContain("getPublicCapabilitiesForSurface(\"home\")");
-    expect(product).toContain("Six questions connect one moment to the next.");
-    expect(product).toContain("CURATED_PUBLIC_PROOFS");
+    expect(homepage).toContain("The personal intelligence operating system");
+    expect(homepage).toContain("not a promise of general availability");
+    expect(product).toContain("Daily Intelligence Brief");
+    expect(product).toContain("native tools");
+    expect(product).toContain("not yet presented as a proven replacement");
+    expect(product).toContain("not automatically included in preview access");
     expect(CURATED_PUBLIC_PROOFS.map(item => item.capabilityId)).toEqual([
       "late-caffeine-adaptation",
       "weather-fueling-composition",
     ]);
     expect(homepage).not.toContain("Supervised automation");
     expect(product).not.toContain("Engineering agent system");
-    expect(metadata).toContain('title: "Delta Personal Intelligence"');
+    expect(metadata).toContain('title: "Delta | Personal Intelligence OS"');
     expect(metadata).not.toContain("AI Health Intelligence");
   });
 
@@ -79,7 +81,8 @@ describe("Delta public identity", () => {
     expect(about).not.toContain('label: "Founded"');
     expect(about).toContain("Eric Geng");
     expect(about).toContain("Rahib Malik");
-    expect(about).toContain("Ann Arbor, Michigan");
+    expect(about).toContain("Ann Arbor,");
+    expect(about).toContain("Michigan.");
     expect(insights).not.toContain("hasPremiumAccess");
     expect(insights).not.toContain("apps.apple.com");
     expect(insights).not.toContain("Health Score");

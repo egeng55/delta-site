@@ -194,9 +194,9 @@ export const PUBLIC_CAPABILITIES: PublicCapability[] = [
     name: "Broader personal intelligence",
     state: "research",
     summary:
-      "Delta is exploring durable cross-domain context, personal briefs, insights, recommendations, voice, and proactive support.",
+      "Owner-operated briefs, continuity, research, and engineering workflows now exist. Broader access and reliable autonomous task completion remain under evaluation.",
     boundary:
-      "These capabilities are not included in private preview access and must not be presented as available or proven.",
+      "These internal workflows are not included in private preview access. Their implementation is not evidence of general availability or proven autonomous performance.",
     publiclyVisible: true,
     surfaces: ["home", "product", "research", "insights"],
   },

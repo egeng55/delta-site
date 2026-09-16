@@ -7,9 +7,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Delta Personal Intelligence",
+  metadataBase: new URL("https://deltahealthintelligence.com"),
+  title: "Delta | Personal Intelligence OS",
   description:
-    "A private personal-intelligence preview for owner-authorized context, bounded reasoning, feedback, and better next actions over time.",
+    "Personal context, source-backed research, and governed engineering. Delta connects the evidence to your next move, with owner control and honest uncertainty.",
   keywords: ["personal intelligence", "AI", "context", "reasoning", "feedback"],
   icons: {
     icon: [
@@ -19,9 +20,9 @@ export const metadata: Metadata = {
     apple: "/icon.png",
   },
   openGraph: {
-    title: "Delta Personal Intelligence",
+    title: "Delta | Personal Intelligence OS",
     description:
-      "Personal intelligence built around context, state, action, feedback, and learning.",
+      "Your context. Connected to what comes next. Explore Delta's personal intelligence operating system and request-based private preview.",
     type: "website",
   },
 };
