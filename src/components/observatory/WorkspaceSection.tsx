@@ -17,7 +17,7 @@ export default function WorkspaceSection({ section, report, draft, setDraft }: {
     <p>Committed source snapshots are separate from local edits, running builds and deployments.</p>
     {report ? <div className={styles.grid}>{report.repositories.map(repo => <article key={repo.id}><h3>{repo.label}</h3><code>{repo.sha}</code><p>{repo.files} tracked files · {repo.testFiles} test files</p><p>Test-file count does not establish passing tests.</p></article>)}</div> : <p>No validated source report is connected.</p>}
     <div className={styles.grid}>
-      <article><h3>Branches & worktrees</h3><p>Integration-graph connection pending. No branch status is inferred from the source snapshot.</p></article>
+
       <article><h3>Checks & changes</h3><p>Task-linked changes, checks and budget evidence are available in the Work execution desk.</p></article>
       <article><h3>Running & deployed</h3><p>Revision identity unavailable. These source commits are not deployment evidence.</p></article>
     </div>

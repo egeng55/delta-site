@@ -1,3 +1,4 @@
+import { readEngineering } from '@/lib/engineeringServer';
 import { notFound } from 'next/navigation';
 import PersonalWorkspace from '@/components/personal/PersonalWorkspace';
 import Observatory from '@/components/observatory/Observatory';
@@ -7,5 +8,5 @@ export const metadata = { title: 'Delta local architecture preview', robots: { i
 export default async function Preview({ searchParams }: { searchParams: Promise<{ view?: string }> }) {
   if (process.env.NODE_ENV !== 'development') notFound();
   if ((await searchParams).view === 'personal') return <PersonalWorkspace />;
-  return <Observatory initialReport={localArchitecturePreview()} preview />;
+  return <Observatory initialReport={localArchitecturePreview()} initialEngineering={await readEngineering()} preview />;
 }

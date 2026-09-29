@@ -25,6 +25,8 @@ import ArchitectureExplorer from "./ArchitectureExplorer";
 import ArchitectureGraph from "./ArchitectureGraph";
 import RuntimeOverview from "./RuntimeOverview";
 import TaskRunner from "./TaskRunner";
+import EngineeringInventory from "./EngineeringInventory";
+import type { EngineeringReport } from "@/lib/engineering";
 import Atmosphere from "../workspace/Atmosphere";
 import WorkspaceSection from "./WorkspaceSection";
 import {
@@ -101,9 +103,11 @@ function Clock() {
 }
 export default function Observatory({
   initialReport,
+  initialEngineering = null,
   preview = false,
 }: {
   initialReport: ObservatoryReport | null;
+  initialEngineering?: EngineeringReport | null;
   preview?: boolean;
 }) {
   const [taskDraft, setTaskDraft] = useState("");
@@ -367,6 +371,7 @@ export default function Observatory({
             </p>
           )}
           {(section === "work" || section === "engineering") && <WorkspaceSection section={section} report={report} draft={taskDraft} setDraft={setTaskDraft} />}
+          {section === "engineering" && <EngineeringInventory initial={initialEngineering} preview={preview} />}
           <div hidden={section !== "work"}><TaskRunner input={taskDraft} preview={preview} /></div>
           {(section === "overview" || section === "quality" || section === "work") && <RuntimeOverview preview={preview} />}
           {section === "work" || section === "engineering" ? null : section === "settings" ? (

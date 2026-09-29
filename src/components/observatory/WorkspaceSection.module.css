@@ -16,3 +16,4 @@
 .panel textarea { border-radius:12px; border-color:#becbbb; min-height:160px; font:18px/1.7 var(--font-inter),Arial,sans-serif; background:#fbfcf9; color:#202820; }
 .panel textarea:focus-visible { outline:2px solid #487350; outline-offset:3px; }
 .grid article { padding:20px; border:1px solid #e0e6da; border-radius:12px; background:#f4f6ef; }
+.table{overflow:auto;margin:18px 0 30px}.table table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}.table th{background:#edf2e7;padding:12px;color:#53634f}.table td{padding:14px 12px;border-bottom:1px solid #dce4d5;line-height:1.8;overflow-wrap:anywhere;max-width:440px}.panel select{display:block;padding:10px 14px;background:#fff;border:1px solid #bacab3;border-radius:8px;margin:10px 0 24px;min-width:180px}.panel details{margin-bottom:28px}.panel li{margin:8px 0}

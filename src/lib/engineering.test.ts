@@ -1,0 +1,13 @@
+/** @jest-environment node */
+import {parseEngineering} from './engineering';
+import {mkdtempSync,mkdirSync,writeFileSync,rmSync,realpathSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const {projectEngineering}=require('../../scripts/engineering-export.cjs');
+it('exports true checkout facts without mutating or claiming missing repositories are clean',()=>{
+ const root=realpathSync(mkdtempSync(path.join(tmpdir(),'delta-git-view-'))),repo=path.join(root,'delta-site');mkdirSync(repo);const git=(...args:string[])=>execFileSync('git',args,{cwd:repo,encoding:'utf8'});
+ try{git('init','-q','-b','main');writeFileSync(path.join(repo,'a.txt'),'a');git('add','.');git('-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','initial');git('checkout','-qb','feature');writeFileSync(path.join(repo,'a.txt'),'changed');writeFileSync(path.join(repo,'new.txt'),'new');const before=git('status','--porcelain');const report=parseEngineering(projectEngineering(root));const site=report.repositories.find(r=>r.id==='site')!;expect(site.worktrees[0]).toMatchObject({branch:'feature',status:'dirty',tracked:1,untracked:1,ahead:0,behind:0});expect(report.repositories.find(r=>r.id==='backend')?.available).toBe(false);expect(git('status','--porcelain')).toBe(before);}finally{rmSync(root,{recursive:true,force:true});}
+});
+it('rejects malformed or duplicate repository observations',()=>{expect(()=>parseEngineering({version:1,observedAt:'bad',repositories:[]})).toThrow();const r={id:'site',available:true,branches:[],branchesTruncated:false,worktrees:[],worktreeCount:0,truncated:false};expect(()=>parseEngineering({version:1,observedAt:new Date().toISOString(),repositories:[r,r]})).toThrow();});

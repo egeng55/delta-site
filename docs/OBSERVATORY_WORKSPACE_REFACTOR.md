@@ -480,3 +480,32 @@ on profiles/subscriptions. No table grants, user accounts or credentials were ch
 Anonymous reads remain denied as expected. Optional account-read failures retain
 identity but leave access unknown; transport failures have distinct login feedback.
 267 tests and production build passed. Successful owner login remains unverified.
+
+## Engineering visibility increment
+
+The Engineering view now shows a bounded Git observation for all five repositories:
+local branch inventory, registered worktrees, HEAD revision, tracked/untracked dirty
+counts, and ahead/behind counts against local main. The fixed exporter uses Git's
+read-only commands with optional locks and filesystem monitoring disabled. It does
+not fetch remotes, classify intent, merge, prune, clean, run repository code or infer
+deployment. Registered paths outside the configured workspace remain unavailable.
+
+The existing agent integration-graph implementation was inspected first. Its selected
+historical agent/backend branch comparisons and purpose heuristics do not represent
+this all-repository factual view; the new companion exporter follows the site's
+existing observatory-export pattern instead of copying that reconciliation logic.
+
+Publish with:
+`node scripts/engineering-export.cjs /Users/egeng/delta /Users/egeng/.local/share/delta/observatory/engineering.json`.
+Set server-only `DELTA_HQ_ENGINEERING_REPORT_PATH` to that fixed output. Export bounds:
+15-second shared deadline, 1.5 seconds per Git command, first 100 branches and 30
+worktrees per repository, with truncation disclosed. The site reads at most 500 KB,
+validates/project known fields, and protects `/api/hq/engineering` with the existing
+owner gate. No request may select paths or execute Git. Development preview reads the
+same local artifact server-side; production still has no preview route.
+
+This is a timestamped snapshot, not an automatic live feed. Staleness appears after
+five minutes and the client reevaluates age every 30 seconds. Refresh the exporter
+and reload the page for new observations. Initial inspection found 137 local branches
+and 45 registered worktrees; one worktree observation was unavailable. Missing data
+never implies clean status. Sign-in activation remains a separate pending workflow.
