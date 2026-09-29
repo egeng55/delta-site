@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import ArchitectureGraph from "./ArchitectureGraph";
 import RuntimeOverview from "./RuntimeOverview";
+import WorkspaceSection from "./WorkspaceSection";
 import {
   freshness,
   reportReply,
@@ -35,9 +36,11 @@ import { requestJson } from "@/lib/requestJson";
 import styles from "./Observatory.module.css";
 
 const navigation = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "architecture", label: "Architecture", icon: Network },
-  { id: "quality", label: "Activity & quality", icon: Activity },
+  { id: "overview", label: "Home", icon: LayoutDashboard },
+  { id: "work", label: "Work", icon: MessageSquare },
+  { id: "engineering", label: "Engineering", icon: GitBranch },
+  { id: "architecture", label: "System", icon: Network },
+  { id: "quality", label: "Analytics", icon: Activity },
   { id: "settings", label: "Settings", icon: Settings2 },
 ] as const;
 function subscribe(callback: () => void) {
@@ -50,7 +53,7 @@ function subscribe(callback: () => void) {
 }
 function readSection(): Section {
   const hash = window.location.hash.slice(1);
-  return ["overview", "architecture", "census", "quality", "settings"].includes(
+  return ["overview", "architecture", "census", "quality", "settings", "work", "engineering"].includes(
     hash,
   )
     ? (hash as Section)
@@ -102,6 +105,7 @@ export default function Observatory({
   initialReport: ObservatoryReport | null;
   preview?: boolean;
 }) {
+  const [taskDraft, setTaskDraft] = useState("");
   const [report, setReport] = useState(initialReport);
   const section = useSyncExternalStore(
     subscribe,
@@ -245,8 +249,8 @@ export default function Observatory({
       : section === "architecture"
         ? "Architecture"
         : activity
-          ? "Activity & quality"
-          : "Workspace settings";
+          ? "Analytics"
+          : section === "work" ? "Work" : section === "engineering" ? "Engineering" : "Workspace settings";
   const previous = report?.history.at(-1);
   const delta =
     report && previous
@@ -319,11 +323,12 @@ export default function Observatory({
             Workspace <ChevronRight size={14} />
             <strong>
               {activity
-                ? "Activity & quality"
+                ? "Analytics"
                 : navigation.find((n) => n.id === section)?.label}
             </strong>
           </span>
           <Clock />
+          <a href="#work" onClick={(event) => { event.preventDefault(); navigate("work"); }}>New task</a>
           <button
             ref={chatToggle}
             title="Ask Delta"
@@ -376,8 +381,9 @@ export default function Observatory({
               {notice}
             </p>
           )}
-          {(section === "overview" || section === "quality") && <RuntimeOverview preview={preview} />}
-          {section === "settings" ? (
+          {(section === "work" || section === "engineering") && <WorkspaceSection section={section} report={report} draft={taskDraft} setDraft={setTaskDraft} />}
+          {(section === "overview" || section === "quality" || section === "work") && <RuntimeOverview preview={preview} />}
+          {section === "work" || section === "engineering" ? null : section === "settings" ? (
             <section className={styles.settings}>
               <h2>Access & data</h2>
               <dl>

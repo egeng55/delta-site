@@ -31,7 +31,7 @@ it('navigates the directory, inspector and settings without dead controls', () =
   fireEvent.click(screen.getByRole('link', { name: 'Settings' }));
   expect(screen.getByRole('heading', { name: 'Workspace settings' })).toBeInTheDocument();
   expect(screen.getByText('Not activated')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('link', { name: 'Overview' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Home' }));
   expect(screen.getByRole('heading', { name: 'System directory' })).toBeInTheDocument();
 });
 it('opens the full architecture workspace from the overview map', () => {
@@ -39,7 +39,7 @@ it('opens the full architecture workspace from the overview map', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Open architecture map' }));
   expect(window.location.hash).toBe('#architecture');
   expect(screen.getByRole('heading', { name: 'Architecture' })).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Architecture' })).toHaveAttribute('aria-current', 'page');
+  expect(screen.getByRole('link', { name: 'System' })).toHaveAttribute('aria-current', 'page');
 });
 it('does not invent data when a report is absent', () => {
   render(<Observatory initialReport={null} />);
@@ -62,4 +62,14 @@ it('deduplicates refreshes and clears report content after authorization is revo
     expect(screen.queryByLabelText('Source census')).not.toBeInTheDocument();
     expect(fetch).toHaveBeenCalledTimes(1);
   } finally { global.fetch = originalFetch; }
+});
+it('preserves task draft across workspace navigation and distinguishes source from deployment', () => {
+ render(<Observatory initialReport={observatoryPreview()} preview />);
+ fireEvent.click(screen.getByRole('link', { name: 'Work' }));
+ fireEvent.change(screen.getByLabelText('Task draft'), { target: { value: 'Inspect the failing test' } });
+ expect(screen.getByRole('button', { name: 'Execution connection pending' })).toBeDisabled();
+ fireEvent.click(screen.getByRole('link', { name: 'Engineering' }));
+ expect(screen.getByText(/Revision identity unavailable/)).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('link', { name: 'Work' }));
+ expect(screen.getByLabelText('Task draft')).toHaveValue('Inspect the failing test');
 });

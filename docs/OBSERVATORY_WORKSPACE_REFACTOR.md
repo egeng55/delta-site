@@ -209,3 +209,20 @@ Phase 3 should organize Home, Work, System, Engineering and Analytics around the
 shared contract. Unconnected sections must explain their missing source. Do not
 present synthetic task, billing or branch data as live. Existing architecture graph
 remains available while its dedicated redesign proceeds in Phase 4.
+
+## Phase 3 delivery: workspace shell
+
+Navigation now exposes Home, Work, Engineering, System, Analytics and Settings.
+Existing overview/architecture/quality hash URLs remain compatible. A persistent
+New task link opens Work. Its bounded draft survives in-page navigation and clears
+on reload; no browser storage or implicit execution is introduced. Engineering
+shows source repositories with explicit missing branch, test and deployed-revision
+connections. Work retains shared runtime observations when authenticated/configured.
+System preserves the architecture explorer for the Phase 4 redesign.
+
+Verified browser navigation Work -> Engineering -> Work with draft preserved, clear
+disabled execution control, narrow-screen layout and no console errors. 245 tests,
+production build and lint (four existing warnings, no errors) passed. This is the
+workspace shell increment; linked task detail panels, durable history and execution
+remain dependent on the later live-workflow contracts. Sign-in configuration and
+hosted deployment remain deferred.
