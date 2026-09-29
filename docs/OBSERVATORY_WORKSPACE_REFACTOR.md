@@ -528,3 +528,24 @@ coverage as unavailable. Owner gating and all read-only exporter boundaries are 
 Verification: 275 tests, production build and browser expansion/filter checks passed.
 Lint has zero errors and four existing warnings. No branch was checked out, merged,
 pruned, or cleaned. The pre-existing AGENTS.md change remains untouched.
+
+## Committed branch comparison increment
+
+Engineering now separates uncommitted worktree status from committed branch changes.
+For each observed worktree, the exporter pins local main and the recorded branch tip,
+finds their common ancestor, and reads name/status changes from that ancestor to the
+branch tip. Main-only changes and dirty working-copy edits are excluded. The UI shows
+all three revisions, the total changed-path count, and at most 50 paths with explicit
+partial-coverage labeling. Renames are represented as additions/deletions. Comparisons
+with missing refs, unrelated histories, or failed observations remain unavailable.
+
+Identical main/tip comparisons are reused within one repository export. Git external
+diff and text-conversion helpers are disabled; no file contents, commit messages,
+network requests, checkout, merge or provider calls are involved. Existing deadlines,
+private-artifact validation and owner protection remain unchanged. This is net change
+since the common ancestor, not a claim that a branch is safe or qualified to merge.
+
+Verification: 278 tests and production build passed; lint has no errors and four
+existing warnings. A diverged-repository test proves main-only and dirty edits are
+excluded while source status remains unchanged. Browser review confirmed pinned SHAs,
+file statuses and the 50-of-58 partial-coverage disclosure on the site branch.

@@ -16,3 +16,8 @@ it('preserves staged renames and unusual file names in NUL-delimited status',()=
  const {parseChanges}=require('../../scripts/engineering-export.cjs');
  expect(parseChanges('R  new name\0old name\0 M line\nbreak\0?? new.txt\0')).toEqual([{path:'new name',previousPath:'old name',code:'R ',staged:true,unstaged:false},{path:'line\nbreak',code:' M',staged:false,unstaged:true},{path:'new.txt',code:'??',staged:false,unstaged:false}]);
 });
+it('compares a diverged branch against its common ancestor, excluding main-only and dirty edits',()=>{
+ const root=realpathSync(mkdtempSync(path.join(tmpdir(),'delta-branch-view-'))),repo=path.join(root,'delta-site');mkdirSync(repo);const git=(...args:string[])=>execFileSync('git',args,{cwd:repo,encoding:'utf8',stdio:['ignore','pipe','pipe']});
+ const commit=()=>{git('add','.');git('-c','user.name=Test','-c','user.email=test@example.invalid','commit','-qm','fixture');};
+ try{git('init','-q','-b','main');writeFileSync(path.join(repo,'base'),'base');commit();git('checkout','-qb','feature');writeFileSync(path.join(repo,'feature file'),'feature');commit();git('checkout','-q','main');writeFileSync(path.join(repo,'main-only'),'main');commit();git('checkout','-q','feature');writeFileSync(path.join(repo,'dirty-only'),'dirty');const before=git('status','--porcelain');const r=parseEngineering(projectEngineering(root));const w=r.repositories.find(x=>x.id==='site')!.worktrees[0];expect(w).toMatchObject({ahead:1,behind:1});expect(w.branchReview?.files).toEqual([{path:'feature file',status:'A'}]);expect(w.changes?.some(c=>c.path==='dirty-only')).toBe(true);expect(git('status','--porcelain')).toBe(before);}finally{rmSync(root,{recursive:true,force:true});}
+});
