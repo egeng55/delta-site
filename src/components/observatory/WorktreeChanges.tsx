@@ -1,0 +1,4 @@
+import type {WorktreeObservation} from '@/lib/engineering';
+export default function WorktreeChanges({worktree:w}:{worktree:WorktreeObservation}){
+ return <details><summary>Review changes · {w.changeCount??'unknown'}</summary>{!w.changes?<p>File-level observation unavailable. Refresh the source export.</p>:<><p>{w.changes.length} of {w.changeCount} status entries shown{w.changesTruncated?' · partial coverage':''}. File names only; no contents or credentials are loaded. Untracked directories may be grouped by Git.</p>{!w.changes.length?<p>No uncommitted changes observed.</p>:<ul>{w.changes.map((c,i)=><li key={i}><code>{c.previousPath?`${c.previousPath} → `:''}{c.path}</code><br/><small>{c.code==='??'?'Untracked':`${c.staged?'Staged':''}${c.staged&&c.unstaged?' + ':''}${c.unstaged?'Unstaged':''}`} · Git status <code>{c.code.replaceAll(' ','·')}</code>{c.code.includes('U')||c.code==='AA'||c.code==='DD'?' · Unmerged entry':''}</small></li>)}</ul>}</>}</details>;
+}

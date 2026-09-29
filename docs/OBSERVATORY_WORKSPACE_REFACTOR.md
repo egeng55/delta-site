@@ -509,3 +509,22 @@ five minutes and the client reevaluates age every 30 seconds. Refresh the export
 and reload the page for new observations. Initial inspection found 137 local branches
 and 45 registered worktrees; one worktree observation was unavailable. Missing data
 never implies clean status. Sign-in activation remains a separate pending workflow.
+
+## Engineering change review increment
+
+Worktree rows now expand to file-level uncommitted changes. The exporter parses
+NUL-delimited porcelain status to preserve spaces/newlines and rename provenance,
+separates staged/unstaged/untracked states, and retains conflict status codes. Each
+worktree publishes at most 50 entries; omitted long paths or additional entries are
+marked as partial coverage. No file contents, patches or credential values are read.
+
+A dirty/unavailable-only filter provides an attention view. Per-repository overlap
+lists compare current uncommitted paths across observed worktrees, including rename
+sources, and show at most 50 overlaps. These are review signals, not Git merge-conflict
+predictions or a comparison of committed branch changes. Missing/truncated observations
+make overlap coverage incomplete. Old snapshots remain readable and show file-level
+coverage as unavailable. Owner gating and all read-only exporter boundaries are unchanged.
+
+Verification: 275 tests, production build and browser expansion/filter checks passed.
+Lint has zero errors and four existing warnings. No branch was checked out, merged,
+pruned, or cleaned. The pre-existing AGENTS.md change remains untouched.
