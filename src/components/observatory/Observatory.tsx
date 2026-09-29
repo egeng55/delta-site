@@ -16,19 +16,18 @@ import {
   MessageSquare,
   Network,
   RefreshCw,
-  Search,
   Send,
   Settings2,
   ShieldCheck,
   X,
 } from "lucide-react";
+import ArchitectureExplorer from "./ArchitectureExplorer";
 import ArchitectureGraph from "./ArchitectureGraph";
 import RuntimeOverview from "./RuntimeOverview";
 import WorkspaceSection from "./WorkspaceSection";
 import {
   freshness,
   reportReply,
-  type GraphNode,
   type ObservatoryReport,
   type Section,
 } from "@/lib/observatory";
@@ -113,10 +112,7 @@ export default function Observatory({
     () => "overview" as Section,
   );
   const [days, setDays] = useState(30);
-  const [graphId, setGraphId] = useState("systems");
   const [repo, setRepo] = useState("all");
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<GraphNode | null>(null);
   const [revision, setRevision] = useState(0);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
@@ -152,7 +148,7 @@ export default function Observatory({
         if (response.status === 401 || response.status === 403) {
           setReport(null);
           setMessages([]);
-          setSelected(null);
+
         }
         throw new Error("unavailable");
       }
@@ -165,7 +161,7 @@ export default function Observatory({
           : "Snapshot updated.",
       );
       setReport(next);
-      setSelected(null);
+
     } catch {
       setNotice("Could not load the report. Check your session and try again.");
     } finally {
@@ -177,7 +173,7 @@ export default function Observatory({
     if (signingOut || preview) return;
     setSigningOut(true);
     setReport(null);
-    setSelected(null);
+
     setMessages([]);
     try {
       const response = await requestJson(
@@ -208,15 +204,13 @@ export default function Observatory({
     if (reply.days) setDays(reply.days);
     if (reply.repo) {
       setRepo(reply.repo);
-      setGraphId("systems");
-      setQuery("");
-      setSelected(null);
+
+
+
     }
     if (reply.rebuild) setRevision((value) => value + 1);
     setChatInput("");
   }
-  const graph =
-    report?.graphs.find((item) => item.id === graphId) || report?.graphs[0];
   const state = report ? freshness(report.generatedAt, now) : "unavailable";
   const snapshots = report
     ? [
@@ -230,18 +224,6 @@ export default function Observatory({
         (point) => Date.parse(point.generatedAt) >= now - days * 86400000,
       )
     : [];
-  const nodes =
-    graph?.nodes.filter(
-      (node) =>
-        (repo === "all" || node.group === repo) &&
-        (node.label + " " + node.kind)
-          .toLowerCase()
-          .includes(query.toLowerCase()),
-    ) || [];
-  const links =
-    graph?.links.filter(
-      (link) => link.source === selected?.id || link.target === selected?.id,
-    ) || [];
   const activity = section === "quality" || section === "census";
   const title =
     section === "overview"
@@ -580,11 +562,11 @@ export default function Observatory({
                         query=""
                         repo="all"
                         revision={revision}
-                        onSelect={(node) => {
-                          setSelected(node);
-                          setGraphId("systems");
+                        onSelect={() => {
+
+
                           setRepo("all");
-                          setQuery("");
+
                           navigate("architecture");
                         }}
                       />
@@ -620,9 +602,9 @@ export default function Observatory({
                         key={item.id}
                         onClick={() => {
                           setRepo(item.id);
-                          setQuery("");
-                          setSelected(null);
-                          setGraphId("systems");
+
+
+
                           navigate("architecture");
                         }}
                       >
@@ -643,175 +625,7 @@ export default function Observatory({
                   </div>
                 </>
               )}
-              {section === "architecture" && graph && (
-                <>
-                  <div className={styles.graphToolbar}>
-                    <div role="tablist" aria-label="Graph layer">
-                      {report.graphs.map((item) => (
-                        <button
-                          key={item.id}
-                          role="tab"
-                          aria-selected={graph.id === item.id}
-                          onClick={() => {
-                            setGraphId(item.id);
-                            setSelected(null);
-                            setQuery("");
-                            setRepo("all");
-                          }}
-                        >
-                          {item.id === "modules"
-                            ? "Graphify code"
-                            : item.id === "systems"
-                              ? "Systems"
-                              : "Capabilities"}
-                        </button>
-                      ))}
-                    </div>
-                    <label className={styles.search}>
-                      <Search size={16} />
-                      <input
-                        aria-label="Find a node"
-                        placeholder="Find a node"
-                        value={query}
-                        onChange={(e) => {
-                          setQuery(e.target.value);
-                          setSelected(null);
-                        }}
-                      />
-                      {query && (
-                        <button
-                          aria-label="Clear search"
-                          onClick={() => setQuery("")}
-                        >
-                          <X size={14} />
-                        </button>
-                      )}
-                    </label>
-                    <select
-                      aria-label="Repository filter"
-                      value={repo}
-                      onChange={(e) => {
-                        setRepo(e.target.value);
-                        setSelected(null);
-                      }}
-                    >
-                      <option value="all">All repositories</option>
-                      {report.repositories.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.label}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      title="Rebuild layout from the same snapshot"
-                      aria-label="Rebuild graph layout"
-                      onClick={() => {
-                        setRevision((value) => value + 1);
-                        setNotice("Layout rebuilt. Source data is unchanged.");
-                      }}
-                    >
-                      <RefreshCw size={17} />
-                    </button>
-                  </div>
-                  <div className={styles.mapWorkspace}>
-                    <ArchitectureGraph
-                      graph={graph}
-                      query={query}
-                      repo={repo}
-                      revision={revision}
-                      onSelect={setSelected}
-                    />
-                    <aside
-                      className={styles.inspector}
-                      aria-label="Node inspector"
-                    >
-                      <div className={styles.sectionHead}>
-                        <h2>{selected ? "Selected node" : "Nodes"}</h2>
-                        {selected && (
-                          <button
-                            aria-label="Close node detail"
-                            onClick={() => setSelected(null)}
-                          >
-                            <X size={16} />
-                          </button>
-                        )}
-                      </div>
-                      {selected ? (
-                        <>
-                          <span className={styles.eyebrow}>
-                            {selected.kind}
-                          </span>
-                          <h3>{selected.label}</h3>
-                          <dl>
-                            <dt>Repository group</dt>
-                            <dd>{selected.group}</dd>
-                            <dt>Declared status</dt>
-                            <dd>{selected.maturity}</dd>
-                          </dl>
-                          <code>{selected.id}</code>
-                          <h4>Relationships ({links.length})</h4>
-                          <ul>
-                            {links.map((link, i) => {
-                              const id =
-                                link.source === selected.id
-                                  ? link.target
-                                  : link.source;
-                              const related = graph.nodes.find(
-                                (node) => node.id === id,
-                              );
-                              return (
-                                <li key={i}>
-                                  <span>{link.relation}</span>
-                                  <button
-                                    onClick={() => setSelected(related || null)}
-                                  >
-                                    {related?.label || id}
-                                    <ChevronRight size={14} />
-                                  </button>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </>
-                      ) : (
-                        <>
-                          <p>{nodes.length} matching nodes</p>
-                          <div className={styles.nodeList}>
-                            {nodes.slice(0, 100).map((node) => (
-                              <button
-                                key={node.id}
-                                onClick={() => setSelected(node)}
-                              >
-                                <span>
-                                  {node.label}
-                                  <small>{node.kind}</small>
-                                </span>
-                                <ChevronRight size={14} />
-                              </button>
-                            ))}
-                          </div>
-                          {nodes.length > 100 && (
-                            <p>First 100 shown. Narrow the search.</p>
-                          )}
-                        </>
-                      )}
-                    </aside>
-                  </div>
-                  <div className={styles.provenance}>
-                    <span>
-                      {graph.id === "modules"
-                        ? "Graphify · static code relationships"
-                        : "Architecture registry · explicit relationships"}
-                    </span>
-                    <span>
-                      {timestamp(graph.generatedAt)} ET ·{" "}
-                      <code>{graph.sourceCommit.slice(0, 8)}</code>
-                      {graph.sourceCommit !== report.sourceCommit &&
-                        " · Historical extraction"}
-                    </span>
-                  </div>
-                </>
-              )}
+              {section === "architecture" && <ArchitectureExplorer key={repo + revision} report={report} initialRepo={repo} />}
               {activity && (
                 <>
                   <div className={styles.sectionHead}>

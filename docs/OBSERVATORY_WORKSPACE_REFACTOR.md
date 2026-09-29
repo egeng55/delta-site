@@ -254,3 +254,17 @@ sign-in configuration. No live identity, role, permission or redirect behavior c
 
 Phase 4 architecture exploration belongs exclusively in Technical -> System.
 The public product narrative and Personal experience do not show its navigation.
+
+## Phase 4: functional graph explorer
+
+Replaced the all-purpose graph toolbar/inspector with a searchable component directory,
+focused graph neighborhood and evidence panel. Users can traverse incoming/outgoing
+edges at one to three hops, follow relationships, step back through visited components,
+reset to the whole layer and carry a shared component across system/capability layers.
+Search filters the directory without destroying graph context. Keyboard buttons provide
+an equivalent path to selecting canvas nodes. Provenance stays attached to each layer.
+
+The design preview still uses synthetic data. Graphify code is available only when its
+validated module graph is supplied. Live execution overlays and revision comparisons
+remain unavailable until those evidence sources are connected. No execution or authority
+is inferred from structural edges. Final aesthetic design remains deferred.

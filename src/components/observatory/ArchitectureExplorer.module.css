@@ -1,0 +1,16 @@
+.explorer { margin-top: 24px; }
+.toolbar { display:flex; flex-wrap:wrap; gap:12px; align-items:end; margin:16px 0; }
+.toolbar label { display:flex; flex-direction:column; gap:6px; font-size:12px; }
+.explorer button,.explorer input,.explorer select { border:1px solid #9aa59b; padding:9px 12px; background:#fff; color:#202820; }
+.explorer button { cursor:pointer; }
+.explorer button:disabled { opacity:.45; cursor:default; }
+.explorer button[aria-selected=true],.explorer button[aria-pressed=true] { background:#263c2b; color:white; }
+.layout { display:grid; grid-template-columns:250px minmax(0,1fr); gap:20px; }
+.directory { max-height:540px; overflow:auto; }
+.directory button { width:100%; text-align:left; overflow-wrap:anywhere; margin:3px 0; }
+.directory small { display:block; margin-top:4px; opacity:.75; }
+.evidence { padding:24px; border:1px solid #bbc3b8; margin-top:20px; }
+.evidence code { overflow-wrap:anywhere; }
+.evidence li { margin:10px 0; }
+.explorer p { line-height:1.6; margin:12px 0; }
+@media(max-width:800px) { .layout { grid-template-columns:1fr; } .directory { max-height:180px; } }
