@@ -393,10 +393,15 @@ than inventing a percentage or completion estimate. Unavailable metrics remain d
 Reduced-motion rules suppress animation and transitions. Navigation no longer remounts
 the execution desk; its selected workflow and in-memory state stay intact.
 
-Unicorn Studio is the confirmed animation product. The owner has no scene ready yet.
-No remote animation runtime or invented project ID has been added. When the approved
-scene is supplied, mount it in a decorative presentation area, provide a static fallback,
-skip loading with reduced motion, and keep operational evidence readable independently.
+The owner delegated scene choice and visual direction to implementation. No owner-
+supplied scene is required. A local SVG/CSS atmosphere now supplies a translucent
+Delta prism, orbit lines and drifting color, with an explicit pause/resume control.
+Personal and technical Home/Work views include this decorative scene. Metric cards
+enter with a short stagger; personal prompts and composer have hover/focus motion.
+The graph and dense evidence remain free of decorative movement. Reduced-motion
+preferences disable all scene motion and transitions. No external animation scripts,
+accounts or project assets are required. This is custom motion, not a Unicorn Studio
+embed; that particular authoring tool is optional rather than a delivery blocker.
 
 ### Broader rollout acceptance matrix
 
@@ -408,7 +413,7 @@ skip loading with reduced motion, and keep operational evidence readable indepen
 | Hosted runtime connectivity | Loopback adapter only | Private authenticated transport design, deployment identity, reconnect/replay test; do not expose the desktop daemon publicly |
 | Costs | Recorded task budgets; unknown billing stays unknown | Reconcile provider settlements and accounting coverage before calling totals live billing |
 | Retention | 100 recent summaries, 1000 task capacity, bounded events | Document owner retention policy and prove encrypted backup/restore in the target environment |
-| Animation | Unicorn Studio selected, asset pending | Approved scene/export, reduced-motion and load-failure checks |
+| Animation | Local animated scene and interaction motion delivered | Pause/resume browser check, reduced-motion rules, no external asset dependency |
 
 Presentation is delivered locally. Hosted rollout and additional live connector
 coverage are not claimed by this phase: their activation depends on the deliberately
@@ -420,3 +425,23 @@ layout and 360px personal layout have no horizontal document overflow. Personal
 request starters preserve editable drafts across tabs, and technical workflow
 selection survives Work -> Engineering -> Work navigation. No live auth, provider
 calls, account mutations, remote animation assets or hosted deployment were performed.
+
+
+### Motion completion and next phase
+
+Motion pass: 264 tests and production build passed. Browser verification confirmed
+scene rendering and pause/resume interaction. No live execution permissions changed.
+
+The next phase is **live workflow activation**, not another presentation framework:
+1. Configure and verify the previously deferred owner sign-in boundary.
+2. Start the opt-in owner workspace runtime and connect the local site through its
+   existing server-only loopback adapter; expose no daemon credentials to the browser.
+3. Submit one deterministic audit from the signed-in browser, reload it, and verify
+   the same retained task ID and evidence.
+4. Select one independently reviewed engineering manifest. Exercise deny, exact
+   approval, progress, change review and recovery with the existing spending caps.
+5. Record the actual runtime/site revisions and observed usage. Keep unknown billing
+   unknown. Only then qualify hosted connectivity as a separate deployment target.
+
+These activation steps remain unexecuted because sign-in/live runtime configuration
+was explicitly deferred. The absence of a Unicorn asset no longer blocks anything.

@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Atmosphere from '../workspace/Atmosphere';
 import { useState } from 'react';
 import styles from './PersonalWorkspace.module.css';
 const pages = ['Ask Delta', 'My tasks', 'Results', 'Connections', 'Preferences'] as const;
@@ -11,6 +12,7 @@ export default function PersonalWorkspace() {
     <main className={styles.body}>
     <nav className={styles.nav} aria-label="Personal navigation">{pages.map(name => <a key={name} href={'#' + name.toLowerCase().replaceAll(' ', '-')} aria-current={page === name ? 'page' : undefined} onClick={event => { event.preventDefault(); setPage(name); }}>{name}</a>)}</nav>
     <p className={styles.notice} role="status">Design preview. Your personal data is not connected.</p>
+    <Atmosphere />
     <section className={styles.hero}>
     <p className={styles.eyebrow}>A little clarity. A little momentum.</p>
     <h1>{page === 'Ask Delta' ? 'What would you like to move forward?' : page}</h1>

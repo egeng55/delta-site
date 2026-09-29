@@ -25,6 +25,7 @@ import ArchitectureExplorer from "./ArchitectureExplorer";
 import ArchitectureGraph from "./ArchitectureGraph";
 import RuntimeOverview from "./RuntimeOverview";
 import TaskRunner from "./TaskRunner";
+import Atmosphere from "../workspace/Atmosphere";
 import WorkspaceSection from "./WorkspaceSection";
 import {
   freshness,
@@ -359,6 +360,7 @@ export default function Observatory({
               {refreshing ? "Refreshing..." : "Refresh report"}
             </button>
           </div>
+          {(section === "overview" || section === "work") && <Atmosphere compact />}
           {notice && (
             <p role="status" className={styles.notice}>
               {notice}
