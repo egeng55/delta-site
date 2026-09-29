@@ -42,15 +42,18 @@ export function graphPositions(nodes: GraphNode[]) {
   return order.indexOf(a)-order.indexOf(b) || a.localeCompare(b);
  });
  const positions = new Map<string,{x:number;y:number}>();
- let offset = 0;
+ let x = 0, y = 0, rowHeight = 0;
  groups.forEach(group => {
   const members=nodes.filter(n=>n.group===group).sort((a,b)=>graphLabel(a).localeCompare(graphLabel(b)));
   const roots=members.filter(n=>n.kind==='repository');
   const children=members.filter(n=>n.kind!=='repository');
-  const columns=Math.max(1,Math.ceil(children.length/7));
-  roots.forEach(n=>positions.set(n.id,{x:offset+(columns-1)*150,y:0}));
-  children.forEach((n,index)=>positions.set(n.id,{x:offset+Math.floor(index/7)*300,y:100+(index%7)*90}));
-  offset += columns*300+90;
+  const columns=Math.min(3,Math.max(1,Math.ceil(Math.sqrt(children.length))));
+  const width=columns*240;
+  const height=80+Math.ceil(children.length/columns)*70;
+  if (x && x+width>1100) { x=0; y+=rowHeight+65; rowHeight=0; }
+  roots.forEach(n=>positions.set(n.id,{x:x+(width-240)/2,y}));
+  children.forEach((n,index)=>positions.set(n.id,{x:x+(index%columns)*240,y:y+80+Math.floor(index/columns)*70}));
+  x+=width+65; rowHeight=Math.max(rowHeight,height);
  });
  return positions;
 }

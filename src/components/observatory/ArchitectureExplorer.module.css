@@ -14,3 +14,6 @@
 .evidence li { margin:10px 0; }
 .explorer p { line-height:1.6; margin:12px 0; }
 @media(max-width:800px) { .layout { grid-template-columns:1fr; } .directory { max-height:180px; } }
+.linkInventory { max-height: 360px; overflow:auto; margin:16px 0; }
+.linkInventory table { width:100%; text-align:left; border-collapse:collapse; }
+.linkInventory td,.linkInventory th { padding:8px; border-bottom:1px solid #d6dcd2; }

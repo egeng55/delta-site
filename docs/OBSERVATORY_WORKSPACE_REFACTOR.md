@@ -288,3 +288,13 @@ Graph coordinates now use deterministic repository groups and bounded rows, with
 force-directed rearrangement. Systems overview displays ownership edges by default;
 users can enable cross-system dependencies or focus a component to see its full
 neighborhood. All nodes remain present. Search accepts short and canonical labels.
+
+### Full declared-link overview
+
+Overview now enables all declared dependencies by default. It distinguishes solid
+ownership edges from dashed dependency edges and includes a complete expandable
+source/relation/target inventory with component navigation. Current systems projection
+has 28 ownership edges, 72 dependency edges and 14 cross-repository edges. Ownership:
+Agent 22 systems, Backend 3, Site 1, Mobile 1, Jobs 1. This is registry evidence only,
+not a complete runtime communication inventory. Compact shelf packing bounds group
+width and wraps repositories into rows rather than extending one sparse horizontal strip.
