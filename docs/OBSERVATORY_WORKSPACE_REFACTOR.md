@@ -445,3 +445,24 @@ The next phase is **live workflow activation**, not another presentation framewo
 
 These activation steps remain unexecuted because sign-in/live runtime configuration
 was explicitly deferred. The absence of a Unicorn asset no longer blocks anything.
+
+## Live activation checkpoint — 2026-09-29
+
+The local daemon was restarted from agent commit 9554a02 with owner approvals and
+workspace controls enabled; provider execution remains disabled. macOS Keychain
+owner authentication succeeded. The site's ignored, private environment now contains
+the loopback runtime connector and a private source-report path. Source export covers
+five repositories, 28 systems, 158 capabilities and 138 tools; its committed-main
+snapshot remains distinct from the running feature-branch code.
+
+A real deterministic audit completed through `/v1/workspace/tasks`, with all returned
+verification checks passing and 11 retained events. Repeating the same submission ID
+produced exactly one retained task; a separate history read recovered it. This is
+runtime API evidence, not a signed-in browser journey or an engineering-model test.
+
+Browser activation is waiting for the owner's email/account selection and interactive
+sign-in. The local owner UUID is not yet configured, so site APIs correctly return
+503 without exposing runtime history. No auth bypass, generated login link, remote
+user mutation, paid model call or hosted deployment was performed. The login page is
+open for the owner. Complete that identity step before the remaining browser reload,
+exact approval and bounded engineering acceptance checks.
