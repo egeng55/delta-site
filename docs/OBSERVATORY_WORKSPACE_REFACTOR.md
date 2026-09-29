@@ -226,3 +226,31 @@ production build and lint (four existing warnings, no errors) passed. This is th
 workspace shell increment; linked task detail panels, durable history and execution
 remain dependent on the later live-workflow contracts. Sign-in configuration and
 hosted deployment remain deferred.
+
+## Audience boundary amendment before Phase 4
+
+Public pages remain public product information and shared sign-in. Personal and
+Technical are separate authenticated experiences, not an elevated mode selected by
+an untrusted browser toggle.
+
+Personal: Ask Delta, My tasks, Results, Connections, Preferences. Return only the
+current user's tasks, plain-language progress/failures, relevant approval requests
+and applicable budget limits. Never send infrastructure graphs, other users' work,
+internal paths, branch inventories or system-wide telemetry to this client.
+
+Technical: Home, Work, Engineering, System, Analytics, Settings. `/hq` and its APIs
+remain exact-owner-only today. Future analyst permission permits scoped read-only
+telemetry, not source changes or approval decisions; developer permission must bind
+explicit repository and execution scope. Neither inherits unrestricted personal data.
+Only a server-verified permission may reveal technical navigation or data. Authentication
+alone, user profile metadata, query parameters and view preferences cannot grant it.
+
+The separate Personal design preview is available locally at
+`/observatory-preview?view=personal`. The selector chooses synthetic presentation
+only, behind the existing development-only route; it never switches authority.
+The Personal component imports no technical projection or runtime connector.
+Production personal routing and server-side user-scoped data are deferred with the
+sign-in configuration. No live identity, role, permission or redirect behavior changes.
+
+Phase 4 architecture exploration belongs exclusively in Technical -> System.
+The public product narrative and Personal experience do not show its navigation.

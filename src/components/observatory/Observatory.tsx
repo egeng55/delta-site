@@ -271,7 +271,7 @@ export default function Observatory({
             priority
           />
           <span>
-            Delta<small>Owner workspace</small>
+            Delta<small>Technical workspace</small>
           </span>
         </Link>
         <nav aria-label="Workspace navigation">
