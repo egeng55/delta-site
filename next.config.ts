@@ -28,6 +28,15 @@ function getDeltaApiOrigin() {
   }
 }
 
+// HQ's auth provider still needs its configured identity service, including after
+// client-side navigation to login. Never allow arbitrary/wildcard auth origins.
+function getAuthOrigin() {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || '');
+    return url.protocol === 'https:' && !url.username && !url.password ? url.origin : null;
+  } catch { return null; }
+}
+const authOrigin = getAuthOrigin();
 const deltaApiOrigin = getDeltaApiOrigin();
 const connectSrc = ["'self'", "https://*.supabase.co", "https://delta-80ht.onrender.com"];
 if (deltaApiOrigin && !connectSrc.includes(deltaApiOrigin)) {
@@ -49,7 +58,7 @@ const nextConfig: NextConfig = {
           { key: 'Cache-Control', value: 'private, no-store, max-age=0' },
           { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
           { key: 'Referrer-Policy', value: 'no-referrer' },
-          { key: 'Content-Security-Policy', value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ${process.env.NODE_ENV === 'development' ? 'ws://localhost:* ws://127.0.0.1:*' : ''}; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'` },
+          { key: 'Content-Security-Policy', value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ${authOrigin || ''} ${process.env.NODE_ENV === 'development' ? 'ws://localhost:* ws://127.0.0.1:*' : ''}; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'` },
         ],
       },
       {

@@ -466,3 +466,17 @@ sign-in. The local owner UUID is not yet configured, so site APIs correctly retu
 user mutation, paid model call or hosted deployment was performed. The login page is
 open for the owner. Complete that identity step before the remaining browser reload,
 exact approval and bounded engineering acceptance checks.
+
+### Activation repair: authentication transport
+
+The enforced HQ CSP permitted only same-origin fetches even though AuthProvider
+uses the configured Supabase identity service. Client-side navigation to login can
+retain that document policy. HQ now includes only the configured HTTPS Supabase
+origin in connect-src, retaining all other restrictions. The running server's actual
+response header was verified. Existing documents need a reload to adopt the fix.
+
+Live read-only checks confirmed Auth health HTTP 200 and authenticated SELECT grants
+on profiles/subscriptions. No table grants, user accounts or credentials were changed.
+Anonymous reads remain denied as expected. Optional account-read failures retain
+identity but leave access unknown; transport failures have distinct login feedback.
+267 tests and production build passed. Successful owner login remains unverified.

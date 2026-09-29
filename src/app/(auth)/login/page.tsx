@@ -35,7 +35,9 @@ export default function LoginPage() {
       ]);
       if (!result.success) {
         setError(
-          "Sign-in failed. Check your email and password, or try again later.",
+          result.error === "auth_service_unavailable"
+            ? "Could not reach the sign-in service. Check your connection and try again. Your credentials have not been verified."
+            : "Sign-in failed. Check your email and password, or try again later.",
         );
         return;
       }

@@ -96,12 +96,16 @@ export function AuthProvider({
         if (identity.current !== userId || revision !== profileRevision.current)
           return;
 
-        if (profileResult.error && profileResult.error.code !== "PGRST116") {
-          console.error("profile_read_unavailable");
-        }
-
-        if (subResult.error && subResult.error.code !== "PGRST116") {
-          console.error("subscription_read_unavailable");
+        const profileUnavailable = profileResult.error && profileResult.error.code !== "PGRST116";
+        const subscriptionUnavailable = subResult.error && subResult.error.code !== "PGRST116";
+        if (profileUnavailable || subscriptionUnavailable) {
+          // Optional account data must neither invalidate sign-in nor fabricate
+          // an active/free subscription when its lookup could not be completed.
+          setProfile(null);
+          setSubscription(null);
+          setAccess(null);
+          console.warn("account_details_unavailable");
+          return;
         }
 
         const fetchedProfile = profileResult.data as Profile | null;
@@ -141,7 +145,10 @@ export function AuthProvider({
             (isDeveloperEmail(userEmail) ? "developer" : "user"),
         });
       } catch {
-        console.error("account_details_unavailable");
+        if (identity.current === userId && revision === profileRevision.current) {
+          setProfile(null); setSubscription(null); setAccess(null);
+          console.warn("account_details_unavailable");
+        }
       }
     },
     [],
@@ -235,7 +242,7 @@ export function AuthProvider({
       });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: error.name === "AuthRetryableFetchError" || error.status === 0 || (error.status ?? 0) >= 500 ? "auth_service_unavailable" : "invalid_credentials" };
       }
 
       if (data.session) {
@@ -258,7 +265,7 @@ export function AuthProvider({
 
       return { success: true };
     } catch {
-      return { success: false, error: "An unexpected error occurred" };
+      return { success: false, error: "auth_service_unavailable" };
     }
   };
 

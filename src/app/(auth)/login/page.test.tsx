@@ -32,3 +32,9 @@ it('bounds a hung login, rejects duplicate submits and clears the password', asy
     expect(screen.getByRole('button', { name: 'Sign in' })).not.toBeDisabled();
   } finally { jest.useRealTimers(); }
 });
+it('distinguishes a transport failure from rejected credentials',async()=>{
+ jest.mocked(useAuth).mockReturnValue({login:jest.fn().mockResolvedValue({success:false,error:'auth_service_unavailable'})} as unknown as ReturnType<typeof useAuth>);
+ jest.mocked(hasSupabaseConfiguration).mockReturnValue(true);render(<Page/>);
+ fireEvent.change(screen.getByLabelText('Email'),{target:{value:'owner@example.test'}});fireEvent.change(screen.getByLabelText('Password'),{target:{value:'fixture'}});fireEvent.submit(screen.getByLabelText('Email').closest('form')!);
+ expect(await screen.findByRole('alert')).toHaveTextContent('Could not reach the sign-in service');expect(screen.getByLabelText('Password')).toHaveValue('');
+});

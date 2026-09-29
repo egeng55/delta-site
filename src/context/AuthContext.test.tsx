@@ -36,3 +36,10 @@ it('the session callback is synchronous and profile reads cannot hold login host
   await act(async () => { finishProfile({ data: { role: 'admin' }, error: null }); });
   expect(screen.getByText('signed-out')).toBeInTheDocument();
 });
+it('keeps a valid identity when optional account reads fail, without inventing access',async()=>{
+ const warn=jest.spyOn(console,'warn').mockImplementation(()=>{});
+ const from=jest.fn(()=>({select:()=>({eq:()=>({single:async()=>({data:null,error:{code:'42501'}})})})}));
+ jest.mocked(getSupabase).mockReturnValue({from,auth:{getSession:async()=>({data:{session}}),onAuthStateChange:()=>({data:{subscription:{unsubscribe:jest.fn()}}})}} as unknown as ReturnType<typeof getSupabase>);
+ function Account(){const a=useAuth();return <span>{a.user?.id}:{a.access===null?'unknown':'known'}</span>;}
+ try{render(<AuthProvider><Account/></AuthProvider>);await waitFor(()=>expect(warn).toHaveBeenCalledWith('account_details_unavailable'));expect(screen.getByText('owner-fixture:unknown')).toBeInTheDocument();}finally{warn.mockRestore();}
+});
