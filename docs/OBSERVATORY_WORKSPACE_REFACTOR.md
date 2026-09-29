@@ -633,3 +633,12 @@ The original remaining-scope list above still applies. Local activation is resol
 provider invoices, hosted CI/deployment evidence, hosted connectivity, broader role
 and personal execution rollout, graph revision history, and successful bounded live
 engineering qualification must not be marked complete on the basis of these tests.
+
+Post-restart authorization initially failed again. Runtime commit `8fd53c7` gives
+interactive Keychain reads 45 seconds instead of 10 and distinguishes timeout from
+denial; metadata probes retain 10 seconds. Session/approval TTLs and permissions are
+unchanged. All 27 owner-session tests and architecture verification passed. The next
+start succeeded, and the browser confirmed `8fd53c7` as the running revision, an active
+owner session, three retained tasks and $0.0709 recorded charges after restart.
+Backend health confirmed running local revision `b3a6826f`. Paid provider execution
+was disabled again after the bounded test; no model retry or cap increase occurred.
