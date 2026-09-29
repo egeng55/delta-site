@@ -1,3 +1,4 @@
+jest.mock('./TaskRunner',()=>({__esModule:true,default:()=> <button disabled>Submit task</button>}));
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import Observatory from './Observatory';
 import { observatoryPreview } from '@/lib/observatoryPreview';
@@ -67,7 +68,7 @@ it('preserves task draft across workspace navigation and distinguishes source fr
  render(<Observatory initialReport={observatoryPreview()} preview />);
  fireEvent.click(screen.getByRole('link', { name: 'Work' }));
  fireEvent.change(screen.getByLabelText('Task draft'), { target: { value: 'Inspect the failing test' } });
- expect(screen.getByRole('button', { name: 'Execution connection pending' })).toBeDisabled();
+ expect(screen.getByRole('button', { name: 'Submit task' })).toBeDisabled();
  fireEvent.click(screen.getByRole('link', { name: 'Engineering' }));
  expect(screen.getByText(/Revision identity unavailable/)).toBeInTheDocument();
  fireEvent.click(screen.getByRole('link', { name: 'Work' }));

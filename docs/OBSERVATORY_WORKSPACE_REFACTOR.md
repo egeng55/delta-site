@@ -1,6 +1,6 @@
 # Delta workspace refactor
 
-Status: Phase 1 source inventory and delivery contract complete; implementation phases pending.
+Status: Phase 5 lifecycle implementation delivered locally. Live sign-in activation and hosted connectivity are deferred.
 Inspected 2026-09-29: site main d6f4052; agent baseline checkout 35cad02.
 These revisions identify inspected source, not running or deployed revisions.
 
@@ -336,3 +336,44 @@ was the deterministic read-only audit; no paid model call or engineering edit.
 Encrypted WorkflowStore remains authoritative for engineering records. Site process
 restart, full-page reload, durable history, approval decisions and engineering
 continuation remain unimplemented integrations, independent of sign-in configuration.
+
+## Phase 5 delivered build: durable execution desk
+
+Work now connects to fixed `/api/hq/lifecycle/*` server routes for history, task
+submission, prepared engineering scopes, exact approval decisions, continuation,
+cancellation and captured change reviews. Owner verification and same-origin writes
+remain enforced. The development preview renders the full interface with execution
+disabled; it does not bypass sign-in.
+
+The agent's opt-in `--workspace-controls` controller delegates to the existing
+kernel, outcome runner, owner approval broker and encrypted WorkflowStore. History
+survives process restart; unfinished tasks become interrupted and require explicit
+continuation. Duplicate task IDs and operation IDs cannot create duplicate work.
+The browser retains only a submission digest and ID in session storage across reload.
+History summaries show the latest 100 of up to 1,000 retained records; each task has
+100 bounded events. Failure and unknown-spend evidence remain visible.
+
+Engineering requests are independently reviewed JSON manifests under the agent's
+`agent/runtime-state/workspace-requests/<slug>.json`; fields use the existing outcome
+request contract (objective, repo, initiative_id, name, areas/files, acceptance_path,
+model, daily_cap_usd, request_id). Selection displays that scope and limits. Request
+bytes are pinned and rechecked on continuation. Protected effects still require an
+exact decision through the original owner broker. No approval proofs or provider
+keys are sent to the browser. Incomplete/redacted approval displays fail closed.
+
+Runtime startup: `npm run delta:daemon -- --start --approve-daemon --workbench
+--owner-approvals --workspace-controls`. Provider execution additionally requires the
+existing explicit OpenAI/provider options and positive reviewed budget. Configure the
+local site's existing `DELTA_HQ_RUNTIME_PORT` and server-only `DELTA_HQ_RUNTIME_TOKEN`
+from that daemon session. Keep credentials out of URLs, commits and browser storage.
+
+Verification includes a real HTTP lifecycle with fixture model responses: submit
+once, approve through the real owner broker, repair a pagination fixture in an isolated
+worktree, run independent acceptance checks, inspect the captured diff and reload
+retained history. Separate tests cover denial, altered digests/manifests, restart
+without replay, explicit continuation, cancellation and encrypted storage. No API
+credits are used by that qualification.
+
+Live sign-in activation remains deliberately deferred. Hosted connectivity remains
+Phase 6 work: a deployed site cannot reach a desktop loopback listener. These are
+activation/rollout limits, not substitutes for the implemented lifecycle tests.

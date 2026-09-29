@@ -1,0 +1,12 @@
+/** @jest-environment node */
+import {GET,POST} from './route';
+import {requireObservatoryOwner} from '@/lib/observatoryServer';
+import {workspaceLifecycle} from '@/lib/workspaceLifecycle';
+jest.mock('@/lib/observatoryServer',()=>({requireObservatoryOwner:jest.fn()}));
+jest.mock('@/lib/workspaceLifecycle',()=>({lifecycleOperations:['tasks','requests','review','approvals','decision','control'],workspaceLifecycle:jest.fn()}));
+const context=(operation='tasks')=>({params:Promise.resolve({operation})});
+beforeEach(()=>{jest.clearAllMocks();jest.mocked(requireObservatoryOwner).mockResolvedValue('owner');jest.mocked(workspaceLifecycle).mockResolvedValue({status:200,data:{tasks:[]}});});
+it('gates history, approvals and writes before runtime access',async()=>{jest.mocked(requireObservatoryOwner).mockResolvedValue('signed_out');expect((await GET(new Request('http://localhost/api/hq/lifecycle/tasks'),context())).status).toBe(401);expect(workspaceLifecycle).not.toHaveBeenCalled();});
+it('rejects cross origin controls and arbitrary destinations',async()=>{expect((await POST(new Request('http://localhost/api/hq/lifecycle/control',{method:'POST',headers:{origin:'http://elsewhere'},body:'{}'}),context('control'))).status).toBe(403);expect((await GET(new Request('http://localhost/api/hq/lifecycle/tasks?url=http://other'),context())).status).toBe(400);expect((await GET(new Request('http://localhost/api/hq/lifecycle/secret'),context('secret'))).status).toBe(404);expect(workspaceLifecycle).not.toHaveBeenCalled();});
+it('forwards an exact decision without manufacturing approval authority',async()=>{const body={id:'id',digest:'digest',accepted:false};const response=await POST(new Request('http://localhost/api/hq/lifecycle/decision',{method:'POST',headers:{origin:'http://localhost'},body:JSON.stringify(body)}),context('decision'));expect(response.status).toBe(200);expect(workspaceLifecycle).toHaveBeenCalledWith('decision','POST',null,body);});
+it('bounds bodies and marks uncertain transport failure',async()=>{expect((await POST(new Request('http://localhost/api/hq/lifecycle/tasks',{method:'POST',headers:{origin:'http://localhost'},body:'x'.repeat(12001)}),context())).status).toBe(400);jest.mocked(workspaceLifecycle).mockRejectedValue(Error('private detail'));const response=await GET(new Request('http://localhost/api/hq/lifecycle/tasks'),context());expect(response.status).toBe(503);expect(JSON.stringify(await response.json())).not.toContain('private detail');});

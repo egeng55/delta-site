@@ -364,8 +364,8 @@ export default function Observatory({
               {notice}
             </p>
           )}
-          <div hidden={section !== "work"}><TaskRunner input={taskDraft} preview={preview} /></div>
           {(section === "work" || section === "engineering") && <WorkspaceSection section={section} report={report} draft={taskDraft} setDraft={setTaskDraft} />}
+          <div hidden={section !== "work"}><TaskRunner input={taskDraft} preview={preview} /></div>
           {(section === "overview" || section === "quality" || section === "work") && <RuntimeOverview preview={preview} />}
           {section === "work" || section === "engineering" ? null : section === "settings" ? (
             <section className={styles.settings}>
