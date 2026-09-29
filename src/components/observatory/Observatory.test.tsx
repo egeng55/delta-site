@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import Observatory from './Observatory';
 import { observatoryPreview } from '@/lib/observatoryPreview';
+jest.mock('./RuntimeOverview', () => ({ __esModule: true, default: () => <div>Runtime overview</div> }));
 jest.mock('./ArchitectureGraph', () => ({ __esModule: true, default: () => <div>Graph canvas</div> }));
 beforeEach(() => window.history.replaceState(null, '', '/'));
 it('shows truthful source counts, unknown runtime health, and local chat controls', () => {

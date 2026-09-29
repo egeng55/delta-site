@@ -23,6 +23,7 @@ import {
   X,
 } from "lucide-react";
 import ArchitectureGraph from "./ArchitectureGraph";
+import RuntimeOverview from "./RuntimeOverview";
 import {
   freshness,
   reportReply,
@@ -375,6 +376,7 @@ export default function Observatory({
               {notice}
             </p>
           )}
+          {(section === "overview" || section === "quality") && <RuntimeOverview preview={preview} />}
           {section === "settings" ? (
             <section className={styles.settings}>
               <h2>Access & data</h2>
