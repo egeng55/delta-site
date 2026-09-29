@@ -1,3 +1,4 @@
+import {isHqOrigin} from '@/lib/hqOrigin';
 import {NextResponse} from 'next/server';
 import {requireObservatoryOwner} from '@/lib/observatoryServer';
 import {workspaceLifecycle,lifecycleOperations,type LifecycleOperation} from '@/lib/workspaceLifecycle';
@@ -10,7 +11,7 @@ async function handle(request:Request,context:{params:Promise<{operation:string}
  if(!lifecycleOperations.includes(operation as LifecycleOperation)||!(method==='GET'?['tasks','requests','approvals','review','session']:['tasks','control','decision','session']).includes(operation))return NextResponse.json({error:'not_found'},{status:404,headers});
  const url=new URL(request.url),id=url.searchParams.get('id');
  if((id&&!/^[a-f0-9-]{36}$/.test(id))||[...url.searchParams.keys()].some(k=>k!=='id'))return NextResponse.json({error:'invalid_request'},{status:400,headers});
- if(method==='POST'&&request.headers.get('origin')!==url.origin)return NextResponse.json({error:'same_origin_required'},{status:403,headers});
+ if(method==='POST'&&!isHqOrigin(request))return NextResponse.json({error:'same_origin_required'},{status:403,headers});
  try{
   let body:unknown;
   if(method==='POST'){

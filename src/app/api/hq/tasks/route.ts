@@ -1,3 +1,4 @@
+import {isHqOrigin} from '@/lib/hqOrigin';
 import { NextResponse } from 'next/server';
 import { requireObservatoryOwner } from '@/lib/observatoryServer';
 import { runWorkspaceAudit } from '@/lib/workspaceTasks';
@@ -6,7 +7,7 @@ export async function POST(request: Request) {
  const headers={'Cache-Control':'private, no-store','Vary':'Cookie'};
  const owner=await requireObservatoryOwner();
  if(owner!=='owner')return NextResponse.json({error:'owner_access_required'},{status:owner==='unconfigured'?503:owner==='signed_out'?401:403,headers});
- if(request.headers.get('origin')!==new URL(request.url).origin)return NextResponse.json({error:'same_origin_required'},{status:403,headers});
+ if(!isHqOrigin(request))return NextResponse.json({error:'same_origin_required'},{status:403,headers});
  try {
   const reader=request.body?.getReader(); if(!reader)throw Error();let size=0;const chunks:Uint8Array[]=[];
   try {for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>12000)throw Error();chunks.push(value);}}finally{await reader.cancel().catch(()=>undefined);}

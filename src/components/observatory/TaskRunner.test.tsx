@@ -25,3 +25,16 @@ it('disables submission on expired authority and explicitly renews through the f
  await waitFor(()=>expect(screen.getByRole('button',{name:'Submit task'})).toBeEnabled());
  expect(fetch).toHaveBeenCalledWith('/api/hq/lifecycle/session',expect.objectContaining({method:'POST',body:'{"confirm":true}'}));
 });
+it('clears transient polling errors when the next poll reconnects',async()=>{
+ jest.useFakeTimers();let unavailable=true;
+ global.fetch=jest.fn(async(url:RequestInfo|URL)=>{
+  if(unavailable)throw Error('Runtime temporarily unavailable');
+  return {ok:true,json:async()=>String(url).endsWith('/session')?{active:true}:String(url).endsWith('/approvals')?{approvals:[]}:String(url).endsWith('/requests')?{requests:[]}:{tasks:[]}};
+ }) as unknown as typeof fetch;
+ try{
+  render(<TaskRunner input="Audit" preview={false}/>);
+  await screen.findByRole('alert');unavailable=false;
+  await waitFor(()=>expect(screen.queryByRole('alert')).not.toBeInTheDocument(),{timeout:3500});
+  expect(screen.getByRole('button',{name:'Submit task'})).toBeEnabled();
+ }finally{jest.useRealTimers();}
+});

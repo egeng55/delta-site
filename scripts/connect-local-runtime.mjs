@@ -3,13 +3,17 @@
 import {spawn} from 'node:child_process';
 import {readFileSync,writeFileSync,renameSync,lstatSync} from 'node:fs';
 import path from 'node:path';
+const args=process.argv.slice(2);
+if(args.some(arg=>arg!=='--allow-provider')||args.length>1)throw Error('Only --allow-provider is supported');
+const allowProvider=args.includes('--allow-provider');
+if(allowProvider&&!process.env.OPENAI_API_KEY)throw Error('Provider key absent from process environment');
 const envFile=path.resolve('.env.local');
 if(lstatSync(envFile).isSymbolicLink())throw Error('Private environment must be a regular file');
 const text=readFileSync(envFile,'utf8');
 const root=text.match(/^DELTA_HQ_AGENT_ROOT=(.+)$/m)?.[1];
 if(!root||!path.isAbsolute(root))throw Error('Set DELTA_HQ_AGENT_ROOT to the approved agent checkout');
 if(!process.stdin.isTTY)throw Error('Start from an interactive local terminal for Keychain authentication');
-const child=spawn(process.execPath,[path.join(root,'scripts/delta-daemon.mjs'),'--start','--approve-daemon','--workbench','--owner-approvals','--workspace-controls'],{cwd:root,stdio:['inherit','pipe','inherit']});
+const child=spawn(process.execPath,[path.join(root,'scripts/delta-daemon.mjs'),'--start','--approve-daemon','--workbench','--owner-approvals','--workspace-controls',...(allowProvider?['--allow-provider']:[])],{cwd:root,stdio:['inherit','pipe','inherit']});
 let pending='';
 child.stdout.on('data',chunk=>{
  pending+=chunk.toString();

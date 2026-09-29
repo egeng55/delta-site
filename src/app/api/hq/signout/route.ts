@@ -1,13 +1,10 @@
+import {isHqOrigin} from '@/lib/hqOrigin';
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function POST(request: NextRequest) {
   const headers = { "Cache-Control": "private, no-store" };
-  // Use the served Host, not Next's normalized internal hostname. Do not trust
-  // caller-supplied forwarded-host headers as an alternate allowed origin.
-  const host = request.headers.get("host") || request.nextUrl.host;
-  const expectedOrigin = `${request.nextUrl.protocol}//${host}`;
-  if (request.headers.get("origin") !== expectedOrigin)
+  if (!isHqOrigin(request))
     return NextResponse.json(
       { error: "origin_rejected" },
       { status: 403, headers },

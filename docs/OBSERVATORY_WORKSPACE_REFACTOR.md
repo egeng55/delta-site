@@ -1,6 +1,6 @@
 # Delta workspace refactor
 
-Status: Phase 5 lifecycle implementation delivered locally. Live sign-in activation and hosted connectivity are deferred.
+Status: Local authenticated HQ is active; browser audit and bounded live engineering attempt verified. Autonomous engineering completion and hosted rollout remain unqualified.
 Inspected 2026-09-29: site main d6f4052; agent baseline checkout 35cad02.
 These revisions identify inspected source, not running or deployed revisions.
 
@@ -587,3 +587,49 @@ cookies. The owner API helper now writes replacement cookie chunks in route hand
 page middleware retains responsibility for Server Component refresh. A regression test
 covers cookie propagation. The browser subsequently recovered current Git observations
 without another sign-in. Protected data still requires a server-verified exact owner.
+
+## Keychain activation and live acceptance — 2026-09-29
+
+Supersedes the earlier Keychain-blocked observation. The existing macOS identity
+loaded successfully, HQ connected to the authenticated foreground runtime, and the
+confirmed owner session submitted a real capability audit through the browser.
+Task `4cbc2be8-e5a0-4059-8558-085e5fc3f706` completed with 158 registered
+capabilities, including 80 requiring approval. Duplicate submission reused its ID;
+its result survived navigation and a runtime restart.
+
+Live POST testing exposed Next hostname normalization: browser Origin used
+127.0.0.1 while the internal request URL used localhost. All HQ mutation routes now
+share a same-origin check, prefer explicit `DELTA_HQ_SITE_ORIGIN`, and reject missing
+or foreign origins. Transient polling failures clear on reconnection without erasing
+action feedback. Authentication and exact-action approval requirements remain intact.
+
+The foreground launcher accepts explicit `--allow-provider`; default startup still
+disables paid calls. The existing process credential must be present, never printed.
+Task budgets and owner approvals are enforced by the existing agent controller.
+
+Engineering task `6323587b-7fed-4413-9d3c-98fdcb26064b` exercised browser submission,
+exact scope/worktree/baseline/funding/mission approvals, independent sandbox baseline,
+a real model call, bounded stop, retained cost and captured review. The baseline
+accepted three valid images and incorrectly accepted three truncated signatures.
+The model spent $0.070907, made no edit, and stopped before exceeding the $0.10
+ceiling. This is live failure evidence, not autonomous qualification. No automatic
+retry or increased cap was used. The remaining allowance was not spent.
+
+Codex then directly repaired structural raster validation in the isolated worktree.
+All six pinned acceptance examples passed, as did 956 backend tests (one skipped).
+Commit `b3a6826f` was fast-forwarded into the local backend feature branch and the
+backend restarted. This direct repair must not be attributed to Delta's model.
+Checks validate container structure, not decoded pixel contents.
+
+Runtime commit `e549495` drops content-free text-stream events from durable progress
+history, retaining model start/completion and tool/approval/stage events without
+per-token database writes. Its prompt makes supplied context count as inspection
+and prioritizes editing over a mandatory planning note. No subsequent paid run has
+qualified that prompt change. 27 focused runtime tests and architecture verification
+passed. Site: 290 tests and production build passed; lint has zero errors and four
+pre-existing warnings.
+
+The original remaining-scope list above still applies. Local activation is resolved;
+provider invoices, hosted CI/deployment evidence, hosted connectivity, broader role
+and personal execution rollout, graph revision history, and successful bounded live
+engineering qualification must not be marked complete on the basis of these tests.
