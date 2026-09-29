@@ -10,3 +10,7 @@ it('rejects malformed source and usage values', () => {
  const data = fixture(); data.operational_visibility.observed_at = 'not-a-date'; expect(() => projectRuntime(data)).toThrow();
  expect(() => projectRuntime({})).toThrow();
 });
+it('rejects invented readiness and verification states instead of rendering them as authority', () => {
+ const data = fixture(); data.capability_availability[0].readiness = 'authorized'; expect(() => projectRuntime(data)).toThrow();
+ const other = fixture(); other.operational_visibility.commands[0].verification = 'approved'; expect(() => projectRuntime(other)).toThrow();
+});

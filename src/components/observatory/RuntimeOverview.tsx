@@ -34,6 +34,9 @@ export default function RuntimeOverview({ preview = false }: { preview?: boolean
     return () => { disposed = true; clearTimeout(timer); controller.abort(); };
   }, [preview]);
   const runtime = data?.runtime;
+  const source = data?.source;
+  const sourceAge = source ? now - Date.parse(source.generatedAt) : null;
+  const sourceStale = sourceAge !== null && (!Number.isFinite(sourceAge) || sourceAge < -5000 || sourceAge > 26 * 60 * 60 * 1000);
   const stale = runtime && (now - Date.parse(runtime.observedAt) > 30000 || Date.parse(runtime.observedAt) > now + 5000);
   const commands = runtime?.commands ?? [];
   const passed = commands.filter(c => c.verification === 'passed').length;
@@ -41,6 +44,9 @@ export default function RuntimeOverview({ preview = false }: { preview?: boolean
     <h2>Runtime observations</h2>
     <p role="status">{preview ? 'Design preview — live runtime is not connected.' : state}{stale ? ' · Observations are stale or clock-skewed.' : ''}</p>
     <p>Shared with Workbench: commands, capability bindings and verification. Costs and running revision remain unknown.</p>
+    {!preview && data && <details><summary>Source revisions · {source ? sourceStale ? 'stale or clock-skewed' : 'recent snapshot' : 'unavailable'}</summary>
+      {source ? <><p>Observed {source.generatedAt}. Committed main revisions; running and deployed revisions are not established.</p><ul>{source.repositories.map(repo => <li key={repo.id}>{repo.label}: <code>{repo.sha}</code></li>)}</ul></> : <p>No validated source report is connected.</p>}
+    </details>}
     {runtime && <>
       <dl style={{ display: 'flex', flexWrap: 'wrap', gap: 28 }}>
         <div><dt>Retained commands</dt><dd>{runtime.retained}</dd></div>

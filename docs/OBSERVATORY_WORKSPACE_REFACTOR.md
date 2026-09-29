@@ -183,3 +183,29 @@ increment does not implement branch joins, approval decisions or task execution;
 those remain subsequent contract/workflow increments. The signed-in page has not
 been verified with a real owner session; connector verification used the real daemon
 separately. No persistent token configuration or deployment was performed.
+
+## Phase 2 closure and Phase 3 entry
+
+Sign-in/live configuration is deferred by owner instruction. Source revisions now
+remain inspectable when runtime is disconnected, with source age and a clear
+main-vs-running/deployed distinction. Runtime state enums are validated rather
+than treated as arbitrary display text.
+
+Ready for Phase 3: owner-protected read model, source/revision display, runtime
+observations, disconnected states and shared Workbench evidence. Build verification
+qualifies packaging only; it does not qualify hosted runtime connectivity.
+
+Carry forward (do not silently mark complete):
+- Durable history: reuse mission/event persistence; daemon memory is not a history store.
+- Branch/task joins: add stable references at the producing controller; names are not IDs.
+- Cost integration: engineering progress already reports per-task estimates and pending
+  usage, but its existing writer emits HTML, not a machine-readable cross-system feed.
+  Backend reservations are not settled invoices. Export a versioned projection before
+  adding either to the workspace; never scrape rendered HTML for accounting.
+- Hosted operation: local daemon loopback cannot be reached from a hosted site server.
+  Keep connector unconfigured until the approved topology and credentials are installed.
+
+Phase 3 should organize Home, Work, System, Engineering and Analytics around the
+shared contract. Unconnected sections must explain their missing source. Do not
+present synthetic task, billing or branch data as live. Existing architecture graph
+remains available while its dedicated redesign proceeds in Phase 4.
