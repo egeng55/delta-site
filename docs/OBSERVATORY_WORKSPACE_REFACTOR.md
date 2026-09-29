@@ -319,3 +319,20 @@ not streaming per-tool progress. Engineering edits, approval decisions, durable 
 history, restart recovery and continuation remain incomplete Phase 5 work. Existing
 mission stores and owner approval controls must be integrated before exposing those
 operations; this audit endpoint does not replace them.
+
+### Phase 5 streaming increment
+
+The existing task adapter now consumes daemon NDJSON, projects only recognized stage
+names, and streams progress plus a confirmed final result to Work. Raw event payloads
+are not forwarded. Interrupted or malformed streams without a final result become
+outcome_unknown. Repeated request IDs replay bounded progress and reuse the original
+execution; the browser retains its ID when checking the same input again. The runner
+stays mounted while navigating between workspace sections so ongoing work/result state
+is not discarded by tab changes. No browser persistence is implied.
+
+Live streaming adapter verification observed Governance checked -> Tool running ->
+Tool completed -> Verification completed, with completed/passed final status. This
+was the deterministic read-only audit; no paid model call or engineering edit.
+Encrypted WorkflowStore remains authoritative for engineering records. Site process
+restart, full-page reload, durable history, approval decisions and engineering
+continuation remain unimplemented integrations, independent of sign-in configuration.

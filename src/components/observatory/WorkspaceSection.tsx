@@ -1,15 +1,14 @@
 'use client';
-import TaskRunner from './TaskRunner';
 import type { ObservatoryReport } from '@/lib/observatory';
 import styles from './WorkspaceSection.module.css';
-export default function WorkspaceSection({ section, report, draft, setDraft, preview = false }: { preview?: boolean; section: 'work' | 'engineering'; report: ObservatoryReport | null; draft: string; setDraft: (value: string) => void }) {
+export default function WorkspaceSection({ section, report, draft, setDraft }: { section: 'work' | 'engineering'; report: ObservatoryReport | null; draft: string; setDraft: (value: string) => void }) {
   if (section === 'work') return <section className={styles.panel} aria-label="Task workspace">
     <p className={styles.eyebrow}>REQUEST → EXECUTION → VERIFICATION → RESULT</p>
     <h2>What should Delta work on?</h2>
     <label htmlFor="task-draft">Task draft</label>
     <textarea id="task-draft" value={draft} maxLength={4000} onChange={event => setDraft(event.target.value)} placeholder="Describe the result you want and how we should verify it." />
     <p>{draft.length} / 4000 characters · Draft stays in this page until reload.</p>
-    <TaskRunner input={draft} preview={preview} />
+
     <p>The site can observe runtime activity. Submitting, approving and continuing tasks will use the authenticated execution connection in the live-workflow phase.</p>
     <div className={styles.grid}>
       <article><h3>Active work</h3><p>See retained command observations below when connected. Durable task history is not connected yet.</p></article>
