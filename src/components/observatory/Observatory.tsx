@@ -363,7 +363,7 @@ export default function Observatory({
               {notice}
             </p>
           )}
-          {(section === "work" || section === "engineering") && <WorkspaceSection section={section} report={report} draft={taskDraft} setDraft={setTaskDraft} />}
+          {(section === "work" || section === "engineering") && <WorkspaceSection preview={preview} section={section} report={report} draft={taskDraft} setDraft={setTaskDraft} />}
           {(section === "overview" || section === "quality" || section === "work") && <RuntimeOverview preview={preview} />}
           {section === "work" || section === "engineering" ? null : section === "settings" ? (
             <section className={styles.settings}>

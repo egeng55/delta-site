@@ -298,3 +298,24 @@ has 28 ownership edges, 72 dependency edges and 14 cross-repository edges. Owner
 Agent 22 systems, Backend 3, Site 1, Mobile 1, Jobs 1. This is registry evidence only,
 not a complete runtime communication inventory. Compact shelf packing bounds group
 width and wraps repositories into rows rather than extending one sparse horizontal strip.
+
+## Phase 5 increment: bounded audit execution
+
+Added owner-protected, same-origin POST /api/hq/tasks and a Work task runner for the
+fixed agent.capability.audit workflow. Arbitrary capabilities, approval claims and
+requester fields are rejected. The connector uses the existing daemon, reports the
+returned verification and session reference, and never retries ambiguous outcomes.
+Request-ID deduplication is process-local, bounded to 100 requests, and rejects
+conflicting payload reuse. Capacity fails closed rather than evicting unresolved work.
+
+Live adapter validation completed the real audit: 158 capabilities, 80 requiring
+approval, verification passed. An initial live attempt exposed an incorrect field
+name (capability instead of capability_id), resulting in inferred routing and rejected
+tool arguments; corrected explicit routing was reverified. No model call was needed.
+
+The preview keeps execution disabled; signed-in browser execution remains deferred
+with live configuration. This increment displays submitted/waiting/result states,
+not streaming per-tool progress. Engineering edits, approval decisions, durable task
+history, restart recovery and continuation remain incomplete Phase 5 work. Existing
+mission stores and owner approval controls must be integrated before exposing those
+operations; this audit endpoint does not replace them.
