@@ -642,3 +642,22 @@ start succeeded, and the browser confirmed `8fd53c7` as the running revision, an
 owner session, three retained tasks and $0.0709 recorded charges after restart.
 Backend health confirmed running local revision `b3a6826f`. Paid provider execution
 was disabled again after the bounded test; no model retry or cap increase occurred.
+
+## Execution diagnosis correction — 2026-09-29
+
+The original model did request an edit. The host rejected it before any file effect
+because the source repository was not clean; the subsequent request could not fit
+the remaining budget. The historical dirty paths were not captured. This was not
+evidence that the model simply chose to plan rather than edit.
+
+HQ now exposes retained tool receipts, the rejected edit reason, provider request
+count, changed files, verification attempts, recorded cost and any structured
+workspace or budget diagnostics. Runtime readiness now uses one Git environment
+and repeats before paid dispatch; workspace failures stop instead of triggering
+model repair. Scoped completed edits automatically enter the existing verifier
+without purchasing another model request. Exact scope, approval and cost caps stay
+in force. See the agent repository's OBSERVATORY_EXECUTION_QUALIFICATION.md for
+real-model qualification evidence and its limits.
+
+UI validation: 291 tests passed; production build passed. The signed-in local HQ
+shows the historical failed task's true rejection and $0.070907 recorded charge.

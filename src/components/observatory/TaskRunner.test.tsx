@@ -38,3 +38,11 @@ it('clears transient polling errors when the next poll reconnects',async()=>{
   expect(screen.getByRole('button',{name:'Submit task'})).toBeEnabled();
  }finally{jest.useRealTimers();}
 });
+
+it('shows the rejected edit separately from the later budget stop',async()=>{
+ const task={id:'b'.repeat(36),kind:'engineering',state:'request_budget_exhausted',input:'Repair',updated_at:new Date().toISOString(),sequence:1,result:{engineering_mission:{receipts:[{capability_id:'agent.worktree.edit',file:'upload_limits.py',outcome:'rejected_before_effect',summary:'source repository must be clean before worktree edits'}],provider_budget:{requests:1,charged_cost_microusd:70907},progress:{changed_files:[],verification_attempts:0}}}};
+ global.fetch=jest.fn(async(url:RequestInfo|URL)=>({ok:true,json:async()=>String(url).includes('tasks?id')?task:String(url).endsWith('/approvals')?{approvals:[]}:String(url).endsWith('/requests')?{requests:[]}:String(url).endsWith('/session')?{active:true}:{tasks:[task]}})) as unknown as typeof fetch;
+ render(<TaskRunner input="" preview={false}/>);
+ const diagnosis=await screen.findByRole('region',{name:'Execution diagnosis'});
+ expect(diagnosis).toHaveTextContent('Edit rejected before any file change:');expect(diagnosis).toHaveTextContent('source repository must be clean');expect(diagnosis).toHaveTextContent('$0.070907');expect(diagnosis).toHaveTextContent('0 edited files');
+});
