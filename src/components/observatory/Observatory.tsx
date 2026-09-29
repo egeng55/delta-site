@@ -708,9 +708,9 @@ export default function Observatory({
                         pass: false,
                       },
                       {
-                        title: "Runtime participation & spending",
+                        title: "Provider invoices",
                         detail:
-                          "No runtime events or billing evidence supplied.",
+                          "Live observations appear above. This source snapshot does not include settled provider invoices.",
                         pass: false,
                       },
                     ].map((check) => (
