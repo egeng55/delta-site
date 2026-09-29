@@ -8,6 +8,7 @@ import {
   MIN_GRAPH_SCALE,
   MAX_GRAPH_SCALE,
 } from "@/lib/graphViewport";
+import { graphLabel, graphPositions } from "@/lib/graphPresentation";
 import styles from "./Observatory.module.css";
 
 export default function ArchitectureGraph({
@@ -73,15 +74,15 @@ export default function ArchitectureGraph({
           runtime: "#adb9be",
           unmapped: "#737d79",
         };
+        const positions = graphPositions(filtered);
         const instance = new Network(
           host.current,
           {
             nodes: filtered.map((node) => ({
               id: node.id,
-              label:
-                node.label.length > 28
-                  ? node.label.slice(0, 25) + "..."
-                  : node.label,
+              label: graphLabel(node),
+              ...positions.get(node.id),
+              fixed: true,
               shape: node.kind === "repository" ? "hexagon" : "dot",
               size:
                 node.kind === "repository"
@@ -96,7 +97,7 @@ export default function ArchitectureGraph({
               },
               font: {
                 color: "#dbe3df",
-                size: graph.id === "modules" ? 10 : 12,
+                size: graph.id === "modules" ? 16 : 20,
                 face: "Inter, sans-serif",
               },
               borderWidth: 2,
@@ -116,7 +117,7 @@ export default function ArchitectureGraph({
             autoResize: true,
             layout: {
               randomSeed: 17 + revision,
-              improvedLayout: filtered.length < 150,
+              improvedLayout: false,
             },
             interaction: {
               hover: true,
@@ -125,15 +126,7 @@ export default function ArchitectureGraph({
               keyboard: { enabled: true, bindToWindow: false, speed: { x: 10, y: 10, zoom: 0 } },
               tooltipDelay: 500,
             },
-            physics: {
-              solver: "forceAtlas2Based",
-              forceAtlas2Based: {
-                gravitationalConstant: -55,
-                springLength: 135,
-                avoidOverlap: 1,
-              },
-              stabilization: { iterations: 200, fit: true },
-            },
+            physics: false,
             edges: { smooth: false },
           },
         );
@@ -159,6 +152,8 @@ export default function ArchitectureGraph({
           instance.moveTo({ scale: boundedGraphScale(instance.getScale() * 0.9) });
           clamp();
         };
+        fit.current();
+        initialView.current = { scale: boundedGraphScale(instance.getScale()), position: instance.getViewPosition() };
         instance.on("zoom", clamp);
         instance.on("selectNode", (event) =>
           select.current(

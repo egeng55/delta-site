@@ -280,3 +280,11 @@ incomplete (96 unmapped, two ambiguous); registry coverage is not code-module co
 Focused mode explicitly shows subset/total and a Show all Delta components control.
 Wheel zoom is applied through a bounded handler at 15%-300%; native unbounded zoom
 is disabled, and existing button/fit/reset controls retain the same bounds.
+
+### Readability pass
+
+Added concise display labels while preserving full canonical names and IDs in evidence.
+Graph coordinates now use deterministic repository groups and bounded rows, without
+force-directed rearrangement. Systems overview displays ownership edges by default;
+users can enable cross-system dependencies or focus a component to see its full
+neighborhood. All nodes remain present. Search accepts short and canonical labels.
