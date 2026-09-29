@@ -268,3 +268,15 @@ The design preview still uses synthetic data. Graphify code is available only wh
 validated module graph is supplied. Live execution overlays and revision comparisons
 remain unavailable until those evidence sources are connected. No execution or authority
 is inferred from structural edges. Final aesthetic design remains deferred.
+
+### Coverage and zoom correction
+
+The local technical preview now uses the existing validated exporter against the
+fixed sibling Delta repositories' committed main refs, instead of the illustrative
+fixture. It is development-only; projection failure shows unavailable data, not a
+synthetic replacement. Current projection: five repositories, 28 systems, 158
+capabilities, 138 tools; systems graph 33 nodes/100 edges. Capability mapping remains
+incomplete (96 unmapped, two ambiguous); registry coverage is not code-module coverage.
+Focused mode explicitly shows subset/total and a Show all Delta components control.
+Wheel zoom is applied through a bounded handler at 15%-300%; native unbounded zoom
+is disabled, and existing button/fit/reset controls retain the same bounds.

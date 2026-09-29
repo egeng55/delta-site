@@ -27,3 +27,11 @@ it('clamps wheel/touch/keyboard zoom events and button zoom to the same limits',
   unmount(); expect(mockDestroy).toHaveBeenCalled();
 });
 it.each([NaN, Infinity, -Infinity])('handles non-finite viewport scale %s', value => expect(boundedGraphScale(value)).toBe(1));
+it('bounds direct wheel input before applying scale', async () => {
+ const { unmount } = render(<ArchitectureGraph graph={observatoryPreview().graphs[0]} query="" repo="all" revision={0} onSelect={jest.fn()} />);
+ await waitFor(() => expect(mockEvents.zoom).toBeDefined());
+ const canvas=screen.getByRole('img');
+ act(() => { mockScale=3; }); fireEvent.wheel(canvas,{deltaY:-100}); expect(mockScale).toBe(3);
+ act(() => { mockScale=.15; }); fireEvent.wheel(canvas,{deltaY:100}); expect(mockScale).toBe(.15);
+ unmount();
+});

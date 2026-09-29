@@ -52,6 +52,7 @@ export default function ArchitectureGraph({
   );
   useEffect(() => {
     let disposed = false;
+    let removeWheel = () => {};
     void import("vis-network/standalone")
       .then(({ Network }) => {
         if (disposed || !host.current) return;
@@ -119,8 +120,9 @@ export default function ArchitectureGraph({
             },
             interaction: {
               hover: true,
+              zoomView: false,
               zoomSpeed: 0.35,
-              keyboard: { enabled: true, bindToWindow: false },
+              keyboard: { enabled: true, bindToWindow: false, speed: { x: 10, y: 10, zoom: 0 } },
               tooltipDelay: 500,
             },
             physics: {
@@ -136,6 +138,15 @@ export default function ArchitectureGraph({
           },
         );
         network.current = instance;
+        const element = host.current;
+        const wheel = (event: WheelEvent) => {
+          event.preventDefault();
+          const next = boundedGraphScale(instance.getScale() * (event.deltaY < 0 ? 1.12 : 1 / 1.12));
+          instance.moveTo({ scale: next, animation: false });
+          setScale(next);
+        };
+        element.addEventListener('wheel', wheel, { passive: false });
+        removeWheel = () => element.removeEventListener('wheel', wheel);
         const clamp = () => {
           const actual = instance.getScale();
           const bounded = boundedGraphScale(actual);
@@ -170,6 +181,7 @@ export default function ArchitectureGraph({
       });
     return () => {
       disposed = true;
+      removeWheel();
       network.current?.destroy();
       network.current = null;
       initialView.current = null;
@@ -207,6 +219,7 @@ export default function ArchitectureGraph({
         >
           <Plus size={16} />
         </button>
+        <span>15%–300%</span>
         <output aria-label="Graph zoom">{Math.round(scale * 100)}%</output>
         <button
           title="Zoom out"

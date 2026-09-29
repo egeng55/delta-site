@@ -324,7 +324,7 @@ export default function Observatory({
         </header>
         {preview && (
           <div className={styles.preview}>
-            <span>Synthetic design sandbox. Not your live system.</span>
+            <span>{report && !report.synthetic ? "Local source snapshot across Delta repositories. Runtime and deployment are not connected." : "Synthetic design sandbox. Not your live system."}</span>
             <Link href="/hq">
               Open private workspace <ArrowRight size={14} />
             </Link>
@@ -443,7 +443,7 @@ export default function Observatory({
                 >
                   <i />
                   {preview
-                    ? "Synthetic snapshot"
+                    ? report.synthetic ? "Synthetic snapshot" : "Local source snapshot"
                     : state === "recent"
                       ? "Recent source snapshot"
                       : state === "stale"
@@ -573,7 +573,7 @@ export default function Observatory({
                       <p className={styles.mapNote}>
                         Declared relationships ·{" "}
                         {preview
-                          ? "Synthetic preview"
+                          ? report.synthetic ? "Synthetic preview" : "Local source snapshot"
                           : "Committed source snapshot"}
                       </p>
                     </div>
