@@ -17,3 +17,9 @@
 .linkInventory { max-height: 360px; overflow:auto; margin:16px 0; }
 .linkInventory table { width:100%; text-align:left; border-collapse:collapse; }
 .linkInventory td,.linkInventory th { padding:8px; border-bottom:1px solid #d6dcd2; }
+.explorer { background:#fbfcf9; border:1px solid #d8dfd5; border-radius:18px; padding:clamp(16px,2vw,28px); }
+.toolbar { padding:16px 0; border-block:1px solid #e0e5db; }
+.directory { background:#f2f5ec; border:1px solid #e0e5db; padding:12px; border-radius:12px; }
+.directory button { display:block; border-color:transparent; border-radius:8px; padding:12px; }
+.evidence { border-radius:12px; background:#fff; border-color:#d8dfd5; }
+.linkInventory th { background:#eef2e8; position:sticky; top:0; }

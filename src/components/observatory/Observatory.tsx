@@ -331,7 +331,7 @@ export default function Observatory({
             </Link>
           </div>
         )}
-        <main key={section} id="workspace-content" className={styles.main}>
+        <main id="workspace-content" className={styles.main}>
           <div className={styles.heading}>
             <div>
               <p className={styles.eyebrow}>

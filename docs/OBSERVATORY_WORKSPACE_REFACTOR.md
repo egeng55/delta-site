@@ -377,3 +377,46 @@ credits are used by that qualification.
 Live sign-in activation remains deliberately deferred. Hosted connectivity remains
 Phase 6 work: a deployed site cannot reach a desktop loopback listener. These are
 activation/rollout limits, not substitutes for the implemented lifecycle tests.
+
+## Phase 6: presentation delivery and rollout boundaries
+
+The personal workspace now has its own responsive presentation, editable request
+starters, clear disconnected states and a persistent draft across its navigation.
+It does not import technical reports or issue runtime requests. Public marketing
+continues to remain separate from owner operational data.
+
+The technical workspace uses consistent light surfaces, readable typography,
+control sizing, focus rings, rounded panels and responsive evidence columns across
+Work, Engineering, System and Analytics. Runtime verification distribution is derived
+only from returned observations. The task stage rail describes current state rather
+than inventing a percentage or completion estimate. Unavailable metrics remain dashes.
+Reduced-motion rules suppress animation and transitions. Navigation no longer remounts
+the execution desk; its selected workflow and in-memory state stay intact.
+
+Unicorn Studio is the confirmed animation product. The owner has no scene ready yet.
+No remote animation runtime or invented project ID has been added. When the approved
+scene is supplied, mount it in a decorative presentation area, provide a static fallback,
+skip loading with reduced motion, and keep operational evidence readable independently.
+
+### Broader rollout acceptance matrix
+
+| Gate | Current delivery | Evidence required before activation |
+| --- | --- | --- |
+| Personal/technical separation | Separate presentations and owner server checks | Live account and role checks remain deferred |
+| Local task lifecycle | Encrypted history, exact decisions, bounded engineering | Existing Phase 5 fixture workflow and site tests |
+| Public preview | Development-only source preview, no execution bypass | Production build must continue to reject the preview route |
+| Hosted runtime connectivity | Loopback adapter only | Private authenticated transport design, deployment identity, reconnect/replay test; do not expose the desktop daemon publicly |
+| Costs | Recorded task budgets; unknown billing stays unknown | Reconcile provider settlements and accounting coverage before calling totals live billing |
+| Retention | 100 recent summaries, 1000 task capacity, bounded events | Document owner retention policy and prove encrypted backup/restore in the target environment |
+| Animation | Unicorn Studio selected, asset pending | Approved scene/export, reduced-motion and load-failure checks |
+
+Presentation is delivered locally. Hosted rollout and additional live connector
+coverage are not claimed by this phase: their activation depends on the deliberately
+deferred identity/connectivity configuration and source-specific qualification.
+
+Phase 6 verification: 263 site tests passed; production build passed; lint has no
+errors and four existing warnings. Browser checks confirmed the 1280px technical
+layout and 360px personal layout have no horizontal document overflow. Personal
+request starters preserve editable drafts across tabs, and technical workflow
+selection survives Work -> Engineering -> Work navigation. No live auth, provider
+calls, account mutations, remote animation assets or hosted deployment were performed.

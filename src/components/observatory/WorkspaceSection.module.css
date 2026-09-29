@@ -10,3 +10,9 @@
 .grid h3 { font-size: 17px; margin-bottom: 12px; }
 .grid code { overflow-wrap: anywhere; font-size: 12px; }
 .panel a { text-decoration: underline; text-underline-offset: 4px; }
+.panel { border-radius:18px; border-color:#d8dfd5; background:#fff; box-shadow:0 8px 32px #233c3005; }
+.panel h2 { font-family:Georgia,serif; font-weight:400; letter-spacing:-.025em; }
+.panel label { font-size:12px; font-weight:600; }
+.panel textarea { border-radius:12px; border-color:#becbbb; min-height:160px; font:18px/1.7 var(--font-inter),Arial,sans-serif; background:#fbfcf9; color:#202820; }
+.panel textarea:focus-visible { outline:2px solid #487350; outline-offset:3px; }
+.grid article { padding:20px; border:1px solid #e0e6da; border-radius:12px; background:#f4f6ef; }

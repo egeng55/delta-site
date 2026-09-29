@@ -12,3 +12,6 @@ it('keeps technical navigation and runtime requests out of the personal experien
  expect(screen.getByLabelText('Your request')).toHaveValue('Plan my day'); expect(fetch).not.toHaveBeenCalled();
  } finally { global.fetch = prior; }
 });
+it('lets a request starter populate an editable draft without executing it',()=>{
+ render(<PersonalWorkspace/>);fireEvent.click(screen.getByRole('button',{name:'Plan my day ↗'}));expect(screen.getByLabelText('Your request')).toHaveValue('Help me plan my day. Ask what matters most before making a schedule.');expect(screen.getByRole('button',{name:'Sending is not available in this preview'})).toBeDisabled();
+});

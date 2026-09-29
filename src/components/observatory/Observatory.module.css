@@ -1226,3 +1226,11 @@
     scroll-behavior: auto !important;
   }
 }
+/* Shared presentation: calm surfaces and a consistent control rhythm. */
+.shell button { border-radius:8px; min-height:40px; }
+.shell h2 { letter-spacing:-.025em; }
+.shell :is(input,select,textarea) { border-radius:8px; }
+.shell details > summary { min-height:40px; padding-block:10px; cursor:pointer; }
+.heading h1 { letter-spacing:-.04em; }
+.preview { border-bottom:1px solid #d8dfd5; }
+@media (prefers-reduced-motion:reduce) { .shell *, .shell *::before, .shell *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
