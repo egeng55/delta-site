@@ -7,7 +7,12 @@ export type Workspace = {
   runtime: null | {
     observedAt: string;
     scope: 'this_process_only';
-    revision: null;
+    revision: string|null;
+    uptimeMs?:number;
+    ownerActive?:boolean;
+    ownerExpiresAt?:string|null;
+    tasks?:{id:string;outcomeId:string|null;kind:string;state:string;chargedMicrousd:number|null;unknownUsage:boolean|null}[];
+    taskCount?:number;
     retained: number;
     evicted: number;
     commands: { id: string; capability: string | null; state: string; verification: string; tokens: number | null }[];
@@ -49,5 +54,14 @@ export function projectRuntime(value: unknown): NonNullable<Workspace['runtime']
     return { id: id(row.capability_id), binding: choice(row.runtime_binding, ['bound', 'not_bound']), readiness: choice(row.readiness, ['not_probed', 'unavailable']), approvalRequired: row.approval_required as boolean | null };
   });
   if (new Set(commands.map(c => c.id)).size !== commands.length || new Set(capabilities.map(c => c.id)).size !== capabilities.length) throw new Error('duplicate_runtime_id');
-  return { observedAt: stamp, scope: 'this_process_only', revision: null, retained: commands.length, evicted: count(visibility.records_evicted), commands, capabilities };
+  const durable=object(root.workspace_visibility??{});
+  const tasks=Array.isArray(durable.tasks)?durable.tasks.slice(0,100).map(v=>{const t=object(v);return {id:id(t.id),outcomeId:typeof t.outcome_id==='string'?id(t.outcome_id):null,kind:choice(t.kind,['audit','engineering']),state:typeof t.state==='string'?t.state.slice(0,80):'unknown',chargedMicrousd:t.charged_microusd===null?null:count(t.charged_microusd),unknownUsage:typeof t.unknown_usage==='boolean'?t.unknown_usage:null};}):[];
+  const owner=object(root.owner_approval_broker??{});
+  return { uptimeMs:typeof root.uptime_ms==='number'?count(root.uptime_ms):undefined,ownerActive:owner.active===true,ownerExpiresAt:typeof owner.expires_at==='string'?owner.expires_at:null,tasks,taskCount:typeof durable.retained==='number'?count(durable.retained):0,observedAt: stamp, scope: 'this_process_only', revision: typeof root.running_revision==='string'&&/^[a-f0-9]{40}$/.test(root.running_revision)?root.running_revision:null, retained: commands.length, evicted: count(visibility.records_evicted), commands, capabilities };
+}
+
+export function recordedTaskCharges(tasks:NonNullable<Workspace['runtime']>['tasks']):number|null {
+ const outcomes=new Map<string,number>();
+ for(const task of tasks??[])if(task.chargedMicrousd!==null){const key=task.outcomeId??task.id;outcomes.set(key,Math.max(outcomes.get(key)??0,task.chargedMicrousd));}
+ return outcomes.size?[...outcomes.values()].reduce((a,b)=>a+b,0)/1000000:null;
 }

@@ -549,3 +549,41 @@ Verification: 278 tests and production build passed; lint has no errors and four
 existing warnings. A diverged-repository test proves main-only and dirty edits are
 excluded while source status remains unchanged. Browser review confirmed pinned SHAs,
 file statuses and the 50-of-58 partial-coverage disclosure on the site branch.
+
+## Local live connections — 2026-09-29
+
+- Bound HQ to the existing confirmed owner account in the ignored private environment;
+  the existing browser session opens `/hq` successfully. The preview remains read-only.
+- `DELTA_HQ_LOCAL_WORKSPACE` explicitly enables fixed read-only collectors. Source
+  observations refresh at 60 seconds; branch/worktree observations refresh at 30 seconds.
+  Concurrent requests share one bounded child process. Failed reads remain unavailable.
+- `/api/hq/operations` is exact-owner protected and refreshes backend `/health` plus the
+  backend-owned local reservation projection every 10 seconds. Reservations, recorded
+  outcome charges and provider invoices remain separate. This is local coverage only.
+- Runtime operator status now carries startup revision, uptime, owner expiry, and
+  content-free durable task observations. Graph component evidence matches command
+  capability IDs through explicit mappings, without inferring dependency execution.
+- The execution desk disables submission while owner authority is inactive. Its fixed
+  session endpoint permits explicit Keychain reauthentication while idle, with the same
+  configured duration and exact-action approval requirements. No automatic renewal.
+- `npm run hq:runtime` runs the existing foreground daemon and atomically refreshes the
+  site's private connector token after successful startup. Token values are not printed.
+  Configure `DELTA_HQ_AGENT_ROOT` to the approved agent checkout first.
+
+Browser evidence: signed-in HQ, advancing source timestamps, healthy backend revision,
+UTC reservation totals and caps. Runtime restart was attempted but macOS Keychain
+rejected identity access. No full browser engineering qualification or successful new
+live task is claimed by this delivery. System security approval cannot be automated by
+this session's computer-control tool. Existing isolated approval/repair/recovery tests
+remain a distinct form of evidence.
+
+Remaining original-plan scope must not be described as complete: provider invoice and
+hosted CI/deployment integration, hosted-to-local connectivity, broader role rollout,
+personal-workspace execution, persisted graph revision comparison, and live full-task
+qualification. These are not additional numbered phases.
+
+During live browser verification, HQ polling also exposed discarded refreshed auth
+cookies. The owner API helper now writes replacement cookie chunks in route handlers;
+page middleware retains responsibility for Server Component refresh. A regression test
+covers cookie propagation. The browser subsequently recovered current Git observations
+without another sign-in. Protected data still requires a server-verified exact owner.

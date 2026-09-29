@@ -11,3 +11,17 @@ it('recovers retained history and forwards an exact approval decision',async()=>
  fireEvent.click(screen.getByRole('button',{name:'Approve this exact action'}));await waitFor(()=>expect(fetch).toHaveBeenCalledWith('/api/hq/lifecycle/decision',expect.objectContaining({method:'POST',body:JSON.stringify({id:'decision',digest:'bound-digest',accepted:true})})));
  expect(screen.getByRole('button',{name:'Continue with review'})).toBeDisabled();
 });
+it('disables submission on expired authority and explicitly renews through the fixed route',async()=>{
+ let active=false;
+ global.fetch=jest.fn(async(url:RequestInfo|URL,init?:RequestInit)=>({ok:true,status:200,json:async()=>{
+  if(String(url).endsWith('/session')){if(init?.method==='POST')active=true;return {active,status:active?'active':'expired',expires_at:null,renewable:true,provider_enabled:false};}
+  if(String(url).endsWith('/approvals'))return {approvals:[]};
+  if(String(url).endsWith('/requests'))return {requests:[]};
+  return {tasks:[],coverage:{retained:0,returned:0}};
+ }})) as unknown as typeof fetch;
+ render(<TaskRunner input="Audit capability registry" preview={false}/>);
+ const renew=await screen.findByRole('button',{name:'Renew runtime session with Keychain'});
+ expect(screen.getByRole('button',{name:'Submit task'})).toBeDisabled();fireEvent.click(renew);
+ await waitFor(()=>expect(screen.getByRole('button',{name:'Submit task'})).toBeEnabled());
+ expect(fetch).toHaveBeenCalledWith('/api/hq/lifecycle/session',expect.objectContaining({method:'POST',body:'{"confirm":true}'}));
+});

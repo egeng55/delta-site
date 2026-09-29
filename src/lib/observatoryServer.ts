@@ -1,4 +1,5 @@
 import 'server-only';
+import {readLocalObservation} from './localObservations';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { open } from 'node:fs/promises';
@@ -16,7 +17,11 @@ export async function requireObservatoryOwner(): Promise<'owner' | 'signed_out' 
     const jar = await cookies();
     const client = createServerClient(url, key, {
       global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store', signal: AbortSignal.timeout(5000) }) },
-      cookies: { getAll: () => jar.getAll(), setAll: () => {} },
+      cookies: { getAll: () => jar.getAll(), setAll: values => {
+        // Route handlers must send refreshed credentials back to the browser.
+        // Server Components cannot write cookies; their page middleware owns refresh.
+        try { for(const {name,value,options} of values)jar.set(name,value,options); } catch { /* read-only Server Component cookie jar */ }
+      } },
     });
     const { data, error } = await client.auth.getUser();
     if (error || !data.user) return 'signed_out';
@@ -25,6 +30,7 @@ export async function requireObservatoryOwner(): Promise<'owner' | 'signed_out' 
 }
 
 export async function readObservatoryReport(): Promise<ObservatoryReport | null> {
+  const live=readLocalObservation('source');if(live){try{return validateReport(await live) as ObservatoryReport;}catch{return null;}}
   // No worktree discovery, source execution, provider request, or client-selected path.
   const configured = process.env.DELTA_HQ_REPORT_PATH;
   if (!configured || !path.isAbsolute(configured)) return null;

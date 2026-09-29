@@ -6,7 +6,8 @@ import { createServerClient } from '@supabase/ssr';
 import { requireObservatoryOwner, readObservatoryReport } from './observatoryServer';
 import { observatoryPreview } from './observatoryPreview';
 jest.mock('server-only', () => ({}), { virtual: true });
-jest.mock('next/headers', () => ({ cookies: async () => ({ getAll: () => [] }) }));
+const mockSetCookie=jest.fn();
+jest.mock('next/headers', () => ({ cookies: async () => ({ getAll: () => [],set:mockSetCookie }) }));
 jest.mock('@supabase/ssr', () => ({ createServerClient: jest.fn() }));
 const original = process.env;
 const id = '12345678-1234-1234-1234-123456789012';
@@ -44,4 +45,9 @@ it('reads only configured bounded files and rejects synthetic, symlink and malfo
     await symlink(file, path.join(directory, 'link')); process.env.DELTA_HQ_REPORT_PATH = path.join(directory, 'link'); expect(await readObservatoryReport()).toBeNull();
     process.env.DELTA_HQ_REPORT_PATH = 'relative.json'; expect(await readObservatoryReport()).toBeNull();
   } finally { await rm(directory, { recursive: true }); }
+});
+
+it('persists all refreshed auth cookie chunks from the owner API check',async()=>{
+ jest.mocked(createServerClient).mockImplementation((_url,_key,options)=>({auth:{getUser:async()=>{options.cookies.setAll?.([{name:'session.0',value:'fresh-one',options:{httpOnly:true}},{name:'session.1',value:'fresh-two',options:{httpOnly:true}}]);return {data:{user:{id,email_confirmed_at:'2026-01-01'}},error:null};}}}) as never);
+ expect(await requireObservatoryOwner()).toBe('owner');expect(mockSetCookie).toHaveBeenCalledWith('session.0','fresh-one',{httpOnly:true});expect(mockSetCookie).toHaveBeenCalledWith('session.1','fresh-two',{httpOnly:true});
 });

@@ -1,4 +1,4 @@
-import { projectRuntime } from './workspace';
+import { projectRuntime, recordedTaskCharges } from './workspace';
 const fixture = () => ({ status: 'ok', runtime: 'delta-agent', secret: 'never expose', operational_visibility: { observed_at: '2026-09-29T12:00:00.000Z', scope: 'this_process_only', records_evicted: 3, commands: [{ command_id: 'run-1', capability_id: null, state: 'completed', verification: 'passed', usage: { total_tokens: null }, prompt: 'private prompt' }] }, capability_availability: [{ capability_id: 'agent.audit', runtime_binding: 'bound', readiness: 'not_probed', approval_required: true }] });
 it('projects only allowlisted fields, retaining unknown billing inputs and eviction scope', () => {
  const result = projectRuntime(fixture()); expect(result.evicted).toBe(3); expect(result.revision).toBeNull(); expect(result.commands[0].tokens).toBeNull(); expect(JSON.stringify(result)).not.toMatch(/secret|private prompt/);
@@ -13,4 +13,10 @@ it('rejects malformed source and usage values', () => {
 it('rejects invented readiness and verification states instead of rendering them as authority', () => {
  const data = fixture(); data.capability_availability[0].readiness = 'authorized'; expect(() => projectRuntime(data)).toThrow();
  const other = fixture(); other.operational_visibility.commands[0].verification = 'approved'; expect(() => projectRuntime(other)).toThrow();
+});
+
+it('does not count one outcome charge twice across workspace tasks',()=>{
+ const task={id:'one',outcomeId:'outcome-one',kind:'engineering',state:'completed',chargedMicrousd:200000,unknownUsage:false};
+ expect(recordedTaskCharges([task,{...task,id:'two',chargedMicrousd:100000}])).toBe(0.2);
+ expect(recordedTaskCharges([{...task,chargedMicrousd:null}])).toBeNull();
 });

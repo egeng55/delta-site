@@ -3,9 +3,10 @@ import { useMemo, useState } from 'react';
 import type { ObservatoryReport } from '@/lib/observatory';
 import { graphLabel } from '@/lib/graphPresentation';
 import { graphNeighborhood } from '@/lib/graphExplore';
+import GraphRuntimeEvidence from './GraphRuntimeEvidence';
 import ArchitectureGraph from './ArchitectureGraph';
 import styles from './ArchitectureExplorer.module.css';
-export default function ArchitectureExplorer({ report, initialRepo = "all" }: { report: ObservatoryReport; initialRepo?: string }) {
+export default function ArchitectureExplorer({ report, initialRepo = "all", preview = true }: { report: ObservatoryReport; initialRepo?: string; preview?:boolean }) {
  const [dependencies, setDependencies] = useState(true);
  const [layer, setLayer] = useState('systems');
  const [focus, setFocus] = useState<string | null>(null);
@@ -28,7 +29,7 @@ export default function ArchitectureExplorer({ report, initialRepo = "all" }: { 
  function changeLayer(id: string) { setLayer(id); setTrail([]); setQuery(''); setRepo('all'); if (!report.graphs.find(g => g.id === id)?.nodes.some(n => n.id === focus)) setFocus(null); }
  return <section aria-label="Architecture explorer" className={styles.explorer}>
    <p>Coverage: {report.repositories.map(r => r.label).join(" · ")}</p>
-   <p>Declared structure · {graph.nodes.length} components · {graph.links.length} relationships. No live execution overlay is connected.</p>
+   <p>Declared structure · {graph.nodes.length} components · {graph.links.length} relationships. Select a component for separately identified runtime evidence.</p>
    <p>{ownerships.length} ownership links · {dependencyLinks.length} declared dependencies · {crossRepo.length} cross-repository links</p>
    <details><summary>Ownership by repository and complete link inventory ({graph.links.length})</summary>
      {graph.id === 'systems' && <ul>{report.repositories.map(r => <li key={r.id}><strong>{r.label}</strong>: {ownerships.filter(e => e.source === `repo:${r.id}`).map(e => graphLabel(nodeById.get(e.target)!)).join(', ') || 'No ownership declared in this layer'}</li>)}</ul>}
@@ -49,6 +50,7 @@ export default function ArchitectureExplorer({ report, initialRepo = "all" }: { 
      <p>Search filters the directory; the graph keeps relationship context around the selected component.</p></div>
    </div>
    <aside aria-label="Component evidence" className={styles.evidence}>{selected ? <><h2>{graphLabel(selected)}</h2><p>{selected.label}</p><code>{selected.id}</code><p>{selected.kind} · {selected.group} · declared status: {selected.maturity}</p><div className={styles.toolbar}>{report.graphs.filter(g => g.id !== graph.id && g.nodes.some(n => n.id === selected.id)).map(g => <button key={g.id} onClick={() => changeLayer(g.id)}>Explore in {g.id}</button>)}</div><h3>Relationships ({edges.length})</h3>{!edges.length && <p>No declared relationships in this layer.</p>}<ul>{edges.map((e,i) => { const other=e.source===focus?e.target:e.source; return <li key={i}>{e.source===focus?'Outgoing':'Incoming'} · {e.relation} → <button onClick={() => select(other)}>{graph.nodes.find(n=>n.id===other)?.label ?? other}</button></li>; })}</ul></> : <><h2>Inspect a component</h2><p>Select a directory entry or graph node to explore its relationships and provenance.</p></>}
+   <GraphRuntimeEvidence report={report} focus={focus} preview={preview}/>
    <p>Source revision <code>{graph.sourceCommit}</code> · observed {graph.generatedAt}{graph.sourceCommit !== report.sourceCommit ? ' · historical extraction' : ''}</p><p>Static relationships do not prove execution, authorization, health or cost. Revision comparison requires a second graph snapshot; none is supplied by this report.</p></aside>
  </section>;
 }

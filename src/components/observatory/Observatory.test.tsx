@@ -1,3 +1,4 @@
+jest.mock('./OperationsOverview',()=>({__esModule:true,default:()=> <div>Operations overview</div>}));
 jest.mock('./TaskRunner',()=>({__esModule:true,default:()=> <button disabled>Submit task</button>}));
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import Observatory from './Observatory';

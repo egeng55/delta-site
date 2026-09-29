@@ -7,7 +7,7 @@ async function handle(request:Request,context:{params:Promise<{operation:string}
  const owner=await requireObservatoryOwner();
  if(owner!=='owner')return NextResponse.json({error:'owner_access_required'},{status:owner==='unconfigured'?503:owner==='signed_out'?401:403,headers});
  const {operation}=await context.params;const method=request.method as 'GET'|'POST';
- if(!lifecycleOperations.includes(operation as LifecycleOperation)||!(method==='GET'?['tasks','requests','approvals','review']:['tasks','control','decision']).includes(operation))return NextResponse.json({error:'not_found'},{status:404,headers});
+ if(!lifecycleOperations.includes(operation as LifecycleOperation)||!(method==='GET'?['tasks','requests','approvals','review','session']:['tasks','control','decision','session']).includes(operation))return NextResponse.json({error:'not_found'},{status:404,headers});
  const url=new URL(request.url),id=url.searchParams.get('id');
  if((id&&!/^[a-f0-9-]{36}$/.test(id))||[...url.searchParams.keys()].some(k=>k!=='id'))return NextResponse.json({error:'invalid_request'},{status:400,headers});
  if(method==='POST'&&request.headers.get('origin')!==url.origin)return NextResponse.json({error:'same_origin_required'},{status:403,headers});

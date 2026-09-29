@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import ArchitectureExplorer from "./ArchitectureExplorer";
 import ArchitectureGraph from "./ArchitectureGraph";
+import OperationsOverview from "./OperationsOverview";
 import RuntimeOverview from "./RuntimeOverview";
 import TaskRunner from "./TaskRunner";
 import EngineeringInventory from "./EngineeringInventory";
@@ -143,13 +144,13 @@ export default function Observatory({
     setChatOpen(false);
     chatToggle.current?.focus();
   }
-  async function refresh() {
+  const refresh=useCallback(async function refresh() {
     if (preview || refreshLock.current) return;
     refreshLock.current = true;
     setRefreshing(true);
     setNotice("");
     try {
-      const response = await requestJson("/api/hq/report", {}, 10000);
+      const response = await requestJson("/api/hq/report", {}, 25000);
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           setReport(null);
@@ -162,9 +163,7 @@ export default function Observatory({
       if (!next || next.version !== 1 || next.synthetic)
         throw new Error("invalid");
       setNotice(
-        next.generatedAt === report?.generatedAt
-          ? "You have the latest published snapshot."
-          : "Snapshot updated.",
+        "Source observation updated.",
       );
       setReport(next);
 
@@ -174,7 +173,8 @@ export default function Observatory({
       refreshLock.current = false;
       setRefreshing(false);
     }
-  }
+  },[preview]);
+  useEffect(()=>{if(preview)return;const timer=setInterval(()=>void refresh(),60000);return()=>clearInterval(timer);},[preview,refresh]);
   async function signOut() {
     if (signingOut || preview) return;
     setSigningOut(true);
@@ -374,6 +374,7 @@ export default function Observatory({
           {section === "engineering" && <EngineeringInventory initial={initialEngineering} preview={preview} />}
           <div hidden={section !== "work"}><TaskRunner input={taskDraft} preview={preview} /></div>
           {(section === "overview" || section === "quality" || section === "work") && <RuntimeOverview preview={preview} />}
+          {["overview","quality","settings"].includes(section)&&<OperationsOverview preview={preview}/>}
           {section === "work" || section === "engineering" ? null : section === "settings" ? (
             <section className={styles.settings}>
               <h2>Access & data</h2>
@@ -634,7 +635,7 @@ export default function Observatory({
                   </div>
                 </>
               )}
-              {section === "architecture" && <ArchitectureExplorer key={repo + revision} report={report} initialRepo={repo} />}
+              {section === "architecture" && <ArchitectureExplorer key={repo + revision} report={report} initialRepo={repo} preview={preview} />}
               {activity && (
                 <>
                   <div className={styles.sectionHead}>

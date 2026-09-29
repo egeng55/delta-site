@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useState} from 'react';
+import type {Operations} from '@/lib/operationsServer';
+import styles from './RuntimeOverview.module.css';
+const usd=(value:number|null)=>value===null?'Unavailable':`$${value.toFixed(4)}`;
+export default function OperationsOverview({preview=false}:{preview?:boolean}){
+ const [data,setData]=useState<Operations|null>(null),[error,setError]=useState('');
+ useEffect(()=>{if(preview)return;let stopped=false,timer:ReturnType<typeof setTimeout>;const controller=new AbortController();async function poll(){try{const r=await fetch('/api/hq/operations',{cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(7000)])});if(!r.ok)throw Error();const next=await r.json();if(!stopped){setData(next);setError('');}}catch{if(!stopped){setData(null);setError('Live operations unavailable. Retrying in 10 seconds.');}}if(!stopped)timer=setTimeout(poll,10000);}void poll();return()=>{stopped=true;controller.abort();clearTimeout(timer);};},[preview]);
+ return <section className={styles.panel} aria-label="Live backend and spending"><h2>Backend & spending</h2><p role="status">{preview?'Connect the private workspace for live observations.':error||(!data?'Loading local operations…':`Observed ${new Date(data.observedAt).toLocaleTimeString()} · refreshes every 10 seconds`)}</p>{data&&<><dl className={styles.metrics}><div><dt>Backend health</dt><dd>{data.backend.state}</dd></div><div><dt>Probe latency</dt><dd>{data.backend.latencyMs} ms</dd></div><div><dt>Daily reserved budget</dt><dd>{usd(data.spending.dailyReserved)}</dd></div><div><dt>Monthly reserved budget</dt><dd>{usd(data.spending.monthlyReserved)}</dd></div></dl><p>Backend revision: <code>{data.backend.revision??'unavailable'}</code></p><p>Daily cap {usd(data.spending.dailyCap)} · monthly cap {usd(data.spending.monthlyCap)} · ledger day {data.spending.day??'unknown'} (UTC).</p><p>Reservations are the backend’s conservative budget accounting, not settled charges or provider invoices. A missing ledger stays unavailable. Agent task charges are reported separately above.</p></>}</section>;
+}

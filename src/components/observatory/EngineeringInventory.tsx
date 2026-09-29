@@ -6,7 +6,9 @@ import {parseEngineering,worktreeOverlaps,type EngineeringReport} from '@/lib/en
 import styles from './WorkspaceSection.module.css';
 export default function EngineeringInventory({initial=null,preview=false}:{initial?:EngineeringReport|null;preview?:boolean}){
  const [report,setReport]=useState(initial),[status,setStatus]=useState(preview?'Local Git observation':'Loading Git observation…'),[filter,setFilter]=useState('all'),[dirtyOnly,setDirtyOnly]=useState(false);
- useEffect(()=>{if(preview)return;const controller=new AbortController();let active=true;void fetch('/api/hq/engineering',{cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(5000)])}).then(async r=>{if(!r.ok)throw Error();const data=await r.json();if(active){setReport(data.report?parseEngineering(data.report):null);setStatus(data.report?'Published Git observation':'No Git observation published.');}}).catch(()=>{if(active){setReport(null);setStatus('Git observation unavailable.');}});return()=>{active=false;controller.abort();};},[preview]);
+ useEffect(()=>{if(preview)return;const controller=new AbortController();let active=true,timer:ReturnType<typeof setTimeout>;
+ async function refresh(){try{const r=await fetch('/api/hq/engineering',{cache:'no-store',signal:AbortSignal.any([controller.signal,AbortSignal.timeout(25000)])});if(!r.ok)throw Error();const data=await r.json();if(active){setReport(data.report?parseEngineering(data.report):null);setStatus(data.report?'Current Git observation · refreshes every 30 seconds':'No Git observation available.');}}catch{if(active){setReport(null);setStatus('Git observation unavailable. Retrying in 30 seconds.');}}if(active)timer=setTimeout(refresh,30000);}
+ void refresh();return()=>{active=false;controller.abort();clearTimeout(timer);};},[preview]);
  const [now,setNow]=useState(()=>Date.now());
  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(timer);},[]);
  const age=report?now-Date.parse(report.observedAt):0;

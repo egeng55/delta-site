@@ -34,7 +34,8 @@
     "access-policy:verify": "node scripts/request-only-auth-config.mjs",
     "access-policy:enforce": "node scripts/request-only-auth-config.mjs --apply",
     "lint": "eslint",
-    "test": "jest"
+    "test": "jest",
+    "hq:runtime": "node scripts/connect-local-runtime.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
