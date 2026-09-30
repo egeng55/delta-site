@@ -702,3 +702,24 @@ The census's unique-test measure is agent-centric. Its 5→6 milestone-file coun
 Verification: 309 site tests passed, production build passed, lint had zero errors and four existing warnings; browser milestone and metric selection verified against real archived data. Architecture contract updated to 1.44.1 under the existing owner observation boundary.
 
 Historian production delivery: application commit `ade140c` deployed READY to `https://deltahealthintelligence.com/hq#history` (Next.js 16.3.5). An authenticated read returned 14 milestones, 2 censuses and 18 comparison metrics; the custom-domain signed-out request returned 401. The deployment error-log query returned no entries. No new monitoring drain was configured. The unrelated pre-existing AGENTS.md modification remains untouched.
+
+### Historian ocean descent — September 30, 2026
+
+Replaced the History dashboard introduction with six scroll-driven ocean chapters:
+Surface, Sunlight, Twilight, Midnight, Abyss, and Seafloor. A procedural SVG code
+reef expands and reveals modules as readers descend. The reef is explicitly
+illustrative; it does not reconstruct historical topology or interpolate code
+size. All 14 original milestone records remain expandable, with their evidence
+and confidence. The two original censuses and all 18 metrics remain at the
+seafloor, together with repository deltas and provenance.
+
+Scroll work uses a passive listener with animation-frame coalescing and cleaned-up
+resize observation. Reduced-motion styles disable ambient animation and reef
+scaling. Chapter buttons and native evidence disclosures support keyboard use;
+narrow layouts retain the complete archive. History owns its heading and full
+width, without an unrelated live-source snapshot badge. The owner API and archive
+source are unchanged.
+
+Validation: 309 tests in 67 suites, production build, lint (zero errors, four
+pre-existing warnings), preflight and advisory safety scan. Browser verification
+covered desktop descent, chapter jumps, census navigation, and a 390px layout.

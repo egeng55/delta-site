@@ -1234,3 +1234,5 @@
 .heading h1 { letter-spacing:-.04em; }
 .preview { border-bottom:1px solid #d8dfd5; }
 @media (prefers-reduced-motion:reduce) { .shell *, .shell *::before, .shell *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+
+.shell .historyMain{max-width:none;padding:0;animation:none}

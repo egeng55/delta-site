@@ -340,8 +340,8 @@ export default function Observatory({
             </Link>
           </div>
         )}
-        <main id="workspace-content" className={styles.main}>
-          <div className={styles.heading}>
+        <main id="workspace-content" className={`${styles.main} ${section === "history" ? styles.historyMain : ""}`}>
+          {section !== "history" && <div className={styles.heading}>
             <div>
               <p className={styles.eyebrow}>
                 DELTA /{" "}
@@ -368,6 +368,7 @@ export default function Observatory({
               {refreshing ? "Refreshing..." : "Refresh report"}
             </button>
           </div>
+          }
           {(section === "overview" || section === "work") && <Atmosphere compact />}
           {notice && (
             <p role="status" className={styles.notice}>
@@ -380,7 +381,7 @@ export default function Observatory({
           <div hidden={section !== "work"}><TaskRunner input={taskDraft} preview={preview} /></div>
           {(section === "overview" || section === "quality" || section === "work") && <RuntimeOverview preview={preview} />}
           {["overview","quality","settings"].includes(section)&&<><OperationsOverview preview={preview}/><ProviderCosts preview={preview}/><ProviderInvoices preview={preview}/></>}
-          {section === "work" || section === "engineering" ? null : section === "settings" ? (
+          {section === "work" || section === "engineering" || section === "history" ? null : section === "settings" ? (
             <section className={styles.settings}>
               <h2>Access & data</h2>
               <dl>
