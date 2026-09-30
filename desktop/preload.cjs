@@ -1,10 +1,10 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("deltaDesktop", {
-  copyText: (value) => ipcRenderer.invoke("delta-hq:copy-text", String(value || "")),
+  copyText: (value) => ipcRenderer.invoke("delta-hq:copy-text", value),
   openHqInBrowser: () => ipcRenderer.invoke("delta-hq:open-hq-in-browser"),
   openConsoleInBrowser: () => ipcRenderer.invoke("delta-os:open-console-in-browser"),
-  openExternal: (url) => ipcRenderer.invoke("delta-hq:open-external", String(url || "")),
+  openExternal: (url) => ipcRenderer.invoke("delta-hq:open-external", url),
   reloadHq: () => ipcRenderer.invoke("delta-hq:reload-hq"),
   reloadConsole: () => ipcRenderer.invoke("delta-os:reload-console"),
   showServiceManager: () => ipcRenderer.invoke("delta-hq:show-service-manager"),

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "id": "desktop-workspaces-v1",
+  "date": "2026-09-30",
+  "summary": "Expose Personal, Studio and Control desktop experiences through server-verified roles while retaining owner-only runtime authority and sharing only a closed source-count summary with granted Control viewers.",
+  "architecture_changed": true,
+  "impacts": ["public_interface_change", "data_or_memory_boundary_change"],
+  "repositories": ["site"],
+  "systems": ["site_operator_surfaces"],
+  "interfaces": ["site_operator_ui", "owner_observatory_snapshot_v1"],
+  "dependencies_added": [],
+  "ownership_changes": [],
+  "data_boundary_changes": [
+    "Explicit server ID grants may read a closed census summary. Raw owner reports, task history, provider account data and runtime execution remain owner-only.",
+    "Privileged desktop IPC requires a trusted sender and fresh server-verified owner permission; renderer-supplied identity never grants authority."
+  ],
+  "contract_changes": [
+    "GET /api/workspace/access returns the verified caller's role, workspaces and explicit permissions. Only the configured owner ID receives runtime authority.",
+    "GET /api/workspace/summary independently authorizes Control access and returns allowlisted counts, observation time and closed status values with private no-store headers.",
+    "The development-only workspace preview uses synthetic identity and disconnected data. Studio simulations perform local fixture assertions without providers or runtime authority."
+  ],
+  "state_updates": [
+    "src/lib/workspaceAccess.ts",
+    "src/lib/workspaceAccessServer.ts",
+    "src/lib/workspaceSummary.ts",
+    "src/app/api/workspace/access/route.ts",
+    "src/app/api/workspace/summary/route.ts",
+    "src/app/workspace/page.tsx",
+    "src/app/workspace-preview/page.tsx",
+    "middleware.ts",
+    "desktop/main.cjs",
+    "docs/architecture-decisions/desktop-workspace-access-v1.md"
+  ],
+  "adr": {
+    "required": true,
+    "path": "docs/architecture-decisions/desktop-workspace-access-v1.md",
+    "reason": "Records server-managed role grants, privileged native operations and the sanitized nonowner reporting boundary."
+  },
+  "verification": [
+    "Focused workspace access, summary, page and middleware tests",
+    "Desktop IPC sender and owner-authority tests",
+    "Site tests, lint, typecheck and production build",
+    "Canonical architecture declaration and registry reconciliation by the integrating task"
+  ]
+}

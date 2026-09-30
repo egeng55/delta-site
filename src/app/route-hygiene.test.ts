@@ -5,12 +5,13 @@ describe("route hygiene", () => {
   it("keeps internal technical surfaces local-only in middleware", () => {
     const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
 
-    expect(middlewareSource).toContain("LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview']");
+    expect(middlewareSource).toContain("LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview', '/workspace-preview']");
     expect(middlewareSource).toContain("process.env.NODE_ENV === 'production'");
     expect(middlewareSource).toContain("status: 404");
     expect(middlewareSource).toContain("'/os/:path*'");
     expect(middlewareSource).toContain("'/demo/:path*'");
     expect(middlewareSource).toContain("'/dashboard/:path*'");
+    expect(middlewareSource).toContain("'/workspace-preview/:path*'");
   });
 
   it("treats HQ as a protected owner web app route", () => {

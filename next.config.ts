@@ -61,6 +61,15 @@ const nextConfig: NextConfig = {
           { key: 'Content-Security-Policy', value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ${authOrigin || ''} ${process.env.NODE_ENV === 'development' ? 'ws://localhost:* ws://127.0.0.1:*' : ''}; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'` },
         ],
       },
+      ...['/workspace/:path*', '/workspace-preview/:path*'].map(source => ({
+        source,
+        headers: [
+          { key: 'Cache-Control', value: 'private, no-store, max-age=0' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          { key: 'Content-Security-Policy', value: `default-src 'self'; script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === 'development' ? " 'unsafe-eval'" : ''}; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ${authOrigin || ''} ${process.env.NODE_ENV === 'development' ? 'ws://localhost:* ws://127.0.0.1:*' : ''}; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'` },
+        ],
+      })),
       {
         source: '/(.*)',
         headers: [
@@ -74,10 +83,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: '/hq/:path*',
-        headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
-      },
+      ...['/hq/:path*', '/workspace/:path*', '/workspace-preview/:path*'].map(source => ({ source, headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }] })),
     ];
   },
 

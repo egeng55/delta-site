@@ -3,465 +3,82 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Delta HQ Service Manager</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" />
+    <title>Reconnect to Delta</title>
     <style>
-      :root {
-        color-scheme: dark;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: #0a0a0f;
-        color: #f8fafc;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
-        background:
-          radial-gradient(circle at 20% 0%, rgba(59, 130, 246, 0.12), transparent 28%),
-          #0a0a0f;
-      }
-
-      main {
-        margin: 0 auto;
-        max-width: 1120px;
-        padding: 36px 28px;
-      }
-
-      .eyebrow {
-        color: #94a3b8;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      h1 {
-        font-size: clamp(30px, 5vw, 48px);
-        letter-spacing: 0;
-        line-height: 1.05;
-        margin: 14px 0 14px;
-      }
-
-      h2,
-      h3 {
-        margin: 0;
-      }
-
-      h2 {
-        font-size: 18px;
-      }
-
-      h3 {
-        font-size: 15px;
-      }
-
-      p {
-        color: #94a3b8;
-        font-size: 15px;
-        line-height: 1.6;
-        margin: 0;
-      }
-
-      .status {
-        background: rgba(17, 17, 24, 0.78);
-        border: 1px solid rgba(148, 163, 184, 0.18);
-        border-radius: 18px;
-        margin-top: 24px;
-        padding: 16px;
-      }
-
-      .grid {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        margin-top: 20px;
-      }
-
-      .card {
-        background: rgba(17, 17, 24, 0.82);
-        border: 1px solid rgba(148, 163, 184, 0.18);
-        border-radius: 18px;
-        padding: 18px;
-      }
-
-      .card-header {
-        align-items: center;
-        display: flex;
-        gap: 12px;
-        justify-content: space-between;
-      }
-
-      .stack {
-        display: grid;
-        gap: 12px;
-      }
-
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 18px;
-      }
-
-      button,
-      a.button {
-        align-items: center;
-        background: #3b82f6;
-        border: 0;
-        border-radius: 12px;
-        color: #ffffff;
-        cursor: pointer;
-        display: inline-flex;
-        font: inherit;
-        font-size: 14px;
-        font-weight: 700;
-        justify-content: center;
-        padding: 10px 12px;
-        text-decoration: none;
-      }
-
-      button.secondary,
-      a.button.secondary {
-        background: #111827;
-        border: 1px solid rgba(148, 163, 184, 0.22);
-      }
-
-      button.danger {
-        background: #991b1b;
-      }
-
-      button:disabled {
-        cursor: not-allowed;
-        opacity: 0.45;
-      }
-
-      .pill {
-        border: 1px solid rgba(148, 163, 184, 0.22);
-        border-radius: 999px;
-        color: #cbd5e1;
-        display: inline-flex;
-        font-size: 12px;
-        font-weight: 800;
-        padding: 6px 10px;
-        text-transform: uppercase;
-      }
-
-      .pill.running {
-        border-color: #2ea043;
-        color: #7ee787;
-      }
-
-      .pill.starting,
-      .pill.unknown {
-        border-color: #d29922;
-        color: #f2cc60;
-      }
-
-      .pill.error {
-        border-color: #f85149;
-        color: #ff7b72;
-      }
-
-      .detail {
-        display: grid;
-        gap: 6px;
-        margin-top: 14px;
-      }
-
-      .detail span {
-        color: #8b949e;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-      }
-
-      code,
-      pre {
-        background: rgba(10, 10, 15, 0.82);
-        border: 1px solid rgba(148, 163, 184, 0.18);
-        border-radius: 12px;
-        color: #f8fafc;
-        font-size: 13px;
-      }
-
-      code {
-        padding: 2px 6px;
-      }
-
-      pre {
-        line-height: 1.5;
-        margin: 12px 0 0;
-        max-height: 220px;
-        overflow: auto;
-        padding: 12px;
-        white-space: pre-wrap;
-      }
-
-      .logs {
-        min-height: 180px;
-      }
-
-      .safety {
-        border-color: #6e4f12;
-      }
-
-      .safety ul {
-        color: #d8b96d;
-        line-height: 1.7;
-        margin: 12px 0 0;
-        padding-left: 20px;
-      }
-
-      .notice {
-        border-color: rgba(216, 185, 109, 0.45);
-        color: #f8e3a1;
-      }
+      :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #edf3ff; color: #102344; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 80% 12%, #d1e0ff 0%, transparent 48%), #f5f8ff; }
+      main { max-width: 960px; margin: auto; padding: 100px 40px 56px; }
+      .brand { color: #2466ed; font-size: 13px; font-weight: 750; letter-spacing: .18em; text-transform: uppercase; }
+      h1 { font-size: clamp(36px, 5.5vw, 62px); line-height: 1.05; letter-spacing: -.045em; max-width: 660px; margin: 28px 0 24px; }
+      p { color: #5c6b83; font-size: 16px; line-height: 1.7; max-width: 680px; }
+      .actions { display: flex; gap: 12px; margin: 32px 0; flex-wrap: wrap; }
+      button { background: #2563eb; border: 1px solid transparent; border-radius: 12px; color: white; padding: 13px 20px; font: inherit; font-weight: 650; cursor: pointer; transition: transform 150ms, background 150ms; }
+      button:hover { background: #174ece; transform: translateY(-1px); }
+      button:focus-visible { outline: 3px solid #7aa6ff; outline-offset: 4px; }
+      button:disabled { opacity: .6; cursor: wait; transform: none; }
+      button.secondary { color: #214875; background: white; border-color: #cfddf1; }
+      .details { background: #ffffffb8; border: 1px solid #dae4f6; border-radius: 20px; padding: 26px; margin-top: 26px; }
+      h2 { font-size: 17px; margin: 0 0 12px; }
+      dt { color: #718097; font-size: 12px; margin-top: 18px; text-transform: uppercase; letter-spacing: .08em; }
+      dd { margin: 7px 0 0; font-size: 14px; overflow-wrap: anywhere; }
+      .small { font-size: 13px; }
+      #feedback { min-height: 24px; color: #a32d35; }
+      @media (prefers-reduced-motion: reduce) { button { transition: none; } }
     </style>
   </head>
   <body>
     <main>
-      <div class="eyebrow">Delta HQ service manager</div>
-      <h1>Start local Delta services safely.</h1>
-      <p>
-        The desktop shell is running. It can start only the allowlisted local backend and Next.js site
-        development services, then load Delta HQ.
-      </p>
-
-      <section class="status stack">
-        <p><strong>HQ URL:</strong> <span id="console-url">http://127.0.0.1:3000/hq</span></p>
-        <p><strong>HQ status:</strong> <span id="console-status">checking</span></p>
-        <p><strong>Reason:</strong> <span id="reason">Delta HQ unavailable</span></p>
-      </section>
-
-      <section id="packaged-note" class="card notice" style="margin-top: 20px" hidden>
-        <h2>Packaged mode</h2>
-        <p id="packaged-reason">
-          Packaged Delta HQ does not start local development services. Start backend/site manually, then reload HQ.
-        </p>
-      </section>
-
+      <div class="brand">Delta / Desktop</div>
+      <h1>Your workspace is one connection away.</h1>
+      <p>The desktop window is ready. Delta's application service is currently unavailable. Reconnect when it is running, then sign in to your account.</p>
       <div class="actions">
-        <button id="start-all">Start Services</button>
-        <button id="start-backend" class="secondary">Start Backend</button>
-        <button id="start-site" class="secondary">Start Site</button>
-        <button id="stop-all" class="danger" disabled>Stop App-Launched Services</button>
-        <button id="refresh" class="secondary">Refresh Status</button>
-        <button id="reload-console" class="secondary">Open Delta HQ</button>
-        <button id="open-browser" class="secondary">Open in Browser</button>
+        <button id="reload">Reconnect to Delta</button>
+        <button id="browser" class="secondary">Open in browser</button>
+        <button id="copy" class="secondary">Copy connection details</button>
       </div>
-
-      <div class="grid">
-        <section class="card">
-          <div class="card-header">
-            <h2>Backend</h2>
-            <span id="backend-pill" class="pill unknown">unknown</span>
-          </div>
-          <div class="detail">
-            <p><span>Owner</span><strong id="backend-owner">unknown</strong></p>
-            <p><span>PID</span><strong id="backend-pid">none</strong></p>
-            <p><span>Health</span><code id="backend-health">http://127.0.0.1:8000/health</code></p>
-            <p><span>Error</span><strong id="backend-error">none</strong></p>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card-header">
-            <h2>Site</h2>
-            <span id="site-pill" class="pill unknown">unknown</span>
-          </div>
-          <div class="detail">
-            <p><span>Owner</span><strong id="site-owner">unknown</strong></p>
-            <p><span>PID</span><strong id="site-pid">none</strong></p>
-            <p><span>Health</span><code id="site-health">http://127.0.0.1:3000/hq</code></p>
-            <p><span>Error</span><strong id="site-error">none</strong></p>
-          </div>
-        </section>
-      </div>
-
-      <div class="grid">
-        <section class="card">
-          <h2>Start backend command</h2>
-          <p>The app runs this fixed command with `.env` loaded in the main process. Secrets are not exposed to this page.</p>
-          <pre id="backend-command">cd /Users/egeng/delta-backend
-set -a; source .env; set +a
-.venv/bin/python -m uvicorn api_server:app --host 127.0.0.1 --port 8000</pre>
-          <div class="actions">
-            <button class="secondary" data-copy="backend-command">Copy backend command</button>
-          </div>
-        </section>
-
-        <section class="card">
-          <h2>Start site command</h2>
-          <p>The app runs this fixed command from the site repo. It does not run arbitrary shell input.</p>
-          <pre id="site-command">cd /Users/egeng/delta-site
-npm run dev -- --hostname 127.0.0.1 --port 3000</pre>
-          <div class="actions">
-            <button class="secondary" data-copy="site-command">Copy site command</button>
-          </div>
-        </section>
-      </div>
-
-      <section class="card safety" style="margin-top: 20px">
-        <h2>Safety posture</h2>
-        <ul>
-          <li>No microphone capture, browser mic, wake word, or always-on listener is started.</li>
-          <li>No backend TTS, browser TTS playback, desktop notification, or delivery side effect is run.</li>
-          <li>No memory writes, feedback writes, migrations, schema changes, or Supabase mutations are performed.</li>
-          <li>Stop controls affect only backend/site child processes launched by this desktop app.</li>
-        </ul>
+      <p id="feedback" role="status" aria-live="polite"></p>
+      <section class="details" aria-labelledby="connection-title">
+        <h2 id="connection-title">Connection details</h2>
+        <dl>
+          <dt>Configured workspace</dt><dd id="workspace-url"></dd>
+          <dt>Last connection result</dt><dd id="reason"></dd>
+        </dl>
       </section>
-
-      <section class="card" style="margin-top: 20px">
-        <div class="card-header">
-          <h2>Service logs</h2>
-          <span class="pill">latest 200 lines per service</span>
-        </div>
-        <pre id="logs" class="logs">No logs yet.</pre>
+      <section class="details" aria-labelledby="services-title">
+        <h2 id="services-title">Local services and owner access</h2>
+        <p class="small">Service status, logs, and start/stop actions require a server-verified platform-owner session. Recovery mode cannot grant that access. Start your configured application service from its project, then reconnect.</p>
+        <p class="small">Packaged Delta HQ does not start local development services. This build remains a desktop shell for a separately running Delta service.</p>
+        <p class="small">No microphone capture. No backend TTS. No desktop notifications. No arbitrary shell commands.</p>
       </section>
     </main>
-
     <script>
       const params = new URLSearchParams(window.location.search);
-      const hqUrl = params.get("hqUrl") || params.get("consoleUrl") || "http://127.0.0.1:3000/hq";
-      const reason = params.get("reason") || "Delta HQ unavailable";
       const api = window.deltaDesktop;
-      let pollTimer = null;
-      let autoReloadWhenReady = false;
-
-      document.getElementById("console-url").textContent = hqUrl;
+      const workspaceUrl = params.get("hqUrl") || "http://127.0.0.1:3000/workspace";
+      const reason = params.get("reason") || "The application service is unavailable.";
+      document.getElementById("workspace-url").textContent = workspaceUrl;
       document.getElementById("reason").textContent = reason;
-
-      function text(value, fallback = "unknown") {
-        return value === undefined || value === null || value === "" ? fallback : String(value);
-      }
-
-      function setButtonBusy(button, busy) {
-        if (!button) return;
-        button.disabled = busy;
-      }
-
-      function renderService(name, service) {
-        const pill = document.getElementById(`${name}-pill`);
-        pill.textContent = service?.status || "unknown";
-        pill.className = `pill ${service?.status || "unknown"}`;
-        document.getElementById(`${name}-owner`).textContent = text(service?.owner, "none");
-        document.getElementById(`${name}-pid`).textContent = text(service?.pid, "none");
-        document.getElementById(`${name}-health`).textContent = text(service?.healthUrl);
-        document.getElementById(`${name}-error`).textContent = text(service?.error, "none");
-      }
-
-      function renderLogs(logs) {
-        const rows = [];
-        for (const serviceName of ["backend", "site"]) {
-          for (const entry of logs?.[serviceName] || []) {
-            rows.push(`${entry.timestamp} ${entry.service}/${entry.stream}: ${entry.line}`);
-          }
-        }
-        document.getElementById("logs").textContent = rows.slice(-220).join("\n") || "No logs yet.";
-      }
-
-      function renderStatus(status) {
-        const backend = status?.services?.backend;
-        const site = status?.services?.site;
-        const desktop = status?.desktop || {};
-        const serviceManagerEnabled = desktop.serviceManagerEnabled !== false;
-        renderService("backend", backend);
-        renderService("site", site);
-        const consoleReady = site?.status === "running";
-        document.getElementById("console-status").textContent = consoleReady ? "available" : "unavailable";
-        document.getElementById("stop-all").disabled = !(backend?.stoppable || site?.stoppable);
-        document.getElementById("start-all").disabled = !serviceManagerEnabled;
-        document.getElementById("start-backend").disabled = !serviceManagerEnabled;
-        document.getElementById("start-site").disabled = !serviceManagerEnabled;
-        document.getElementById("packaged-note").hidden = serviceManagerEnabled;
-        document.getElementById("packaged-reason").textContent =
-          desktop.serviceManagerDisabledReason ||
-          "Packaged Delta HQ does not start local development services. Start backend/site manually, then reload HQ.";
-        if (consoleReady && autoReloadWhenReady) {
-          autoReloadWhenReady = false;
-          window.setTimeout(() => api?.reloadHq?.() || api?.reloadConsole?.(), 700);
-        }
-      }
-
-      async function refreshStatus() {
-        if (!api?.getServiceStatus) {
-          document.getElementById("console-status").textContent = "desktop bridge unavailable";
-          return null;
-        }
-        const status = await api.getServiceStatus();
-        renderStatus(status);
-        if (api.getServiceLogs) renderLogs(await api.getServiceLogs());
-        return status;
-      }
-
-      async function withRefresh(buttonId, action) {
-        const button = document.getElementById(buttonId);
-        setButtonBusy(button, true);
+      async function perform(id, action) {
+        const button = document.getElementById(id);
+        button.disabled = true;
+        document.getElementById("feedback").textContent = "";
         try {
+          if (!api) throw new Error("The desktop bridge is unavailable. Reopen Delta.");
           await action();
-          const status = await refreshStatus();
-          if (status?.services?.site?.status === "running") {
-            window.setTimeout(() => api?.reloadHq?.() || api?.reloadConsole?.(), 900);
-          }
+        } catch {
+          document.getElementById("feedback").textContent = "That action could not complete. Reopen Delta and try again.";
         } finally {
-          setButtonBusy(button, false);
+          button.disabled = false;
         }
       }
-
-      async function copyText(value) {
-        if (api?.copyText) {
-          await api.copyText(value);
-          return;
-        }
-        await navigator.clipboard.writeText(value);
-      }
-
-      document.getElementById("start-all").addEventListener("click", () => {
-        autoReloadWhenReady = true;
-        withRefresh("start-all", () => api?.startAll?.());
-      });
-      document.getElementById("start-backend").addEventListener("click", () => {
-        withRefresh("start-backend", () => api?.startBackend?.());
-      });
-      document.getElementById("start-site").addEventListener("click", () => {
-        autoReloadWhenReady = true;
-        withRefresh("start-site", () => api?.startSite?.());
-      });
-      document.getElementById("stop-all").addEventListener("click", () => {
-        withRefresh("stop-all", () => api?.stopAll?.());
-      });
-      document.getElementById("refresh").addEventListener("click", () => refreshStatus());
-      document.getElementById("reload-console").addEventListener("click", () => {
-        if (api?.reloadHq) api.reloadHq();
-        else if (api?.reloadConsole) api.reloadConsole();
-        else window.location.reload();
-      });
-      document.getElementById("open-browser").addEventListener("click", () => {
-        if (api?.openExternal) api.openExternal(hqUrl);
-        else window.open(hqUrl, "_blank", "noopener,noreferrer");
-      });
-
-      document.querySelectorAll("[data-copy]").forEach((button) => {
-        button.addEventListener("click", async () => {
-          const original = button.textContent;
-          const target = document.getElementById(button.getAttribute("data-copy"));
-          await copyText(target.textContent);
-          button.textContent = "Copied";
-          window.setTimeout(() => {
-            button.textContent = original;
-          }, 1600);
-        });
-      });
-
-      refreshStatus();
-      pollTimer = window.setInterval(refreshStatus, 4000);
-      window.addEventListener("beforeunload", () => {
-        if (pollTimer) window.clearInterval(pollTimer);
-      });
+      document.getElementById("reload").addEventListener("click", () => perform("reload", () => api.reloadHq()));
+      document.getElementById("browser").addEventListener("click", () => perform("browser", () => api.openHqInBrowser()));
+      document.getElementById("copy").addEventListener("click", () => perform("copy", async () => {
+        await api.copyText(`Delta workspace: ${workspaceUrl}\nConnection: ${reason}`);
+        document.getElementById("feedback").textContent = "Connection details copied.";
+      }));
     </script>
   </body>
 </html>
