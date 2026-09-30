@@ -31,6 +31,7 @@ import TaskRunner from "./TaskRunner";
 import EngineeringInventory from "./EngineeringInventory";
 import type { EngineeringReport } from "@/lib/engineering";
 import Atmosphere from "../workspace/Atmosphere";
+import HistorianHistory from './HistorianHistory';
 import WorkspaceSection from "./WorkspaceSection";
 import {
   freshness,
@@ -46,6 +47,7 @@ const navigation = [
   { id: "work", label: "Work", icon: MessageSquare },
   { id: "engineering", label: "Engineering", icon: GitBranch },
   { id: "architecture", label: "System", icon: Network },
+  { id: "history", label: "History", icon: Activity },
   { id: "quality", label: "Analytics", icon: Activity },
   { id: "settings", label: "Settings", icon: Settings2 },
 ] as const;
@@ -59,7 +61,7 @@ function subscribe(callback: () => void) {
 }
 function readSection(): Section {
   const hash = window.location.hash.slice(1);
-  return ["overview", "architecture", "census", "quality", "settings", "work", "engineering"].includes(
+  return ["overview", "architecture", "census", "quality", "settings", "work", "engineering", "history"].includes(
     hash,
   )
     ? (hash as Section)
@@ -238,7 +240,7 @@ export default function Observatory({
       ? "Your system, at a glance."
       : section === "architecture"
         ? "Architecture"
-        : activity
+        : section === "history" ? "History" : activity
           ? "Analytics"
           : section === "work" ? "Work" : section === "engineering" ? "Engineering" : "Workspace settings";
   const previous = report?.history.at(-1);
@@ -372,6 +374,7 @@ export default function Observatory({
               {notice}
             </p>
           )}
+          {section === "history" && <HistorianHistory preview={preview}/>}
           {(section === "work" || section === "engineering") && <WorkspaceSection section={section} report={report} draft={taskDraft} setDraft={setTaskDraft} />}
           {section === "engineering" && <EngineeringInventory initial={initialEngineering} preview={preview} />}
           <div hidden={section !== "work"}><TaskRunner input={taskDraft} preview={preview} /></div>

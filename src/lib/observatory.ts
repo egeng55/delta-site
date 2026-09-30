@@ -6,7 +6,7 @@ export interface ObservatoryReport {
   repositories: { id: string; label: string; sha: string; files: number; testFiles: number }[];
   census: Census; graphs: Graph[]; history: { generatedAt: string; sourceCommit: string; census: Census }[];
 }
-export type Section = 'overview' | 'architecture' | 'census' | 'quality' | 'settings' | 'work' | 'engineering';
+export type Section = 'overview' | 'architecture' | 'census' | 'quality' | 'settings' | 'work' | 'engineering' | 'history';
 export function freshness(timestamp: string, now = Date.now()) {
   const age = now - Date.parse(timestamp);
   return age < -60_000 || !Number.isFinite(age) ? 'invalid' : age > 26 * 3600_000 ? 'stale' : 'recent';

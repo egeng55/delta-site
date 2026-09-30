@@ -1,0 +1,1005 @@
+{
+  "version": 1,
+  "sourceCommit": "35cad022afa9ba7f8ea3d20e345ebed2ba9f26be",
+  "archiveThrough": "2026-08-08T11:06:12-04:00",
+  "provenance": [
+    {
+      "path": "agent/measurements/organizational-observability/comparisons/2026-08-12/canonical-numerical-progress-2026-08-07-to-2026-08-12.json",
+      "sha256": "2188eb88d6cbff0e9e58a14bb7facf7ac7c0a72b3271f28a4716611d8d10f469"
+    },
+    {
+      "path": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+      "sha256": "09ed9ba4d99c8f04b74d5a061f20e5083972504435c8d461dee57dbd95222472"
+    },
+    {
+      "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-07/orgcensus-55895242-843e-47c2-9d63-2b336d475d2e.json",
+      "sha256": "048069f2205ab4a4f3fb3f980431fa52a51c5d564cff05ecf7510184fe80074b"
+    },
+    {
+      "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-12/orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16.json",
+      "sha256": "fd7ed52007aded3955c7d7e509eb46efdf852097b7503d870828214bbda90575"
+    }
+  ],
+  "snapshots": [
+    {
+      "id": "orgcensus-55895242-843e-47c2-9d63-2b336d475d2e",
+      "date": "2026-08-07T20:10:30-04:00",
+      "methodology": "2026-08-06.phase1",
+      "quality": "complete",
+      "missingQualification": true
+    },
+    {
+      "id": "orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16",
+      "date": "2026-08-12T14:15:12-04:00",
+      "methodology": "2026-08-06.phase1",
+      "quality": "complete",
+      "missingQualification": true
+    }
+  ],
+  "milestones": [
+    {
+      "id": "delta-origin-2025-12-26",
+      "date": "2025-12-26T17:48:32-05:00",
+      "title": "Delta Origin",
+      "significance": "transformational",
+      "tracks": [
+        "product_intelligence"
+      ],
+      "description": "Earliest currently verifiable Delta product origin: a longitudinal health-intelligence and personal-analytics system organized around raw events, cautious signals, state, and reflection.",
+      "gained": "Delta gained its first executable longitudinal intelligence loop over user events.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-backend:851cbac12608ace1c83633a82a051db4b307d8b1:README.md",
+          "summary": "Earliest recovered product statement describing Delta as a longitudinal personal analytics engine.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:f1c7c36e2aae814342d2e7d89d5891002bf2e226:README.md",
+          "summary": "First direct README evidence for Delta as a longitudinal health intelligence system with the core loop.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:f1c7c36e2aae814342d2e7d89d5891002bf2e226:run_delta.py",
+          "summary": "Executable script proving the original event-to-reflection runtime existed.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:b5ea874d767e9531366fab975e34e7eab2d7c94a:core/signals.py",
+          "summary": "Signal extraction code showing cautious hypothesis generation from recent events.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
+    },
+    {
+      "id": "delta-durable-memory-architecture-2026-01-01",
+      "date": "2026-01-01T08:42:47-08:00",
+      "title": "Durable Memory Architecture",
+      "significance": "transformational",
+      "tracks": [
+        "product_intelligence"
+      ],
+      "description": "Delta introduced explicit long-term, episodic, pattern, trace, and daily-context memory, moving memory from incidental persistence to a first-class intelligence substrate.",
+      "gained": "Delta gained a durable multi-store memory architecture instead of relying only on event persistence and transient state.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "ref": "delta-backend:fe01eb9f0be6359d90cf3507b6b279b04e270394:memory/pipeline.py",
+          "summary": "End-to-end memory pipeline showing detection, routing, promotion, and context preparation.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:fe01eb9f0be6359d90cf3507b6b279b04e270394:memory_store/long_term_store.py",
+          "summary": "Long-term memory store proving typed durable memory records.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:fe01eb9f0be6359d90cf3507b6b279b04e270394:memory_store/episodic_store.py",
+          "summary": "Episodic memory store proving durable event memory beyond raw logs.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 2
+    },
+    {
+      "id": "delta-conversational-delta-2026-01-12",
+      "date": "2026-01-12T14:08:21-05:00",
+      "title": "Conversational Delta",
+      "significance": "major",
+      "tracks": [
+        "product_intelligence"
+      ],
+      "description": "Delta became explicitly conversational with short-term conversation memory, explicit user facts, memory injection, and state derivation shaping replies.",
+      "gained": "Delta gained a chat-first user experience grounded in memory and derived state.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-backend:3ed5f38214c7423b9907ea0f49421ee345b23319:README.md",
+          "summary": "Conversational-first README proving the explicit product pivot.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:d66950e8decf08a4fd262d6457d0a2e3e7b8e1ce:conversation_memory.py",
+          "summary": "SQLite-backed short-term conversation memory with pruning and pattern summaries.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:d66950e8decf08a4fd262d6457d0a2e3e7b8e1ce:memory_store.py",
+          "summary": "Explicit user-fact memory store used by the conversational layer.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:e629b38e18feb480ed22dbc05eb9212d6b4285f5:state_manager.py",
+          "summary": "State derivation artifact showing conversational state and belief extraction.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
+    },
+    {
+      "id": "delta-inference-driven-health-advisor-2026-01-29",
+      "date": "2026-01-29T08:20:23-05:00",
+      "title": "Inference-Driven Health Advisor",
+      "significance": "transformational",
+      "tracks": [
+        "product_intelligence"
+      ],
+      "description": "Delta matured into an inference-driven health advisor with baselines, readiness, causal reasoning, multi-type memory, recommendations, LLM explanations, and explicit outcome-learning components.",
+      "gained": "Delta gained a fuller health-intelligence stack with reasoning, explanation, and learning-loop components.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-backend:04a92ab2c97e9829fadc8848222afd4faea67fae:health_intelligence.py",
+          "summary": "Comprehensive health intelligence module with baselines, readiness, causal chains, and safety boundaries.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:1a578fd3dca7a2ab94e5498f86011d49421a7281:delta_intelligence.py",
+          "summary": "LLM-powered explanation and advice layer for Delta's health intelligence.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:1a578fd3dca7a2ab94e5498f86011d49421a7281:inference_engine.py",
+          "summary": "Formalized cognitive loop: user input to event interpretation, memory update, state update, and response context.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:7a3ef41128c84bd3f4abfc02912ee6bb742a49a1:PROJECT_NOTES.md",
+          "summary": "Direct product notes describing Delta as an inference-driven health advisor and documenting the learning-loop gap.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:9a6bb6f52e79936506ebdd0b43c20c989621a1b2:prediction_engine.py",
+          "summary": "Prediction engine proving explicit testable-health prediction support.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:9a6bb6f52e79936506ebdd0b43c20c989621a1b2:outcome_collector.py",
+          "summary": "Outcome collector proving feedback learning and verification intent.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:9a6bb6f52e79936506ebdd0b43c20c989621a1b2:belief_updater.py",
+          "summary": "Belief updater proving explicit confidence revision support.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
+    },
+    {
+      "id": "delta-behavioral-os-2026-06-08",
+      "date": "2026-06-08T15:48:12-04:00",
+      "title": "Behavioral OS",
+      "significance": "transformational",
+      "tracks": [
+        "product_intelligence"
+      ],
+      "description": "Delta generalized beyond a health advisor into a behavioral operating substrate built around observed events, interventions, feedback, adaptation, policy effects, and persistent behavioral memory.",
+      "gained": "Delta gained a generalized behavioral loop with persistent intervention and feedback state.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-backend:38034cd3ec0e7b5e4b0fc1ae01d8fb3199b27bd3:behavioral_os.py",
+          "summary": "Behavioral OS implementation proving the new generalized substrate.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:38034cd3ec0e7b5e4b0fc1ae01d8fb3199b27bd3:feedback_contract.py",
+          "summary": "Shared intervention feedback contract with policy effects.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:38034cd3ec0e7b5e4b0fc1ae01d8fb3199b27bd3:migrations/018_behavioral_os.sql",
+          "summary": "Persistent behavioral memory and intervention schema proving durable behavioral state.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
+    },
+    {
+      "id": "delta-agent-supervisor-origin-2026-06-22",
+      "date": "2026-06-22T18:31:56-05:00",
+      "title": "Agent Supervisor Origin",
+      "significance": "major",
+      "tracks": [
+        "engineering_agentic"
+      ],
+      "description": "The separate engineering-agent lineage began when delta-agent appeared as a bounded local supervisor and orchestration substrate for engineering work.",
+      "gained": "Delta gained a distinct engineering orchestration runtime separate from the product-intelligence lineage.",
+      "confidence": "high",
+      "evidence": [],
+      "omittedEvidence": 1
+    },
+    {
+      "id": "delta-intelligence-os-2026-06-25",
+      "date": "2026-06-25T09:06:52-05:00",
+      "title": "Intelligence OS",
+      "significance": "transformational",
+      "tracks": [
+        "product_intelligence"
+      ],
+      "description": "Delta was explicitly reframed as a personal Intelligence OS, with health demoted from product container to domain family and shared substrate elevated as the architectural center.",
+      "gained": "Delta gained a durable substrate-centered architecture with domains treated as capability packs.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-backend:e0a2fa4af4fa51806448806623d572f1b662e6f2:docs/BEHAVIORAL_OS_DOMAIN_MODEL.md",
+          "summary": "Architecture plan directly reframing Delta as a personal Intelligence OS with domains as capability packs.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
+    },
+    {
+      "id": "delta-shared-substrate-proof-era-2026-06-29",
+      "date": "2026-06-29T16:24:02-05:00",
+      "title": "Shared-Substrate Proof Era",
+      "significance": "major",
+      "tracks": [
+        "product_intelligence"
+      ],
+      "description": "Delta formalized scenario-registry and proof/eval framing for the shared substrate, turning multi-domain transferability into a governed proof discipline rather than an implied promise.",
+      "gained": "Delta gained explicit proof fixtures and scenario governance for substrate transfer across domains.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-backend:659936ff19c8836dc1395cf6af462c03aa41ae5f:docs/INTELLIGENCE_SCENARIO_REGISTRY.md",
+          "summary": "Scenario registry document formalizing proof fixtures for the shared Intelligence OS substrate.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-backend:942e7639bc61f121aa150d84f35ad5c3aa376ef9:docs/INTELLIGENCE_SCENARIO_REGISTRY.md",
+          "summary": "Supporting deterministic scenario eval runner evidence within the same proof era.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
+    },
+    {
+      "id": "delta-agentic-os-direction-2026-07-02",
+      "date": "2026-07-02T10:46:24-05:00",
+      "title": "Agentic OS Direction",
+      "significance": "transformational",
+      "tracks": [
+        "engineering_agentic"
+      ],
+      "description": "The engineering track became an explicit Agentic OS direction with supervised loops, routing, lanes, and codex-oriented execution scaffolding.",
+      "gained": "Delta's engineering-agent line gained an explicit operating model centered on supervised agentic loops.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-agent:f54b16226f8251928fb7a823fb40e0b154fe328a:docs/DELTA_AGENTIC_OS_ROADMAP.md",
+          "summary": "Roadmap commit explicitly recentering the engineering stack on agentic OS loops.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 1
+    },
+    {
+      "id": "delta-shared-llm-runtime-2026-08-06",
+      "date": "2026-08-06T13:58:40-04:00",
+      "title": "Shared LLM Agent Runtime",
+      "significance": "major",
+      "tracks": [
+        "engineering_agentic"
+      ],
+      "description": "Delta's engineering stack gained a shared LLM agent runtime, creating a common execution substrate for multiple bounded agents rather than separate bespoke runtimes.",
+      "gained": "Engineering agents gained a common model-runtime substrate.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-agent:53b86f79aadef7ffce26b8f1de131e5e3ff00e03:docs/DELTA_SHARED_AGENT_RUNTIME.md",
+          "summary": "Shared runtime specification documenting the common agent runtime substrate.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 1
+    },
+    {
+      "id": "mission-control-live-qualification-2026-08-06",
+      "date": "2026-08-06T14:55:57-04:00",
+      "title": "Mission Control Live Qualification",
+      "significance": "major",
+      "tracks": [
+        "engineering_agentic"
+      ],
+      "description": "Mission Control passed live runtime qualification as a bounded advisory orchestrator with explicit authority limits and evaluation expectations.",
+      "gained": "Delta gained a qualified Mission Control orchestration layer in the engineering stack.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-agent:47bf452aef648d0b22164214b3ee0fc2b7f8d0c9:docs/DELTA_MISSION_CONTROL_OWNER_REVIEW_EXPERIENCE.md",
+          "summary": "Mission Control owner review experience document preserving the qualified authority boundary.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 1
+    },
+    {
+      "id": "historian-runtime-bounded-dependency-2026-08-06",
+      "date": "2026-08-06T16:04:37-04:00",
+      "title": "Historian Runtime Becomes Bounded Dependency",
+      "significance": "major",
+      "tracks": [
+        "engineering_agentic"
+      ],
+      "description": "Historian gained a committed read-only runtime inspection interface and became a bounded production dependency for Mission Control without gaining canonical authority.",
+      "gained": "Mission Control could consume bounded Historian context directly through a read-only runtime interface.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-agent:b8c6d00fe839f6f40e84dc66f2d51736ddffcd46:src/historian/runtime.mjs",
+          "summary": "Committed read-only historian runtime interface.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 1
+    },
+    {
+      "id": "failure-triage-second-qualified-specialist-2026-08-07",
+      "date": "2026-08-07T14:17:41-04:00",
+      "title": "Failure Triage Second Qualified Specialist",
+      "significance": "major",
+      "tracks": [
+        "engineering_agentic",
+        "converged_platform"
+      ],
+      "description": "Governance promoted Failure Triage from candidate to qualified handoff-only advisory/read-only use, making Delta's governed shared-agent substrate historically span more than one distinct qualified intelligent specialist without granting autonomous wake, repair, or execution authority.",
+      "gained": "Delta gained a second qualified bounded specialist role on its governed shared-agent runtime.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-agent:bff167cc4979a775e1238134c47e3b617c8c589c:config/agent-qualifications.json",
+          "summary": "Failure Triage entered the qualification registry as a candidate with advisory_read_only authority and disabled pending promotion Event Bus eligibility.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:c97133590603f12d030d9793dfe6163faec7304d:config/agent-qualifications.json",
+          "summary": "Canonical qualification registry records Failure Triage as qualified at advisory_read_only authority with separately_governed Event Bus status and preserves Mission Control as already qualified.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:c97133590603f12d030d9793dfe6163faec7304d:agent/architecture-changes/2026-08-07-failure-triage-handoff-only-promotion.json",
+          "summary": "Promotion declaration preserves the handoff-only advisory/read-only boundary, explicit prohibitions, and post-promotion verification commands.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:c97133590603f12d030d9793dfe6163faec7304d:docs/architecture-decisions/0016-failure-triage-handoff-only-promotion.md",
+          "summary": "ADR 0016 records the accepted promotion decision, its evidence chain, and the preserved denial of Event Bus wake and other authority expansion.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:f72836ff163f470c67f71623fa5b82b43470ccfa:agent/runs/qualification-evidence/2026-08-07T14-53-12Z-failure-triage-final-gate-evidence-manifest.json",
+          "summary": "The preserved final-gate manifest records the 37/39 live gate, 37/37 compatibility replay, zero provider/runtime contract mismatches, and Architecture 1.10.0 verification passing.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:04bacfb9bf9eaeacad2705b8a453fe1e54b3ec9e:agent/runs/qualification-evidence/2026-08-07T17-57-24Z-failure-triage-delta-requalification-evidence-manifest.json",
+          "summary": "The authorized delta requalification manifest records 6/6 exact outcomes with zero hallucinated evidence references, zero grounding failures, zero safety violations, and zero authority violations.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 2
+    },
+    {
+      "id": "architecture-review-third-qualified-specialist-2026-08-08",
+      "date": "2026-08-08T11:06:12-04:00",
+      "title": "Architecture Review Third Qualified Specialist",
+      "significance": "major",
+      "tracks": [
+        "engineering_agentic",
+        "converged_platform"
+      ],
+      "description": "Governance promoted Architecture Review from candidate to qualified handoff-only advisory/read-only use, making Delta's governed shared-agent runtime span a third distinct qualified intelligent specialist and extending that substrate into structural judgment without granting canon mutation, Event Bus wake, approval, or execution authority.",
+      "gained": "Delta gained a third qualified bounded specialist role with structural and institutional review semantics on the governed shared-agent runtime.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:config/agent-qualifications.json",
+          "summary": "Canonical qualification registry records Architecture Review as qualified with advisory_read_only authority and separately_governed Event Bus status.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:agent/architecture-changes/2026-08-08-architecture-review-handoff-only-promotion.json",
+          "summary": "Promotion declaration preserves the handoff-only advisory/read-only boundary, evidence commit, integrity digest, and post-promotion verification commands.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:docs/architecture-decisions/0019-architecture-review-handoff-only-promotion.md",
+          "summary": "ADR 0019 records the accepted promotion decision, its evidence chain, and the preserved denial of Event Bus wake, canon mutation, approval, and execution authority.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:9ab8faee6a69a14da3e048c0d6cac6965f1d2ddd:agent/runs/qualification-evidence/2026-08-08T14-07-48Z-architecture_review-combined-final-gate-9060d85-manifest.json",
+          "summary": "Combined final-gate manifest records the 12/12 gate, 9/9 compatibility replay, 3/3 delta requalification, total spend estimate, integrity digest, and zero provider/runtime, evidence-reference, grounding, safety, and authority failures.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:config/specialists/architecture_review.json",
+          "summary": "Architecture Review specialist declaration preserves safe effect defaults, closed-world evidence, proposal-only Mission Control handoff, and canon mutation disallowance.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:config/agent-subscriptions.json",
+          "summary": "Architecture Review is absent from the subscription registry, so automatic wake remains disabled after promotion.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:docs/architecture-decisions/0017-specialist-agent-factory.md",
+          "summary": "ADR 0017 defines Specialist Agent Factory as a non-authoritative shared mechanism for specialist contract, evidence, context, lifecycle, artifact, and economics mechanics.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:docs/architecture-decisions/0018-architecture-review-specialist.md",
+          "summary": "ADR 0018 records Architecture Review as a deterministic candidate that explicitly relied on Specialist Agent Factory V1 and excluded Event Bus eligibility and canon record authority.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:tests/architecture-review-specialist.test.mjs",
+          "summary": "Focused Architecture Review tests directly assert qualified status, advisory authority, absent canon-record capability, absent subscription, and truth-domain consistency checks.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:tests/specialist-agent-factory.test.mjs",
+          "summary": "Specialist Factory tests assert safe fail-closed declarations, closed-world evidence, bounded context projection, provider contract closure, and factory-backed specialist scaffolding behavior.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 1
+    }
+  ],
+  "comparison": {
+    "id": "canonical-numerical-progress-2026-08-07-to-2026-08-12",
+    "recordedAt": "2026-08-12T14:15:12-04:00",
+    "methodology": "2026-08-06.phase1",
+    "metrics": [
+      {
+        "metric_id": "repository_count",
+        "title": "Repository count",
+        "unit": "count",
+        "previous": 5,
+        "current": 5,
+        "absolute_change": 0,
+        "percentage_change": 0
+      },
+      {
+        "metric_id": "source_loc",
+        "title": "Source LOC",
+        "unit": "loc",
+        "previous": 182107,
+        "current": 186730,
+        "absolute_change": 4623,
+        "percentage_change": 2.538617
+      },
+      {
+        "metric_id": "source_files",
+        "title": "Source files",
+        "unit": "count",
+        "previous": 562,
+        "current": 568,
+        "absolute_change": 6,
+        "percentage_change": 1.067616
+      },
+      {
+        "metric_id": "test_loc",
+        "title": "Test LOC",
+        "unit": "loc",
+        "previous": 52307,
+        "current": 54130,
+        "absolute_change": 1823,
+        "percentage_change": 3.485193
+      },
+      {
+        "metric_id": "test_files",
+        "title": "Test files",
+        "unit": "count",
+        "previous": 192,
+        "current": 194,
+        "absolute_change": 2,
+        "percentage_change": 1.041667
+      },
+      {
+        "metric_id": "documentation_loc",
+        "title": "Documentation LOC",
+        "unit": "loc",
+        "previous": 34296,
+        "current": 35023,
+        "absolute_change": 727,
+        "percentage_change": 2.119781
+      },
+      {
+        "metric_id": "documentation_files",
+        "title": "Documentation files",
+        "unit": "count",
+        "previous": 213,
+        "current": 219,
+        "absolute_change": 6,
+        "percentage_change": 2.816901
+      },
+      {
+        "metric_id": "schema_config_loc",
+        "title": "Schema/config LOC",
+        "unit": "loc",
+        "previous": 49747,
+        "current": 52618,
+        "absolute_change": 2871,
+        "percentage_change": 5.771202
+      },
+      {
+        "metric_id": "schema_config_files",
+        "title": "Schema/config files",
+        "unit": "count",
+        "previous": 149,
+        "current": 158,
+        "absolute_change": 9,
+        "percentage_change": 6.040268
+      },
+      {
+        "metric_id": "registered_capabilities_defined",
+        "title": "Registered capabilities",
+        "unit": "count",
+        "previous": 77,
+        "current": 78,
+        "absolute_change": 1,
+        "percentage_change": 1.298701
+      },
+      {
+        "metric_id": "registered_capabilities_implemented",
+        "title": "Implemented capabilities",
+        "unit": "count",
+        "previous": 62,
+        "current": 63,
+        "absolute_change": 1,
+        "percentage_change": 1.612903
+      },
+      {
+        "metric_id": "runtime_tools_defined",
+        "title": "Runtime tools",
+        "unit": "count",
+        "previous": 62,
+        "current": 63,
+        "absolute_change": 1,
+        "percentage_change": 1.612903
+      },
+      {
+        "metric_id": "schemas_defined",
+        "title": "Canonical schemas",
+        "unit": "count",
+        "previous": 28,
+        "current": 30,
+        "absolute_change": 2,
+        "percentage_change": 7.142857
+      },
+      {
+        "metric_id": "agent_roles_defined",
+        "title": "Agent roles defined",
+        "unit": "count",
+        "previous": 14,
+        "current": 15,
+        "absolute_change": 1,
+        "percentage_change": 7.142857
+      },
+      {
+        "metric_id": "unique_tests",
+        "title": "Unique tests",
+        "unit": "count",
+        "previous": 365,
+        "current": 417,
+        "absolute_change": 52,
+        "percentage_change": 14.246575
+      },
+      {
+        "metric_id": "adversarial_scenarios",
+        "title": "Adversarial scenarios",
+        "unit": "count",
+        "previous": 42,
+        "current": 46,
+        "absolute_change": 4,
+        "percentage_change": 9.52381
+      },
+      {
+        "metric_id": "test_source_ratio",
+        "title": "Test/source ratio",
+        "unit": "ratio",
+        "previous": 0.287232,
+        "current": 0.289884,
+        "absolute_change": 0.0026519999999999877,
+        "percentage_change": 0.923295
+      },
+      {
+        "metric_id": "historian_milestones",
+        "title": "Historian milestones",
+        "unit": "count",
+        "previous": 5,
+        "current": 6,
+        "absolute_change": 1,
+        "percentage_change": 20
+      }
+    ],
+    "repositories": [
+      {
+        "repo": "delta-agent",
+        "commit_count": 41,
+        "data_quality_previous": "complete",
+        "data_quality_current": "complete",
+        "metrics": {
+          "source_loc": {
+            "previous": 50529,
+            "current": 53867,
+            "absolute_change": 3338,
+            "percentage_change": 6.606107
+          },
+          "source_files": {
+            "previous": 129,
+            "current": 135,
+            "absolute_change": 6,
+            "percentage_change": 4.651163
+          },
+          "test_loc": {
+            "previous": 13086,
+            "current": 14694,
+            "absolute_change": 1608,
+            "percentage_change": 12.287941
+          },
+          "test_files": {
+            "previous": 34,
+            "current": 36,
+            "absolute_change": 2,
+            "percentage_change": 5.882353
+          },
+          "documentation_loc": {
+            "previous": 16861,
+            "current": 17588,
+            "absolute_change": 727,
+            "percentage_change": 4.311725
+          },
+          "documentation_files": {
+            "previous": 91,
+            "current": 97,
+            "absolute_change": 6,
+            "percentage_change": 6.593407
+          },
+          "schema_config_loc": {
+            "previous": 22570,
+            "current": 25441,
+            "absolute_change": 2871,
+            "percentage_change": 12.720425
+          },
+          "schema_config_files": {
+            "previous": 112,
+            "current": 121,
+            "absolute_change": 9,
+            "percentage_change": 8.035714
+          },
+          "unique_tests": {
+            "previous": 365,
+            "current": 417,
+            "absolute_change": 52,
+            "percentage_change": 14.246575
+          }
+        }
+      },
+      {
+        "repo": "delta-backend",
+        "commit_count": 0,
+        "data_quality_previous": "partial",
+        "data_quality_current": "partial",
+        "metrics": {
+          "source_loc": {
+            "previous": 46738,
+            "current": 46738,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "source_files": {
+            "previous": 132,
+            "current": 132,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "test_loc": {
+            "previous": 24298,
+            "current": 24298,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "test_files": {
+            "previous": 80,
+            "current": 80,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_loc": {
+            "previous": 7923,
+            "current": 7923,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_files": {
+            "previous": 38,
+            "current": 38,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_loc": {
+            "previous": 1392,
+            "current": 1392,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_files": {
+            "previous": 8,
+            "current": 8,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "unique_tests": {
+            "previous": 0,
+            "current": 0,
+            "absolute_change": 0,
+            "percentage_change": null
+          }
+        }
+      },
+      {
+        "repo": "delta-jobs",
+        "commit_count": 0,
+        "data_quality_previous": "partial",
+        "data_quality_current": "partial",
+        "metrics": {
+          "source_loc": {
+            "previous": 23213,
+            "current": 23213,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "source_files": {
+            "previous": 46,
+            "current": 46,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "test_loc": {
+            "previous": 10196,
+            "current": 10196,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "test_files": {
+            "previous": 45,
+            "current": 45,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_loc": {
+            "previous": 163,
+            "current": 163,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_files": {
+            "previous": 3,
+            "current": 3,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_loc": {
+            "previous": 484,
+            "current": 484,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_files": {
+            "previous": 8,
+            "current": 8,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "unique_tests": {
+            "previous": 0,
+            "current": 0,
+            "absolute_change": 0,
+            "percentage_change": null
+          }
+        }
+      },
+      {
+        "repo": "delta-mobile",
+        "commit_count": 0,
+        "data_quality_previous": "partial",
+        "data_quality_current": "partial",
+        "metrics": {
+          "source_loc": {
+            "previous": 37862,
+            "current": 37862,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "source_files": {
+            "previous": 163,
+            "current": 163,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "test_loc": {
+            "previous": 2336,
+            "current": 2336,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "test_files": {
+            "previous": 16,
+            "current": 16,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_loc": {
+            "previous": 2363,
+            "current": 2363,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_files": {
+            "previous": 12,
+            "current": 12,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_loc": {
+            "previous": 13195,
+            "current": 13195,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_files": {
+            "previous": 13,
+            "current": 13,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "unique_tests": {
+            "previous": 0,
+            "current": 0,
+            "absolute_change": 0,
+            "percentage_change": null
+          }
+        }
+      },
+      {
+        "repo": "delta-site",
+        "commit_count": 1,
+        "data_quality_previous": "partial",
+        "data_quality_current": "partial",
+        "metrics": {
+          "source_loc": {
+            "previous": 23765,
+            "current": 25050,
+            "absolute_change": 1285,
+            "percentage_change": 5.407111
+          },
+          "source_files": {
+            "previous": 92,
+            "current": 92,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "test_loc": {
+            "previous": 2391,
+            "current": 2606,
+            "absolute_change": 215,
+            "percentage_change": 8.992054
+          },
+          "test_files": {
+            "previous": 17,
+            "current": 17,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_loc": {
+            "previous": 6986,
+            "current": 6986,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "documentation_files": {
+            "previous": 69,
+            "current": 69,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_loc": {
+            "previous": 12106,
+            "current": 12106,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "schema_config_files": {
+            "previous": 8,
+            "current": 8,
+            "absolute_change": 0,
+            "percentage_change": 0
+          },
+          "unique_tests": {
+            "previous": 0,
+            "current": 0,
+            "absolute_change": 0,
+            "percentage_change": null
+          }
+        }
+      }
+    ],
+    "interpretation": {
+      "summary": "Recent growth is real platform maturation, but it is concentrated in delta-agent substrate, verification, continuity, and governance surfaces rather than downstream product-runtime expansion.",
+      "product_capability_assessment": "Limited direct product-surface growth. Backend, mobile, and jobs were flat across the baseline window; delta-site grew modestly.",
+      "infrastructure_governance_assessment": "Most net growth was infrastructure/governance heavy: observability, continuity, specialist/runtime support, qualification evidence, and tests."
+    },
+    "limitations": [
+      "unique_tests remains delta-agent-centric because the current parser counts node:test-style test definitions and does not produce equivalent cross-repo unique test counts for Python and Jest suites."
+    ]
+  }
+}

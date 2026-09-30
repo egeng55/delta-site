@@ -20,6 +20,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    ".owner-reports/**",
     "out/**",
     "build/**",
     "desktop/**",
