@@ -26,7 +26,7 @@ export default function RuntimeOverview({ preview = false }: { preview?: boolean
           const next = response.data as Workspace;
           if (next?.version !== 1) throw new Error('invalid_workspace');
           setData(next);
-          setState(next.connection === 'connected' ? 'Connected to local runtime' : next.connection === 'unconfigured' ? 'Runtime connector not configured.' : 'Runtime disconnected.');
+          setState(next.connection === 'snapshot' ? 'Hosted observation feed · read-only · updated within 2 minutes' : next.connection === 'stale' ? 'Observation feed stale · last known state, not live health' : next.connection === 'connected' ? 'Connected to local runtime' : next.connection === 'unconfigured' ? 'Runtime connector not configured.' : 'Runtime disconnected.');
         }
       } catch { if (!disposed) { setData(null); setState('Runtime unavailable.'); } }
       if (!disposed) timer = setTimeout(refresh, 10000);

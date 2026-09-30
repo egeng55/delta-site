@@ -1,4 +1,5 @@
 import 'server-only';
+import {readHostedObservation} from './hostedObservationServer';
 import {readLocalObservation} from './localObservations';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
@@ -31,6 +32,7 @@ export async function requireObservatoryOwner(): Promise<'owner' | 'signed_out' 
 
 export async function readObservatoryReport(): Promise<ObservatoryReport | null> {
   const live=readLocalObservation('source');if(live){try{return validateReport(await live) as ObservatoryReport;}catch{return null;}}
+  if(process.env.DELTA_HQ_HOSTED_OBSERVATIONS==='1')return (await readHostedObservation())?.source??null;
   // No worktree discovery, source execution, provider request, or client-selected path.
   const configured = process.env.DELTA_HQ_REPORT_PATH;
   if (!configured || !path.isAbsolute(configured)) return null;

@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useState} from 'react';
+import type {ProviderCosts as Costs} from '@/lib/providerCosts';
+import styles from './RuntimeOverview.module.css';
+export default function ProviderCosts({preview=false}:{preview?:boolean}){
+ const [data,setData]=useState<Costs|null>(null),[error,setError]=useState(false),[refresh,setRefresh]=useState(0);
+ useEffect(()=>{if(preview)return;const c=new AbortController();fetch('/api/hq/costs',{cache:'no-store',signal:AbortSignal.any([c.signal,AbortSignal.timeout(10000)])}).then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{setData(d);setError(false);}).catch(()=>{if(!c.signal.aborted)setError(true);});return()=>c.abort();},[preview,refresh]);
+ const max=Math.max(0.000001,...(data?.days.map(d=>Math.abs(d.usd))??[]));
+ return <section className={styles.panel} aria-label="Provider reported costs"><h2>Provider costs</h2><p role="status">{preview?'Provider accounts are only available in the private workspace.':error?'Costs could not be read.':!data?'Loading provider costs…':data.state==='unconfigured'?'OpenAI billing connection needs a server-side organization admin key.':data.state==='available'?`Provider-reported usage · ${data.scope}`:`Provider costs ${data.state}. No total is inferred.`}</p>{!preview&&<button onClick={()=>setRefresh(n=>n+1)}>Refresh costs</button>}{!error&&data?.state==='available'&&<><p><strong>${data.usd?.toFixed(4)}</strong> · {data.periodStart.slice(0,10)} to {data.periodEnd.slice(0,10)} UTC</p><div aria-label="Daily provider cost chart">{data.days.map(d=><div key={d.day}><span>{d.day} · ${d.usd.toFixed(4)}</span><div style={{height:8,width:`${Math.max(1,Math.abs(d.usd)/max*100)}%`,background:d.usd<0?'#76c5a4':'#72a8ed',borderRadius:4}}/></div>)}</div><p>Provider data observed {new Date(data.observedAt).toLocaleString()} · cached for five minutes.</p></>}<p>Usage costs, local reservations and recorded task estimates have different scopes. They are shown separately. Final invoices, taxes and credits are not inferred from usage.</p></section>;
+}

@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import ArchitectureExplorer from "./ArchitectureExplorer";
 import ArchitectureGraph from "./ArchitectureGraph";
+import ProviderInvoices from './ProviderInvoices';
+import ProviderCosts from './ProviderCosts';
 import OperationsOverview from "./OperationsOverview";
 import RuntimeOverview from "./RuntimeOverview";
 import TaskRunner from "./TaskRunner";
@@ -374,7 +376,7 @@ export default function Observatory({
           {section === "engineering" && <EngineeringInventory initial={initialEngineering} preview={preview} />}
           <div hidden={section !== "work"}><TaskRunner input={taskDraft} preview={preview} /></div>
           {(section === "overview" || section === "quality" || section === "work") && <RuntimeOverview preview={preview} />}
-          {["overview","quality","settings"].includes(section)&&<OperationsOverview preview={preview}/>}
+          {["overview","quality","settings"].includes(section)&&<><OperationsOverview preview={preview}/><ProviderCosts preview={preview}/><ProviderInvoices preview={preview}/></>}
           {section === "work" || section === "engineering" ? null : section === "settings" ? (
             <section className={styles.settings}>
               <h2>Access & data</h2>

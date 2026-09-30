@@ -4,6 +4,7 @@ import type { ObservatoryReport } from '@/lib/observatory';
 import { graphLabel } from '@/lib/graphPresentation';
 import { graphNeighborhood } from '@/lib/graphExplore';
 import GraphRuntimeEvidence from './GraphRuntimeEvidence';
+import GraphRevisionHistory from './GraphRevisionHistory';
 import ArchitectureGraph from './ArchitectureGraph';
 import styles from './ArchitectureExplorer.module.css';
 export default function ArchitectureExplorer({ report, initialRepo = "all", preview = true }: { report: ObservatoryReport; initialRepo?: string; preview?:boolean }) {
@@ -45,12 +46,13 @@ export default function ArchitectureExplorer({ report, initialRepo = "all", prev
    <div className={styles.layout}>
      <aside aria-label="Component directory"><h2>Components</h2><p>{matches.length} matches{matches.length > 100 ? ' · first 100 shown' : ''}</p>{!matches.length && <p>No matches. Try another name or repository.</p>}<div className={styles.directory}>{matches.slice(0,100).map(n => <button key={n.id} aria-pressed={focus === n.id} onClick={() => select(n.id)} title={n.label}>{graphLabel(n)}<small>{n.kind} · {n.group}</small></button>)}</div></aside>
      <div><div className={styles.toolbar}><button disabled={!trail.length} onClick={() => { setFocus(trail.at(-1) ?? null); setTrail(t => t.slice(0,-1)); }}>Back to previous component</button><label>Neighborhood depth<select aria-label="Neighborhood depth" value={depth} onChange={e => setDepth(Number(e.target.value))}>{[1,2,3].map(n => <option key={n} value={n}>{n} hop{n>1?'s':''}</option>)}</select></label><label>Follow edges<select aria-label="Relationship direction" value={direction} onChange={e => setDirection(e.target.value as typeof direction)}><option value="both">Both directions</option><option value="outgoing">Outgoing</option><option value="incoming">Incoming</option></select></label></div>
-     <p role="status">{selected ? `FOCUSED VIEW: ${selected.label} — ${visible.nodes.length} of ${graph.nodes.length} components. Use Show all Delta components to return.` : 'Whole layer — select a component to isolate its neighborhood'}</p>
+     <p role="status" aria-label="Graph focus status">{selected ? `FOCUSED VIEW: ${selected.label} — ${visible.nodes.length} of ${graph.nodes.length} components. Use Show all Delta components to return.` : 'Whole layer — select a component to isolate its neighborhood'}</p>
      <ArchitectureGraph graph={displayGraph} query="" repo="all" revision={0} onSelect={n => { if(n) select(n.id); }} />
      <p>Search filters the directory; the graph keeps relationship context around the selected component.</p></div>
    </div>
    <aside aria-label="Component evidence" className={styles.evidence}>{selected ? <><h2>{graphLabel(selected)}</h2><p>{selected.label}</p><code>{selected.id}</code><p>{selected.kind} · {selected.group} · declared status: {selected.maturity}</p><div className={styles.toolbar}>{report.graphs.filter(g => g.id !== graph.id && g.nodes.some(n => n.id === selected.id)).map(g => <button key={g.id} onClick={() => changeLayer(g.id)}>Explore in {g.id}</button>)}</div><h3>Relationships ({edges.length})</h3>{!edges.length && <p>No declared relationships in this layer.</p>}<ul>{edges.map((e,i) => { const other=e.source===focus?e.target:e.source; return <li key={i}>{e.source===focus?'Outgoing':'Incoming'} · {e.relation} → <button onClick={() => select(other)}>{graph.nodes.find(n=>n.id===other)?.label ?? other}</button></li>; })}</ul></> : <><h2>Inspect a component</h2><p>Select a directory entry or graph node to explore its relationships and provenance.</p></>}
    <GraphRuntimeEvidence report={report} focus={focus} preview={preview}/>
-   <p>Source revision <code>{graph.sourceCommit}</code> · observed {graph.generatedAt}{graph.sourceCommit !== report.sourceCommit ? ' · historical extraction' : ''}</p><p>Static relationships do not prove execution, authorization, health or cost. Revision comparison requires a second graph snapshot; none is supplied by this report.</p></aside>
+   <p>Source revision <code>{graph.sourceCommit}</code> · observed {graph.generatedAt}{graph.sourceCommit !== report.sourceCommit ? ' · historical extraction' : ''}</p><p>Static relationships do not prove execution, authorization, health or cost. Retained source snapshots can be compared below.</p></aside>
+ <GraphRevisionHistory layer={graph.id} preview={preview}/>
  </section>;
 }

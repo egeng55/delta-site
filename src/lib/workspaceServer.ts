@@ -1,10 +1,18 @@
 import 'server-only';
+import {readHostedObservation} from './hostedObservationServer';
+import {observationFreshness} from './hostedObservation';
 import { readObservatoryReport } from './observatoryServer';
 import { projectRuntime, type Workspace } from './workspace';
 
 // Fixed server configuration only: never accept a URL or credential from a caller.
 export async function readWorkspace(): Promise<Workspace> {
   const result: Workspace = { version: 1, observedAt: new Date().toISOString(), source: await readObservatoryReport(), runtime: null, connection: 'unconfigured', billing: { state: 'unknown', usd: null } };
+  if(!process.env.DELTA_HQ_LOCAL_WORKSPACE&&process.env.DELTA_HQ_HOSTED_OBSERVATIONS==='1'){
+    const snapshot=await readHostedObservation();
+    if(snapshot){result.observedAt=snapshot.observedAt;result.runtime=snapshot.runtime;result.connection=observationFreshness(snapshot.observedAt)==='fresh'?'snapshot':'stale';}
+    else result.connection='unavailable';
+    return result;
+  }
   const port = process.env.DELTA_HQ_RUNTIME_PORT;
   const token = process.env.DELTA_HQ_RUNTIME_TOKEN;
   if (!port || !token) return result;

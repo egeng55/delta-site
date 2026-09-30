@@ -1,11 +1,15 @@
 import 'server-only';
 import {execFile} from 'node:child_process';
 import path from 'node:path';
-export type Operations={observedAt:string;backend:{state:string;latencyMs:number;revision:string|null};spending:{state:string;day:string|null;dailyReserved:number|null;monthlyReserved:number|null;dailyCap:number|null;monthlyCap:number|null}};
+import {type Operations} from './operationsSnapshot';
+export type {Operations} from './operationsSnapshot';
+import {readHostedObservation} from './hostedObservationServer';
+import {observationFreshness} from './hostedObservation';
 const emptySpending:Operations['spending']={state:'unavailable',day:null,dailyReserved:null,monthlyReserved:null,dailyCap:null,monthlyCap:null};
 const money=(v:unknown)=>typeof v==='number'&&Number.isSafeInteger(v)&&v>=0?v/1000000:null;
 let cached:{until:number;promise:Promise<Operations>}|null=null;
 export function readOperations():Promise<Operations>{
+ if(!process.env.DELTA_HQ_LOCAL_WORKSPACE&&process.env.DELTA_HQ_HOSTED_OBSERVATIONS==='1')return readHostedObservation().then(snapshot=>snapshot?.operations?{...snapshot.operations,source:'hosted',stale:observationFreshness(snapshot.observedAt)==='stale'}:{observedAt:new Date().toISOString(),source:'hosted',stale:true,backend:{state:'unavailable',latencyMs:0,revision:null},spending:emptySpending});
  if(cached&&cached.until>Date.now())return cached.promise;
  const promise=(async()=>{
  const start=Date.now();const workspace=process.env.DELTA_HQ_LOCAL_WORKSPACE;

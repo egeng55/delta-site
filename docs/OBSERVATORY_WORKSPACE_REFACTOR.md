@@ -661,3 +661,26 @@ real-model qualification evidence and its limits.
 
 UI validation: 291 tests passed; production build passed. The signed-in local HQ
 shows the historical failed task's true rejection and $0.070907 recorded charge.
+
+## Hosted observation delivery and cost provenance — September 30
+
+The private hosted HQ now reads validated observations from the existing Supabase project. The local publisher uploads current source census, sanitized runtime status, engineering inventory, backend health and reservation totals. Backend migrations own the three `hq_*` tables and publisher RPC. The hosted site has only public Supabase credentials plus the exact owner UUID; it receives neither the backend service key nor the daemon token.
+
+Run from the site checkout with Node 26:
+
+```sh
+node scripts/publish-hosted-observation.cjs --dry-run
+node scripts/publish-hosted-observation.cjs --watch
+```
+
+The explicit foreground publisher uploads every 30 seconds, exits after eight hours or three consecutive failures, and stops with Ctrl-C. An awake Mac and running publisher are required; this is not an always-on hosted agent. Hosted snapshots older than two minutes are marked stale. Source graphs continue to describe committed main refs; engineering inventory separately shows branch/worktree state. No hosted endpoint can use the feed to execute or approve local work.
+
+Hosted configuration: existing `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, server-only `DELTA_HQ_OWNER_USER_ID`, and `DELTA_HQ_HOSTED_OBSERVATIONS=1`. Keep local filesystem paths and runtime tokens out of hosted environment variables. Backend publisher reads its existing `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` from backend configuration.
+
+Analytics and Settings show separate local reservation, OpenAI provider-cost, and invoice panels. `/api/hq/costs` requires a server-only `OPENAI_ADMIN_KEY`; optional `OPENAI_PROJECT_ID` narrows scope. It reads the current UTC month, has a six-second deadline, three-page cap, 500 KB page limit and five-minute cache. Missing credentials, malformed responses, denied requests and incomplete pagination remain unavailable rather than zero. It does not reconcile organization totals against incomplete local task estimates.
+
+`/api/hq/invoices` imports small JSON metadata with exact USD-cent arithmetic, exclusive period end, provider invoice ID and source-document SHA-256. Only the provisioned observation owner can import; duplicate IDs are rejected. These are explicitly labeled owner imports, not independently provider-verified invoices or payments. Do not upload API keys or raw invoice documents. The UI includes the schema.
+
+System → Revision history reads `/api/hq/graph-revisions`. Up to 100 distinct committed-source snapshots are retained and identical observations deduplicate. Select before/after revisions to compare added, removed or changed components and directed links. Historical data is never fabricated; activation starts with one baseline until another distinct source revision is published.
+
+Rollback: disable `DELTA_HQ_HOSTED_OBSERVATIONS`, stop the publisher and redeploy the preceding site release. The local runtime remains unaffected. Private retained data can remain for inspection; no rollback requires dropping tables.

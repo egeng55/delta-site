@@ -18,7 +18,7 @@ export type Workspace = {
     commands: { id: string; capability: string | null; state: string; verification: string; tokens: number | null }[];
     capabilities: { id: string; binding: string; readiness: string; approvalRequired: boolean | null }[];
   };
-  connection: 'connected' | 'unconfigured' | 'unavailable';
+  connection: 'connected' | 'unconfigured' | 'unavailable' | 'snapshot' | 'stale';
   billing: { state: 'unknown'; usd: null };
 };
 const object = (v: unknown): Record<string, unknown> => {
