@@ -735,3 +735,21 @@ This fixed review does not interpret arbitrary requests or authorize cleanup.
 Git ancestry is not a claim that all distinct commits represent missing features.
 Ignored files are surfaced as an archive-review requirement. No provider call,
 file-content ingestion, merge, push, or deletion is part of this workflow.
+
+Live local acceptance: owner HQ submitted task
+`f40d4c78-c265-4649-b5b4-9029f5b2df8e`, which completed with 17 worktrees across
+five repositories. The Recheck action produced a second completed task. Both
+survived a foreground runtime restart. The committed runtime (`fb8129b`) then
+completed fresh task `f081f176-4b03-431d-aa96-e3a4ed8f2a5a`, displayed in HQ.
+All three reads used zero provider calls and $0 provider spend. No repositories
+were modified by these reads. This proves the fixed read workflow, not general
+language-driven analysis or arbitrary follow-up handling.
+
+Validation: agent full suite 1,789 passed, one skipped, one policy-binding failure
+while the registry was uncommitted; all 23 affected architecture tests passed
+after commit. Final collector/task checks passed 18/18. Site full suite initially
+passed 306/309 with three Xcode Git-selection failures; the affected suites
+passed after selecting installed Command Line Tools Git. The new UI test passed
+with all six task-runner tests. Typecheck, production build, and architecture
+verification passed; lint has zero errors and four existing warnings. Deployment
+for this increment is local HQ, not a hosted release.
