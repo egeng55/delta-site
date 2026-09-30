@@ -1,6 +1,12 @@
 {
   "version": 1,
-  "sourceCommit": "35cad022afa9ba7f8ea3d20e345ebed2ba9f26be",
+  "sourceMode": "bundled_archive",
+  "freshness": {
+    "state": "fallback",
+    "generatedAt": "2026-08-12T14:15:12-04:00",
+    "latestAcceptedSourceTime": "2026-08-12T14:15:12-04:00"
+  },
+  "sourceCommit": "65635021f93d7a810537c676454834cb18291826",
   "archiveThrough": "2026-08-08T11:06:12-04:00",
   "provenance": [
     {
@@ -8,8 +14,8 @@
       "sha256": "2188eb88d6cbff0e9e58a14bb7facf7ac7c0a72b3271f28a4716611d8d10f469"
     },
     {
-      "path": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
-      "sha256": "09ed9ba4d99c8f04b74d5a061f20e5083972504435c8d461dee57dbd95222472"
+      "path": "agent/historian/projections/evolution-timeline-2026-09-30-stats-origin-backfill.json",
+      "sha256": "d4bd717aee194e26fa2b6b0cfe8449bff9ee1c930d8bbbf3908000f89657fa03"
     },
     {
       "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-07/orgcensus-55895242-843e-47c2-9d63-2b336d475d2e.json",
@@ -38,38 +44,51 @@
   ],
   "milestones": [
     {
+      "id": "delta-stats-social-app-origin-2025-12-06",
+      "date": "2025-12-06T22:20:53-05:00",
+      "title": "Stats Social App Origin",
+      "significance": "transformational",
+      "tracks": [
+        "product_intelligence",
+        "origin_archaeology"
+      ],
+      "description": "Delta began as a Stats Social Media App: profiles, personal stat input, feed/social mechanics, leaderboards, comparison, HVS/value scoring, and AI coaching.",
+      "gained": "Delta gained its first recovered product form: quantified personal metrics turned into identity, comparison, and guidance.",
+      "confidence": "high",
+      "evidence": [
+        {
+          "kind": "historian_milestone",
+          "ref": "agent/historian/milestones/delta-stats-social-app-origin-2025-12-06.json",
+          "summary": "Durable milestone admitting the recovered Stats Social Media App as Delta's earliest currently known origin.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        },
+        {
+          "kind": "historian_update",
+          "ref": "agent/updates/2026-09-30T20-31-08Z-delta-stats-social-app-origin-backfill-v1.json",
+          "summary": "Backfill evidence record preserving local iCloud, local Git reflog, Figma Make, and Drive-search evidence boundaries.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
+    },
+    {
       "id": "delta-origin-2025-12-26",
       "date": "2025-12-26T17:48:32-05:00",
-      "title": "Delta Origin",
+      "title": "Longitudinal Personal Analytics / Health-Intelligence Transition",
       "significance": "transformational",
       "tracks": [
         "product_intelligence"
       ],
-      "description": "Earliest currently verifiable Delta product origin: a longitudinal health-intelligence and personal-analytics system organized around raw events, cautious signals, state, and reflection.",
-      "gained": "Delta gained its first executable longitudinal intelligence loop over user events.",
+      "description": "Delta moved from social stat scoring toward longitudinal personal analytics and early health intelligence organized around raw events, cautious signals, state, and reflection.",
+      "gained": "Delta gained its first recovered longitudinal intelligence loop over user events.",
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-backend:851cbac12608ace1c83633a82a051db4b307d8b1:README.md",
-          "summary": "Earliest recovered product statement describing Delta as a longitudinal personal analytics engine.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:f1c7c36e2aae814342d2e7d89d5891002bf2e226:README.md",
-          "summary": "First direct README evidence for Delta as a longitudinal health intelligence system with the core loop.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:f1c7c36e2aae814342d2e7d89d5891002bf2e226:run_delta.py",
-          "summary": "Executable script proving the original event-to-reflection runtime existed.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:b5ea874d767e9531366fab975e34e7eab2d7c94a:core/signals.py",
-          "summary": "Signal extraction code showing cautious hypothesis generation from recent events.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving delta-backend evidence for the December 26 personal-analytics / health-intelligence artifact.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
@@ -85,29 +104,18 @@
         "product_intelligence"
       ],
       "description": "Delta introduced explicit long-term, episodic, pattern, trace, and daily-context memory, moving memory from incidental persistence to a first-class intelligence substrate.",
-      "gained": "Delta gained a durable multi-store memory architecture instead of relying only on event persistence and transient state.",
+      "gained": "Delta gained durable memory stores rather than relying only on event persistence and transient state.",
       "confidence": "medium",
       "evidence": [
         {
-          "ref": "delta-backend:fe01eb9f0be6359d90cf3507b6b279b04e270394:memory/pipeline.py",
-          "summary": "End-to-end memory pipeline showing detection, routing, promotion, and context preparation.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:fe01eb9f0be6359d90cf3507b6b279b04e270394:memory_store/long_term_store.py",
-          "summary": "Long-term memory store proving typed durable memory records.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:fe01eb9f0be6359d90cf3507b6b279b04e270394:memory_store/episodic_store.py",
-          "summary": "Episodic memory store proving durable event memory beyond raw logs.",
-          "confidence": "high",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving durable-memory evidence recovered from delta-backend history.",
+          "confidence": "medium",
           "classification": "directly_evidenced"
         }
       ],
-      "omittedEvidence": 2
+      "omittedEvidence": 0
     },
     {
       "id": "delta-conversational-delta-2026-01-12",
@@ -117,31 +125,14 @@
       "tracks": [
         "product_intelligence"
       ],
-      "description": "Delta became explicitly conversational with short-term conversation memory, explicit user facts, memory injection, and state derivation shaping replies.",
+      "description": "Delta became explicitly conversational with short-term conversation memory, user facts, memory injection, and derived state shaping replies.",
       "gained": "Delta gained a chat-first user experience grounded in memory and derived state.",
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-backend:3ed5f38214c7423b9907ea0f49421ee345b23319:README.md",
-          "summary": "Conversational-first README proving the explicit product pivot.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:d66950e8decf08a4fd262d6457d0a2e3e7b8e1ce:conversation_memory.py",
-          "summary": "SQLite-backed short-term conversation memory with pruning and pattern summaries.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:d66950e8decf08a4fd262d6457d0a2e3e7b8e1ce:memory_store.py",
-          "summary": "Explicit user-fact memory store used by the conversational layer.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:e629b38e18feb480ed22dbc05eb9212d6b4285f5:state_manager.py",
-          "summary": "State derivation artifact showing conversational state and belief extraction.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Conversational Delta evidence recovered from delta-backend history.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
@@ -156,49 +147,14 @@
       "tracks": [
         "product_intelligence"
       ],
-      "description": "Delta matured into an inference-driven health advisor with baselines, readiness, causal reasoning, multi-type memory, recommendations, LLM explanations, and explicit outcome-learning components.",
+      "description": "Delta matured into an inference-driven health advisor with baselines, readiness, causal reasoning, memory, recommendations, explanations, and outcome-learning components.",
       "gained": "Delta gained a fuller health-intelligence stack with reasoning, explanation, and learning-loop components.",
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-backend:04a92ab2c97e9829fadc8848222afd4faea67fae:health_intelligence.py",
-          "summary": "Comprehensive health intelligence module with baselines, readiness, causal chains, and safety boundaries.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:1a578fd3dca7a2ab94e5498f86011d49421a7281:delta_intelligence.py",
-          "summary": "LLM-powered explanation and advice layer for Delta's health intelligence.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:1a578fd3dca7a2ab94e5498f86011d49421a7281:inference_engine.py",
-          "summary": "Formalized cognitive loop: user input to event interpretation, memory update, state update, and response context.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:7a3ef41128c84bd3f4abfc02912ee6bb742a49a1:PROJECT_NOTES.md",
-          "summary": "Direct product notes describing Delta as an inference-driven health advisor and documenting the learning-loop gap.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:9a6bb6f52e79936506ebdd0b43c20c989621a1b2:prediction_engine.py",
-          "summary": "Prediction engine proving explicit testable-health prediction support.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:9a6bb6f52e79936506ebdd0b43c20c989621a1b2:outcome_collector.py",
-          "summary": "Outcome collector proving feedback learning and verification intent.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:9a6bb6f52e79936506ebdd0b43c20c989621a1b2:belief_updater.py",
-          "summary": "Belief updater proving explicit confidence revision support.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving health-intelligence evidence recovered from delta-backend history.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
@@ -218,20 +174,9 @@
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-backend:38034cd3ec0e7b5e4b0fc1ae01d8fb3199b27bd3:behavioral_os.py",
-          "summary": "Behavioral OS implementation proving the new generalized substrate.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:38034cd3ec0e7b5e4b0fc1ae01d8fb3199b27bd3:feedback_contract.py",
-          "summary": "Shared intervention feedback contract with policy effects.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:38034cd3ec0e7b5e4b0fc1ae01d8fb3199b27bd3:migrations/018_behavioral_os.sql",
-          "summary": "Persistent behavioral memory and intervention schema proving durable behavioral state.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Behavioral OS evidence recovered from delta-backend history.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
@@ -249,8 +194,16 @@
       "description": "The separate engineering-agent lineage began when delta-agent appeared as a bounded local supervisor and orchestration substrate for engineering work.",
       "gained": "Delta gained a distinct engineering orchestration runtime separate from the product-intelligence lineage.",
       "confidence": "high",
-      "evidence": [],
-      "omittedEvidence": 1
+      "evidence": [
+        {
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving the engineering-agent supervisor origin.",
+          "confidence": "high",
+          "classification": "directly_evidenced"
+        }
+      ],
+      "omittedEvidence": 0
     },
     {
       "id": "delta-intelligence-os-2026-06-25",
@@ -265,8 +218,9 @@
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-backend:e0a2fa4af4fa51806448806623d572f1b662e6f2:docs/BEHAVIORAL_OS_DOMAIN_MODEL.md",
-          "summary": "Architecture plan directly reframing Delta as a personal Intelligence OS with domains as capability packs.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Intelligence OS evidence recovered from delta-backend history.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
@@ -281,19 +235,14 @@
       "tracks": [
         "product_intelligence"
       ],
-      "description": "Delta formalized scenario-registry and proof/eval framing for the shared substrate, turning multi-domain transferability into a governed proof discipline rather than an implied promise.",
+      "description": "Delta formalized scenario-registry and proof/eval framing for the shared substrate, turning multi-domain transferability into a governed proof discipline.",
       "gained": "Delta gained explicit proof fixtures and scenario governance for substrate transfer across domains.",
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-backend:659936ff19c8836dc1395cf6af462c03aa41ae5f:docs/INTELLIGENCE_SCENARIO_REGISTRY.md",
-          "summary": "Scenario registry document formalizing proof fixtures for the shared Intelligence OS substrate.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-backend:942e7639bc61f121aa150d84f35ad5c3aa376ef9:docs/INTELLIGENCE_SCENARIO_REGISTRY.md",
-          "summary": "Supporting deterministic scenario eval runner evidence within the same proof era.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving shared-substrate proof-era evidence.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
@@ -313,13 +262,14 @@
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-agent:f54b16226f8251928fb7a823fb40e0b154fe328a:docs/DELTA_AGENTIC_OS_ROADMAP.md",
-          "summary": "Roadmap commit explicitly recentering the engineering stack on agentic OS loops.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Agentic OS direction evidence.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
       ],
-      "omittedEvidence": 1
+      "omittedEvidence": 0
     },
     {
       "id": "delta-shared-llm-runtime-2026-08-06",
@@ -334,13 +284,14 @@
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-agent:53b86f79aadef7ffce26b8f1de131e5e3ff00e03:docs/DELTA_SHARED_AGENT_RUNTIME.md",
-          "summary": "Shared runtime specification documenting the common agent runtime substrate.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving shared LLM runtime evidence.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
       ],
-      "omittedEvidence": 1
+      "omittedEvidence": 0
     },
     {
       "id": "mission-control-live-qualification-2026-08-06",
@@ -355,13 +306,14 @@
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-agent:47bf452aef648d0b22164214b3ee0fc2b7f8d0c9:docs/DELTA_MISSION_CONTROL_OWNER_REVIEW_EXPERIENCE.md",
-          "summary": "Mission Control owner review experience document preserving the qualified authority boundary.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Mission Control live qualification evidence.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
       ],
-      "omittedEvidence": 1
+      "omittedEvidence": 0
     },
     {
       "id": "historian-runtime-bounded-dependency-2026-08-06",
@@ -376,13 +328,14 @@
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-agent:b8c6d00fe839f6f40e84dc66f2d51736ddffcd46:src/historian/runtime.mjs",
-          "summary": "Committed read-only historian runtime interface.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Historian runtime dependency evidence.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
       ],
-      "omittedEvidence": 1
+      "omittedEvidence": 0
     },
     {
       "id": "failure-triage-second-qualified-specialist-2026-08-07",
@@ -393,48 +346,19 @@
         "engineering_agentic",
         "converged_platform"
       ],
-      "description": "Governance promoted Failure Triage from candidate to qualified handoff-only advisory/read-only use, making Delta's governed shared-agent substrate historically span more than one distinct qualified intelligent specialist without granting autonomous wake, repair, or execution authority.",
+      "description": "Governance promoted Failure Triage to qualified handoff-only advisory/read-only use, making Delta's governed shared-agent substrate span more than one distinct qualified intelligent specialist without granting autonomous wake, repair, or execution authority.",
       "gained": "Delta gained a second qualified bounded specialist role on its governed shared-agent runtime.",
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-agent:bff167cc4979a775e1238134c47e3b617c8c589c:config/agent-qualifications.json",
-          "summary": "Failure Triage entered the qualification registry as a candidate with advisory_read_only authority and disabled pending promotion Event Bus eligibility.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:c97133590603f12d030d9793dfe6163faec7304d:config/agent-qualifications.json",
-          "summary": "Canonical qualification registry records Failure Triage as qualified at advisory_read_only authority with separately_governed Event Bus status and preserves Mission Control as already qualified.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:c97133590603f12d030d9793dfe6163faec7304d:agent/architecture-changes/2026-08-07-failure-triage-handoff-only-promotion.json",
-          "summary": "Promotion declaration preserves the handoff-only advisory/read-only boundary, explicit prohibitions, and post-promotion verification commands.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:c97133590603f12d030d9793dfe6163faec7304d:docs/architecture-decisions/0016-failure-triage-handoff-only-promotion.md",
-          "summary": "ADR 0016 records the accepted promotion decision, its evidence chain, and the preserved denial of Event Bus wake and other authority expansion.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:f72836ff163f470c67f71623fa5b82b43470ccfa:agent/runs/qualification-evidence/2026-08-07T14-53-12Z-failure-triage-final-gate-evidence-manifest.json",
-          "summary": "The preserved final-gate manifest records the 37/39 live gate, 37/37 compatibility replay, zero provider/runtime contract mismatches, and Architecture 1.10.0 verification passing.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:04bacfb9bf9eaeacad2705b8a453fe1e54b3ec9e:agent/runs/qualification-evidence/2026-08-07T17-57-24Z-failure-triage-delta-requalification-evidence-manifest.json",
-          "summary": "The authorized delta requalification manifest records 6/6 exact outcomes with zero hallucinated evidence references, zero grounding failures, zero safety violations, and zero authority violations.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Failure Triage qualification evidence.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
       ],
-      "omittedEvidence": 2
+      "omittedEvidence": 0
     },
     {
       "id": "architecture-review-third-qualified-specialist-2026-08-08",
@@ -445,74 +369,141 @@
         "engineering_agentic",
         "converged_platform"
       ],
-      "description": "Governance promoted Architecture Review from candidate to qualified handoff-only advisory/read-only use, making Delta's governed shared-agent runtime span a third distinct qualified intelligent specialist and extending that substrate into structural judgment without granting canon mutation, Event Bus wake, approval, or execution authority.",
+      "description": "Governance promoted Architecture Review to qualified handoff-only advisory/read-only use, making Delta's governed shared-agent runtime span a third distinct qualified intelligent specialist without granting canon mutation, Event Bus wake, approval, or execution authority.",
       "gained": "Delta gained a third qualified bounded specialist role with structural and institutional review semantics on the governed shared-agent runtime.",
       "confidence": "high",
       "evidence": [
         {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:config/agent-qualifications.json",
-          "summary": "Canonical qualification registry records Architecture Review as qualified with advisory_read_only authority and separately_governed Event Bus status.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:agent/architecture-changes/2026-08-08-architecture-review-handoff-only-promotion.json",
-          "summary": "Promotion declaration preserves the handoff-only advisory/read-only boundary, evidence commit, integrity digest, and post-promotion verification commands.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:docs/architecture-decisions/0019-architecture-review-handoff-only-promotion.md",
-          "summary": "ADR 0019 records the accepted promotion decision, its evidence chain, and the preserved denial of Event Bus wake, canon mutation, approval, and execution authority.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:9ab8faee6a69a14da3e048c0d6cac6965f1d2ddd:agent/runs/qualification-evidence/2026-08-08T14-07-48Z-architecture_review-combined-final-gate-9060d85-manifest.json",
-          "summary": "Combined final-gate manifest records the 12/12 gate, 9/9 compatibility replay, 3/3 delta requalification, total spend estimate, integrity digest, and zero provider/runtime, evidence-reference, grounding, safety, and authority failures.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:config/specialists/architecture_review.json",
-          "summary": "Architecture Review specialist declaration preserves safe effect defaults, closed-world evidence, proposal-only Mission Control handoff, and canon mutation disallowance.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:config/agent-subscriptions.json",
-          "summary": "Architecture Review is absent from the subscription registry, so automatic wake remains disabled after promotion.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:docs/architecture-decisions/0017-specialist-agent-factory.md",
-          "summary": "ADR 0017 defines Specialist Agent Factory as a non-authoritative shared mechanism for specialist contract, evidence, context, lifecycle, artifact, and economics mechanics.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:docs/architecture-decisions/0018-architecture-review-specialist.md",
-          "summary": "ADR 0018 records Architecture Review as a deterministic candidate that explicitly relied on Specialist Agent Factory V1 and excluded Event Bus eligibility and canon record authority.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:tests/architecture-review-specialist.test.mjs",
-          "summary": "Focused Architecture Review tests directly assert qualified status, advisory authority, absent canon-record capability, absent subscription, and truth-domain consistency checks.",
-          "confidence": "high",
-          "classification": "directly_evidenced"
-        },
-        {
-          "ref": "delta-agent:e01f26927a5494b273dc568115fcc7d0059ffc5f:tests/specialist-agent-factory.test.mjs",
-          "summary": "Specialist Factory tests assert safe fail-closed declarations, closed-world evidence, bounded context projection, provider contract closure, and factory-backed specialist scaffolding behavior.",
+          "kind": "historian_projection",
+          "ref": "agent/historian/projections/evolution-timeline-2026-08-08-origin-backfill.json",
+          "summary": "Prior origin projection preserving Architecture Review qualification evidence.",
           "confidence": "high",
           "classification": "directly_evidenced"
         }
       ],
-      "omittedEvidence": 1
+      "omittedEvidence": 0
     }
   ],
+  "historyFeed": {
+    "schemaVersion": 1,
+    "feedType": "delta_history_feed_v1",
+    "sourceProjectionType": "delta_origin_story",
+    "generatedAt": "2026-09-30T20:31:08Z",
+    "story": {
+      "headline": "Delta began as a social stats/value-score app, then evolved through longitudinal personal analytics, health intelligence, Behavioral OS, and finally a governed Intelligence OS substrate.",
+      "summary": "When comparing current work to early Delta mistakes, the correct origin baseline is now the Stats Social App and its quantified-worth/social-scoring assumptions, not only the later health-intelligence loop.",
+      "coreShift": "The center of gravity moved from quantified-worth scoring and social comparison toward memory, evidence, feedback, governance, and bounded action.",
+      "truthBoundary": "Historian remains temporal truth. The website renders a read-only presentation feed and does not mutate canon."
+    },
+    "origin": {
+      "milestoneId": "delta-stats-social-app-origin-2025-12-06",
+      "date": "2025-12-06T22:20:53-05:00",
+      "title": "Stats Social App Origin",
+      "summary": "Delta began as a Stats Social Media App: profiles, personal stat input, feed/social mechanics, leaderboards, comparison, HVS/value scoring, and AI coaching.",
+      "currentTruthGuard": "Origin evidence is historical context, not current canonical product identity."
+    },
+    "chapters": [
+      {
+        "id": "origin",
+        "name": "Origin",
+        "zone": "Surface",
+        "period": "Dec 2025",
+        "headline": "Stats Social App Origin.",
+        "copy": "Delta began as a Stats Social Media App: profiles, personal stat input, feed/social mechanics, leaderboards, comparison, HVS/value scoring, and AI coaching.",
+        "milestoneIds": [
+          "delta-stats-social-app-origin-2025-12-06"
+        ]
+      },
+      {
+        "id": "memory-and-health",
+        "name": "Memory and health intelligence",
+        "zone": "Sunlight",
+        "period": "Dec 2025 - Jan 2026",
+        "headline": "The score becomes continuity.",
+        "copy": "The product lineage moved from isolated measurement toward memory, conversation, inference, and health-intelligence loops.",
+        "milestoneIds": [
+          "delta-origin-2025-12-26",
+          "delta-durable-memory-architecture-2026-01-01",
+          "delta-conversational-delta-2026-01-12",
+          "delta-inference-driven-health-advisor-2026-01-29"
+        ]
+      },
+      {
+        "id": "operating-substrate",
+        "name": "Operating substrate",
+        "zone": "Twilight",
+        "period": "Jun 2026",
+        "headline": "The product becomes an operating system.",
+        "copy": "Delta generalized from one domain into Behavioral OS and Intelligence OS framing, with substrate proof replacing implied transferability.",
+        "milestoneIds": [
+          "delta-behavioral-os-2026-06-08",
+          "delta-intelligence-os-2026-06-25",
+          "delta-shared-substrate-proof-era-2026-06-29"
+        ]
+      },
+      {
+        "id": "agentic-engineering",
+        "name": "Agentic engineering",
+        "zone": "Midnight",
+        "period": "Jun 2026 - Aug 2026",
+        "headline": "The engineering system gets its own runtime.",
+        "copy": "The engineering lineage added supervisor, shared runtime, Mission Control, and bounded Historian dependency records.",
+        "milestoneIds": [
+          "delta-agent-supervisor-origin-2026-06-22",
+          "delta-agentic-os-direction-2026-07-02",
+          "delta-shared-llm-runtime-2026-08-06",
+          "mission-control-live-qualification-2026-08-06",
+          "historian-runtime-bounded-dependency-2026-08-06"
+        ]
+      },
+      {
+        "id": "governed-specialists",
+        "name": "Governed specialists",
+        "zone": "Abyss",
+        "period": "Aug 2026",
+        "headline": "Specialists join the current.",
+        "copy": "Qualified specialist milestones show the shared runtime expanding into distinct advisory roles without granting autonomous execution authority.",
+        "milestoneIds": [
+          "failure-triage-second-qualified-specialist-2026-08-07",
+          "architecture-review-third-qualified-specialist-2026-08-08"
+        ]
+      }
+    ],
+    "outputModules": [
+      {
+        "id": "origin_hero",
+        "label": "Origin story hero",
+        "consumes": [
+          "historyFeed.origin",
+          "historyFeed.story"
+        ]
+      },
+      {
+        "id": "ocean_timeline",
+        "label": "Interactive evolution timeline",
+        "consumes": [
+          "historyFeed.chapters",
+          "milestones"
+        ]
+      },
+      {
+        "id": "census_growth",
+        "label": "Measured structural growth",
+        "consumes": [
+          "comparison",
+          "snapshots"
+        ]
+      },
+      {
+        "id": "evidence_drawers",
+        "label": "Bounded evidence drawers",
+        "consumes": [
+          "milestones.evidence",
+          "provenance"
+        ]
+      }
+    ]
+  },
   "comparison": {
     "id": "canonical-numerical-progress-2026-08-07-to-2026-08-12",
     "recordedAt": "2026-08-12T14:15:12-04:00",
