@@ -700,3 +700,5 @@ The owner-only History tab (`/hq#history`) presents the existing Historian archi
 The census's unique-test measure is agent-centric. Its 5→6 milestone-file count differs from the 14-entry origin-backfill timeline. Missing qualified-agent totals stay missing; structural counts are not an intelligence score. Current live census values are not appended to a series with a different methodology. No additional censuses or post-August milestones were invented.
 
 Verification: 309 site tests passed, production build passed, lint had zero errors and four existing warnings; browser milestone and metric selection verified against real archived data. Architecture contract updated to 1.44.1 under the existing owner observation boundary.
+
+Historian production delivery: application commit `ade140c` deployed READY to `https://deltahealthintelligence.com/hq#history` (Next.js 16.3.5). An authenticated read returned 14 milestones, 2 censuses and 18 comparison metrics; the custom-domain signed-out request returned 401. The deployment error-log query returned no entries. No new monitoring drain was configured. The unrelated pre-existing AGENTS.md modification remains untouched.
