@@ -1,6 +1,6 @@
 # Delta workspace refactor
 
-Status: Local authenticated HQ is active; browser audit and bounded live engineering attempt verified. Autonomous engineering completion and hosted rollout remain unqualified.
+Status: Authenticated local HQ and hosted observation delivery are active. Production deployment and owner-gated observation endpoints are verified. Live OpenAI costs await an organization admin key; invoice records await import. Autonomous engineering completion is not established by this delivery.
 Inspected 2026-09-29: site main d6f4052; agent baseline checkout 35cad02.
 These revisions identify inspected source, not running or deployed revisions.
 
@@ -688,3 +688,5 @@ Rollback: disable `DELTA_HQ_HOSTED_OBSERVATIONS`, stop the publisher and redeplo
 Verification for this delivery: 302 site tests passed, targeted post-review tests passed, production build passed, lint had zero errors and four existing warnings. Backend publisher tests passed. Live Supabase transactions verified owner read/import and non-owner isolation without retaining fixture invoices. Authenticated hosted preview returned current workspace, backend and engineering observations plus invoice/history responses; unauthenticated workspace reads returned 401. Browser revision comparison and missing-billing-key/empty-invoice states were verified.
 
 Supabase advisors: authenticated GraphQL schema discovery is expected for the three RLS-protected HQ tables; owner/non-owner row access was tested directly. Existing unrelated notices include public profile schema visibility, vector extension location and disabled leaked-password protection. See the [schema visibility advisor](https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed) and [password protection guidance](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection).
+
+Production verification: deployment `dpl_5ykLyXkWyJh2zQjPP9bbV8KCwS44` is READY at https://deltahealthintelligence.com, with application code commit `c7006a4`. Seven authenticated API reads passed; the custom-domain private endpoints denied unauthenticated reads. The production error-log query returned no error entries. No external drain was configured or verified. The foreground publisher was active at handoff; its eight-hour cap and stale-data behavior remain in force. Backend commit: `f4edb795`; architecture registry commit: `e59ad3c`. Site AGENTS.md had a pre-existing modification and was preserved.
