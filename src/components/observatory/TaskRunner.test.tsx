@@ -46,3 +46,15 @@ it('shows the rejected edit separately from the later budget stop',async()=>{
  const diagnosis=await screen.findByRole('region',{name:'Execution diagnosis'});
  expect(diagnosis).toHaveTextContent('Edit rejected before any file change:');expect(diagnosis).toHaveTextContent('source repository must be clean');expect(diagnosis).toHaveTextContent('$0.070907');expect(diagnosis).toHaveTextContent('0 edited files');
 });
+
+it('renders retained worktree evidence and submits a fresh read for follow-up',async()=>{
+ const task={id:'f40d4c78-c265-4649-b5b4-9029f5b2df8e',kind:'worktree_review',state:'completed',input:'Review worktrees',updated_at:new Date().toISOString(),sequence:1,result:{worktree_report:{observed_at:new Date().toISOString(),provider_cost_usd:0,limitations:'Review before deletion.',repositories:[{repo:'agent',available:true,entries:[{path:'/workspace/draft',branch:'draft',head:'abc',state:'preserve_changes',integrated:false,dirty:true,ignored_artifacts:true}]}]}}};
+ global.fetch=jest.fn(async(url:RequestInfo|URL,init?:RequestInit)=>({ok:true,json:async()=>init?.method==='POST'?task:String(url).includes('tasks?id')?task:String(url).endsWith('/session')?{active:true}:String(url).endsWith('/approvals')?{approvals:[]}:String(url).endsWith('/requests')?{requests:[]}:{tasks:[task]}})) as unknown as typeof fetch;
+ const random=jest.spyOn(crypto,'randomUUID').mockReturnValue('70f75d8e-c4a7-4d95-8f71-dae26d725783');
+ try{
+  render(<TaskRunner input="" preview={false}/>);
+  expect(await screen.findByRole('region',{name:'Worktree review report'})).toHaveTextContent('preserve changes');
+  fireEvent.click(screen.getByRole('button',{name:'Recheck worktrees'}));
+  await waitFor(()=>expect(fetch).toHaveBeenCalledWith('/api/hq/lifecycle/tasks',expect.objectContaining({method:'POST',body:JSON.stringify({id:'70f75d8e-c4a7-4d95-8f71-dae26d725783',kind:'worktree_review',input:'Recheck repository and worktree status'})})));
+ }finally{random.mockRestore();}
+});

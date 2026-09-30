@@ -3,6 +3,7 @@
 const {
   DEFAULT_CONSOLE_URL,
   DEFAULT_HQ_URL,
+  DEFAULT_WORKSPACE_URL,
   PACKAGED_SERVICE_MANAGER_DISABLED_REASON,
   resolveDesktopEntryUrl,
   resolveConsoleUrl,
@@ -34,13 +35,16 @@ describe("desktop runtime config", () => {
     expect(resolveDesktopEntryUrl({ DELTA_HQ_URL: "https://delta.local/hq" })).toBe("https://delta.local/hq");
     expect(resolveDesktopEntryUrl({ DELTA_HQ_URL: "http://127.0.0.1:3000/hq" })).toBe(DEFAULT_HQ_URL);
     expect(resolveConsoleUrl({ DELTA_OS_CONSOLE_URL: "http://127.0.0.1:3000/os" })).toBe("http://127.0.0.1:3000/os");
-    expect(DEFAULT_CONSOLE_URL).toBe(DEFAULT_HQ_URL);
+    expect(DEFAULT_CONSOLE_URL).toBe(DEFAULT_WORKSPACE_URL);
+    expect(resolveDesktopEntryUrl({})).toBe(DEFAULT_WORKSPACE_URL);
+    expect(resolveDesktopEntryUrl({ DELTA_DESKTOP_URL: "https://delta.local/workspace" })).toBe("https://delta.local/workspace");
   });
 
   it("falls back for malformed or non-http HQ URLs", () => {
     const warn = jest.fn();
-    expect(resolveDesktopEntryUrl({ DELTA_HQ_URL: "delta://hq" }, warn)).toBe(DEFAULT_HQ_URL);
-    expect(resolveDesktopEntryUrl({ DELTA_HQ_URL: "not a url" }, warn)).toBe(DEFAULT_HQ_URL);
-    expect(warn).toHaveBeenCalledTimes(2);
+    expect(resolveDesktopEntryUrl({ DELTA_HQ_URL: "delta://hq" }, warn)).toBe(DEFAULT_WORKSPACE_URL);
+    expect(resolveDesktopEntryUrl({ DELTA_HQ_URL: "not a url" }, warn)).toBe(DEFAULT_WORKSPACE_URL);
+    expect(resolveDesktopEntryUrl({ DELTA_HQ_URL: "https://user:secret@delta.local/hq" }, warn)).toBe(DEFAULT_WORKSPACE_URL);
+    expect(warn).toHaveBeenCalledTimes(3);
   });
 });

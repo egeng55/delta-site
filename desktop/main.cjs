@@ -4,6 +4,9 @@ const fs = require("node:fs");
 const http = require("node:http");
 const https = require("node:https");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
+const { createDesktopHandler, isTrustedNavigation, assertTrustedSender, validateArguments } = require("./ipc-policy.cjs");
+const { createDiagnosticRedactor } = require("./diagnostic-redaction.cjs");
 const {
   SERVICE_LOG_LIMIT,
   resolveDesktopEntryUrl,
@@ -16,6 +19,12 @@ const isSmokeTest = process.argv.includes("--smoke-test");
 const desktopRuntime = resolveDesktopRuntime({ isPackaged: app.isPackaged });
 const hqUrl = resolveDesktopEntryUrl(process.env, console.warn);
 const consoleUrl = hqUrl;
+const publicHqUrl = publicUrl(hqUrl);
+const localFallbackUrl = pathToFileURL(path.join(__dirname, "fallback.html")).toString();
+const diagnostics = createDiagnosticRedactor();
+diagnostics.registerEnvironment(process.env);
+let serviceMutation = Promise.resolve();
+let queuedMutations = 0;
 const serviceDefinitions = {
   backend: {
     label: "Backend",
@@ -46,6 +55,15 @@ let mainWindow = null;
 let smokeFinished = false;
 let consoleLoadFailed = false;
 let fallbackLoading = false;
+
+function publicUrl(value) {
+  const url = new URL(value);
+  url.username = "";
+  url.password = "";
+  url.search = "";
+  url.hash = "";
+  return url.toString();
+}
 
 function createServiceState() {
   return {
@@ -89,7 +107,7 @@ function serviceLog(serviceName, stream, message) {
     .map((line) => line.trimEnd())
     .filter(Boolean);
   for (const line of lines) {
-    state.logs.push({ service: serviceName, stream, timestamp, line });
+    state.logs.push({ service: serviceName, stream, timestamp, line: diagnostics.redact(line) });
   }
   if (state.logs.length > SERVICE_LOG_LIMIT) {
     state.logs.splice(0, state.logs.length - SERVICE_LOG_LIMIT);
@@ -100,6 +118,8 @@ function attachLogStream(serviceName, streamName, stream) {
   let buffer = "";
   stream.on("data", (chunk) => {
     buffer += chunk.toString();
+    // Bound unterminated process output before retaining it.
+    if (buffer.length > 65536) buffer = buffer.slice(-65536);
     const parts = buffer.split(/\r?\n/);
     buffer = parts.pop() || "";
     for (const part of parts) serviceLog(serviceName, streamName, part);
@@ -186,12 +206,12 @@ async function getSingleServiceStatus(serviceName) {
     stoppable: childRunning,
     startedAt: state.startedAt,
     lastCheckedAt: checkedAt,
-    healthUrl: definition.healthUrl,
+    healthUrl: publicUrl(definition.healthUrl),
     cwd: definition.cwd,
     launchable: definition.launchable,
     disabledReason: definition.disabledReason,
     commandPreview: definition.launchable ? [definition.command, ...definition.args].join(" ") : null,
-    error,
+    error: error ? diagnostics.redact(error) : null,
     lastExit: state.lastExit,
     logLines: state.logs.slice(-12),
   };
@@ -203,8 +223,8 @@ async function getServiceStatus() {
     getSingleServiceStatus("site"),
   ]);
   return {
-    hqUrl,
-    consoleUrl: hqUrl,
+    hqUrl: publicHqUrl,
+    consoleUrl: publicHqUrl,
     generatedAt: new Date().toISOString(),
     services: { backend, site },
     desktop: {
@@ -252,9 +272,11 @@ async function startService(serviceName) {
   serviceLog(serviceName, "system", `Starting ${definition.label} with allowlisted desktop command.`);
 
   try {
+    const environment = definition.env();
+    diagnostics.registerEnvironment(environment);
     const child = spawn(definition.command, definition.args, {
       cwd: definition.cwd,
-      env: definition.env(),
+      env: environment,
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
     });
@@ -352,7 +374,7 @@ function safeOpenExternal(targetUrl) {
   try {
     const target = new URL(targetUrl || hqUrl);
     const allowed = new URL(hqUrl);
-    if (!["http:", "https:"].includes(target.protocol) || target.origin !== allowed.origin) {
+    if (!["http:", "https:"].includes(target.protocol) || target.origin !== allowed.origin || target.username || target.password) {
       throw new Error("Only the configured local Delta HQ origin can be opened from the desktop bridge.");
     }
     shell.openExternal(target.toString()).catch((error) => {
@@ -366,10 +388,10 @@ function safeOpenExternal(targetUrl) {
 }
 
 function fallbackUrl(reason) {
-  const url = new URL(`file://${path.join(__dirname, "fallback.html")}`);
-  url.searchParams.set("hqUrl", hqUrl);
-  url.searchParams.set("consoleUrl", hqUrl);
-  url.searchParams.set("reason", reason || "Delta HQ unavailable");
+  const url = new URL(localFallbackUrl);
+  url.searchParams.set("hqUrl", publicHqUrl);
+  url.searchParams.set("consoleUrl", publicHqUrl);
+  url.searchParams.set("reason", diagnostics.redact(reason || "Delta HQ unavailable"));
   return url.toString();
 }
 
@@ -442,35 +464,25 @@ function createWindow() {
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      shell.openExternal(url).catch((error) => {
-        console.error(`[Delta HQ] Failed to open external URL: ${error.message}`);
-      });
+    if (isTrustedNavigation(mainWindow.webContents.getURL(), { entryUrl: hqUrl, fallbackUrl: localFallbackUrl }, true)) {
+      safeOpenExternal(url);
     }
     return { action: "deny" };
   });
 
-  mainWindow.webContents.on("will-navigate", (event, targetUrl) => {
-    if (targetUrl.startsWith("file://")) return;
-    try {
-      const target = new URL(targetUrl);
-      const allowed = new URL(hqUrl);
-      if (target.origin === allowed.origin) return;
-    } catch {
-      // Fall through to blocking unknown navigations.
+  const blockUntrustedNavigation = (event, targetUrl) => {
+    if (!isTrustedNavigation(targetUrl, { entryUrl: hqUrl, fallbackUrl: localFallbackUrl }, true)) {
+      event.preventDefault();
     }
-    event.preventDefault();
-    if (targetUrl.startsWith("http://") || targetUrl.startsWith("https://")) {
-      shell.openExternal(targetUrl).catch((error) => {
-        console.error(`[Delta HQ] Failed to open external navigation: ${error.message}`);
-      });
-    }
-  });
+  };
+  mainWindow.webContents.on("will-navigate", blockUntrustedNavigation);
+  mainWindow.webContents.on("will-redirect", blockUntrustedNavigation);
+  mainWindow.webContents.on("will-attach-webview", (event) => event.preventDefault());
 
   mainWindow.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
     if (!isMainFrame || errorCode === -3) return;
     consoleLoadFailed = true;
-    console.warn(`[Delta HQ] Failed to load ${validatedURL}: ${errorDescription}`);
+    console.warn(`[Delta HQ] Failed to load configured workspace: ${diagnostics.redact(errorDescription)}`);
     setTimeout(() => loadFallback(errorDescription), 50);
   });
 
@@ -505,59 +517,64 @@ app.whenReady().then(() => {
   installSafetyGuards();
   buildMenu();
 
-  ipcMain.handle("delta-hq:copy-text", (_event, value) => {
-    clipboard.writeText(String(value || ""));
+  const handle = (channels, action, options = {}) => {
+    for (const channel of channels) {
+      ipcMain.handle(channel, createDesktopHandler({
+        getWindow: () => mainWindow,
+        entryUrl: hqUrl,
+        fallbackUrl: localFallbackUrl,
+        action,
+        ...options,
+      }));
+    }
+  };
+  const aliases = (name) => [`delta-hq:${name}`, `delta-os:${name}`];
+  // The queue includes authorization, so a request waiting behind another mutation
+  // must pass a fresh owner check immediately before its operation begins.
+  const mutate = (channels, action) => {
+    const checked = createDesktopHandler({
+      getWindow: () => mainWindow, entryUrl: hqUrl, fallbackUrl: localFallbackUrl, owner: true, action,
+    });
+    for (const channel of channels) {
+      ipcMain.handle(channel, (event, ...args) => {
+        assertTrustedSender(event, mainWindow, { entryUrl: hqUrl, fallbackUrl: localFallbackUrl }, false);
+        validateArguments("none", args, hqUrl);
+        if (queuedMutations >= 4) throw new Error("Desktop service controls are busy. Try again after the current action completes.");
+        queuedMutations += 1;
+        const result = serviceMutation.then(() => checked(event, ...args));
+        serviceMutation = result.catch(() => {});
+        return result.finally(() => { queuedMutations -= 1; });
+      });
+    }
+  };
+  handle(aliases("copy-text"), (value) => {
+    clipboard.writeText(value);
     return true;
-  });
-  ipcMain.handle("delta-os:copy-text", (_event, value) => {
-    clipboard.writeText(String(value || ""));
-    return true;
-  });
-  ipcMain.handle("delta-hq:open-hq-in-browser", () => {
+  }, { arguments: "copy" });
+  handle(["delta-hq:open-hq-in-browser", "delta-os:open-console-in-browser"], () => {
     safeOpenHqInBrowser();
     return true;
   });
-  ipcMain.handle("delta-os:open-console-in-browser", () => {
-    safeOpenHqInBrowser();
-    return true;
-  });
-  ipcMain.handle("delta-hq:open-external", (_event, targetUrl) => safeOpenExternal(String(targetUrl || hqUrl)));
-  ipcMain.handle("delta-os:open-external", (_event, targetUrl) => safeOpenExternal(String(targetUrl || hqUrl)));
-  ipcMain.handle("delta-hq:reload-hq", () => {
+  handle(aliases("open-external"), safeOpenExternal, { arguments: "url" });
+  handle(["delta-hq:reload-hq", "delta-os:reload-console"], () => {
     reloadHqWindow();
     return true;
   });
-  ipcMain.handle("delta-os:reload-console", () => {
-    reloadHqWindow();
+  handle(aliases("show-service-manager"), () => {
+    loadFallback("Reconnect to Delta to access owner service controls.");
     return true;
   });
-  ipcMain.handle("delta-hq:show-service-manager", () => {
-    loadFallback("Service manager opened manually");
-    return true;
-  });
-  ipcMain.handle("delta-os:show-service-manager", () => {
-    loadFallback("Service manager opened manually");
-    return true;
-  });
-  ipcMain.handle("delta-hq:get-service-status", () => getServiceStatus());
-  ipcMain.handle("delta-os:get-service-status", () => getServiceStatus());
-  ipcMain.handle("delta-hq:start-backend", () => startService("backend"));
-  ipcMain.handle("delta-os:start-backend", () => startService("backend"));
-  ipcMain.handle("delta-hq:start-site", () => startService("site"));
-  ipcMain.handle("delta-os:start-site", () => startService("site"));
-  ipcMain.handle("delta-hq:start-all", () => startAllServices());
-  ipcMain.handle("delta-os:start-all", () => startAllServices());
-  ipcMain.handle("delta-hq:stop-backend", () => stopService("backend"));
-  ipcMain.handle("delta-os:stop-backend", () => stopService("backend"));
-  ipcMain.handle("delta-hq:stop-site", () => stopService("site"));
-  ipcMain.handle("delta-os:stop-site", () => stopService("site"));
-  ipcMain.handle("delta-hq:stop-all", () => stopAllServices());
-  ipcMain.handle("delta-os:stop-all", () => stopAllServices());
-  ipcMain.handle("delta-hq:get-service-logs", () => getServiceLogs());
-  ipcMain.handle("delta-os:get-service-logs", () => getServiceLogs());
-  const getDesktopConfig = () => ({
-    hqUrl,
-    consoleUrl: hqUrl,
+  handle(aliases("get-service-status"), getServiceStatus, { owner: true });
+  handle(aliases("get-service-logs"), getServiceLogs, { owner: true });
+  mutate(["delta-hq:start-backend", "delta-os:start-backend"], () => startService("backend"));
+  mutate(["delta-hq:start-site", "delta-os:start-site"], () => startService("site"));
+  mutate(["delta-hq:start-all", "delta-os:start-all"], startAllServices);
+  mutate(aliases("stop-backend"), () => stopService("backend"));
+  mutate(aliases("stop-site"), () => stopService("site"));
+  mutate(["delta-hq:stop-all", "delta-os:stop-all"], stopAllServices);
+  handle(aliases("get-config"), () => ({
+    hqUrl: publicHqUrl,
+    consoleUrl: publicHqUrl,
     shellMode: false,
     desktopMode: desktopRuntime.mode,
     productionPathStatus: desktopRuntime.productionPathStatus,
@@ -567,9 +584,7 @@ app.whenReady().then(() => {
     notificationEnabled: false,
     ttsEnabled: false,
     memoryWritesEnabled: false,
-  });
-  ipcMain.handle("delta-hq:get-config", getDesktopConfig);
-  ipcMain.handle("delta-os:get-config", getDesktopConfig);
+  }), { owner: true });
 
   createWindow();
 
