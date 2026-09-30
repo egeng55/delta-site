@@ -723,3 +723,15 @@ source are unchanged.
 Validation: 309 tests in 67 suites, production build, lint (zero errors, four
 pre-existing warnings), preflight and advisory safety scan. Browser verification
 covered desktop descent, chapter jumps, census navigation, and a 390px layout.
+
+## Useful workspace result: worktree review — 2026-09-30
+
+The execution desk adds an explicit Repository & worktree review workflow. It
+invokes the existing governed repo.status read with a host-selected worktree metadata projection, displays
+per-repository Git evidence and preservation/retirement-review classifications,
+and retains the result in encrypted runtime task history. Recheck worktrees
+submits a fresh read, leaving the preceding result available for comparison.
+This fixed review does not interpret arbitrary requests or authorize cleanup.
+Git ancestry is not a claim that all distinct commits represent missing features.
+Ignored files are surfaced as an archive-review requirement. No provider call,
+file-content ingestion, merge, push, or deletion is part of this workflow.
