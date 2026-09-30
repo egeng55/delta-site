@@ -1236,3 +1236,35 @@
 @media (prefers-reduced-motion:reduce) { .shell *, .shell *::before, .shell *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
 
 .shell .historyMain{max-width:none;padding:0;animation:none}
+
+/* Carry the History ocean palette through its workspace chrome. */
+.shell:has(.historyMain) {
+  --ink: #dceaff;
+  --muted: #a0b9db;
+  --line: #294468;
+  --accent: #80b3ff;
+  background: #071426;
+  color: var(--ink);
+}
+.shell:has(.historyMain) .sidebar,
+.shell:has(.historyMain) .topbar {
+  background: #0b1e38;
+  color: #dceaff;
+  border-color: #294468;
+}
+.shell:has(.historyMain) :is(.sidebar, .topbar) button {
+  background-color: #112c4c;
+  color: #dceaff;
+  border-color: #355780;
+}
+.shell:has(.historyMain) :is(.sidebar, .topbar) button:hover:not(:disabled) {
+  background-color: #1b3e66;
+}
+.shell:has(.historyMain) .notice {
+  color: #c5dcff;
+  background: #132d50;
+  border-color: #5189d8;
+}
+.shell:has(.historyMain) .brand img {
+  filter: hue-rotate(-25deg);
+}

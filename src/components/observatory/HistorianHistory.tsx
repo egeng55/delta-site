@@ -69,8 +69,8 @@ function CodeReef({ stage }: { stage: number }) {
     <svg className={styles.reef} viewBox="0 0 800 800" aria-hidden="true">
       <defs>
         <radialGradient id="reef-glow">
-          <stop stopColor="#5df5dd" stopOpacity=".2" />
-          <stop offset="1" stopColor="#5df5dd" stopOpacity="0" />
+          <stop stopColor="#5d9af5" stopOpacity=".2" />
+          <stop offset="1" stopColor="#5d9af5" stopOpacity="0" />
         </radialGradient>
       </defs>
       <circle cx="400" cy="400" r="340" fill="url(#reef-glow)" />

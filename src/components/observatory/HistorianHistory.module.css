@@ -1,8 +1,8 @@
 .history {
-  --ink: #e8f8f3;
-  --muted: #99b9bd;
-  --line: #274d59;
-  background: #030f1b;
+  --ink: #e8eef8;
+  --muted: #99a7bd;
+  --line: #273b59;
+  background: #030d1b;
   color: var(--ink);
   isolation: isolate;
 }
@@ -11,12 +11,12 @@
   --reef-scale: 0.38;
   position: relative;
   background: linear-gradient(
-    #126c7e 0%,
-    #064259 19%,
-    #072c46 37%,
-    #061c32 58%,
-    #041426 80%,
-    #030f1b 100%
+    #123d7e 0%,
+    #062759 19%,
+    #072046 37%,
+    #061832 58%,
+    #041226 80%,
+    #030d1b 100%
   );
 }
 .stage {
@@ -26,7 +26,7 @@
   margin-bottom: calc(-100svh + 64px);
   overflow: hidden;
   pointer-events: none;
-  background: linear-gradient(90deg, rgba(2, 18, 30, 0.3), transparent);
+  background: linear-gradient(90deg, rgba(2, 13, 30, 0.3), transparent);
 }
 .rays {
   position: absolute;
@@ -34,7 +34,7 @@
   background: repeating-conic-gradient(
     from 165deg at 52% 0%,
     transparent 0deg 8deg,
-    #b2ffe419 9deg 12deg,
+    #b2d1ff19 9deg 12deg,
     transparent 14deg 25deg
   );
   filter: blur(14px);
@@ -45,15 +45,15 @@
   position: absolute;
   inset: 0 0 auto;
   height: 90px;
-  background: radial-gradient(ellipse at 55% -40%, #b9fff380, transparent 70%);
+  background: radial-gradient(ellipse at 55% -40%, #b9d5ff80, transparent 70%);
   opacity: calc(1 - var(--descent) * 4);
 }
 .particles {
   position: absolute;
   inset: -80px;
   background-image:
-    radial-gradient(circle, #a9ffe77a 0.7px, transparent 1.5px),
-    radial-gradient(circle, #b9eafa55 1px, transparent 2px);
+    radial-gradient(circle, #a9cbff7a 0.7px, transparent 1.5px),
+    radial-gradient(circle, #b9d3fa55 1px, transparent 2px);
   background-size:
     83px 137px,
     193px 211px;
@@ -77,10 +77,10 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 0 12px #52e5d01f);
+  filter: drop-shadow(0 0 12px #528de51f);
 }
 .reef text {
-  fill: #cefff4;
+  fill: #cee2ff;
   font:
     12px ui-monospace,
     monospace;
@@ -91,38 +91,38 @@
 }
 .orbit {
   fill: none;
-  stroke: #60ccb521;
+  stroke: #608bcc21;
   stroke-dasharray: 3 14;
 }
 .connection {
   fill: none;
-  stroke: #72e6c7;
+  stroke: #72a0e6;
   stroke-width: 1.3;
   stroke-dasharray: 5 8;
   animation: flow 30s linear infinite;
 }
 .twig {
   fill: none;
-  stroke: #54bba677;
+  stroke: #547dbb77;
   stroke-width: 0.8;
 }
 .module {
-  fill: #102f3c;
-  stroke: #72d8c0;
+  fill: #10223c;
+  stroke: #729bd8;
   stroke-width: 0.7;
 }
 .codeLine {
   fill: none;
-  stroke: #a0f1d7;
+  stroke: #a0c0f1;
   stroke-width: 1;
 }
 .hub {
-  fill: #103647;
-  stroke: #78ddc8;
+  fill: #102647;
+  stroke: #78a0dd;
 }
 .core {
-  fill: #092d3c;
-  stroke: #a2f9d7;
+  fill: #091d3c;
+  stroke: #a2c5f9;
   stroke-width: 1.5;
 }
 .cluster {
@@ -139,7 +139,7 @@
     9px ui-monospace,
     monospace;
   letter-spacing: 2px;
-  color: #7ba7ad;
+  color: #7b8fad;
 }
 .depthNav {
   position: sticky;
@@ -156,7 +156,7 @@
 .history .depthNav button {
   border: 0;
   background: transparent;
-  color: #aac8cf;
+  color: #aab9cf;
   min-height: 25px;
   padding: 4px;
   display: flex;
@@ -171,17 +171,17 @@
 .history .depthNav button:hover,
 .history .depthNav button[aria-current] {
   background: transparent;
-  color: #ddfff4;
+  color: #ddebff;
 }
 .depthDot {
   width: 5px;
   height: 5px;
-  background: #668e9b;
+  background: #667b9b;
   border-radius: 100%;
 }
 .history .depthNav button[aria-current] .depthDot {
-  background: #baffdf;
-  box-shadow: 0 0 13px #8bffd0;
+  background: #bad6ff;
+  box-shadow: 0 0 13px #8bb9ff;
   transform: scale(1.7);
 }
 .story {
@@ -214,13 +214,13 @@
     monospace;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #a0d1ce;
+  color: #a0b4d1;
   display: block;
 }
 .eyebrow span {
   display: block;
   margin-top: 10px;
-  color: #b4ccd0;
+  color: #b4bfd0;
   letter-spacing: 1px;
 }
 .kicker {
@@ -229,7 +229,7 @@
     monospace;
   letter-spacing: 2px;
   margin-top: 60px !important;
-  color: #bce9e1;
+  color: #bccee9;
 }
 .history .chapter h1,
 .history .chapter h2 {
@@ -238,26 +238,26 @@
     serif;
   letter-spacing: -2.3px;
   margin: 24px 0;
-  color: #edfff5;
+  color: #edf4ff;
   text-wrap: balance;
 }
 .chapterCopy {
   font-size: 16px;
-  color: #b9d5d9;
+  color: #b9c6d9;
   max-width: 420px;
 }
 .archiveLine {
   font:
     11px ui-monospace,
     monospace;
-  color: #c1e6df;
+  color: #c1d0e6;
   margin: 28px 0;
 }
 .history .descend {
   background: transparent;
-  color: #dcffee;
+  color: #dceaff;
   border: 0;
-  border-bottom: 1px solid #80bcab;
+  border-bottom: 1px solid #8098bc;
   border-radius: 0;
   padding: 12px 0;
   margin: 16px 0;
@@ -273,7 +273,7 @@
 }
 .disclaimer {
   font-size: 11px;
-  color: #8eb3b8;
+  color: #8e9fb8;
   max-width: 370px;
   margin-top: 22px;
 }
@@ -282,7 +282,7 @@
     9px ui-monospace,
     monospace;
   letter-spacing: 2px;
-  color: #92debf;
+  color: #92b0de;
   margin: 36px 0 12px;
 }
 .shift span {
@@ -290,10 +290,10 @@
   font-size: 12px;
   letter-spacing: 0;
   margin-top: 10px;
-  color: #d1f3e5;
+  color: #d1dff3;
 }
 .milestone {
-  border-top: 1px solid #b0e5e030;
+  border-top: 1px solid #b0c5e530;
 }
 .milestone summary {
   cursor: pointer;
@@ -301,7 +301,7 @@
   padding: 15px 25px 15px 0;
   position: relative;
   font-size: 13px;
-  color: #d6ede9;
+  color: #d6dfed;
 }
 .milestone summary::-webkit-details-marker {
   display: none;
@@ -311,7 +311,7 @@
   font:
     9px ui-monospace,
     monospace;
-  color: #8db5bd;
+  color: #8da0bd;
   margin-bottom: 6px;
 }
 .milestone summary b {
@@ -325,23 +325,23 @@
   transform: rotate(45deg);
 }
 .evidence {
-  background: #031727df;
+  background: #031127df;
   padding: 20px;
-  border: 1px solid #315260;
+  border: 1px solid #314460;
   font-size: 12px;
-  color: #bbd4d8;
+  color: #bbc7d8;
 }
 .evidence code {
   display: block;
-  color: #8cc8bc;
+  color: #8ca4c8;
   overflow-wrap: anywhere;
 }
 .history .evidence h3 {
-  color: #e6f9f0;
+  color: #e6eef9;
   font-size: 12px;
 }
 .evidence > div {
-  border-top: 1px solid #294552;
+  border-top: 1px solid #293952;
   margin-top: 18px;
 }
 .censusStat {
@@ -355,31 +355,31 @@
     monospace;
 }
 .censusStat > span {
-  color: #82a6b2;
+  color: #8295b2;
 }
 .censusStat > b {
   font-weight: 400;
-  color: #7dbfae;
+  color: #7d97bf;
 }
 .censusStat strong {
-  color: #befbdd;
+  color: #bed6fb;
   font-weight: 400;
 }
 .censusStat small {
   flex-basis: 100%;
   font-size: 11px;
-  color: #92b1b9;
+  color: #92a2b9;
 }
 .explore {
   display: inline-block;
   padding: 12px 0;
-  border-bottom: 1px solid #7fb6ac;
+  border-bottom: 1px solid #7f95b6;
   font-size: 12px;
 }
 .measurements {
   padding: 90px 8%;
   background:
-    radial-gradient(ellipse at 80% 0, #133043, transparent 55%), #030f1b;
+    radial-gradient(ellipse at 80% 0, #132643, transparent 55%), #030d1b;
   position: relative;
   scroll-margin-top: 80px;
 }
@@ -393,7 +393,7 @@
   margin: 15px 0;
 }
 .measurementHeader p {
-  color: #9fb9c1;
+  color: #9fadc1;
 }
 .grid {
   display: grid;
@@ -402,16 +402,16 @@
 }
 .panel {
   padding: 25px;
-  border: 1px solid #28424e;
-  background: #0a1d2b;
-  color: #c0d4d9;
+  border: 1px solid #28374e;
+  background: #0a172b;
+  color: #c0cad9;
   margin-bottom: 24px;
 }
 .history .panel h3 {
   font:
     24px Georgia,
     serif;
-  color: #e3f4ed;
+  color: #e3eaf4;
   margin-bottom: 20px;
 }
 .history .panel p {
@@ -427,9 +427,9 @@
   gap: 8px;
 }
 .history select {
-  background: #132e3b;
-  color: #deeee8;
-  border: 1px solid #375765;
+  background: #13233b;
+  color: #dee4ee;
+  border: 1px solid #374965;
   padding: 10px;
   border-radius: 4px;
   max-width: 100%;
@@ -448,34 +448,34 @@
 }
 .track {
   height: 24px;
-  background: #142f3d;
+  background: #14243d;
 }
 .bar {
   height: 100%;
-  background: #8ccbb8;
+  background: #8ca5cb;
 }
 .prior {
-  background: #416775;
+  background: #415675;
 }
 .change {
   font:
     26px ui-monospace,
     monospace !important;
-  color: #c3f7df;
+  color: #c3d8f7;
 }
 .change small {
   display: block;
   font-size: 11px;
-  color: #9dbac2;
+  color: #9dacc2;
   margin-top: 6px;
 }
 .footnote {
-  color: #99b6bf;
+  color: #99a8bf;
   font-size: 11px !important;
 }
 .badge {
   font-size: 10px;
-  color: #8ac4b2;
+  color: #8aa1c4;
 }
 .table {
   overflow-x: auto;
@@ -491,11 +491,11 @@
 .table th,
 .table td {
   padding: 13px 10px;
-  border-bottom: 1px solid #28434f;
+  border-bottom: 1px solid #28384f;
 }
 .table th {
   font-weight: 400;
-  color: #b9d6d9;
+  color: #b9c6d9;
 }
 .table td {
   font-family: ui-monospace, monospace;
@@ -503,7 +503,7 @@
 .panel summary {
   cursor: pointer;
   padding: 10px 0;
-  color: #c9eee0;
+  color: #c9d8ee;
 }
 .panel li {
   margin: 10px 0;
@@ -594,7 +594,7 @@
     opacity: 0.25;
   }
   .chapterContent {
-    background: linear-gradient(90deg, #041c2b66, transparent);
+    background: linear-gradient(90deg, #04142b66, transparent);
   }
   .depthNav {
     top: 90px;
@@ -640,9 +640,9 @@
 
 .history .explore {
   background: transparent;
-  color: #c9eee0;
+  color: #c9d8ee;
   border: 0;
-  border-bottom: 1px solid #7fb6ac;
+  border-bottom: 1px solid #7f95b6;
   border-radius: 0;
   padding: 12px 0;
 }
@@ -652,4 +652,4 @@
 }
 
 /* Keep deep reef branches behind the reading column. */
-.stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #031322bb 0%, #03132288 34%, transparent 60%); opacity: var(--descent); }
+.stage::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #030f22bb 0%, #030f2288 34%, transparent 60%); opacity: var(--descent); }
