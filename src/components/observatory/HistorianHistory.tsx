@@ -7,14 +7,38 @@ import {
 } from "@/lib/historian";
 import styles from "./HistorianHistory.module.css";
 const date = (s: string) =>
-  new Date(s).toLocaleDateString("en-US", {
+  Number.isFinite(Date.parse(s)) ? new Date(s).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
     timeZone: "America/New_York",
-  });
-const chapters = [
+  }) : "Unknown date";
+function metricById(data: HistorianArchive, metricId: string) {
+  return data.comparison.metrics.find((metric) => metric.metric_id === metricId);
+}
+function signedChange(data: HistorianArchive, metricId: string) {
+  const metric = metricById(data, metricId);
+  if (!metric || metric.absolute_change === null) return "unmeasured";
+  return `${metric.absolute_change > 0 ? "+" : ""}${number(metric.absolute_change, metric.unit)}`;
+}
+function snapshotPeriod(data: HistorianArchive) {
+  const [first, second] = data.snapshots;
+  if (!first || !second) return "Latest comparable census";
+  return `${date(first.date)} → ${date(second.date)}`;
+}
+type RenderChapter = {
+  id: string;
+  name: string;
+  zone: string;
+  period: string;
+  headline: string;
+  copy: string;
+  milestoneIds: string[];
+  measurement?: boolean;
+};
+const legacyChapterSpecs = [
   {
+    id: "first-signal",
     name: "The first signal",
     zone: "Surface",
     period: "December 2025",
@@ -23,6 +47,7 @@ const chapters = [
     copy: "Delta began with a simple ambition: turn everyday health events into understanding. One signal. One state. A foundation to build upon.",
   },
   {
+    id: "learning-to-remember",
     name: "Learning to remember",
     zone: "Sunlight",
     period: "January 2026",
@@ -31,6 +56,7 @@ const chapters = [
     copy: "Durable memory, conversation, and inference transform isolated observations into continuity. The architecture starts carrying context forward.",
   },
   {
+    id: "different-os",
     name: "A different kind of OS",
     zone: "Twilight",
     period: "June 2026",
@@ -39,6 +65,7 @@ const chapters = [
     copy: "Behavioral intelligence meets agent supervision. Shared substrate becomes the architectural direction: a larger system, with more responsibilities and deeper connections.",
   },
   {
+    id: "shared-engine",
     name: "The shared engine",
     zone: "Midnight",
     period: "July – August 2026",
@@ -47,6 +74,7 @@ const chapters = [
     copy: "The engineering system takes shape around shared execution, Mission Control, and a bounded Historian dependency. Separate efforts begin to operate on common foundations.",
   },
   {
+    id: "coordinated-system",
     name: "A coordinated system",
     zone: "Abyss",
     period: "August 2026",
@@ -54,15 +82,49 @@ const chapters = [
     headline: "Specialists join the current.",
     copy: "Failure triage and architecture review enter the historical qualification record. Coordination and verification become part of the system’s structure.",
   },
-  {
+];
+function measuredChapter(data: HistorianArchive): RenderChapter {
+  const source = metricById(data, "source_loc");
+  const currentSource = source?.current === null || source?.current === undefined
+    ? "measured code"
+    : `${number(source.current, source.unit)} lines`;
+  return {
+    id: "measured-depths",
     name: "The measured depths",
     zone: "Seafloor",
-    period: "August 7 → 12, 2026",
-    range: [14, 14],
-    headline: "186,730 lines below the surface.",
-    copy: "Two comparable censuses reveal the scale beneath the story: five repositories, 4,623 additional source lines, and 1,823 additional test lines in this recorded window.",
-  },
-];
+    period: snapshotPeriod(data),
+    milestoneIds: [],
+    measurement: true,
+    headline: `${currentSource} below the surface.`,
+    copy: `The latest comparable census reveals the scale beneath the story: five repositories, ${signedChange(data, "source_loc")} source lines, and ${signedChange(data, "test_loc")} test lines in the recorded window.`,
+  };
+}
+function fallbackChapters(data: HistorianArchive): RenderChapter[] {
+  return legacyChapterSpecs.map((chapter) => ({
+    id: chapter.id,
+    name: chapter.name,
+    zone: chapter.zone,
+    period: chapter.period,
+    headline: chapter.headline,
+    copy: chapter.copy,
+    milestoneIds: data.milestones
+      .slice(...(chapter.range as [number, number]))
+      .map((milestone) => milestone.id),
+  }));
+}
+function historyChapters(data: HistorianArchive): RenderChapter[] {
+  const feedChapters = data.historyFeed?.chapters
+    ?.filter((chapter) => chapter.milestoneIds.length > 0)
+    .map((chapter) => ({ ...chapter, measurement: false })) ?? [];
+  return [
+    ...(feedChapters.length > 0 ? feedChapters : fallbackChapters(data)),
+    measuredChapter(data),
+  ];
+}
+function milestonesForChapter(data: HistorianArchive, chapter: RenderChapter) {
+  const ids = new Set(chapter.milestoneIds);
+  return data.milestones.filter((milestone) => ids.has(milestone.id));
+}
 const systems = ["Agent", "Backend", "Site", "Mobile", "Jobs"];
 function CodeReef({ stage }: { stage: number }) {
   return (
@@ -185,6 +247,8 @@ function Ocean({ data }: { data: HistorianArchive }) {
           : "smooth",
         block: "start",
       });
+  const chapters = historyChapters(data);
+  const source = metricById(data, "source_loc");
   return (
     <div className={styles.ocean} ref={root}>
       <div className={styles.stage} aria-hidden="true">
@@ -244,18 +308,17 @@ function Ocean({ data }: { data: HistorianArchive }) {
                     Scroll to descend <span>↓</span>
                   </button>
                   <p className={styles.disclaimer}>
-                    Depth and the growing reef tell the story visually. Measured
-                    code size appears at the seafloor.
+                    {data.historyFeed?.story.coreShift
+                      ?? "Depth and the growing reef tell the story visually. Measured code size appears at the seafloor."}
                   </p>
                 </>
               )}
-              {index > 0 && index < 5 && (
+              {index > 0 && !chapter.measurement && (
                 <p className={styles.shift}>
                   ARCHITECTURE SHIFT <span>{chapter.name}</span>
                 </p>
               )}
-              {data.milestones
-                .slice(...(chapter.range as [number, number]))
+              {milestonesForChapter(data, chapter)
                 .map((m) => (
                   <details className={styles.milestone} key={m.id}>
                     <summary>
@@ -275,6 +338,7 @@ function Ocean({ data }: { data: HistorianArchive }) {
                       {m.evidence.map((e) => (
                         <div key={e.ref}>
                           <p>{e.summary}</p>
+                          {e.kind && <small>{e.kind}</small>}
                           <code>{e.ref}</code>
                         </div>
                       ))}
@@ -287,13 +351,18 @@ function Ocean({ data }: { data: HistorianArchive }) {
                     </div>
                   </details>
                 ))}
-              {index === 5 && (
+              {chapter.measurement && (
                 <>
                   <div className={styles.censusStat}>
-                    <span>182,107</span>
+                    <span>{number(source?.previous ?? null, source?.unit)}</span>
                     <b>→</b>
-                    <strong>186,730</strong>
-                    <small>source lines · +2.54%</small>
+                    <strong>{number(source?.current ?? null, source?.unit)}</strong>
+                    <small>
+                      source lines ·{" "}
+                      {source?.percentage_change === null || source?.percentage_change === undefined
+                        ? "change unavailable"
+                        : `${source.percentage_change > 0 ? "+" : ""}${source.percentage_change.toFixed(2)}%`}
+                    </small>
                   </div>
                   <button
                     className={styles.explore}
@@ -306,8 +375,8 @@ function Ocean({ data }: { data: HistorianArchive }) {
                     Explore the census evidence ↓
                   </button>
                   <p className={styles.disclaimer}>
-                    Historical assessments, not present-day qualification. No
-                    code-size estimates are interpolated between milestones.
+                    {data.historyFeed?.story.truthBoundary
+                      ?? "Historical assessments, not present-day qualification. No code-size estimates are interpolated between milestones."}
                   </p>
                 </>
               )}
@@ -389,8 +458,14 @@ export default function HistorianHistory({
           </span>
           <h2>What lies beneath.</h2>
           <p>
-            Two structural censuses. The original measurements, interpretations,
-            and source trail.
+            {data.snapshots.length} structural censuses. The latest available
+            measurements, interpretations, and source trail.
+          </p>
+          <p className={styles.footnote}>
+            Feed: {data.sourceMode === "live_agent_store" ? "live agent store" : "bundled fallback archive"}
+            {data.freshness?.latestAcceptedSourceTime
+              ? ` · latest source ${date(data.freshness.latestAcceptedSourceTime)}`
+              : ""}
           </p>
         </header>
         <div className={styles.grid}>
@@ -460,8 +535,8 @@ export default function HistorianHistory({
             {metricId === "historian_milestones" && (
               <p>
                 This metric counts the milestone files found by that census (5 →
-                6). The separate origin-backfill timeline above contains 14
-                entries and uses a different scope.
+                6). The timeline above renders the latest website history feed,
+                which can include a different projection scope than the census.
               </p>
             )}
           </section>
@@ -485,8 +560,8 @@ export default function HistorianHistory({
             </p>
             <p className={styles.footnote}>
               Structural growth is not a measure of intelligence or present-day
-              reliability. Qualified-agent totals were not measured in either
-              census.
+              reliability. The site renders supplied Historian/Observability
+              evidence and does not recompute historical truth.
             </p>
           </section>
         </div>
@@ -561,9 +636,9 @@ export default function HistorianHistory({
                 missing even though the aggregate census was marked complete.
               </li>
               <li>
-                The current live source census uses a different projection. It
-                is not appended to this historical series as if it were the same
-                measurement.
+                Live-feed data is read from persisted Historian/Observability
+                artifacts when available. If unavailable, this view falls back
+                to the bundled archive instead of inventing current state.
               </li>
             </ul>
             <ul>
