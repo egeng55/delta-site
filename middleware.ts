@@ -5,6 +5,7 @@ import { authRedirect } from './src/lib/authRedirect';
 const OWNER_HQ_ROUTE = '/hq';
 const PROTECTED_ROUTES = [
   OWNER_HQ_ROUTE,
+  '/workspace',
   '/command',
   '/dashboard',
   '/settings',
@@ -14,7 +15,7 @@ const PROTECTED_ROUTES = [
 ];
 const AUTH_ROUTES = ['/login', '/signup'];
 const OS_CONSOLE_ROUTE = '/os';
-const LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview'];
+const LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview', '/workspace-preview'];
 
 function isOsConsoleRoute(pathname: string): boolean {
   return pathname === OS_CONSOLE_ROUTE || pathname.startsWith(`${OS_CONSOLE_ROUTE}/`);
@@ -47,7 +48,7 @@ export async function middleware(request: NextRequest) {
 
   // The OS console has no product authentication boundary and is available
   // only from an explicitly started local development environment.
-  if (isOsRoute) {
+  if (isOsRoute || (pathname === '/workspace-preview' && process.env.NODE_ENV === 'development')) {
     return response;
   }
 
@@ -106,6 +107,8 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/hq/:path*',
+    '/workspace/:path*',
+    '/workspace-preview/:path*',
     '/observatory-preview/:path*',
     '/os/:path*',
     '/demo/:path*',

@@ -1,0 +1,20 @@
+'use client';
+import {useEffect,useMemo,useState} from 'react';
+import {ArrowLeft,ArrowRight,ArrowUpRight,FileCheck2,RefreshCw,Search} from 'lucide-react';
+import Link from 'next/link';
+import {requestJson} from '@/lib/requestJson';
+import styles from './WorkspacePanels.module.css';
+type Task={id:string;input:string;state:string;kind:string;updated_at:string;review_available?:boolean};
+// Match the execution desk's active-state boundary. A paused, budget-stopped or
+// unknown outcome still has evidence to review; it must not disappear here.
+const active=new Set(['queued','running','waiting_for_approval']);
+function parseTasks(data:unknown):Task[]{const tasks=(data as {tasks?:unknown})?.tasks;if(!Array.isArray(tasks)||tasks.length>100)throw Error();return tasks.map(t=>{if(!t||typeof t!=='object'||!/^([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i.test(t.id)||typeof t.input!=='string'||typeof t.state!=='string'||typeof t.kind!=='string'||typeof t.updated_at!=='string')throw Error();return t as Task;});}
+export default function ResultLibrary({enabled}:{enabled:boolean}){
+  const [tasks,setTasks]=useState<Task[]>([]),[state,setState]=useState('loading'),[revision,setRevision]=useState(0),[query,setQuery]=useState(''),[page,setPage]=useState(0);
+  useEffect(()=>{if(!enabled)return;const c=new AbortController();let alive=true;async function load(){setState('loading');try{const r=await requestJson('/api/hq/lifecycle/tasks',{signal:c.signal});if(!r.ok)throw Error();const rows=parseTasks(r.data);if(alive){setTasks(rows.filter(t=>!active.has(t.state)));setState('ready');}}catch{if(alive){setTasks([]);setState('error');}}}void load();return()=>{alive=false;c.abort();};},[enabled,revision]);
+  const filtered=useMemo(()=>tasks.filter(t=>(t.input+' '+t.state+' '+t.kind).toLowerCase().includes(query.toLowerCase())),[tasks,query]);
+  const maxPage=Math.max(0,Math.ceil(filtered.length/8)-1),current=Math.min(page,maxPage),rows=filtered.slice(current*8,current*8+8);
+  return <section aria-label="Result library" className={styles.report}><div className={styles.toolbar}><label className={styles.search}><Search size={16}/><input value={query} onChange={e=>{setQuery(e.target.value);setPage(0);}} aria-label="Search results" placeholder="Find a result…"/></label><button disabled={!enabled||state==='loading'} onClick={()=>setRevision(v=>v+1)}><RefreshCw size={14}/>Refresh</button></div>
+    {!enabled?<div className={styles.empty}><FileCheck2 size={32}/><h2>Your work will live here.</h2><p>Connect an authorized owner runtime to read retained results. This view does not load another person’s tasks.</p></div>:state==='loading'?<p role="status" className={styles.loading}>Reading retained results…</p>:state==='error'?<div className={styles.empty} role="alert"><h2>Results are temporarily unavailable.</h2><p>Check the runtime connection and your owner session, then refresh.</p></div>:!rows.length?<div className={styles.empty}><FileCheck2 size={32}/><h2>{query?'No results match your search.':'Nothing finished here yet.'}</h2><p>{query?'Try a different title or status.':'Completed, stopped, failed, and review-ready tasks will appear with their original evidence.'}</p></div>:<><div className={styles.results}>{rows.map(t=><article key={t.id}><span className={styles.resultIcon}><FileCheck2 size={20}/></span><span className={styles.resultStatus}>{t.state.replaceAll('_',' ')}</span><h2>{t.input}</h2><p>{t.kind.replaceAll('_',' ')} · {new Date(t.updated_at).toLocaleString()}</p><Link href={`/workspace?task=${encodeURIComponent(t.id)}#work`}>Open task evidence <ArrowUpRight size={14}/></Link></article>)}</div><div className={styles.pagination}><button disabled={current===0} onClick={()=>setPage(current-1)}><ArrowLeft size={14}/>Previous</button><span>Page {current+1} of {maxPage+1} · {filtered.length} retained results</span><button disabled={current>=maxPage} onClick={()=>setPage(current+1)}>Next<ArrowRight size={14}/></button></div></>}
+  </section>;
+}

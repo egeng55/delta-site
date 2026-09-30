@@ -91,7 +91,7 @@ describe("Delta public identity", () => {
   it("keeps technical cockpits local-only", () => {
     const middleware = readSource("middleware.ts");
 
-    expect(middleware).toContain("const LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview']");
+    expect(middleware).toContain("const LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview', '/workspace-preview']");
     expect(middleware).toContain("isInternalRoute && process.env.NODE_ENV === 'production'");
     expect(middleware).toContain("status: 404");
     expect(middleware).toContain("const OWNER_HQ_ROUTE = '/hq'");

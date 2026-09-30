@@ -13,9 +13,10 @@ const mainPath = path.join(__dirname, "main.cjs");
 const preloadPath = path.join(__dirname, "preload.cjs");
 const fallbackPath = path.join(__dirname, "fallback.html");
 const runtimeConfigPath = path.join(__dirname, "runtime-config.cjs");
+const ipcPolicyPath = path.join(__dirname, "ipc-policy.cjs");
 const packagePath = path.join(root, "package.json");
 
-for (const file of [mainPath, preloadPath, fallbackPath, runtimeConfigPath, packagePath]) {
+for (const file of [mainPath, preloadPath, fallbackPath, runtimeConfigPath, ipcPolicyPath, packagePath]) {
   assert(fs.existsSync(file), `${path.relative(root, file)} is missing`);
 }
 
@@ -65,16 +66,18 @@ assert(preload.includes("reloadHq"), "preload HQ reload bridge is missing");
 assert(preload.includes("startBackend"), "preload startBackend bridge is missing");
 assert(preload.includes("getServiceStatus"), "preload service status bridge is missing");
 assert(!preload.includes("runCommand"), "preload must not expose arbitrary command APIs");
-assert(fallback.includes("Delta HQ service manager"), "service manager fallback copy is missing");
-assert(fallback.includes("Start Services"), "service manager start action is missing");
+assert(fallback.includes("Reconnect to Delta"), "desktop recovery copy is missing");
+assert(!fallback.includes("api.start"), "recovery page must not launch services");
+assert(main.includes("createDesktopHandler"), "desktop IPC authorization wrapper is missing");
+assert(main.includes("owner: true"), "owner authorization is missing");
 assert(fallback.includes("No microphone capture"), "service manager safety copy is missing");
 assert(fallback.includes("No backend TTS"), "service manager TTS safety copy is missing");
 assert(fallback.includes("Packaged Delta HQ does not start local development services"), "packaged mode service-manager copy is missing");
-assert(fallback.includes("serviceManagerEnabled"), "fallback must render service-manager enabled state");
+assert(fallback.includes("server-verified platform-owner session"), "recovery must explain owner authorization");
 assert(runtimeConfig.resolveDesktopRuntime({ isPackaged: false }).serviceManagerEnabled === true, "development runtime must allow local service manager");
 assert(runtimeConfig.resolveDesktopRuntime({ isPackaged: true }).serviceManagerEnabled === false, "packaged runtime must not launch local dev services");
 assert(
-  runtimeConfig.resolveDesktopEntryUrl({ DELTA_HQ_URL: "delta://bad" }, () => {}) === runtimeConfig.DEFAULT_HQ_URL,
+  runtimeConfig.resolveDesktopEntryUrl({ DELTA_HQ_URL: "delta://bad" }, () => {}) === runtimeConfig.DEFAULT_WORKSPACE_URL,
   "invalid HQ URL should fall back safely",
 );
 
