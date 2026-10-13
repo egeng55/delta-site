@@ -57,6 +57,8 @@ export default function ResearchPage() {
         <PageIntro
           label="Current development"
           title="Built is not the same as proven."
+          atmosphere="/images/atmosphere/misty-village.jpg"
+          atmospherePosition="center 48%"
         >
           <p>
             We distinguish working implementation, approved access, and measured

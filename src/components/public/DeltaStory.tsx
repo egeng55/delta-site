@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { ArrowDown, ArrowUpRight, LockKeyhole, MoveRight } from "lucide-react";
+import AtmosphereBackdrop from "./AtmosphereBackdrop";
 import styles from "./public-site.module.css";
 
 const DeltaMarkScene = dynamic(() => import("./DeltaMarkScene"), {
@@ -127,6 +128,11 @@ export default function DeltaStory() {
         viewport={{ once: true, amount: 0.25 }}
         transition={{ duration: 0.55 }}
       >
+        <AtmosphereBackdrop
+          src="/images/atmosphere/lake-sunset.jpg"
+          treatment="light"
+          position="center 58%"
+        />
         <motion.div
           className={styles.signalIntro}
           initial={reduceMotion ? false : { opacity: 0, y: 42 }}
@@ -168,6 +174,11 @@ export default function DeltaStory() {
       </motion.section>
 
       <section id="continuity" className={styles.continuityChapter}>
+        <AtmosphereBackdrop
+          src="/images/atmosphere/aerial-glaciers.jpg"
+          treatment="dark"
+          position="center 38%"
+        />
         <header className={styles.continuityHeader}>
           <p className={styles.storyIndex}>[ 02 / CONTINUITY ]</p>
           <h2>Context becomes useful when it survives the moment.</h2>
@@ -197,6 +208,11 @@ export default function DeltaStory() {
       </section>
 
       <section id="workspace" className={styles.workspaceBridge}>
+        <AtmosphereBackdrop
+          src="/images/atmosphere/river-blooms.jpg"
+          treatment="light"
+          position="center 52%"
+        />
         <motion.div
           className={styles.bridgeStatement}
           initial={reduceMotion ? false : { opacity: 0, y: 42 }}
@@ -278,6 +294,11 @@ export default function DeltaStory() {
         viewport={{ once: true, amount: 0.25 }}
         transition={{ duration: 0.75 }}
       >
+        <AtmosphereBackdrop
+          src="/images/atmosphere/ocean-mountains.jpg"
+          treatment="dark"
+          position="center 45%"
+        />
         <div className={styles.authorityLock} aria-hidden="true">
           <LockKeyhole size={32} />
         </div>
@@ -302,6 +323,11 @@ export default function DeltaStory() {
       </motion.section>
 
       <section id="state" className={styles.stateChapter}>
+        <AtmosphereBackdrop
+          src="/images/atmosphere/orange-sunset.jpg"
+          treatment="light"
+          position="center 54%"
+        />
         <header>
           <div>
             <p className={styles.storyIndex}>[ 06 / CURRENT STATE ]</p>

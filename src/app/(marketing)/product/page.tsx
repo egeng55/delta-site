@@ -22,6 +22,8 @@ export default function ProductPage() {
         <PageIntro
           label="The system"
           title="One intelligence. A wider context."
+          atmosphere="/images/atmosphere/aerial-ice.jpg"
+          atmospherePosition="center 42%"
         >
           <p>
             Delta begins as a private conversation, then brings in only the

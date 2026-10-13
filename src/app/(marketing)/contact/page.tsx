@@ -72,6 +72,8 @@ export default function ContactPage() {
         <PageIntro
           label="Contact"
           title="What would you like Delta to understand?"
+          atmosphere="/images/atmosphere/willow-water.jpg"
+          atmospherePosition="center 44%"
         >
           <p>
             Questions, thoughtful feedback, and conversations about the system

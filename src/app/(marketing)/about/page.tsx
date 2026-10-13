@@ -19,6 +19,8 @@ export default function AboutPage() {
         <PageIntro
           label="Why Delta"
           title="Intelligence should understand the larger situation."
+          atmosphere="/images/atmosphere/waterfall-stones.jpg"
+          atmospherePosition="center 45%"
         >
           <p>
             We started with health context. The deeper problem was broader:

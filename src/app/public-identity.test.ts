@@ -78,17 +78,42 @@ describe("Delta public identity", () => {
   });
 
   it("keeps scenery decorative and separate from capability claims", () => {
-    const story = readSource("src/components/public/DeltaStory.tsx");
-    const styles = readSource("src/components/public/public-site.module.css");
-    const atmospherePaths = [...`${story} ${styles}`.matchAll(/\/images\/atmosphere\/[\w.-]+/g)]
-      .map(match => match[0]);
+    const atmosphereComponent = readSource(
+      "src/components/public/AtmosphereBackdrop.tsx",
+    );
+    const sources = [
+      "src/components/public/DeltaStory.tsx",
+      "src/app/(marketing)/product/page.tsx",
+      "src/app/(marketing)/research/page.tsx",
+      "src/app/(marketing)/security/page.tsx",
+      "src/app/(marketing)/access/page.tsx",
+      "src/app/(marketing)/about/page.tsx",
+      "src/app/(marketing)/contact/page.tsx",
+    ].map(readSource).join(" ");
+    const atmospherePaths = [...sources.matchAll(/\/images\/atmosphere\/[\w.-]+/g)]
+      .map(match => match[0])
+      .sort();
 
     expect(atmospherePaths).toEqual([
+      "/images/atmosphere/aerial-glaciers.jpg",
+      "/images/atmosphere/aerial-ice.jpg",
+      "/images/atmosphere/coastal-wildflowers.jpg",
+      "/images/atmosphere/lake-sunset.jpg",
+      "/images/atmosphere/misty-village.jpg",
       "/images/atmosphere/mountain-moon.jpg",
+      "/images/atmosphere/ocean-mountains.jpg",
+      "/images/atmosphere/orange-sunset.jpg",
+      "/images/atmosphere/river-blooms.jpg",
+      "/images/atmosphere/rocky-beach.jpg",
       "/images/atmosphere/sunset-shore.jpg",
-    ]);
-    expect(story).toContain('src="/images/atmosphere/mountain-moon.jpg" alt=""');
-    expect(story).toContain('src="/images/atmosphere/sunset-shore.jpg" alt=""');
+      "/images/atmosphere/waterfall-stones.jpg",
+      "/images/atmosphere/willow-water.jpg",
+    ].sort());
+    expect(new Set(atmospherePaths).size).toBe(atmospherePaths.length);
+    expect(atmosphereComponent).toContain('aria-hidden="true"');
+    expect(atmosphereComponent).toContain('alt=""');
+    expect(atmosphereComponent).not.toContain("figcaption");
+    expect(atmosphereComponent).not.toContain("children");
   });
 
   it("removes unsupported health, premium, mobile, and historical claims", () => {

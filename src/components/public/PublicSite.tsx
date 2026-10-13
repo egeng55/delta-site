@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import AtmosphereBackdrop from "./AtmosphereBackdrop";
 import PublicNavigation from "./PublicNavigation";
 import styles from "./public-site.module.css";
 
@@ -52,16 +53,31 @@ export function PageIntro({
   label,
   title,
   children,
+  atmosphere,
+  atmospherePosition,
 }: {
   label: string;
   title: string;
   children: ReactNode;
+  atmosphere?: string;
+  atmospherePosition?: string;
 }) {
   return (
-    <header className={`${styles.container} ${styles.pageIntro}`}>
-      <p className={styles.eyebrow}>{label}</p>
-      <h1>{title}</h1>
-      <div className={styles.lead}>{children}</div>
+    <header
+      className={`${styles.pageIntro} ${atmosphere ? styles.pageIntroAtmosphere : ""}`}
+    >
+      {atmosphere ? (
+        <AtmosphereBackdrop
+          src={atmosphere}
+          treatment="page"
+          position={atmospherePosition}
+        />
+      ) : null}
+      <div className={`${styles.container} ${styles.pageIntroContent}`}>
+        <p className={styles.eyebrow}>{label}</p>
+        <h1>{title}</h1>
+        <div className={styles.lead}>{children}</div>
+      </div>
     </header>
   );
 }

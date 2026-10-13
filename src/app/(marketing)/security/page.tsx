@@ -42,6 +42,8 @@ export default function SecurityPage() {
         <PageIntro
           label="Security and control"
           title="Useful context needs a hard boundary."
+          atmosphere="/images/atmosphere/rocky-beach.jpg"
+          atmospherePosition="center 58%"
         >
           <p>
             Delta is designed so each person enters through their own account,

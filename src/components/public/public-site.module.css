@@ -1745,6 +1745,76 @@
   content: "△";
 }
 
+.atmosphereBackdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.atmosphereBackdrop img {
+  object-fit: cover;
+  transform: scale(1.035);
+  filter: saturate(0.68) contrast(1.06);
+  animation: atmosphereDrift 24s ease-in-out infinite alternate;
+}
+
+.atmosphereBackdrop::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.atmosphereDark img {
+  opacity: 0.32;
+}
+
+.atmosphereDark::after {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 19, 0.92), rgba(7, 8, 24, 0.72) 58%, rgba(5, 6, 19, 0.9)),
+    linear-gradient(180deg, rgba(5, 6, 19, 0.42), rgba(5, 6, 19, 0.78));
+}
+
+.atmosphereLight img {
+  opacity: 0.24;
+}
+
+.atmosphereLight::after {
+  background: rgba(242, 243, 239, 0.84);
+}
+
+.atmospherePage img {
+  opacity: 0.64;
+}
+
+.atmospherePage::after {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 19, 0.94) 0%, rgba(5, 6, 19, 0.76) 58%, rgba(5, 6, 19, 0.62) 100%),
+    linear-gradient(180deg, rgba(5, 6, 19, 0.52), rgba(5, 6, 19, 0.88));
+}
+
+.signalChapter,
+.continuityChapter,
+.workspaceBridge,
+.authorityChapter,
+.stateChapter,
+.pageIntro {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.signalChapter > :not(.atmosphereBackdrop),
+.continuityChapter > :not(.atmosphereBackdrop),
+.workspaceBridge > :not(.atmosphereBackdrop),
+.authorityChapter > :not(.atmosphereBackdrop),
+.stateChapter > :not(.atmosphereBackdrop),
+.pageIntro > :not(.atmosphereBackdrop) {
+  position: relative;
+  z-index: 1;
+}
+
 .signalChapter {
   position: relative;
   z-index: 4;
@@ -2344,6 +2414,16 @@
   border-bottom-color: rgba(255, 255, 255, 0.16);
 }
 
+.pageIntroAtmosphere {
+  min-height: 620px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.pageIntroContent {
+  width: min(1240px, calc(100% - 96px));
+}
+
 .pageIntro h1 {
   max-width: 1050px;
   font-family: Georgia, "Times New Roman", serif;
@@ -2493,6 +2573,17 @@
 @keyframes signalPulse {
   0%, 100% { opacity: 0.48; transform: scale(0.82); }
   50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes atmosphereDrift {
+  from { transform: scale(1.035) translate3d(-0.35%, 0, 0); }
+  to { transform: scale(1.075) translate3d(0.35%, -0.5%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmosphereBackdrop img {
+    animation: none;
+  }
 }
 
 @media (max-width: 1080px) {
@@ -2780,6 +2871,14 @@
 
   .pageIntro {
     padding-top: 140px;
+  }
+
+  .pageIntroContent {
+    width: calc(100% - 40px);
+  }
+
+  .pageIntroAtmosphere {
+    min-height: 560px;
   }
 
   .pageIntro h1 {

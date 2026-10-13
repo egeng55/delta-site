@@ -21,7 +21,12 @@ export default function AccessPage() {
   return (
     <PublicSite>
       <main id="main">
-        <PageIntro label="Private access" title="Start with a conversation.">
+        <PageIntro
+          label="Private access"
+          title="Start with a conversation."
+          atmosphere="/images/atmosphere/coastal-wildflowers.jpg"
+          atmospherePosition="center 45%"
+        >
           <p>
             Delta is a request-based private preview. Tell us what you want to
             explore. We review requests manually and invite people within the
