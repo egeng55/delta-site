@@ -1874,89 +1874,68 @@
   font-size: 82px;
 }
 
-.photoSequence {
+.continuitySequence {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.photoChapter {
+.continuityStep {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(280px, 0.48fr) 1.52fr;
-  min-height: 94svh;
+  grid-template-columns: 0.35fr 0.45fr 1.2fr auto;
+  align-items: center;
+  gap: 5%;
+  min-height: 48svh;
+  padding: 72px 6%;
   overflow: hidden;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.photoFrame {
-  position: relative;
-  grid-column: 2;
-  min-height: 94svh;
-  overflow: hidden;
-}
-
-.photoFrame img {
-  object-fit: cover;
-  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 700ms ease;
-}
-
-.photoChapter:hover .photoFrame img {
-  transform: scale(1.035);
-  filter: saturate(1.08);
-}
-
-.photoTint {
+.continuityStep::before {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, rgba(7, 8, 21, 0.72), transparent 38%);
+  inset: 0 auto 0 27%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  content: "";
 }
 
-.photoChapterCopy {
-  position: relative;
-  z-index: 3;
-  grid-column: 1;
-  grid-row: 1;
-  align-self: end;
-  padding: 0 4vw 8vh 6vw;
+.continuityStep:hover {
+  background: rgba(121, 105, 239, 0.08);
 }
 
-.photoChapterCopy span {
+.continuityNumber {
+  color: rgba(255, 255, 255, 0.12);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 118px;
+  line-height: 0.8;
+}
+
+.continuityLabel,
+.continuityStatus {
   color: var(--story-ice);
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 9px;
+  text-transform: uppercase;
 }
 
-.photoChapterCopy h3 {
-  margin: 18px 0 0;
+.continuityCopy h3 {
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 54px;
+  font-size: 58px;
   font-weight: 400;
   line-height: 1;
 }
 
-.photoChapterCopy p {
-  max-width: 390px;
-  margin: 28px 0 0;
+.continuityCopy p {
+  max-width: 570px;
+  margin: 24px 0 0;
   color: #b7bccb;
   font-size: 13px;
   line-height: 1.75;
 }
 
-.photoChapter:nth-child(2) {
-  grid-template-columns: 1.52fr minmax(280px, 0.48fr);
-}
-
-.photoChapter:nth-child(2) .photoFrame {
-  grid-column: 1;
-}
-
-.photoChapter:nth-child(2) .photoTint {
-  background: linear-gradient(270deg, rgba(7, 8, 21, 0.72), transparent 38%);
-}
-
-.photoChapter:nth-child(2) .photoChapterCopy {
-  grid-column: 2;
-  padding-right: 6vw;
-  padding-left: 4vw;
+.continuityStatus {
+  color: rgba(255, 255, 255, 0.34);
+  writing-mode: vertical-rl;
 }
 
 .workspaceBridge {
@@ -2145,29 +2124,6 @@
   color: #575b66;
   font-size: 13px;
   line-height: 1.6;
-}
-
-.worldImage {
-  position: absolute;
-  z-index: 2;
-  left: 24%;
-  bottom: 18px;
-  width: 300px;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(18px) rotate(-2deg);
-  transition: opacity 280ms ease, transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.worldImage img {
-  object-fit: cover;
-}
-
-.worldRow:hover .worldImage {
-  opacity: 1;
-  transform: translateY(0) rotate(-2deg);
 }
 
 .authorityChapter {
@@ -2705,24 +2661,32 @@
     padding: 90px 20px 70px;
   }
 
-  .photoChapter,
-  .photoChapter:nth-child(2) {
-    display: block;
+  .continuityStep {
+    grid-template-columns: 58px 1fr;
+    gap: 18px;
     min-height: auto;
+    padding: 64px 20px;
   }
 
-  .photoFrame,
-  .photoChapter:nth-child(2) .photoFrame {
-    min-height: 68svh;
+  .continuityStep::before {
+    display: none;
   }
 
-  .photoChapterCopy,
-  .photoChapter:nth-child(2) .photoChapterCopy {
-    padding: 38px 20px 72px;
+  .continuityNumber {
+    grid-row: 1 / span 2;
+    font-size: 58px;
   }
 
-  .photoChapterCopy h3 {
+  .continuityCopy {
+    grid-column: 2;
+  }
+
+  .continuityCopy h3 {
     font-size: 43px;
+  }
+
+  .continuityStatus {
+    display: none;
   }
 
   .workspaceWindow {
@@ -2763,10 +2727,6 @@
   .worldRow p {
     grid-column: 2 / -1;
     padding-bottom: 22px;
-  }
-
-  .worldImage {
-    display: none;
   }
 
   .authorityChapter::before {
@@ -2908,10 +2868,5 @@
 @media (prefers-reduced-motion: reduce) {
   .signalRow i {
     animation: none;
-  }
-
-  .photoFrame img,
-  .worldImage {
-    transform: none !important;
   }
 }

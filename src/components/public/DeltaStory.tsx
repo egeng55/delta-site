@@ -24,24 +24,18 @@ const chapters = [
     label: "OBSERVE",
     title: "See the whole field.",
     body: "Delta starts with the situation around the question: current signals, earlier context, attached evidence, and what is still missing.",
-    image: "/images/atmosphere/aerial-ice.jpg",
-    alt: "Aerial view of ice, mountains, and open water",
   },
   {
     index: "02",
     label: "REMEMBER",
     title: "Carry context forward.",
     body: "Useful continuity should prevent you from rebuilding the same understanding every time, without turning old context into current truth.",
-    image: "/images/atmosphere/river-blooms.jpg",
-    alt: "A river framed by flowering trees beneath a blue sky",
   },
   {
     index: "03",
     label: "DECIDE",
     title: "Move with evidence.",
     body: "Delta separates observations, inferences, conflicts, and unknowns so the next decision remains grounded and visibly yours.",
-    image: "/images/atmosphere/waterfall-stones.jpg",
-    alt: "A broad waterfall flowing over dark stones",
   },
 ] as const;
 
@@ -50,19 +44,16 @@ const worlds = [
     index: "01",
     name: "Your day",
     summary: "Recovery, nutrition, weather, plans, and the context connecting them.",
-    image: "/images/atmosphere/coastal-wildflowers.jpg",
   },
   {
     index: "02",
     name: "Your research",
     summary: "Sources, competing claims, durable findings, and explicit uncertainty.",
-    image: "/images/atmosphere/ocean-mountains.jpg",
   },
   {
     index: "03",
     name: "Your work",
     summary: "Projects, architecture, verification, and the actual state of what was built.",
-    image: "/images/atmosphere/misty-village.jpg",
   },
 ] as const;
 
@@ -90,7 +81,7 @@ export default function DeltaStory() {
         >
           <Image
             src="/images/atmosphere/mountain-moon.jpg"
-            alt="Snow-covered mountains beneath a violet evening sky"
+            alt=""
             fill
             priority
             sizes="100vw"
@@ -181,42 +172,25 @@ export default function DeltaStory() {
           <p className={styles.storyIndex}>[ 02 / CONTINUITY ]</p>
           <h2>Context becomes useful when it survives the moment.</h2>
         </header>
-        <div className={styles.photoSequence}>
+        <div className={styles.continuitySequence}>
           {chapters.map((chapter) => (
             <motion.article
               key={chapter.index}
-              className={styles.photoChapter}
-              initial={reduceMotion ? false : { opacity: 0.68 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.22 }}
-              transition={{ duration: 0.8 }}
+              className={styles.continuityStep}
+              initial={reduceMotion ? false : { opacity: 0, y: 44 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.45 }}
+              transition={{ duration: 0.72, ease: [0.2, 0.8, 0.2, 1] }}
             >
-              <motion.div
-                className={styles.photoFrame}
-                initial={reduceMotion ? false : { clipPath: "inset(10% 8% 10% 8%)" }}
-                whileInView={{ clipPath: "inset(0% 0% 0% 0%)" }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 1.05, ease: [0.2, 0.8, 0.2, 1] }}
-              >
-                <Image
-                  src={chapter.image}
-                  alt={chapter.alt}
-                  fill
-                  sizes="(max-width: 800px) 100vw, 72vw"
-                />
-                <div className={styles.photoTint} aria-hidden="true" />
-              </motion.div>
-              <motion.div
-                className={styles.photoChapterCopy}
-                initial={reduceMotion ? false : { opacity: 0, y: 46 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.55 }}
-                transition={{ duration: 0.75, delay: 0.12 }}
-              >
-                <span>{chapter.index} / {chapter.label}</span>
+              <span className={styles.continuityNumber} aria-hidden="true">
+                {chapter.index}
+              </span>
+              <div className={styles.continuityLabel}>{chapter.label}</div>
+              <div className={styles.continuityCopy}>
                 <h3>{chapter.title}</h3>
                 <p>{chapter.body}</p>
-              </motion.div>
+              </div>
+              <span className={styles.continuityStatus}>CONTEXT LAYER</span>
             </motion.article>
           ))}
         </div>
@@ -287,9 +261,6 @@ export default function DeltaStory() {
               viewport={{ once: true, amount: 0.7 }}
               transition={{ duration: 0.58, delay: worldIndex * 0.08 }}
             >
-              <div className={styles.worldImage}>
-                <Image src={world.image} alt="" fill sizes="42vw" />
-              </div>
               <span>[{world.index}]</span>
               <h3>{world.name}</h3>
               <p>{world.summary}</p>
@@ -371,7 +342,7 @@ export default function DeltaStory() {
       >
         <Image
           src="/images/atmosphere/sunset-shore.jpg"
-          alt="Sunset light across a quiet shore"
+          alt=""
           fill
           sizes="100vw"
         />

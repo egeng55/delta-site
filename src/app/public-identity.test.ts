@@ -77,6 +77,20 @@ describe("Delta public identity", () => {
     expect(metadata).not.toContain("AI Health Intelligence");
   });
 
+  it("keeps scenery decorative and separate from capability claims", () => {
+    const story = readSource("src/components/public/DeltaStory.tsx");
+    const styles = readSource("src/components/public/public-site.module.css");
+    const atmospherePaths = [...`${story} ${styles}`.matchAll(/\/images\/atmosphere\/[\w.-]+/g)]
+      .map(match => match[0]);
+
+    expect(atmospherePaths).toEqual([
+      "/images/atmosphere/mountain-moon.jpg",
+      "/images/atmosphere/sunset-shore.jpg",
+    ]);
+    expect(story).toContain('src="/images/atmosphere/mountain-moon.jpg" alt=""');
+    expect(story).toContain('src="/images/atmosphere/sunset-shore.jpg" alt=""');
+  });
+
   it("removes unsupported health, premium, mobile, and historical claims", () => {
     const about = readSource("src/app/(marketing)/about/page.tsx");
     const insights = readSource("src/app/(auth)/insights/page.tsx");
