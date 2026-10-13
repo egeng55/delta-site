@@ -26,7 +26,8 @@ export function PublicSite({ children }: { children: ReactNode }) {
               <br />A wider view. A better next move.
             </p>
             <nav aria-label="Footer">
-              <Link href="/product">The system</Link>
+              <Link href="/product">Product</Link>
+              <Link href="/security">Security</Link>
               <Link href="/research">Development</Link>
               <Link href="/about">About</Link>
               <Link href="/contact">Contact</Link>
@@ -73,16 +74,21 @@ export function AccessBand() {
   return (
     <section className={styles.accessBand}>
       <div className={styles.container}>
-        <p className={styles.eyebrow}>
-          Built deliberately. Opened thoughtfully.
-        </p>
+        <p className={styles.eyebrow}>Your account. Your context.</p>
         <div className={styles.accessRow}>
-          <h2>Get closer to Delta.</h2>
-          <Link href="/access" className={styles.darkButton}>
-            Explore private access <Arrow />
-          </Link>
+          <h2>Continue the conversation.</h2>
+          <div className={styles.buttonRow}>
+            <Link href="/login?redirect=/app" className={styles.darkButton}>
+              Open Delta <Arrow />
+            </Link>
+            <Link href="/access" className={styles.outlineButton}>
+              Request access <Arrow />
+            </Link>
+          </div>
         </div>
-        <p>Manual approval. Clear boundaries. No paid subscription.</p>
+        <p>
+          Private preview. Account-scoped context. Explicit approval for actions.
+        </p>
       </div>
     </section>
   );

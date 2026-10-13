@@ -5,6 +5,7 @@ import { authRedirect } from './src/lib/authRedirect';
 const OWNER_HQ_ROUTE = '/hq';
 const PROTECTED_ROUTES = [
   OWNER_HQ_ROUTE,
+  '/app',
   '/workspace',
   '/command',
   '/dashboard',
@@ -97,7 +98,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAuthRoute && user) {
-    const fallback = user.id === process.env.DELTA_HQ_OWNER_USER_ID ? '/hq' : '/account';
+    const fallback = user.id === process.env.DELTA_HQ_OWNER_USER_ID ? '/hq' : '/app';
     return redirectWithCookies(new URL(authRedirect(request.nextUrl.searchParams.get('redirect'), fallback), request.url));
   }
 
@@ -107,6 +108,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/hq/:path*',
+    '/app/:path*',
     '/workspace/:path*',
     '/workspace-preview/:path*',
     '/observatory-preview/:path*',

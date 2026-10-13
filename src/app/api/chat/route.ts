@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 10;
@@ -34,6 +35,64 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
+type AuthenticatedUserResult =
+  | { userId: string }
+  | { response: NextResponse };
+
+async function authenticateBearer(
+  authorization: string | null,
+): Promise<AuthenticatedUserResult> {
+  const token = authorization?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+  if (!token) {
+    return {
+      response: NextResponse.json(
+        { error: 'Authenticated chat requires a bearer token.' },
+        { status: 401 },
+      ),
+    };
+  }
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) {
+    return {
+      response: NextResponse.json(
+        { error: 'Authentication is not configured.' },
+        { status: 503 },
+      ),
+    };
+  }
+
+  try {
+    const supabase = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user?.id) {
+      return {
+        response: NextResponse.json(
+          { error: 'Authenticated session required.' },
+          { status: 401 },
+        ),
+      };
+    }
+    return { userId: data.user.id };
+  } catch {
+    return {
+      response: NextResponse.json(
+        { error: 'Authentication could not be verified.' },
+        { status: 503 },
+      ),
+    };
+  }
+}
+
+function boundedString(value: unknown, maximum: number): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'string' || value.length > maximum) return undefined;
+  return value;
+}
+
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request);
 
@@ -50,12 +109,8 @@ export async function POST(request: NextRequest) {
   }
 
   const authorization = request.headers.get('authorization');
-  if (!authorization) {
-    return NextResponse.json(
-      { error: 'Authenticated chat proxy requires an Authorization bearer token.' },
-      { status: 401 }
-    );
-  }
+  const authenticated = await authenticateBearer(authorization);
+  if ('response' in authenticated) return authenticated.response;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 30_000);
@@ -89,13 +144,34 @@ export async function POST(request: NextRequest) {
     let body: unknown;
     try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); }
     catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json({ error: 'Invalid chat request' }, { status: 400 });
+    }
+    const candidate = body as Record<string, unknown>;
+    const message = boundedString(candidate.message, 12_000)?.trim();
+    if (!message) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    }
+    const unitSystem = boundedString(candidate.unit_system, 16);
+    if (unitSystem && unitSystem !== 'metric' && unitSystem !== 'imperial') {
+      return NextResponse.json({ error: 'Invalid unit system' }, { status: 400 });
+    }
+    const weatherContext = boundedString(candidate.weather_context, 4_000);
+    const clientTimezone = boundedString(candidate.client_timezone, 128);
+    const upstreamBody = {
+      user_id: authenticated.userId,
+      message,
+      ...(unitSystem ? { unit_system: unitSystem } : {}),
+      ...(weatherContext ? { weather_context: weatherContext } : {}),
+      ...(clientTimezone ? { client_timezone: clientTimezone } : {}),
+    };
     const response = await fetch(`${apiUrl}/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: authorization,
+        Authorization: authorization!,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(upstreamBody),
       signal: controller.signal,
     });
 

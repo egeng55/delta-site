@@ -43,7 +43,7 @@ test('all refreshed session cookies survive a protected page response', async ()
 test('auth redirects preserve refreshed cookies', async () => {
   refreshCookies({ id: 'fixture-owner' });
   const response = await middleware(new NextRequest('https://delta.example.invalid/login'));
-  expect(response.headers.get('location')).toBe('https://delta.example.invalid/account');
+  expect(response.headers.get('location')).toBe('https://delta.example.invalid/app');
   expect(response.cookies.get('session.0')?.value).toBe('first');
   expect(response.cookies.get('session.1')?.value).toBe('second');
 });

@@ -1,6 +1,6 @@
 import { authRedirect } from './authRedirect';
 it.each(['https://evil.test', '//evil.test', '/\\evil.test', '/login', '/signup', '/\nevil'])('rejects unsafe or looping redirect %s', value => {
-  expect(authRedirect(value)).toBe('/hq');
+  expect(authRedirect(value)).toBe('/app');
 });
 it('preserves internal path, query and hash', () => {
   expect(authRedirect('/hq#architecture')).toBe('/hq#architecture');

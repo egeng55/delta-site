@@ -40,7 +40,7 @@ export const PUBLIC_ACCESS_POLICY = {
   mode: "request_access",
   label: "Request access",
   requestPath: "/signup",
-  loginPath: "/login?redirect=/command",
+  loginPath: "/login?redirect=/app",
   statement:
     "Delta is a manually approved private preview. Public account creation is closed, and submitting a request does not guarantee access.",
   approvalScope:

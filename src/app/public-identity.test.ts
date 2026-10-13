@@ -57,8 +57,9 @@ describe("Delta public identity", () => {
     const product = readSource("src/app/(marketing)/product/page.tsx");
     const metadata = readSource("src/app/layout.tsx");
 
-    expect(homepage).toContain("The personal intelligence operating system");
-    expect(homepage).toContain("not a promise of general availability");
+    expect(homepage).toContain("Personal intelligence operating system");
+    expect(homepage).toContain("Private by account");
+    expect(homepage).toContain('/login?redirect=/app');
     expect(product).toContain("Daily Intelligence Brief");
     expect(product).toContain("native tools");
     expect(product).toContain("not yet presented as a proven replacement");
@@ -96,5 +97,14 @@ describe("Delta public identity", () => {
     expect(middleware).toContain("status: 404");
     expect(middleware).toContain("const OWNER_HQ_ROUTE = '/hq'");
     expect(middleware).toContain("OWNER_HQ_ROUTE,");
+  });
+
+  it("makes authenticated chat the primary protected product route", () => {
+    const middleware = readSource("middleware.ts");
+    const manifest = readSource("src/lib/publicCapabilityManifest.ts");
+
+    expect(middleware).toContain("'/app'");
+    expect(middleware).toContain("'/app/:path*'");
+    expect(manifest).toContain('loginPath: "/login?redirect=/app"');
   });
 });

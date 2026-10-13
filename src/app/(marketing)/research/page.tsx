@@ -55,7 +55,7 @@ export default function ResearchPage() {
     <PublicSite>
       <main id="main">
         <PageIntro
-          label="Development / September 2026"
+          label="Current development"
           title="Built is not the same as proven."
         >
           <p>

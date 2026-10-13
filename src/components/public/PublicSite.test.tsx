@@ -91,7 +91,7 @@ describe("public navigation and access", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Log in to your account/ }),
-    ).toHaveAttribute("href", "/login?redirect=/command");
+    ).toHaveAttribute("href", "/login?redirect=/app");
   });
 });
 

@@ -24,6 +24,15 @@ describe("route hygiene", () => {
     expect(middlewareSource).toContain("'/hq/:path*'");
   });
 
+  it("protects the account-scoped Delta chat workspace", () => {
+    const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
+    const appPath = path.join(process.cwd(), "src/app/(auth)/app/page.tsx");
+
+    expect(middlewareSource).toContain("'/app'");
+    expect(middlewareSource).toContain("'/app/:path*'");
+    expect(existsSync(appPath)).toBe(true);
+  });
+
   it("keeps the protected settings route backed by a page", () => {
     const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
     const settingsPath = path.join(process.cwd(), "src/app/(auth)/settings/page.tsx");

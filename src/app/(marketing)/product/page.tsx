@@ -24,12 +24,39 @@ export default function ProductPage() {
           title="One intelligence. A wider context."
         >
           <p>
-            Delta connects the information you authorize with the work you are
-            trying to do. Not every question needs every tool. Not every answer
-            should become an action.
+            Delta begins as a private conversation, then brings in only the
+            account context and evidence that can materially improve the answer.
+            Not every question needs every tool. Not every answer should become
+            an action.
           </p>
         </PageIntro>
         <div className={styles.container}>
+          <section className={styles.detailSection}>
+            <div>
+              <span className={styles.badge}>Authenticated private preview</span>
+              <h2>
+                Talk to Delta,
+                <br />
+                inside your account.
+              </h2>
+            </div>
+            <div className={styles.detailContent}>
+              <p>
+                The Delta workspace is the primary product surface. The signed-in
+                account determines the available context; a conversation ID does
+                not grant access to another person&apos;s information. Internal
+                engineering and owner consoles remain separate.
+              </p>
+              <div className={styles.buttonRow}>
+                <Link href="/login?redirect=/app" className={styles.darkButton}>
+                  Open Delta <Arrow />
+                </Link>
+                <Link href="/security" className={styles.outlineButton}>
+                  Security boundaries <Arrow />
+                </Link>
+              </div>
+            </div>
+          </section>
           <IntelligenceScene />
           <section id="personal" className={styles.detailSection}>
             <div>

@@ -106,6 +106,7 @@ export default function Navigation() {
   const navItems = user
     ? [
       ...publicNavItems,
+        { label: "Delta Chat", href: "/app" },
         { label: "Command", href: "/command" },
         { label: "WHOOP", href: "/integrations/whoop" },
         { label: "Account", href: "/account" },
@@ -219,7 +220,7 @@ export default function Navigation() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              <Link href="/command">
+              <Link href="/app">
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -295,7 +296,7 @@ export default function Navigation() {
                 {user ? (
                   <div className="space-y-2">
                     <Link
-                      href="/command"
+                      href="/app"
                       onClick={handleNavClick}
                       className="text-xs text-muted hover:text-foreground transition-colors block"
                     >

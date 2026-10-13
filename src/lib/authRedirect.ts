@@ -1,4 +1,4 @@
-export function authRedirect(value: string | null, fallback = "/hq"): string {
+export function authRedirect(value: string | null, fallback = "/app"): string {
   if (
     !value ||
     !value.startsWith("/") ||

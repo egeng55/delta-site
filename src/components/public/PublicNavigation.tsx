@@ -7,7 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./public-site.module.css";
 
 const links = [
-  { href: "/product", label: "The system" },
+  { href: "/product", label: "Product" },
+  { href: "/security", label: "Security" },
   { href: "/research", label: "Development" },
   { href: "/about", label: "About" },
 ];
@@ -59,11 +60,11 @@ export default function PublicNavigation() {
           ))}
         </nav>
         <div className={styles.navActions}>
-          <Link href="/login?redirect=/command" className={styles.login}>
-            Log in
+          <Link href="/access" className={styles.login}>
+            Request access
           </Link>
-          <Link href="/access" className={styles.smallButton}>
-            Request access <span aria-hidden="true">↗</span>
+          <Link href="/login?redirect=/app" className={styles.smallButton}>
+            Open Delta <span aria-hidden="true">↗</span>
           </Link>
         </div>
         <button
@@ -86,8 +87,8 @@ export default function PublicNavigation() {
           {[
             ...links,
             { href: "/contact", label: "Contact" },
-            { href: "/login?redirect=/command", label: "Log in" },
             { href: "/access", label: "Request access" },
+            { href: "/login?redirect=/app", label: "Open Delta" },
           ].map((link) => (
             <Link
               key={link.href}

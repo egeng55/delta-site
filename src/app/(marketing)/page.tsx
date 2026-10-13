@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   AccessBand,
@@ -5,216 +6,210 @@ import {
   PublicSite,
   styles,
 } from "@/components/public/PublicSite";
-import IntelligenceScene from "@/components/public/IntelligenceScene";
 
 export default function Home() {
   return (
     <PublicSite>
       <main id="main">
         <section className={styles.hero}>
-          <div className={styles.container}>
+          <Image
+            className={styles.heroImage}
+            src="/images/hero/mountain-moon.jpg"
+            alt="Snow-covered mountains beneath a violet evening sky"
+            fill
+            priority
+            sizes="100vw"
+          />
+          <div className={styles.heroShade} aria-hidden="true" />
+          <div className={`${styles.container} ${styles.heroContent}`}>
             <div className={styles.heroTop}>
-              <p className={styles.eyebrow}>
-                The personal intelligence operating system
-              </p>
-              <span className={styles.status}>In active development</span>
+              <p className={styles.eyebrow}>Personal intelligence operating system</p>
+              <span className={styles.status}>Private preview</span>
             </div>
             <div className={styles.heroTitle}>
+              <Image
+                className={styles.heroMark}
+                src="/delta-logo.svg"
+                alt=""
+                width={88}
+                height={88}
+              />
               <h1>Delta</h1>
-              <p>
-                Your context.
-                <br />
-                Connected to what comes next.
-              </p>
+              <p>Your context, carried into the next decision.</p>
             </div>
             <div className={styles.heroSub}>
               <p>
-                Life, research, and the work you build. Delta brings relevant
-                evidence into focus, helps you reason through it, and keeps you
-                in control of the next move.
+                Talk through life, research, and the work you are building.
+                Delta brings forward the context that belongs to your account,
+                keeps evidence attached, and leaves consequential actions under
+                your control.
               </p>
               <div className={styles.buttonRow}>
-                <Link href="/product" className={styles.darkButton}>
+                <Link href="/login?redirect=/app" className={styles.lightButton}>
+                  Open Delta <Arrow />
+                </Link>
+                <Link href="/product" className={styles.glassButton}>
                   Explore the system <Arrow />
                 </Link>
-                <Link href="/access" className={styles.outlineButton}>
-                  Request access <Arrow />
+              </div>
+            </div>
+            <div className={styles.heroSignals} aria-label="Delta product principles">
+              <span>Private by account</span>
+              <span>Evidence-aware</span>
+              <span>Owner-controlled</span>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.introBand}>
+          <div className={styles.container}>
+            <p className={styles.eyebrow}>Not another blank chat</p>
+            <div className={styles.introGrid}>
+              <h2>Start where you left off.</h2>
+              <p>
+                A useful conversation should understand the account it belongs
+                to without confusing history with current truth. Delta is built
+                to carry relevant context forward, show what is uncertain, and
+                ask before crossing an action boundary.
+              </p>
+              <Link href="/security" className={styles.textLink}>
+                See the privacy boundary <Arrow />
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.conversationBand}>
+          <div className={styles.container}>
+            <div className={styles.conversationGrid}>
+              <div className={styles.conversationCopy}>
+                <p className={styles.eyebrow}>One place to think</p>
+                <h2>A conversation that belongs to you.</h2>
+                <p>
+                  Every approved account has its own authenticated Delta
+                  workspace. Your questions and available context stay scoped
+                  to that account. Internal operator tools remain separate from
+                  the product you use.
+                </p>
+                <Link href="/login?redirect=/app" className={styles.textLink}>
+                  Enter your workspace <Arrow />
                 </Link>
+              </div>
+              <div className={styles.chatPreview} aria-label="Delta chat preview">
+                <div className={styles.chatPreviewHeader}>
+                  <Image src="/delta-logo.svg" alt="" width={28} height={28} />
+                  <span>Delta</span>
+                  <span>Private account</span>
+                </div>
+                <div className={styles.chatPreviewBody}>
+                  <p className={styles.previewUser}>
+                    Help me understand what deserves attention today.
+                  </p>
+                  <div className={styles.previewDelta}>
+                    <span>DELTA</span>
+                    <p>
+                      I can help separate what is current, what is carried from
+                      earlier context, and what still needs evidence. Where
+                      should we begin?
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.chatPreviewComposer}>
+                  <span>Ask Delta</span>
+                  <span aria-hidden="true">↑</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
-        <div className={styles.container}>
-          <IntelligenceScene />
-        </div>
+
         <section className={`${styles.container} ${styles.section}`}>
           <div className={styles.sectionHeading}>
-            <p className={styles.eyebrow}>01 / Beyond a single answer</p>
+            <p className={styles.eyebrow}>A wider view</p>
             <div>
-              <h2>
-                The important things
-                <br />
-                don&apos;t happen in isolation.
-              </h2>
+              <h2>The same intelligence across the parts of life that connect.</h2>
               <p>
-                Recovery changes how you train. New evidence changes what you
-                believe. A code change affects more than one file. Delta is
-                being built to reason with those connections, not lose them
-                between conversations.
+                Delta is not a collection of unrelated dashboards. It is one
+                governed conversation surface that can draw on approved context
+                when that context materially improves the answer.
               </p>
             </div>
           </div>
           <div className={styles.domains}>
             <article className={styles.domain}>
               <span className={styles.domainNumber}>01 / PERSONAL</span>
-              <h3>A clearer read on your day.</h3>
+              <h3>Understand your current state.</h3>
               <p>
-                Bring recovery, sleep, logged nutrition, and relevant history
-                into one grounded brief. Know what is current, what is missing,
-                and what deserves attention.
+                Bring recovery, sleep, nutrition, weather, and continuity into
+                a grounded conversation without turning missing data into fact.
               </p>
-              <ul>
-                <li>Daily Intelligence Brief</li>
-                <li>Relevant weather and continuity</li>
-                <li>Freshness and uncertainty built in</li>
-              </ul>
-              <Link className={styles.textLink} href="/product#personal">
-                Personal context <Arrow />
-              </Link>
             </article>
             <article className={styles.domain}>
               <span className={styles.domainNumber}>02 / RESEARCH</span>
-              <h3>Go from information to evidence.</h3>
+              <h3>Keep evidence attached.</h3>
               <p>
-                Research a company, examine an opportunity, or understand a
-                topic. Keep source quality, provenance, and the limits of the
-                evidence in view.
+                Investigate companies and opportunities while preserving
+                sources, uncertainty, and the difference between research and
+                permission to act.
               </p>
-              <ul>
-                <li>Source-backed prospect research</li>
-                <li>Financial education and career context</li>
-                <li>Explicit approval for external actions</li>
-              </ul>
-              <Link className={styles.textLink} href="/product#research">
-                Research workflows <Arrow />
-              </Link>
             </article>
             <article className={styles.domain}>
-              <span className={styles.domainNumber}>03 / ENGINEERING</span>
-              <h3>Build with the whole system in view.</h3>
+              <span className={styles.domainNumber}>03 / BUILD</span>
+              <h3>Work with the system in view.</h3>
               <p>
-                Inspect source, trace declared dependencies, make reviewed
-                changes in isolated worktrees, and verify the outcome. Useful
-                engineering is more than generated code.
+                Understand architecture, make bounded changes, and verify the
+                result without confusing generated activity with completed work.
               </p>
-              <ul>
-                <li>Native inspection and editing tools</li>
-                <li>Durable, governed workflows</li>
-                <li>Verification before integration</li>
-              </ul>
-              <Link className={styles.textLink} href="/product#engineering">
-                Engineering direction <Arrow />
-              </Link>
             </article>
           </div>
-          <p className={styles.notice}>
-            These are implemented owner workflows and ongoing development areas,
-            not a promise of general availability. The public preview is
-            narrower.{" "}
-            <Link href="/access" className={styles.textLink}>
-              See access scope <Arrow />
-            </Link>
-          </p>
         </section>
+
+        <section className={styles.photoBand}>
+          <Image
+            src="/images/hero/lake-sunset.jpg"
+            alt="A quiet lake reflecting the last light of sunset"
+            fill
+            sizes="100vw"
+          />
+          <div className={styles.photoShade} aria-hidden="true" />
+          <div className={`${styles.container} ${styles.photoCopy}`}>
+            <p className={styles.eyebrow}>Context without overreach</p>
+            <h2>Memory should make Delta more useful, not less accountable.</h2>
+            <p>
+              Account context, temporary conversations, connected sources, and
+              action approvals are separate controls. You should always be able
+              to understand which boundary you are using.
+            </p>
+          </div>
+        </section>
+
         <section className={styles.systemBand}>
           <div className={styles.container}>
-            <p className={styles.eyebrow}>02 / How Delta works</p>
-            <h2>
-              Context makes it relevant.
-              <br />
-              Evidence makes it accountable.
-            </h2>
+            <p className={styles.eyebrow}>How Delta responds</p>
+            <h2>Relevant context. Visible uncertainty. Explicit authority.</h2>
             <div className={styles.steps}>
               <article>
                 <span>01</span>
-                <h3>Understand the request</h3>
-                <p>
-                  Start with the actual question. Bring in only context that can
-                  materially help.
-                </p>
+                <h3>Understand</h3>
+                <p>Begin with the request and the account it belongs to.</p>
               </article>
               <article>
                 <span>02</span>
-                <h3>Check the evidence</h3>
-                <p>
-                  Distinguish current observations from history, assumptions,
-                  and missing information.
-                </p>
+                <h3>Ground</h3>
+                <p>Use only context and evidence that can materially help.</p>
               </article>
               <article>
                 <span>03</span>
-                <h3>Review the answer</h3>
-                <p>
-                  Use bounded review and verification where the workflow
-                  supports them. Show uncertainty honestly.
-                </p>
+                <h3>Distinguish</h3>
+                <p>Keep observations, inferences, conflicts, and unknowns separate.</p>
               </article>
               <article>
                 <span>04</span>
-                <h3>Keep you in control</h3>
-                <p>
-                  A suggestion is not permission to act. Consequential
-                  operations require their own authorization.
-                </p>
+                <h3>Ask</h3>
+                <p>Require a fresh approval before a consequential action.</p>
               </article>
             </div>
           </div>
-        </section>
-        <section className={`${styles.container} ${styles.section}`}>
-          <div className={styles.sectionHeading}>
-            <p className={styles.eyebrow}>03 / Where we are</p>
-            <div>
-              <h2>
-                A working system.
-                <br />
-                An honest development story.
-              </h2>
-              <p>
-                Delta has grown beyond its health origins. That does not mean
-                every internal capability is a public product, or every
-                experiment is proven autonomy.
-              </p>
-            </div>
-          </div>
-          <div className={styles.statusGrid}>
-            <article className={styles.statusItem}>
-              <span className={styles.badge}>Private preview</span>
-              <h3>Connected WHOOP context</h3>
-              <p>
-                Manually approved accounts can connect WHOOP and inspect
-                owner-scoped context and access controls.
-              </p>
-            </article>
-            <article className={styles.statusItem}>
-              <span className={styles.badge}>Owner-operated</span>
-              <h3>Briefs, research, and engineering</h3>
-              <p>
-                Internal workflows with specific evidence and approval
-                boundaries. Not bundled into public preview access.
-              </p>
-            </article>
-            <article className={styles.statusItem}>
-              <span className={styles.badge}>Being evaluated</span>
-              <h3>More capable autonomous work</h3>
-              <p>
-                Independent reasoning and engineering quality need real-task
-                evidence, not a larger list of tools.
-              </p>
-            </article>
-          </div>
-          <Link className={styles.textLink} href="/research">
-            Read the development status <Arrow />
-          </Link>
         </section>
         <AccessBand />
       </main>
