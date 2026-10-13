@@ -24,10 +24,11 @@ export function PublicSite({ children }: { children: ReactNode }) {
             </Link>
             <h2>See what changed.<br />Know what matters next.</h2>
             <nav aria-label="Footer">
-              <Link href="/product"><span>01</span> System</Link>
-              <Link href="/research"><span>02</span> Development</Link>
-              <Link href="/security"><span>03</span> Security</Link>
-              <Link href="/access"><span>04</span> Access</Link>
+              <Link href="/#examples"><span>01</span> Meet Delta</Link>
+              <Link href="/product"><span>02</span> Product</Link>
+              <Link href="/research"><span>03</span> Development</Link>
+              <Link href="/security"><span>04</span> Security</Link>
+              <Link href="/access"><span>05</span> Request access</Link>
             </nav>
           </div>
           <div className={styles.footerBottom}>

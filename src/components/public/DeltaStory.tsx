@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
-import { ArrowDown, ArrowUpRight, LockKeyhole, MoveRight } from "lucide-react";
+import { ArrowDown, ArrowUpRight, LockKeyhole } from "lucide-react";
 import AtmosphereBackdrop from "./AtmosphereBackdrop";
+import DeltaConversationExample from "./DeltaConversationExample";
 import styles from "./public-site.module.css";
 
 const DeltaMarkScene = dynamic(() => import("./DeltaMarkScene"), {
@@ -23,20 +24,20 @@ const chapters = [
   {
     index: "01",
     label: "OBSERVE",
-    title: "See the whole field.",
-    body: "Delta starts with the situation around the question: current signals, earlier context, attached evidence, and what is still missing.",
+    title: "Start with what matters.",
+    body: "A deadline you just mentioned matters more than an old plan. Delta brings relevant context into the question and keeps missing information visible.",
   },
   {
     index: "02",
     label: "REMEMBER",
-    title: "Carry context forward.",
-    body: "Useful continuity should prevent you from rebuilding the same understanding every time, without turning old context into current truth.",
+    title: "Keep the thread.",
+    body: "A project rarely fits in one conversation. Continuity is about bringing forward the useful parts, while checking whether earlier information still holds.",
   },
   {
     index: "03",
     label: "DECIDE",
-    title: "Move with evidence.",
-    body: "Delta separates observations, inferences, conflicts, and unknowns so the next decision remains grounded and visibly yours.",
+    title: "Know why, then decide.",
+    body: "A recommendation should come with its basis. What was provided, what was inferred, and what still needs checking should not look like the same thing.",
   },
 ] as const;
 
@@ -102,14 +103,15 @@ export default function DeltaStory() {
           <p className={styles.storyKicker}>Personal intelligence operating system</p>
           <h1>Delta</h1>
           <p className={styles.storyThesis}>
-            A private intelligence that carries the right context forward.
+            A personal intelligence for the life you&apos;re building.
           </p>
+          <p className={styles.heroDescription}>Think through a decision. Keep a project moving. Bring the useful context with you.</p>
           <div className={styles.storyHeroActions}>
             <Link href="/login?redirect=/app" className={styles.storyPrimaryAction}>
               Open Delta <ArrowUpRight size={17} />
             </Link>
-            <Link href="#continuity" className={styles.storyTextAction}>
-              Follow the signal <ArrowDown size={15} />
+            <Link href="#examples" className={styles.storyTextAction}>
+              Meet Delta <ArrowDown size={15} />
             </Link>
           </div>
         </motion.div>
@@ -118,6 +120,20 @@ export default function DeltaStory() {
           <span>Evidence-aware</span>
           <span>Owner-controlled</span>
         </div>
+      </section>
+
+      <section id="examples" className={styles.exampleChapter} aria-labelledby="example-title">
+        <AtmosphereBackdrop src="/images/atmosphere/river-blooms.jpg" treatment="light" position="center 52%" />
+        <div className={styles.exampleHeading}>
+          <p className={styles.storyIndex}>[ 01 / IN CONVERSATION ]</p>
+          <h2 id="example-title">A question.<br />A clearer next step.</h2>
+          <p>A useful answer does more than sound convincing. It connects what you know to what you can do next, without filling in the gaps for you.</p>
+          <div className={styles.exampleAside}>
+            <span>Context</span><span>Perspective</span><span>Your decision</span>
+          </div>
+          <Link href="/access" className={styles.exampleAccess}>Private preview <ArrowUpRight size={16} /></Link>
+        </div>
+        <DeltaConversationExample />
       </section>
 
       <motion.section
@@ -140,11 +156,12 @@ export default function DeltaStory() {
           viewport={{ once: true, amount: 0.55 }}
           transition={{ duration: 0.75, ease: [0.2, 0.8, 0.2, 1] }}
         >
-          <p className={styles.storyIndex}>[ 01 / SIGNAL ]</p>
-          <h2>Your life does not arrive in neat categories.</h2>
+          <p className={styles.storyIndex}>[ 02 / CONTEXT ]</p>
+          <h2>The question is only part of the picture.</h2>
           <p>
-            Most software waits for another prompt. Delta is built to understand
-            what surrounds the question before deciding what belongs in the answer.
+            What you said earlier. The source you attached. Something that changed
+            this morning. Delta&apos;s direction is to bring the relevant pieces together,
+            without treating everything it has seen as equally useful or current.
           </p>
         </motion.div>
         <div className={styles.signalLedger} aria-label="Illustrative context signals">
@@ -180,8 +197,8 @@ export default function DeltaStory() {
           position="center 38%"
         />
         <header className={styles.continuityHeader}>
-          <p className={styles.storyIndex}>[ 02 / CONTINUITY ]</p>
-          <h2>Context becomes useful when it survives the moment.</h2>
+          <p className={styles.storyIndex}>[ 03 / CONTINUITY ]</p>
+          <h2>From one question<br />to the next.</h2>
         </header>
         <div className={styles.continuitySequence}>
           {chapters.map((chapter) => (
@@ -207,65 +224,10 @@ export default function DeltaStory() {
         </div>
       </section>
 
-      <section id="workspace" className={styles.workspaceBridge}>
-        <AtmosphereBackdrop
-          src="/images/atmosphere/river-blooms.jpg"
-          treatment="light"
-          position="center 52%"
-        />
-        <motion.div
-          className={styles.bridgeStatement}
-          initial={reduceMotion ? false : { opacity: 0, y: 42 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.7 }}
-        >
-          <p className={styles.storyIndex}>[ 03 / CONVERSATION ]</p>
-          <h2>Not another blank chat.</h2>
-          <p>
-            Start where you left off. Delta can use the context available to your
-            authenticated account while keeping uncertainty and action boundaries visible.
-          </p>
-        </motion.div>
-        <motion.div
-          className={styles.workspaceWindow}
-          initial={reduceMotion ? false : { opacity: 0, y: 56, rotateX: 4 }}
-          whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-          viewport={{ once: true, amount: 0.35 }}
-          transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}
-        >
-          <div className={styles.workspaceBar}>
-            <span><i /> DELTA / PRIVATE ACCOUNT</span>
-            <span>ACCOUNT CONTEXT</span>
-          </div>
-          <div className={styles.workspaceBody}>
-            <div className={styles.workspacePrompt}>
-              <span>YOU</span>
-              <p>What actually deserves attention today?</p>
-            </div>
-            <div className={styles.workspaceAnswer}>
-              <span>DELTA</span>
-              <p>
-                Two things are current, one is carried from earlier context, and one
-                still needs evidence. Let&apos;s separate them before deciding.
-              </p>
-              <div>
-                <small>01 / CURRENT</small>
-                <small>02 / CONTEXT</small>
-                <small>03 / UNKNOWN</small>
-              </div>
-            </div>
-          </div>
-          <Link href="/login?redirect=/app" className={styles.workspaceEnter}>
-            Enter your workspace <MoveRight size={18} />
-          </Link>
-        </motion.div>
-      </section>
-
       <section id="worlds" className={styles.worldsChapter}>
         <div className={styles.worldsHeading}>
-          <p className={styles.storyIndex}>[ 04 / ONE INTELLIGENCE ]</p>
-          <h2>Different parts of life. One governed point of view.</h2>
+          <p className={styles.storyIndex}>[ 04 / DIRECTIONS ]</p>
+          <h2>Built around life.<br />Not one kind of task.</h2>
         </div>
         <div className={styles.worldList}>
           {worlds.map((world, worldIndex) => (
@@ -302,8 +264,8 @@ export default function DeltaStory() {
         <div className={styles.authorityLock} aria-hidden="true">
           <LockKeyhole size={32} />
         </div>
-        <p className={styles.storyIndex}>[ 05 / AUTHORITY ]</p>
-        <h2>Understanding can continue. Action waits for you.</h2>
+        <p className={styles.storyIndex}>[ 05 / YOUR CONTROL ]</p>
+        <h2>Help thinking.<br />Not a blank cheque.</h2>
         <motion.div
           className={styles.authorityFlow}
           initial={reduceMotion ? false : { opacity: 0, x: -30 }}
@@ -314,11 +276,11 @@ export default function DeltaStory() {
           <span>OBSERVE</span><i /><span>REASON</span><i /><span>PROPOSE</span><i /><strong>APPROVE</strong>
         </motion.div>
         <p>
-          Conversation access is not blanket permission. Publishing, outreach,
-          purchases, and other consequential operations retain their own explicit boundary.
+          Talking through a plan is different from carrying it out. Publishing,
+          sending messages, or making purchases needs its own permission.
         </p>
         <Link href="/security" className={styles.storyTextAction}>
-          Read the security boundary <ArrowUpRight size={15} />
+          Privacy and control <ArrowUpRight size={15} />
         </Link>
       </motion.section>
 
@@ -331,11 +293,11 @@ export default function DeltaStory() {
         <header>
           <div>
             <p className={styles.storyIndex}>[ 06 / CURRENT STATE ]</p>
-            <h2>Built is not the same as proven.</h2>
+            <h2>Where Delta is today.</h2>
           </div>
           <p>
-            Delta reports what is available, what remains conditional, and where
-            authority still belongs to the operator.
+            Delta is in active development. Preview access is limited;
+            owner-operated work does not automatically become a feature in every account.
           </p>
         </header>
         <div className={styles.stateIndex}>

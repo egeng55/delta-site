@@ -4,13 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import styles from "./public-site.module.css";
 
 const links = [
-  { href: "/product", index: "01", label: "System" },
-  { href: "/research", index: "02", label: "Development" },
-  { href: "/security", index: "03", label: "Security" },
-  { href: "/access", index: "04", label: "Access" },
+  { href: "/#examples", index: "01", label: "Meet Delta" },
+  { href: "/product", index: "02", label: "Product" },
+  { href: "/research", index: "03", label: "Development" },
+  { href: "/security", index: "04", label: "Security" },
 ];
 
 export default function PublicNavigation() {
@@ -62,7 +63,7 @@ export default function PublicNavigation() {
         </nav>
         <div className={styles.navActions}>
           <Link href="/login?redirect=/app" className={styles.smallButton}>
-            Open Delta <span aria-hidden="true">↗</span>
+            Open Delta <ArrowUpRight size={15} aria-hidden="true" />
           </Link>
         </div>
         <button
@@ -73,7 +74,7 @@ export default function PublicNavigation() {
           aria-controls="public-menu"
           onClick={() => setOpen(!open)}
         >
-          <span aria-hidden="true">{open ? "×" : "☰"}</span>
+          {open ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
         </button>
       </div>
       {open && (
@@ -84,6 +85,7 @@ export default function PublicNavigation() {
         >
           {[
             ...links,
+            { href: "/access", label: "Request access" },
             { href: "/contact", label: "Contact" },
             { href: "/login?redirect=/app", label: "Open Delta" },
           ].map((link) => (
