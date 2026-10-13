@@ -53,7 +53,10 @@ describe("Delta public identity", () => {
   });
 
   it("describes current implementation without expanding preview entitlement or autonomy claims", () => {
-    const homepage = readSource("src/app/(marketing)/page.tsx");
+    const homepage = [
+      readSource("src/app/(marketing)/page.tsx"),
+      readSource("src/components/public/DeltaStory.tsx"),
+    ].join(" ");
     const product = readSource("src/app/(marketing)/product/page.tsx");
     const metadata = readSource("src/app/layout.tsx");
 

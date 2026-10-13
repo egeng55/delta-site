@@ -7,10 +7,10 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./public-site.module.css";
 
 const links = [
-  { href: "/product", label: "Product" },
-  { href: "/security", label: "Security" },
-  { href: "/research", label: "Development" },
-  { href: "/about", label: "About" },
+  { href: "/product", index: "01", label: "System" },
+  { href: "/research", index: "02", label: "Development" },
+  { href: "/security", index: "03", label: "Security" },
+  { href: "/access", index: "04", label: "Access" },
 ];
 
 export default function PublicNavigation() {
@@ -46,7 +46,8 @@ export default function PublicNavigation() {
           onClick={() => setOpen(false)}
         >
           <Image src="/delta-logo.svg" alt="" width={30} height={30} priority />
-          Delta<span className={styles.brandDescriptor}>Intelligence OS</span>
+          <span>DELTA</span>
+          <span className={styles.brandDescriptor}>Personal intelligence</span>
         </Link>
         <nav className={styles.desktopNav} aria-label="Primary">
           {links.map((link) => (
@@ -55,14 +56,11 @@ export default function PublicNavigation() {
               href={link.href}
               aria-current={pathname === link.href ? "page" : undefined}
             >
-              {link.label}
+              <span>{link.index}</span> {link.label}
             </Link>
           ))}
         </nav>
         <div className={styles.navActions}>
-          <Link href="/access" className={styles.login}>
-            Request access
-          </Link>
           <Link href="/login?redirect=/app" className={styles.smallButton}>
             Open Delta <span aria-hidden="true">↗</span>
           </Link>
@@ -87,7 +85,6 @@ export default function PublicNavigation() {
           {[
             ...links,
             { href: "/contact", label: "Contact" },
-            { href: "/access", label: "Request access" },
             { href: "/login?redirect=/app", label: "Open Delta" },
           ].map((link) => (
             <Link
@@ -96,7 +93,8 @@ export default function PublicNavigation() {
               aria-current={pathname === link.href ? "page" : undefined}
               onClick={() => setOpen(false)}
             >
-              {link.label}
+              {"index" in link && <small>{link.index}</small>}
+              <span>{link.label}</span>
               <span aria-hidden="true">↗</span>
             </Link>
           ))}

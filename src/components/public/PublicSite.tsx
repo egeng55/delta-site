@@ -19,23 +19,19 @@ export function PublicSite({ children }: { children: ReactNode }) {
           <div className={styles.footerTop}>
             <Link href="/" className={styles.brand}>
               <Image src="/delta-logo.svg" alt="" width={28} height={28} />
-              Delta
+              <span>DELTA</span>
             </Link>
-            <p>
-              Personal intelligence.
-              <br />A wider view. A better next move.
-            </p>
+            <h2>See what changed.<br />Know what matters next.</h2>
             <nav aria-label="Footer">
-              <Link href="/product">Product</Link>
-              <Link href="/security">Security</Link>
-              <Link href="/research">Development</Link>
-              <Link href="/about">About</Link>
-              <Link href="/contact">Contact</Link>
+              <Link href="/product"><span>01</span> System</Link>
+              <Link href="/research"><span>02</span> Development</Link>
+              <Link href="/security"><span>03</span> Security</Link>
+              <Link href="/access"><span>04</span> Access</Link>
             </nav>
           </div>
           <div className={styles.footerBottom}>
-            <span>© {new Date().getFullYear()} Delta</span>
-            <span>Private preview · No paid plans</span>
+            <span>© {new Date().getFullYear()} DELTA</span>
+            <span>PRIVATE PREVIEW · ANN ARBOR, MI</span>
             <nav aria-label="Legal">
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>

@@ -47,6 +47,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "sharp": "0.35.4",
+    "three": "^0.186.1",
     "vis-network": "10.1.2"
   },
   "devDependencies": {
@@ -58,6 +59,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "^0.186.0",
     "electron": "^42.4.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
