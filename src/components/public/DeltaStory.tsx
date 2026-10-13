@@ -24,7 +24,7 @@ const chapters = [
     label: "OBSERVE",
     title: "See the whole field.",
     body: "Delta starts with the situation around the question: current signals, earlier context, attached evidence, and what is still missing.",
-    image: "/images/hero/aerial-ice.jpg",
+    image: "/images/atmosphere/aerial-ice.jpg",
     alt: "Aerial view of ice, mountains, and open water",
   },
   {
@@ -32,7 +32,7 @@ const chapters = [
     label: "REMEMBER",
     title: "Carry context forward.",
     body: "Useful continuity should prevent you from rebuilding the same understanding every time, without turning old context into current truth.",
-    image: "/images/hero/river-blooms.jpg",
+    image: "/images/atmosphere/river-blooms.jpg",
     alt: "A river framed by flowering trees beneath a blue sky",
   },
   {
@@ -40,7 +40,7 @@ const chapters = [
     label: "DECIDE",
     title: "Move with evidence.",
     body: "Delta separates observations, inferences, conflicts, and unknowns so the next decision remains grounded and visibly yours.",
-    image: "/images/hero/waterfall-stones.jpg",
+    image: "/images/atmosphere/waterfall-stones.jpg",
     alt: "A broad waterfall flowing over dark stones",
   },
 ] as const;
@@ -50,19 +50,19 @@ const worlds = [
     index: "01",
     name: "Your day",
     summary: "Recovery, nutrition, weather, plans, and the context connecting them.",
-    image: "/images/hero/coastal-wildflowers.jpg",
+    image: "/images/atmosphere/coastal-wildflowers.jpg",
   },
   {
     index: "02",
     name: "Your research",
     summary: "Sources, competing claims, durable findings, and explicit uncertainty.",
-    image: "/images/hero/ocean-mountains.jpg",
+    image: "/images/atmosphere/ocean-mountains.jpg",
   },
   {
     index: "03",
     name: "Your work",
     summary: "Projects, architecture, verification, and the actual state of what was built.",
-    image: "/images/hero/misty-village.jpg",
+    image: "/images/atmosphere/misty-village.jpg",
   },
 ] as const;
 
@@ -89,7 +89,7 @@ export default function DeltaStory() {
           style={{ position: "absolute", inset: 0, scale: heroImageScale }}
         >
           <Image
-            src="/images/hero/mountain-moon.jpg"
+            src="/images/atmosphere/mountain-moon.jpg"
             alt="Snow-covered mountains beneath a violet evening sky"
             fill
             priority
@@ -370,7 +370,7 @@ export default function DeltaStory() {
         transition={{ duration: 1 }}
       >
         <Image
-          src="/images/hero/sunset-shore.jpg"
+          src="/images/atmosphere/sunset-shore.jpg"
           alt="Sunset light across a quiet shore"
           fill
           sizes="100vw"
