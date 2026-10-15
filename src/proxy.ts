@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { authRedirect } from './src/lib/authRedirect';
+import { authRedirect } from './lib/authRedirect';
+import { accountAdmission } from './lib/accountAdmission';
 
 const OWNER_HQ_ROUTE = '/hq';
 const PROTECTED_ROUTES = [
@@ -28,7 +29,7 @@ function isLocalOnlyRoute(pathname: string): boolean {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   let response = NextResponse.next({
@@ -95,6 +96,17 @@ export async function middleware(request: NextRequest) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return redirectWithCookies(loginUrl);
+  }
+
+  if (isProtected && user) {
+    if (user.is_anonymous || !user.email_confirmed_at) return new NextResponse('Access denied', { status: 403 });
+    let data;
+    try { ({ data } = await supabase.auth.getSession()); }
+    catch { return new NextResponse('Authentication temporarily unavailable', { status: 503 }); }
+    const admission = await accountAdmission(data.session?.access_token || '', user.id);
+    if (admission !== 'approved') return new NextResponse('Account access unavailable', {
+      status: admission === 'denied' ? 403 : 503, headers: { 'Cache-Control': 'private, no-store' },
+    });
   }
 
   if (isAuthRoute && user) {

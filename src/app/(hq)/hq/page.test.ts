@@ -121,7 +121,7 @@ describe("Delta HQ web route", () => {
     const pageSource = readSource("src/app/(hq)/hq/page.tsx");
     const componentSource = readSource("src/components/DeltaHQ.tsx");
     const serverViewModelSource = readSource("src/lib/deltaHqServerViewModel.ts");
-    const middlewareSource = readSource("middleware.ts");
+    const middlewareSource = readSource("src/proxy.ts");
 
     expect(pageSource).toContain("Delta HQ");
     expect(pageSource).toContain("requireObservatoryOwner()");

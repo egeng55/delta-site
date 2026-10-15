@@ -1,6 +1,8 @@
 /** @jest-environment node */
 import { createServerClient } from '@supabase/ssr';
 import { getWorkspaceAccess } from './workspaceAccessServer';
+import { accountAdmission } from './accountAdmission';
+jest.mock('./accountAdmission', () => ({ accountAdmission: jest.fn() }));
 
 jest.mock('server-only', () => ({}), { virtual: true });
 const mockSetCookie = jest.fn();
@@ -11,13 +13,14 @@ const owner = '12345678-1234-1234-1234-123456789012';
 const member = 'abcdef12-1234-1234-1234-123456789012';
 
 function verifiedUser(user: unknown) {
-  jest.mocked(createServerClient).mockReturnValue({ auth: { getUser: async () => ({ data: { user }, error: null }) } } as never);
+  jest.mocked(createServerClient).mockReturnValue({ auth: { getUser: async () => ({ data: { user }, error: null }), getSession: async () => ({ data: { session: { access_token: 'fixture' } } }) } } as never);
 }
 
 beforeEach(() => {
   process.env = { ...original, DELTA_HQ_OWNER_USER_ID: owner, NEXT_PUBLIC_SUPABASE_URL: 'https://fixture.invalid', NEXT_PUBLIC_SUPABASE_ANON_KEY: 'fixture' };
   delete process.env.DELTA_WORKSPACE_GRANTS;
   jest.clearAllMocks();
+  jest.mocked(accountAdmission).mockResolvedValue('approved');
 });
 afterEach(() => { process.env = original; });
 
@@ -43,8 +46,8 @@ it('applies grant revocation on the next request without a stale authorization c
   process.env.DELTA_WORKSPACE_GRANTS = JSON.stringify({ [member]: 'admin' });
   verifiedUser({ id: member, email_confirmed_at: '2026-01-01' });
   expect(await getWorkspaceAccess()).toMatchObject({ access: { role: 'admin' } });
-  process.env.DELTA_WORKSPACE_GRANTS = '{}';
-  expect(await getWorkspaceAccess()).toMatchObject({ access: { role: 'consumer', workspaces: ['personal'] } });
+  process.env.DELTA_WORKSPACE_GRANTS = JSON.stringify({ [member]: 'revoked' });
+  expect(await getWorkspaceAccess()).toEqual({ status: 'denied' });
   expect(createServerClient).toHaveBeenCalledTimes(2);
 });
 
@@ -76,7 +79,7 @@ it('returns a closed error when authentication throws', async () => {
 });
 
 it('propagates refreshed auth cookies and forces private bounded auth fetches', async () => {
-  jest.mocked(createServerClient).mockImplementation((_url, _key, options) => ({ auth: { getUser: async () => {
+  jest.mocked(createServerClient).mockImplementation((_url, _key, options) => ({ auth: { getSession: async () => ({ data: { session: { access_token: 'fixture' } } }), getUser: async () => {
     options.cookies.setAll?.([{ name: 'session.0', value: 'fresh', options: { httpOnly: true } }]);
     return { data: { user: { id: member, email_confirmed_at: '2026-01-01' } }, error: null };
   } } }) as never);

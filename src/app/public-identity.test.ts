@@ -132,7 +132,7 @@ describe("Delta public identity", () => {
   });
 
   it("keeps technical cockpits local-only", () => {
-    const middleware = readSource("middleware.ts");
+    const middleware = readSource("src/proxy.ts");
 
     expect(middleware).toContain("const LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview', '/workspace-preview']");
     expect(middleware).toContain("isInternalRoute && process.env.NODE_ENV === 'production'");
@@ -142,7 +142,7 @@ describe("Delta public identity", () => {
   });
 
   it("makes authenticated chat the primary protected product route", () => {
-    const middleware = readSource("middleware.ts");
+    const middleware = readSource("src/proxy.ts");
     const manifest = readSource("src/lib/publicCapabilityManifest.ts");
 
     expect(middleware).toContain("'/app'");

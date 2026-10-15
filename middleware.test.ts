@@ -1,7 +1,9 @@
 /** @jest-environment node */
 import { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { middleware } from './middleware';
+import { proxy as middleware } from './src/proxy';
+import { accountAdmission } from './src/lib/accountAdmission';
+jest.mock('./src/lib/accountAdmission', () => ({ accountAdmission: jest.fn() }));
 
 jest.mock('@supabase/ssr', () => ({ createServerClient: jest.fn() }));
 
@@ -14,19 +16,21 @@ beforeEach(() => {
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-public-key';
   delete process.env.DELTA_HQ_OWNER_USER_ID;
   createClient.mockReset();
+  jest.mocked(accountAdmission).mockResolvedValue('approved');
 });
 afterEach(() => { process.env = originalEnvironment; });
 
 function refreshCookies(user: { id: string } | null) {
   createClient.mockImplementation((_url, _key, options) => ({
     auth: {
+      getSession: async () => ({ data: { session: { access_token: 'fixture' } } }),
       getUser: async () => {
         // A session may span multiple cookies; every chunk must survive.
         options.cookies.setAll?.([
           { name: 'session.0', value: 'first', options: { httpOnly: true } },
           { name: 'session.1', value: 'second', options: { httpOnly: true } },
         ]);
-        return { data: { user }, error: null };
+        return { data: { user: user ? { ...user, email_confirmed_at: '2026-01-01' } : null }, error: null };
       },
     },
   } as ReturnType<typeof createServerClient>));
@@ -38,6 +42,13 @@ test('all refreshed session cookies survive a protected page response', async ()
   expect(response.status).toBe(200);
   expect(response.cookies.get('session.0')?.value).toBe('first');
   expect(response.cookies.get('session.1')?.value).toBe('second');
+});
+
+test.each(['denied', 'unavailable'] as const)('blocks %s admission on private routes', async admission => {
+  refreshCookies({ id: 'fixture-owner' });
+  jest.mocked(accountAdmission).mockResolvedValue(admission);
+  const response = await middleware(new NextRequest('https://delta.example.invalid/app'));
+  expect(response.status).toBe(admission === 'denied' ? 403 : 503);
 });
 
 test('auth redirects preserve refreshed cookies', async () => {

@@ -66,9 +66,10 @@ async function authenticateBearer(
   try {
     const supabase = createClient(url, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: (input, init) => fetch(input, { ...init, cache: 'no-store', signal: AbortSignal.timeout(5000) }) },
     });
     const { data, error } = await supabase.auth.getUser(token);
-    if (error || !data.user?.id) {
+    if (error || !data.user?.id || data.user.is_anonymous || !data.user.email_confirmed_at) {
       return {
         response: NextResponse.json(
           { error: 'Authenticated session required.' },
@@ -164,6 +165,8 @@ export async function POST(request: NextRequest) {
       ...(unitSystem ? { unit_system: unitSystem } : {}),
       ...(weatherContext ? { weather_context: weatherContext } : {}),
       ...(clientTimezone ? { client_timezone: clientTimezone } : {}),
+      ...(typeof candidate.conversation_id === 'string' ? { conversation_id: candidate.conversation_id } : {}),
+      ...(typeof candidate.request_id === 'string' ? { request_id: candidate.request_id } : {}),
     };
     const response = await fetch(`${apiUrl}/chat`, {
       method: 'POST',
@@ -173,6 +176,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(upstreamBody),
       signal: controller.signal,
+      redirect: 'error',
     });
 
     const data = await response.json();

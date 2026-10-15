@@ -2,10 +2,11 @@ import 'server-only';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { workspaceAccessFor, type WorkspaceAccessResult, type WorkspaceRole } from './workspaceAccess';
+import { accountAdmission } from './accountAdmission';
 
 const userIdPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
-type GrantedRole = Exclude<WorkspaceRole, 'owner'>;
-const grantedRoles = new Set<GrantedRole>(['consumer', 'developer', 'stakeholder', 'admin']);
+type GrantedRole = Exclude<WorkspaceRole, 'owner'> | 'revoked';
+const grantedRoles = new Set<GrantedRole>(['consumer', 'developer', 'stakeholder', 'admin', 'revoked']);
 
 function readGrants(raw: string | undefined): Map<string, GrantedRole> | null {
   if (raw === undefined || raw.trim() === '') return new Map();
@@ -52,7 +53,14 @@ export async function getWorkspaceAccess(): Promise<WorkspaceAccessResult> {
     const user = data.user;
     if (!userIdPattern.test(user.id) || user.is_anonymous || !user.email_confirmed_at) return { status: 'denied' };
     const id = user.id.toLowerCase();
-    const role = id === ownerId.toLowerCase() ? 'owner' : grants.get(id) ?? 'consumer';
+    const granted = grants.get(id);
+    if (granted === 'revoked') return { status: 'denied' };
+    let role: WorkspaceRole | undefined = id === ownerId.toLowerCase() ? 'owner' : granted;
+    if (!role) {
+      const { data: sessionData } = await client.auth.getSession();
+      if (await accountAdmission(sessionData.session?.access_token || '', user.id) !== 'approved') return { status: 'denied' };
+      role = 'consumer';
+    }
     return { status: 'authenticated', access: workspaceAccessFor(user.id, role) };
   } catch { return { status: 'denied' }; }
 }

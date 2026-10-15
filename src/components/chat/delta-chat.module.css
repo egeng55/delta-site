@@ -103,6 +103,30 @@
   margin-top: 28px;
 }
 
+.history {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  max-height: 32svh;
+  overflow-y: auto;
+}
+
+.history button {
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 4px;
+  color: var(--muted);
+  background: transparent;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.history button:hover, .history button[aria-current="page"] {
+  color: #fff;
+  background: var(--panel-soft);
+}
+
 .appNav > span {
   margin: 0 10px 8px;
   color: #6f7a92;

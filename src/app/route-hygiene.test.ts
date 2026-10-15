@@ -3,7 +3,7 @@ import path from "path";
 
 describe("route hygiene", () => {
   it("keeps internal technical surfaces local-only in middleware", () => {
-    const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
+    const middlewareSource = readFileSync(path.join(process.cwd(), "src/proxy.ts"), "utf8");
 
     expect(middlewareSource).toContain("LOCAL_ONLY_ROUTES = ['/os', '/demo', '/dashboard', '/observatory-preview', '/workspace-preview']");
     expect(middlewareSource).toContain("process.env.NODE_ENV === 'production'");
@@ -15,7 +15,7 @@ describe("route hygiene", () => {
   });
 
   it("treats HQ as a protected owner web app route", () => {
-    const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
+    const middlewareSource = readFileSync(path.join(process.cwd(), "src/proxy.ts"), "utf8");
 
     expect(middlewareSource).toContain("OWNER_HQ_ROUTE = '/hq'");
     expect(middlewareSource).toContain("PROTECTED_ROUTES = [");
@@ -25,7 +25,7 @@ describe("route hygiene", () => {
   });
 
   it("protects the account-scoped Delta chat workspace", () => {
-    const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
+    const middlewareSource = readFileSync(path.join(process.cwd(), "src/proxy.ts"), "utf8");
     const appPath = path.join(process.cwd(), "src/app/(auth)/app/page.tsx");
 
     expect(middlewareSource).toContain("'/app'");
@@ -34,7 +34,7 @@ describe("route hygiene", () => {
   });
 
   it("keeps the protected settings route backed by a page", () => {
-    const middlewareSource = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
+    const middlewareSource = readFileSync(path.join(process.cwd(), "src/proxy.ts"), "utf8");
     const settingsPath = path.join(process.cwd(), "src/app/(auth)/settings/page.tsx");
     const settingsSource = readFileSync(settingsPath, "utf8");
 

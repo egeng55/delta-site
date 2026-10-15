@@ -34,7 +34,7 @@ describe("request-only access enforcement", () => {
   it("keeps owner review authenticated and invitation server-only", () => {
     const ownerServer = readSource("src/lib/accessRequestServer.ts");
     const invitation = readSource("src/app/api/access-requests/[id]/invite/route.ts");
-    const middleware = readSource("middleware.ts");
+    const middleware = readSource("src/proxy.ts");
 
     expect(ownerServer).toContain("DELTA_ACCESS_OWNER_EMAILS");
     expect(ownerServer).not.toContain("NEXT_PUBLIC_DELTA_ACCESS_OWNER_EMAILS");

@@ -35,7 +35,7 @@ describe("/api/chat proxy", () => {
     mockCreateClient.mockReturnValue({
       auth: {
         getUser: jest.fn().mockResolvedValue({
-          data: { user: { id: "verified-user" } },
+          data: { user: { id: "verified-user", email_confirmed_at: '2026-01-01' } },
           error: null,
         }),
       },
