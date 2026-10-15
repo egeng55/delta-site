@@ -105,6 +105,11 @@ describe("Delta chat workspace", () => {
     render(<DeltaChatWorkspace />);
     await userEvent.click(await screen.findByRole('button', { name: 'Saved thread' }));
     expect(await screen.findByText('Saved answer')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Saved thread' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('button', { name: 'Reload saved conversation' })).toBeInTheDocument();
     expect((global.fetch as jest.Mock).mock.calls.some(([url]) => url === '/api/chat')).toBe(false);
+    await userEvent.click(screen.getByRole('button', { name: 'New conversation' }));
+    expect(screen.getByRole('button', { name: 'Saved thread' })).not.toHaveAttribute('aria-current');
+    expect(screen.queryByRole('button', { name: 'Reload saved conversation' })).not.toBeInTheDocument();
   });
 });

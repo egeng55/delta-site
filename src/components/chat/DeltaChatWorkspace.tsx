@@ -51,7 +51,7 @@ function AccountChatWorkspace() {
   const transcript = useRef<HTMLDivElement>(null);
   const generation = useRef(0);
   const sending = useRef(false);
-  const activeThread = useRef<string | null>(null);
+  const [activeThread, setActiveThread] = useState<string | null>(null);
   const [threads, setThreads] = useState<Array<{ id: string; title: string }>>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const accessToken = session?.access_token;
@@ -97,7 +97,7 @@ function AccountChatWorkspace() {
     setInput('');
     setError('');
     setHistoryLoading(true);
-    activeThread.current = id;
+    setActiveThread(id);
     const abort = new AbortController();
     controller.current = abort;
     try {
@@ -129,7 +129,7 @@ function AccountChatWorkspace() {
     controller.current = abortController;
 
     try {
-      let threadId = activeThread.current;
+      let threadId = activeThread;
       if (!threadId) {
         threadId = crypto.randomUUID();
         const created = await fetch('/api/conversations', {
@@ -140,7 +140,7 @@ function AccountChatWorkspace() {
         const record = await created.json();
         if (record.id !== threadId) throw new Error('thread_mismatch');
         if (current !== generation.current || abortController.signal.aborted) return;
-        activeThread.current = threadId;
+        setActiveThread(threadId);
         setThreads(existing => [{ id: threadId!, title: text.slice(0, 100) }, ...existing].slice(0, 50));
       }
       const response = await fetch("/api/chat", {
@@ -184,7 +184,7 @@ function AccountChatWorkspace() {
   function resetConversation() {
     generation.current += 1;
     sending.current = false;
-    activeThread.current = null;
+    setActiveThread(null);
     controller.current?.abort();
     controller.current = null;
     setMessages([]);
@@ -241,7 +241,7 @@ function AccountChatWorkspace() {
           New conversation
         </button>
         <nav className={styles.history} aria-label="Saved conversations">
-          {threads.map(thread => <button key={thread.id} type="button" title={thread.title} onClick={() => void openConversation(thread.id)} aria-current={activeThread.current === thread.id ? 'page' : undefined}>{thread.title}</button>)}
+          {threads.map(thread => <button key={thread.id} type="button" title={thread.title} onClick={() => void openConversation(thread.id)} aria-current={activeThread === thread.id ? 'page' : undefined}>{thread.title}</button>)}
         </nav>
         <nav className={styles.appNav} aria-label="Delta workspace">
           <span>Workspace</span>
@@ -295,7 +295,7 @@ function AccountChatWorkspace() {
             <strong>Conversation</strong>
             <span>{historyLoading ? 'Loading conversation' : 'Account context'}</span>
           </div>
-          {activeThread.current && <button type="button" title="Reload saved conversation" aria-label="Reload saved conversation" onClick={() => void openConversation(activeThread.current!)}><RefreshCw size={17} /></button>}
+          {activeThread && <button type="button" title="Reload saved conversation" aria-label="Reload saved conversation" onClick={() => void openConversation(activeThread)}><RefreshCw size={17} /></button>}
           <Link href="/account" aria-label="Open account">
             {accountLabel.slice(0, 1).toUpperCase()}
           </Link>
