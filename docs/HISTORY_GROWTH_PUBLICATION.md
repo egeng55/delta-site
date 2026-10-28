@@ -1,0 +1,13 @@
+# History growth publication
+
+The existing private History tab now consumes a versioned `growthArchive` projection alongside its origin/milestone story. It contains every accepted comparison, their endpoint snapshots and unique checkpoint metadata. Charts and SVG checkpoint cards derive from the same values. Never infer measurements between checkpoints; incompatible methods are separate series. Dates are checkpoint dates, not deployment dates. Test-name counts remain static inventories, not passes or qualification.
+
+Historian retains durable records under the existing agent Observability store. Site modules never write those records. Export rejects invalid metric values/deltas and retains hashes for comparison, timeline and snapshot sources. Records cannot be silently edited through the admission CLI. Corrected evidence requires explicit supersession, not altered past measurements.
+
+For local operation, the existing authenticated reader discovers admitted store records on each request. Configure `DELTA_AGENT_ROOT` explicitly when using the isolated canonical main checkout; it is independent of the public publishing source. For hosted builds, the checked-in bundle is the reproducible fallback. `npm run build` validates it. When `DELTA_HISTORY_AGENT_ROOT` is set to an absolute agent repository, the prebuild step regenerates from committed agent main first, allowing an existing CI build to update the feed without manual layout edits. No scheduler or new remote service is introduced. Without that repository, the bundle stays pinned and labeled fallback, never presented as current live state.
+
+Manual export: `node scripts/export-historian-archive.cjs ABSOLUTE_AGENT_ROOT`. Review and commit generated changes before deployment. Existing authentication and audience remain unchanged: this work does not expose private Historian records on the public marketing website. Public growth storytelling needs a separate redacted audience release review. Deployment was not performed.
+
+Recovered checkpoints: August 7, August 12, October 28. Recovered comparisons: August 7 to August 12, August 12 to October 28. Other reports or test fixtures are not numerical checkpoints without resolvable snapshots. The origin story, chapters and evidence drawers remain the existing milestone projection. SVG output includes method, date, record identity and a non-qualification caveat.
+
+Verification: focused archive/server/route/component tests, export integrity tests, TypeScript and production build. Desktop browser QA used a disposable local fixture for catalogue selection and chart rendering; the fixture route was removed. Authenticated production and mobile-browser verification are not claimed.

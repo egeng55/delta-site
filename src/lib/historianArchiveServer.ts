@@ -358,8 +358,8 @@ function sourceCommitFromComparison(artifact: JsonRecord): string {
   return commit && /^[a-f0-9]{40}$/.test(commit) ? commit : "";
 }
 
-function buildLiveArchive(agentRoot: string): HistorianArchive | null {
-  const comparison = selectLatestComparison(agentRoot);
+function buildLiveArchive(agentRoot: string, selected?: { path: string; raw: string; artifact: JsonRecord }): HistorianArchive | null {
+  const comparison = selected ?? selectLatestComparison(agentRoot);
   const timeline = selectLatestTimeline(agentRoot);
   if (!comparison || !timeline) return null;
   const refs = isRecord(comparison.artifact.snapshot_refs) ? comparison.artifact.snapshot_refs : {};
@@ -421,7 +421,19 @@ export function readHistorianArchive(): HistorianArchive {
   if (agentRoot) {
     try {
       const live = buildLiveArchive(agentRoot);
-      if (live) return live;
+      if (live) {
+        const entries = listJsonFiles(agentRoot, COMPARISON_ROOT).map((file) => {
+          const { raw, parsed } = readBoundedJson(agentRoot, file);
+          if (parsed.artifact_type !== 'structural_census_progress_baseline'
+              || !isRecord(parsed.read_only_boundary) || parsed.read_only_boundary.no_metric_methodology_change !== true) throw new Error('invalid_growth_record');
+          const entry = buildLiveArchive(agentRoot, { path: file, raw, artifact: parsed });
+          if (!entry) throw new Error('incomplete_growth_record');
+          return { comparison: entry.comparison, snapshots: entry.snapshots };
+        }).sort((a, b) => Date.parse(a.comparison.recordedAt) - Date.parse(b.comparison.recordedAt));
+        live.growthArchive = { version: 1, comparisons: entries,
+          checkpoints: [...new Map(entries.flatMap(e => e.snapshots).map(s => [s.id, s])).values()].sort((a, b) => Date.parse(a.date) - Date.parse(b.date)) };
+        return live;
+      }
     } catch {
       // Fall through to the pinned bundled archive. Missing live history must not
       // create a synthetic present-day story.

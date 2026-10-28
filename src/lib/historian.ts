@@ -60,6 +60,11 @@ export type DeltaHistoryFeed = {
   }[];
 };
 export type HistorianArchive = {
+  growthArchive?: {
+    version: 1;
+    comparisons: { comparison: HistorianArchive["comparison"]; snapshots: HistorianArchive["snapshots"] }[];
+    checkpoints: HistorianArchive["snapshots"];
+  };
   version: number;
   sourceMode?: "live_agent_store" | "bundled_archive";
   freshness?: {

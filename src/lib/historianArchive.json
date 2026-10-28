@@ -3,10 +3,10 @@
   "sourceMode": "bundled_archive",
   "freshness": {
     "state": "fallback",
-    "generatedAt": "2026-08-12T14:15:12-04:00",
-    "latestAcceptedSourceTime": "2026-08-12T14:15:12-04:00"
+    "generatedAt": "2026-10-28T15:41:09.401Z",
+    "latestAcceptedSourceTime": "2026-10-28T15:41:09.401Z"
   },
-  "sourceCommit": "65635021f93d7a810537c676454834cb18291826",
+  "sourceCommit": "a970a8233c039f0e6978596ceba2132da729910d",
   "archiveThrough": "2026-08-08T11:06:12-04:00",
   "provenance": [
     {
@@ -24,19 +24,27 @@
     {
       "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-12/orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16.json",
       "sha256": "fd7ed52007aded3955c7d7e509eb46efdf852097b7503d870828214bbda90575"
+    },
+    {
+      "path": "agent/measurements/organizational-observability/comparisons/2026-10-28/canonical-numerical-progress-2026-08-12-to-2026-10-28.json",
+      "sha256": "80ad9de1ebb5c7ed24566714315c93b794a66ec1a801ad2b99120a8751df78db"
+    },
+    {
+      "path": "agent/measurements/organizational-observability/census/snapshots/2026-10-28/orgcensus-0e15cc7c-e775-46e9-830a-c720f2e86041.json",
+      "sha256": "debd10af966830729bc0060f2d3c35f762e0d2b89b2518ee59450881d13e016e"
     }
   ],
   "snapshots": [
     {
-      "id": "orgcensus-55895242-843e-47c2-9d63-2b336d475d2e",
-      "date": "2026-08-07T20:10:30-04:00",
+      "id": "orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16",
+      "date": "2026-08-12T14:15:12-04:00",
       "methodology": "2026-08-06.phase1",
       "quality": "complete",
       "missingQualification": true
     },
     {
-      "id": "orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16",
-      "date": "2026-08-12T14:15:12-04:00",
+      "id": "orgcensus-0e15cc7c-e775-46e9-830a-c720f2e86041",
+      "date": "2026-10-28T15:41:09.401Z",
       "methodology": "2026-08-06.phase1",
       "quality": "complete",
       "missingQualification": true
@@ -505,8 +513,8 @@
     ]
   },
   "comparison": {
-    "id": "canonical-numerical-progress-2026-08-07-to-2026-08-12",
-    "recordedAt": "2026-08-12T14:15:12-04:00",
+    "id": "canonical-numerical-progress-2026-08-12-to-2026-10-28",
+    "recordedAt": "2026-10-28T15:41:09.401Z",
     "methodology": "2026-08-06.phase1",
     "metrics": [
       {
@@ -522,316 +530,316 @@
         "metric_id": "source_loc",
         "title": "Source LOC",
         "unit": "loc",
-        "previous": 182107,
-        "current": 186730,
-        "absolute_change": 4623,
-        "percentage_change": 2.538617
+        "previous": 186730,
+        "current": 329707,
+        "absolute_change": 142977,
+        "percentage_change": 76.568843
       },
       {
         "metric_id": "source_files",
         "title": "Source files",
         "unit": "count",
-        "previous": 562,
-        "current": 568,
-        "absolute_change": 6,
-        "percentage_change": 1.067616
+        "previous": 568,
+        "current": 1220,
+        "absolute_change": 652,
+        "percentage_change": 114.788732
       },
       {
         "metric_id": "test_loc",
         "title": "Test LOC",
         "unit": "loc",
-        "previous": 52307,
-        "current": 54130,
-        "absolute_change": 1823,
-        "percentage_change": 3.485193
+        "previous": 54130,
+        "current": 102364,
+        "absolute_change": 48234,
+        "percentage_change": 89.107704
       },
       {
         "metric_id": "test_files",
         "title": "Test files",
         "unit": "count",
-        "previous": 192,
-        "current": 194,
-        "absolute_change": 2,
-        "percentage_change": 1.041667
+        "previous": 194,
+        "current": 436,
+        "absolute_change": 242,
+        "percentage_change": 124.742268
       },
       {
         "metric_id": "documentation_loc",
         "title": "Documentation LOC",
         "unit": "loc",
-        "previous": 34296,
-        "current": 35023,
-        "absolute_change": 727,
-        "percentage_change": 2.119781
+        "previous": 35023,
+        "current": 50563,
+        "absolute_change": 15540,
+        "percentage_change": 44.370842
       },
       {
         "metric_id": "documentation_files",
         "title": "Documentation files",
         "unit": "count",
-        "previous": 213,
-        "current": 219,
-        "absolute_change": 6,
-        "percentage_change": 2.816901
+        "previous": 219,
+        "current": 406,
+        "absolute_change": 187,
+        "percentage_change": 85.388128
       },
       {
         "metric_id": "schema_config_loc",
         "title": "Schema/config LOC",
         "unit": "loc",
-        "previous": 49747,
-        "current": 52618,
-        "absolute_change": 2871,
-        "percentage_change": 5.771202
+        "previous": 52618,
+        "current": 79703,
+        "absolute_change": 27085,
+        "percentage_change": 51.47478
       },
       {
         "metric_id": "schema_config_files",
         "title": "Schema/config files",
         "unit": "count",
-        "previous": 149,
-        "current": 158,
-        "absolute_change": 9,
-        "percentage_change": 6.040268
+        "previous": 158,
+        "current": 319,
+        "absolute_change": 161,
+        "percentage_change": 101.898734
       },
       {
         "metric_id": "registered_capabilities_defined",
         "title": "Registered capabilities",
         "unit": "count",
-        "previous": 77,
-        "current": 78,
-        "absolute_change": 1,
-        "percentage_change": 1.298701
+        "previous": 78,
+        "current": 162,
+        "absolute_change": 84,
+        "percentage_change": 107.692308
       },
       {
         "metric_id": "registered_capabilities_implemented",
         "title": "Implemented capabilities",
         "unit": "count",
-        "previous": 62,
-        "current": 63,
-        "absolute_change": 1,
-        "percentage_change": 1.612903
+        "previous": 63,
+        "current": 148,
+        "absolute_change": 85,
+        "percentage_change": 134.920635
       },
       {
         "metric_id": "runtime_tools_defined",
         "title": "Runtime tools",
         "unit": "count",
-        "previous": 62,
-        "current": 63,
-        "absolute_change": 1,
-        "percentage_change": 1.612903
+        "previous": 63,
+        "current": 142,
+        "absolute_change": 79,
+        "percentage_change": 125.396825
       },
       {
         "metric_id": "schemas_defined",
         "title": "Canonical schemas",
         "unit": "count",
-        "previous": 28,
-        "current": 30,
-        "absolute_change": 2,
-        "percentage_change": 7.142857
+        "previous": 30,
+        "current": 37,
+        "absolute_change": 7,
+        "percentage_change": 23.333333
       },
       {
         "metric_id": "agent_roles_defined",
         "title": "Agent roles defined",
         "unit": "count",
-        "previous": 14,
-        "current": 15,
-        "absolute_change": 1,
-        "percentage_change": 7.142857
+        "previous": 15,
+        "current": 23,
+        "absolute_change": 8,
+        "percentage_change": 53.333333
       },
       {
         "metric_id": "unique_tests",
         "title": "Unique tests",
         "unit": "count",
-        "previous": 365,
-        "current": 417,
-        "absolute_change": 52,
-        "percentage_change": 14.246575
+        "previous": 417,
+        "current": 1977,
+        "absolute_change": 1560,
+        "percentage_change": 374.100719
       },
       {
         "metric_id": "adversarial_scenarios",
         "title": "Adversarial scenarios",
         "unit": "count",
-        "previous": 42,
-        "current": 46,
-        "absolute_change": 4,
-        "percentage_change": 9.52381
+        "previous": 46,
+        "current": 193,
+        "absolute_change": 147,
+        "percentage_change": 319.565217
       },
       {
         "metric_id": "test_source_ratio",
         "title": "Test/source ratio",
         "unit": "ratio",
-        "previous": 0.287232,
-        "current": 0.289884,
-        "absolute_change": 0.0026519999999999877,
-        "percentage_change": 0.923295
+        "previous": 0.289884,
+        "current": 0.31047,
+        "absolute_change": 0.02058600000000005,
+        "percentage_change": 7.101461
       },
       {
         "metric_id": "historian_milestones",
         "title": "Historian milestones",
         "unit": "count",
-        "previous": 5,
-        "current": 6,
+        "previous": 6,
+        "current": 7,
         "absolute_change": 1,
-        "percentage_change": 20
+        "percentage_change": 16.666667
       }
     ],
     "repositories": [
       {
         "repo": "delta-agent",
-        "commit_count": 41,
-        "data_quality_previous": "complete",
-        "data_quality_current": "complete",
+        "commit_count": 520,
+        "data_quality_previous": "unknown",
+        "data_quality_current": "unknown",
         "metrics": {
           "source_loc": {
-            "previous": 50529,
-            "current": 53867,
-            "absolute_change": 3338,
-            "percentage_change": 6.606107
+            "previous": 53867,
+            "current": 156797,
+            "absolute_change": 102930,
+            "percentage_change": 191.081738
           },
           "source_files": {
-            "previous": 129,
-            "current": 135,
-            "absolute_change": 6,
-            "percentage_change": 4.651163
+            "previous": 135,
+            "current": 475,
+            "absolute_change": 340,
+            "percentage_change": 251.851852
           },
           "test_loc": {
-            "previous": 13086,
-            "current": 14694,
-            "absolute_change": 1608,
-            "percentage_change": 12.287941
+            "previous": 14694,
+            "current": 54695,
+            "absolute_change": 40001,
+            "percentage_change": 272.226759
           },
           "test_files": {
-            "previous": 34,
-            "current": 36,
-            "absolute_change": 2,
-            "percentage_change": 5.882353
+            "previous": 36,
+            "current": 168,
+            "absolute_change": 132,
+            "percentage_change": 366.666667
           },
           "documentation_loc": {
-            "previous": 16861,
-            "current": 17588,
-            "absolute_change": 727,
-            "percentage_change": 4.311725
+            "previous": 17588,
+            "current": 28040,
+            "absolute_change": 10452,
+            "percentage_change": 59.426882
           },
           "documentation_files": {
-            "previous": 91,
-            "current": 97,
-            "absolute_change": 6,
-            "percentage_change": 6.593407
+            "previous": 97,
+            "current": 247,
+            "absolute_change": 150,
+            "percentage_change": 154.639175
           },
           "schema_config_loc": {
-            "previous": 22570,
-            "current": 25441,
-            "absolute_change": 2871,
-            "percentage_change": 12.720425
+            "previous": 25441,
+            "current": 48634,
+            "absolute_change": 23193,
+            "percentage_change": 91.163869
           },
           "schema_config_files": {
-            "previous": 112,
-            "current": 121,
-            "absolute_change": 9,
-            "percentage_change": 8.035714
+            "previous": 121,
+            "current": 258,
+            "absolute_change": 137,
+            "percentage_change": 113.22314
           },
           "unique_tests": {
-            "previous": 365,
-            "current": 417,
-            "absolute_change": 52,
-            "percentage_change": 14.246575
+            "previous": 417,
+            "current": null,
+            "absolute_change": null,
+            "percentage_change": null
           }
         }
       },
       {
         "repo": "delta-backend",
-        "commit_count": 0,
-        "data_quality_previous": "partial",
-        "data_quality_current": "partial",
+        "commit_count": 119,
+        "data_quality_previous": "unknown",
+        "data_quality_current": "unknown",
         "metrics": {
           "source_loc": {
             "previous": 46738,
-            "current": 46738,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 74466,
+            "absolute_change": 27728,
+            "percentage_change": 59.326458
           },
           "source_files": {
             "previous": 132,
-            "current": 132,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 315,
+            "absolute_change": 183,
+            "percentage_change": 138.636364
           },
           "test_loc": {
             "previous": 24298,
-            "current": 24298,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 27938,
+            "absolute_change": 3640,
+            "percentage_change": 14.980657
           },
           "test_files": {
             "previous": 80,
-            "current": 80,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 112,
+            "absolute_change": 32,
+            "percentage_change": 40
           },
           "documentation_loc": {
             "previous": 7923,
-            "current": 7923,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 10542,
+            "absolute_change": 2619,
+            "percentage_change": 33.055661
           },
           "documentation_files": {
             "previous": 38,
-            "current": 38,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 59,
+            "absolute_change": 21,
+            "percentage_change": 55.263158
           },
           "schema_config_loc": {
             "previous": 1392,
-            "current": 1392,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 3519,
+            "absolute_change": 2127,
+            "percentage_change": 152.801724
           },
           "schema_config_files": {
             "previous": 8,
-            "current": 8,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 24,
+            "absolute_change": 16,
+            "percentage_change": 200
           },
           "unique_tests": {
             "previous": 0,
-            "current": 0,
-            "absolute_change": 0,
+            "current": null,
+            "absolute_change": null,
             "percentage_change": null
           }
         }
       },
       {
         "repo": "delta-jobs",
-        "commit_count": 0,
-        "data_quality_previous": "partial",
-        "data_quality_current": "partial",
+        "commit_count": 8,
+        "data_quality_previous": "unknown",
+        "data_quality_current": "unknown",
         "metrics": {
           "source_loc": {
             "previous": 23213,
-            "current": 23213,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 23581,
+            "absolute_change": 368,
+            "percentage_change": 1.585319
           },
           "source_files": {
             "previous": 46,
-            "current": 46,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 48,
+            "absolute_change": 2,
+            "percentage_change": 4.347826
           },
           "test_loc": {
             "previous": 10196,
-            "current": 10196,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 10391,
+            "absolute_change": 195,
+            "percentage_change": 1.912515
           },
           "test_files": {
             "previous": 45,
-            "current": 45,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 47,
+            "absolute_change": 2,
+            "percentage_change": 4.444444
           },
           "documentation_loc": {
             "previous": 163,
-            "current": 163,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 182,
+            "absolute_change": 19,
+            "percentage_change": 11.656442
           },
           "documentation_files": {
             "previous": 3,
@@ -841,156 +849,1210 @@
           },
           "schema_config_loc": {
             "previous": 484,
-            "current": 484,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 707,
+            "absolute_change": 223,
+            "percentage_change": 46.07438
           },
           "schema_config_files": {
             "previous": 8,
-            "current": 8,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 10,
+            "absolute_change": 2,
+            "percentage_change": 25
           },
           "unique_tests": {
             "previous": 0,
-            "current": 0,
-            "absolute_change": 0,
+            "current": null,
+            "absolute_change": null,
             "percentage_change": null
           }
         }
       },
       {
         "repo": "delta-mobile",
-        "commit_count": 0,
-        "data_quality_previous": "partial",
-        "data_quality_current": "partial",
+        "commit_count": 19,
+        "data_quality_previous": "unknown",
+        "data_quality_current": "unknown",
         "metrics": {
           "source_loc": {
             "previous": 37862,
-            "current": 37862,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 38570,
+            "absolute_change": 708,
+            "percentage_change": 1.869949
           },
           "source_files": {
             "previous": 163,
-            "current": 163,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 170,
+            "absolute_change": 7,
+            "percentage_change": 4.294479
           },
           "test_loc": {
             "previous": 2336,
-            "current": 2336,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 2971,
+            "absolute_change": 635,
+            "percentage_change": 27.183219
           },
           "test_files": {
             "previous": 16,
-            "current": 16,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 21,
+            "absolute_change": 5,
+            "percentage_change": 31.25
           },
           "documentation_loc": {
             "previous": 2363,
-            "current": 2363,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 2599,
+            "absolute_change": 236,
+            "percentage_change": 9.987304
           },
           "documentation_files": {
             "previous": 12,
-            "current": 12,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 14,
+            "absolute_change": 2,
+            "percentage_change": 16.666667
           },
           "schema_config_loc": {
             "previous": 13195,
-            "current": 13195,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 12681,
+            "absolute_change": -514,
+            "percentage_change": -3.895415
           },
           "schema_config_files": {
             "previous": 13,
-            "current": 13,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 16,
+            "absolute_change": 3,
+            "percentage_change": 23.076923
           },
           "unique_tests": {
             "previous": 0,
-            "current": 0,
-            "absolute_change": 0,
+            "current": null,
+            "absolute_change": null,
             "percentage_change": null
           }
         }
       },
       {
         "repo": "delta-site",
-        "commit_count": 1,
-        "data_quality_previous": "partial",
-        "data_quality_current": "partial",
+        "commit_count": 71,
+        "data_quality_previous": "unknown",
+        "data_quality_current": "unknown",
         "metrics": {
           "source_loc": {
-            "previous": 23765,
-            "current": 25050,
-            "absolute_change": 1285,
-            "percentage_change": 5.407111
+            "previous": 25050,
+            "current": 36453,
+            "absolute_change": 11403,
+            "percentage_change": 45.520958
           },
           "source_files": {
             "previous": 92,
-            "current": 92,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 213,
+            "absolute_change": 121,
+            "percentage_change": 131.521739
           },
           "test_loc": {
-            "previous": 2391,
-            "current": 2606,
-            "absolute_change": 215,
-            "percentage_change": 8.992054
+            "previous": 2606,
+            "current": 6369,
+            "absolute_change": 3763,
+            "percentage_change": 144.397544
           },
           "test_files": {
             "previous": 17,
-            "current": 17,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 88,
+            "absolute_change": 71,
+            "percentage_change": 417.647059
           },
           "documentation_loc": {
             "previous": 6986,
-            "current": 6986,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 9200,
+            "absolute_change": 2214,
+            "percentage_change": 31.691955
           },
           "documentation_files": {
             "previous": 69,
-            "current": 69,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 83,
+            "absolute_change": 14,
+            "percentage_change": 20.289855
           },
           "schema_config_loc": {
             "previous": 12106,
-            "current": 12106,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 14427,
+            "absolute_change": 2321,
+            "percentage_change": 19.172311
           },
           "schema_config_files": {
             "previous": 8,
-            "current": 8,
-            "absolute_change": 0,
-            "percentage_change": 0
+            "current": 12,
+            "absolute_change": 4,
+            "percentage_change": 50
           },
           "unique_tests": {
             "previous": 0,
-            "current": 0,
-            "absolute_change": 0,
+            "current": null,
+            "absolute_change": null,
             "percentage_change": null
           }
         }
       }
     ],
     "interpretation": {
-      "summary": "Recent growth is real platform maturation, but it is concentrated in delta-agent substrate, verification, continuity, and governance surfaces rather than downstream product-runtime expansion.",
-      "product_capability_assessment": "Limited direct product-surface growth. Backend, mobile, and jobs were flat across the baseline window; delta-site grew modestly.",
-      "infrastructure_governance_assessment": "Most net growth was infrastructure/governance heavy: observability, continuity, specialist/runtime support, qualification evidence, and tests."
+      "summary": "Growth concentrated in agent workflows and their operating substrate.",
+      "product_capability_assessment": "Prospect workflows, collaboration and website surfaces expanded; code size alone is not product qualification.",
+      "infrastructure_governance_assessment": "Runtime, privacy, verification and evidence support grew alongside product capabilities."
     },
     "limitations": [
-      "unique_tests remains delta-agent-centric because the current parser counts node:test-style test definitions and does not produce equivalent cross-repo unique test counts for Python and Jest suites."
+      "unique_tests is the existing agent-centric static name counter, not executed tests or suite-wide qualification",
+      "Archive roots intentionally have no Git metadata; full resolved main hashes supplied in checkpoints",
+      "Same five-repository baseline scope; new sibling repositories are not added",
+      "Local main, not deployed or remote state",
+      "Schema/config growth includes tracked JSON evidence not excluded by existing methodology",
+      "Archive-based integration backlog is not measured: ignore the comparison backlog delta of zero; no worktree-health inference is valid.",
+      "Per-repository counts deduplicate within each repository; suite totals also deduplicate identical content across repositories, so row sums need not equal suite totals."
+    ]
+  },
+  "growthArchive": {
+    "version": 1,
+    "comparisons": [
+      {
+        "comparison": {
+          "id": "canonical-numerical-progress-2026-08-07-to-2026-08-12",
+          "recordedAt": "2026-08-12T14:15:12-04:00",
+          "methodology": "2026-08-06.phase1",
+          "metrics": [
+            {
+              "metric_id": "repository_count",
+              "title": "Repository count",
+              "unit": "count",
+              "previous": 5,
+              "current": 5,
+              "absolute_change": 0,
+              "percentage_change": 0
+            },
+            {
+              "metric_id": "source_loc",
+              "title": "Source LOC",
+              "unit": "loc",
+              "previous": 182107,
+              "current": 186730,
+              "absolute_change": 4623,
+              "percentage_change": 2.538617
+            },
+            {
+              "metric_id": "source_files",
+              "title": "Source files",
+              "unit": "count",
+              "previous": 562,
+              "current": 568,
+              "absolute_change": 6,
+              "percentage_change": 1.067616
+            },
+            {
+              "metric_id": "test_loc",
+              "title": "Test LOC",
+              "unit": "loc",
+              "previous": 52307,
+              "current": 54130,
+              "absolute_change": 1823,
+              "percentage_change": 3.485193
+            },
+            {
+              "metric_id": "test_files",
+              "title": "Test files",
+              "unit": "count",
+              "previous": 192,
+              "current": 194,
+              "absolute_change": 2,
+              "percentage_change": 1.041667
+            },
+            {
+              "metric_id": "documentation_loc",
+              "title": "Documentation LOC",
+              "unit": "loc",
+              "previous": 34296,
+              "current": 35023,
+              "absolute_change": 727,
+              "percentage_change": 2.119781
+            },
+            {
+              "metric_id": "documentation_files",
+              "title": "Documentation files",
+              "unit": "count",
+              "previous": 213,
+              "current": 219,
+              "absolute_change": 6,
+              "percentage_change": 2.816901
+            },
+            {
+              "metric_id": "schema_config_loc",
+              "title": "Schema/config LOC",
+              "unit": "loc",
+              "previous": 49747,
+              "current": 52618,
+              "absolute_change": 2871,
+              "percentage_change": 5.771202
+            },
+            {
+              "metric_id": "schema_config_files",
+              "title": "Schema/config files",
+              "unit": "count",
+              "previous": 149,
+              "current": 158,
+              "absolute_change": 9,
+              "percentage_change": 6.040268
+            },
+            {
+              "metric_id": "registered_capabilities_defined",
+              "title": "Registered capabilities",
+              "unit": "count",
+              "previous": 77,
+              "current": 78,
+              "absolute_change": 1,
+              "percentage_change": 1.298701
+            },
+            {
+              "metric_id": "registered_capabilities_implemented",
+              "title": "Implemented capabilities",
+              "unit": "count",
+              "previous": 62,
+              "current": 63,
+              "absolute_change": 1,
+              "percentage_change": 1.612903
+            },
+            {
+              "metric_id": "runtime_tools_defined",
+              "title": "Runtime tools",
+              "unit": "count",
+              "previous": 62,
+              "current": 63,
+              "absolute_change": 1,
+              "percentage_change": 1.612903
+            },
+            {
+              "metric_id": "schemas_defined",
+              "title": "Canonical schemas",
+              "unit": "count",
+              "previous": 28,
+              "current": 30,
+              "absolute_change": 2,
+              "percentage_change": 7.142857
+            },
+            {
+              "metric_id": "agent_roles_defined",
+              "title": "Agent roles defined",
+              "unit": "count",
+              "previous": 14,
+              "current": 15,
+              "absolute_change": 1,
+              "percentage_change": 7.142857
+            },
+            {
+              "metric_id": "unique_tests",
+              "title": "Unique tests",
+              "unit": "count",
+              "previous": 365,
+              "current": 417,
+              "absolute_change": 52,
+              "percentage_change": 14.246575
+            },
+            {
+              "metric_id": "adversarial_scenarios",
+              "title": "Adversarial scenarios",
+              "unit": "count",
+              "previous": 42,
+              "current": 46,
+              "absolute_change": 4,
+              "percentage_change": 9.52381
+            },
+            {
+              "metric_id": "test_source_ratio",
+              "title": "Test/source ratio",
+              "unit": "ratio",
+              "previous": 0.287232,
+              "current": 0.289884,
+              "absolute_change": 0.0026519999999999877,
+              "percentage_change": 0.923295
+            },
+            {
+              "metric_id": "historian_milestones",
+              "title": "Historian milestones",
+              "unit": "count",
+              "previous": 5,
+              "current": 6,
+              "absolute_change": 1,
+              "percentage_change": 20
+            }
+          ],
+          "repositories": [
+            {
+              "repo": "delta-agent",
+              "commit_count": 41,
+              "data_quality_previous": "complete",
+              "data_quality_current": "complete",
+              "metrics": {
+                "source_loc": {
+                  "previous": 50529,
+                  "current": 53867,
+                  "absolute_change": 3338,
+                  "percentage_change": 6.606107
+                },
+                "source_files": {
+                  "previous": 129,
+                  "current": 135,
+                  "absolute_change": 6,
+                  "percentage_change": 4.651163
+                },
+                "test_loc": {
+                  "previous": 13086,
+                  "current": 14694,
+                  "absolute_change": 1608,
+                  "percentage_change": 12.287941
+                },
+                "test_files": {
+                  "previous": 34,
+                  "current": 36,
+                  "absolute_change": 2,
+                  "percentage_change": 5.882353
+                },
+                "documentation_loc": {
+                  "previous": 16861,
+                  "current": 17588,
+                  "absolute_change": 727,
+                  "percentage_change": 4.311725
+                },
+                "documentation_files": {
+                  "previous": 91,
+                  "current": 97,
+                  "absolute_change": 6,
+                  "percentage_change": 6.593407
+                },
+                "schema_config_loc": {
+                  "previous": 22570,
+                  "current": 25441,
+                  "absolute_change": 2871,
+                  "percentage_change": 12.720425
+                },
+                "schema_config_files": {
+                  "previous": 112,
+                  "current": 121,
+                  "absolute_change": 9,
+                  "percentage_change": 8.035714
+                },
+                "unique_tests": {
+                  "previous": 365,
+                  "current": 417,
+                  "absolute_change": 52,
+                  "percentage_change": 14.246575
+                }
+              }
+            },
+            {
+              "repo": "delta-backend",
+              "commit_count": 0,
+              "data_quality_previous": "partial",
+              "data_quality_current": "partial",
+              "metrics": {
+                "source_loc": {
+                  "previous": 46738,
+                  "current": 46738,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "source_files": {
+                  "previous": 132,
+                  "current": 132,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "test_loc": {
+                  "previous": 24298,
+                  "current": 24298,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "test_files": {
+                  "previous": 80,
+                  "current": 80,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_loc": {
+                  "previous": 7923,
+                  "current": 7923,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_files": {
+                  "previous": 38,
+                  "current": 38,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_loc": {
+                  "previous": 1392,
+                  "current": 1392,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_files": {
+                  "previous": 8,
+                  "current": 8,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": 0,
+                  "absolute_change": 0,
+                  "percentage_change": null
+                }
+              }
+            },
+            {
+              "repo": "delta-jobs",
+              "commit_count": 0,
+              "data_quality_previous": "partial",
+              "data_quality_current": "partial",
+              "metrics": {
+                "source_loc": {
+                  "previous": 23213,
+                  "current": 23213,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "source_files": {
+                  "previous": 46,
+                  "current": 46,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "test_loc": {
+                  "previous": 10196,
+                  "current": 10196,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "test_files": {
+                  "previous": 45,
+                  "current": 45,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_loc": {
+                  "previous": 163,
+                  "current": 163,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_files": {
+                  "previous": 3,
+                  "current": 3,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_loc": {
+                  "previous": 484,
+                  "current": 484,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_files": {
+                  "previous": 8,
+                  "current": 8,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": 0,
+                  "absolute_change": 0,
+                  "percentage_change": null
+                }
+              }
+            },
+            {
+              "repo": "delta-mobile",
+              "commit_count": 0,
+              "data_quality_previous": "partial",
+              "data_quality_current": "partial",
+              "metrics": {
+                "source_loc": {
+                  "previous": 37862,
+                  "current": 37862,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "source_files": {
+                  "previous": 163,
+                  "current": 163,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "test_loc": {
+                  "previous": 2336,
+                  "current": 2336,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "test_files": {
+                  "previous": 16,
+                  "current": 16,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_loc": {
+                  "previous": 2363,
+                  "current": 2363,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_files": {
+                  "previous": 12,
+                  "current": 12,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_loc": {
+                  "previous": 13195,
+                  "current": 13195,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_files": {
+                  "previous": 13,
+                  "current": 13,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": 0,
+                  "absolute_change": 0,
+                  "percentage_change": null
+                }
+              }
+            },
+            {
+              "repo": "delta-site",
+              "commit_count": 1,
+              "data_quality_previous": "partial",
+              "data_quality_current": "partial",
+              "metrics": {
+                "source_loc": {
+                  "previous": 23765,
+                  "current": 25050,
+                  "absolute_change": 1285,
+                  "percentage_change": 5.407111
+                },
+                "source_files": {
+                  "previous": 92,
+                  "current": 92,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "test_loc": {
+                  "previous": 2391,
+                  "current": 2606,
+                  "absolute_change": 215,
+                  "percentage_change": 8.992054
+                },
+                "test_files": {
+                  "previous": 17,
+                  "current": 17,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_loc": {
+                  "previous": 6986,
+                  "current": 6986,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "documentation_files": {
+                  "previous": 69,
+                  "current": 69,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_loc": {
+                  "previous": 12106,
+                  "current": 12106,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_files": {
+                  "previous": 8,
+                  "current": 8,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": 0,
+                  "absolute_change": 0,
+                  "percentage_change": null
+                }
+              }
+            }
+          ],
+          "interpretation": {
+            "summary": "Recent growth is real platform maturation, but it is concentrated in delta-agent substrate, verification, continuity, and governance surfaces rather than downstream product-runtime expansion.",
+            "product_capability_assessment": "Limited direct product-surface growth. Backend, mobile, and jobs were flat across the baseline window; delta-site grew modestly.",
+            "infrastructure_governance_assessment": "Most net growth was infrastructure/governance heavy: observability, continuity, specialist/runtime support, qualification evidence, and tests."
+          },
+          "limitations": [
+            "unique_tests remains delta-agent-centric because the current parser counts node:test-style test definitions and does not produce equivalent cross-repo unique test counts for Python and Jest suites."
+          ]
+        },
+        "snapshots": [
+          {
+            "id": "orgcensus-55895242-843e-47c2-9d63-2b336d475d2e",
+            "date": "2026-08-07T20:10:30-04:00",
+            "methodology": "2026-08-06.phase1",
+            "quality": "complete",
+            "missingQualification": true
+          },
+          {
+            "id": "orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16",
+            "date": "2026-08-12T14:15:12-04:00",
+            "methodology": "2026-08-06.phase1",
+            "quality": "complete",
+            "missingQualification": true
+          }
+        ]
+      },
+      {
+        "comparison": {
+          "id": "canonical-numerical-progress-2026-08-12-to-2026-10-28",
+          "recordedAt": "2026-10-28T15:41:09.401Z",
+          "methodology": "2026-08-06.phase1",
+          "metrics": [
+            {
+              "metric_id": "repository_count",
+              "title": "Repository count",
+              "unit": "count",
+              "previous": 5,
+              "current": 5,
+              "absolute_change": 0,
+              "percentage_change": 0
+            },
+            {
+              "metric_id": "source_loc",
+              "title": "Source LOC",
+              "unit": "loc",
+              "previous": 186730,
+              "current": 329707,
+              "absolute_change": 142977,
+              "percentage_change": 76.568843
+            },
+            {
+              "metric_id": "source_files",
+              "title": "Source files",
+              "unit": "count",
+              "previous": 568,
+              "current": 1220,
+              "absolute_change": 652,
+              "percentage_change": 114.788732
+            },
+            {
+              "metric_id": "test_loc",
+              "title": "Test LOC",
+              "unit": "loc",
+              "previous": 54130,
+              "current": 102364,
+              "absolute_change": 48234,
+              "percentage_change": 89.107704
+            },
+            {
+              "metric_id": "test_files",
+              "title": "Test files",
+              "unit": "count",
+              "previous": 194,
+              "current": 436,
+              "absolute_change": 242,
+              "percentage_change": 124.742268
+            },
+            {
+              "metric_id": "documentation_loc",
+              "title": "Documentation LOC",
+              "unit": "loc",
+              "previous": 35023,
+              "current": 50563,
+              "absolute_change": 15540,
+              "percentage_change": 44.370842
+            },
+            {
+              "metric_id": "documentation_files",
+              "title": "Documentation files",
+              "unit": "count",
+              "previous": 219,
+              "current": 406,
+              "absolute_change": 187,
+              "percentage_change": 85.388128
+            },
+            {
+              "metric_id": "schema_config_loc",
+              "title": "Schema/config LOC",
+              "unit": "loc",
+              "previous": 52618,
+              "current": 79703,
+              "absolute_change": 27085,
+              "percentage_change": 51.47478
+            },
+            {
+              "metric_id": "schema_config_files",
+              "title": "Schema/config files",
+              "unit": "count",
+              "previous": 158,
+              "current": 319,
+              "absolute_change": 161,
+              "percentage_change": 101.898734
+            },
+            {
+              "metric_id": "registered_capabilities_defined",
+              "title": "Registered capabilities",
+              "unit": "count",
+              "previous": 78,
+              "current": 162,
+              "absolute_change": 84,
+              "percentage_change": 107.692308
+            },
+            {
+              "metric_id": "registered_capabilities_implemented",
+              "title": "Implemented capabilities",
+              "unit": "count",
+              "previous": 63,
+              "current": 148,
+              "absolute_change": 85,
+              "percentage_change": 134.920635
+            },
+            {
+              "metric_id": "runtime_tools_defined",
+              "title": "Runtime tools",
+              "unit": "count",
+              "previous": 63,
+              "current": 142,
+              "absolute_change": 79,
+              "percentage_change": 125.396825
+            },
+            {
+              "metric_id": "schemas_defined",
+              "title": "Canonical schemas",
+              "unit": "count",
+              "previous": 30,
+              "current": 37,
+              "absolute_change": 7,
+              "percentage_change": 23.333333
+            },
+            {
+              "metric_id": "agent_roles_defined",
+              "title": "Agent roles defined",
+              "unit": "count",
+              "previous": 15,
+              "current": 23,
+              "absolute_change": 8,
+              "percentage_change": 53.333333
+            },
+            {
+              "metric_id": "unique_tests",
+              "title": "Unique tests",
+              "unit": "count",
+              "previous": 417,
+              "current": 1977,
+              "absolute_change": 1560,
+              "percentage_change": 374.100719
+            },
+            {
+              "metric_id": "adversarial_scenarios",
+              "title": "Adversarial scenarios",
+              "unit": "count",
+              "previous": 46,
+              "current": 193,
+              "absolute_change": 147,
+              "percentage_change": 319.565217
+            },
+            {
+              "metric_id": "test_source_ratio",
+              "title": "Test/source ratio",
+              "unit": "ratio",
+              "previous": 0.289884,
+              "current": 0.31047,
+              "absolute_change": 0.02058600000000005,
+              "percentage_change": 7.101461
+            },
+            {
+              "metric_id": "historian_milestones",
+              "title": "Historian milestones",
+              "unit": "count",
+              "previous": 6,
+              "current": 7,
+              "absolute_change": 1,
+              "percentage_change": 16.666667
+            }
+          ],
+          "repositories": [
+            {
+              "repo": "delta-agent",
+              "commit_count": 520,
+              "data_quality_previous": "unknown",
+              "data_quality_current": "unknown",
+              "metrics": {
+                "source_loc": {
+                  "previous": 53867,
+                  "current": 156797,
+                  "absolute_change": 102930,
+                  "percentage_change": 191.081738
+                },
+                "source_files": {
+                  "previous": 135,
+                  "current": 475,
+                  "absolute_change": 340,
+                  "percentage_change": 251.851852
+                },
+                "test_loc": {
+                  "previous": 14694,
+                  "current": 54695,
+                  "absolute_change": 40001,
+                  "percentage_change": 272.226759
+                },
+                "test_files": {
+                  "previous": 36,
+                  "current": 168,
+                  "absolute_change": 132,
+                  "percentage_change": 366.666667
+                },
+                "documentation_loc": {
+                  "previous": 17588,
+                  "current": 28040,
+                  "absolute_change": 10452,
+                  "percentage_change": 59.426882
+                },
+                "documentation_files": {
+                  "previous": 97,
+                  "current": 247,
+                  "absolute_change": 150,
+                  "percentage_change": 154.639175
+                },
+                "schema_config_loc": {
+                  "previous": 25441,
+                  "current": 48634,
+                  "absolute_change": 23193,
+                  "percentage_change": 91.163869
+                },
+                "schema_config_files": {
+                  "previous": 121,
+                  "current": 258,
+                  "absolute_change": 137,
+                  "percentage_change": 113.22314
+                },
+                "unique_tests": {
+                  "previous": 417,
+                  "current": null,
+                  "absolute_change": null,
+                  "percentage_change": null
+                }
+              }
+            },
+            {
+              "repo": "delta-backend",
+              "commit_count": 119,
+              "data_quality_previous": "unknown",
+              "data_quality_current": "unknown",
+              "metrics": {
+                "source_loc": {
+                  "previous": 46738,
+                  "current": 74466,
+                  "absolute_change": 27728,
+                  "percentage_change": 59.326458
+                },
+                "source_files": {
+                  "previous": 132,
+                  "current": 315,
+                  "absolute_change": 183,
+                  "percentage_change": 138.636364
+                },
+                "test_loc": {
+                  "previous": 24298,
+                  "current": 27938,
+                  "absolute_change": 3640,
+                  "percentage_change": 14.980657
+                },
+                "test_files": {
+                  "previous": 80,
+                  "current": 112,
+                  "absolute_change": 32,
+                  "percentage_change": 40
+                },
+                "documentation_loc": {
+                  "previous": 7923,
+                  "current": 10542,
+                  "absolute_change": 2619,
+                  "percentage_change": 33.055661
+                },
+                "documentation_files": {
+                  "previous": 38,
+                  "current": 59,
+                  "absolute_change": 21,
+                  "percentage_change": 55.263158
+                },
+                "schema_config_loc": {
+                  "previous": 1392,
+                  "current": 3519,
+                  "absolute_change": 2127,
+                  "percentage_change": 152.801724
+                },
+                "schema_config_files": {
+                  "previous": 8,
+                  "current": 24,
+                  "absolute_change": 16,
+                  "percentage_change": 200
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": null,
+                  "absolute_change": null,
+                  "percentage_change": null
+                }
+              }
+            },
+            {
+              "repo": "delta-jobs",
+              "commit_count": 8,
+              "data_quality_previous": "unknown",
+              "data_quality_current": "unknown",
+              "metrics": {
+                "source_loc": {
+                  "previous": 23213,
+                  "current": 23581,
+                  "absolute_change": 368,
+                  "percentage_change": 1.585319
+                },
+                "source_files": {
+                  "previous": 46,
+                  "current": 48,
+                  "absolute_change": 2,
+                  "percentage_change": 4.347826
+                },
+                "test_loc": {
+                  "previous": 10196,
+                  "current": 10391,
+                  "absolute_change": 195,
+                  "percentage_change": 1.912515
+                },
+                "test_files": {
+                  "previous": 45,
+                  "current": 47,
+                  "absolute_change": 2,
+                  "percentage_change": 4.444444
+                },
+                "documentation_loc": {
+                  "previous": 163,
+                  "current": 182,
+                  "absolute_change": 19,
+                  "percentage_change": 11.656442
+                },
+                "documentation_files": {
+                  "previous": 3,
+                  "current": 3,
+                  "absolute_change": 0,
+                  "percentage_change": 0
+                },
+                "schema_config_loc": {
+                  "previous": 484,
+                  "current": 707,
+                  "absolute_change": 223,
+                  "percentage_change": 46.07438
+                },
+                "schema_config_files": {
+                  "previous": 8,
+                  "current": 10,
+                  "absolute_change": 2,
+                  "percentage_change": 25
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": null,
+                  "absolute_change": null,
+                  "percentage_change": null
+                }
+              }
+            },
+            {
+              "repo": "delta-mobile",
+              "commit_count": 19,
+              "data_quality_previous": "unknown",
+              "data_quality_current": "unknown",
+              "metrics": {
+                "source_loc": {
+                  "previous": 37862,
+                  "current": 38570,
+                  "absolute_change": 708,
+                  "percentage_change": 1.869949
+                },
+                "source_files": {
+                  "previous": 163,
+                  "current": 170,
+                  "absolute_change": 7,
+                  "percentage_change": 4.294479
+                },
+                "test_loc": {
+                  "previous": 2336,
+                  "current": 2971,
+                  "absolute_change": 635,
+                  "percentage_change": 27.183219
+                },
+                "test_files": {
+                  "previous": 16,
+                  "current": 21,
+                  "absolute_change": 5,
+                  "percentage_change": 31.25
+                },
+                "documentation_loc": {
+                  "previous": 2363,
+                  "current": 2599,
+                  "absolute_change": 236,
+                  "percentage_change": 9.987304
+                },
+                "documentation_files": {
+                  "previous": 12,
+                  "current": 14,
+                  "absolute_change": 2,
+                  "percentage_change": 16.666667
+                },
+                "schema_config_loc": {
+                  "previous": 13195,
+                  "current": 12681,
+                  "absolute_change": -514,
+                  "percentage_change": -3.895415
+                },
+                "schema_config_files": {
+                  "previous": 13,
+                  "current": 16,
+                  "absolute_change": 3,
+                  "percentage_change": 23.076923
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": null,
+                  "absolute_change": null,
+                  "percentage_change": null
+                }
+              }
+            },
+            {
+              "repo": "delta-site",
+              "commit_count": 71,
+              "data_quality_previous": "unknown",
+              "data_quality_current": "unknown",
+              "metrics": {
+                "source_loc": {
+                  "previous": 25050,
+                  "current": 36453,
+                  "absolute_change": 11403,
+                  "percentage_change": 45.520958
+                },
+                "source_files": {
+                  "previous": 92,
+                  "current": 213,
+                  "absolute_change": 121,
+                  "percentage_change": 131.521739
+                },
+                "test_loc": {
+                  "previous": 2606,
+                  "current": 6369,
+                  "absolute_change": 3763,
+                  "percentage_change": 144.397544
+                },
+                "test_files": {
+                  "previous": 17,
+                  "current": 88,
+                  "absolute_change": 71,
+                  "percentage_change": 417.647059
+                },
+                "documentation_loc": {
+                  "previous": 6986,
+                  "current": 9200,
+                  "absolute_change": 2214,
+                  "percentage_change": 31.691955
+                },
+                "documentation_files": {
+                  "previous": 69,
+                  "current": 83,
+                  "absolute_change": 14,
+                  "percentage_change": 20.289855
+                },
+                "schema_config_loc": {
+                  "previous": 12106,
+                  "current": 14427,
+                  "absolute_change": 2321,
+                  "percentage_change": 19.172311
+                },
+                "schema_config_files": {
+                  "previous": 8,
+                  "current": 12,
+                  "absolute_change": 4,
+                  "percentage_change": 50
+                },
+                "unique_tests": {
+                  "previous": 0,
+                  "current": null,
+                  "absolute_change": null,
+                  "percentage_change": null
+                }
+              }
+            }
+          ],
+          "interpretation": {
+            "summary": "Growth concentrated in agent workflows and their operating substrate.",
+            "product_capability_assessment": "Prospect workflows, collaboration and website surfaces expanded; code size alone is not product qualification.",
+            "infrastructure_governance_assessment": "Runtime, privacy, verification and evidence support grew alongside product capabilities."
+          },
+          "limitations": [
+            "unique_tests is the existing agent-centric static name counter, not executed tests or suite-wide qualification",
+            "Archive roots intentionally have no Git metadata; full resolved main hashes supplied in checkpoints",
+            "Same five-repository baseline scope; new sibling repositories are not added",
+            "Local main, not deployed or remote state",
+            "Schema/config growth includes tracked JSON evidence not excluded by existing methodology",
+            "Archive-based integration backlog is not measured: ignore the comparison backlog delta of zero; no worktree-health inference is valid.",
+            "Per-repository counts deduplicate within each repository; suite totals also deduplicate identical content across repositories, so row sums need not equal suite totals."
+          ]
+        },
+        "snapshots": [
+          {
+            "id": "orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16",
+            "date": "2026-08-12T14:15:12-04:00",
+            "methodology": "2026-08-06.phase1",
+            "quality": "complete",
+            "missingQualification": true
+          },
+          {
+            "id": "orgcensus-0e15cc7c-e775-46e9-830a-c720f2e86041",
+            "date": "2026-10-28T15:41:09.401Z",
+            "methodology": "2026-08-06.phase1",
+            "quality": "complete",
+            "missingQualification": true
+          }
+        ]
+      }
+    ],
+    "checkpoints": [
+      {
+        "id": "orgcensus-55895242-843e-47c2-9d63-2b336d475d2e",
+        "date": "2026-08-07T20:10:30-04:00",
+        "methodology": "2026-08-06.phase1",
+        "quality": "complete",
+        "missingQualification": true
+      },
+      {
+        "id": "orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16",
+        "date": "2026-08-12T14:15:12-04:00",
+        "methodology": "2026-08-06.phase1",
+        "quality": "complete",
+        "missingQualification": true
+      },
+      {
+        "id": "orgcensus-0e15cc7c-e775-46e9-830a-c720f2e86041",
+        "date": "2026-10-28T15:41:09.401Z",
+        "methodology": "2026-08-06.phase1",
+        "quality": "complete",
+        "missingQualification": true
+      }
     ]
   }
 }

@@ -35,11 +35,19 @@ it("exposes every milestone through ocean chapters and preserves measured census
     target: { value: "unique_tests" },
   });
   expect(
-    screen.getByRole("img", { name: "Unique tests: 365 to 417" }),
+    screen.getByRole("img", { name: "Unique tests: 417 to 1,977" }),
   ).toBeInTheDocument();
   expect(
     screen.getByText(/not every repository’s test suite/),
   ).toBeInTheDocument();
+});
+it('selects historical comparisons without discarding the catalogue', async () => {
+  render(<HistorianHistory />);
+  await screen.findByLabelText('Recorded comparison');
+  const old = archive.growthArchive.comparisons[0];
+  fireEvent.change(screen.getByLabelText('Recorded comparison'), { target: { value: old.comparison.id } });
+  expect(screen.getByRole('img', { name: 'Source LOC: 182,107 to 186,730' })).toBeVisible();
+  expect(screen.getByLabelText('Recorded comparison').querySelectorAll('option')).toHaveLength(2);
 });
 it("renders a live census feed without hardcoded archive totals", async () => {
   const live = JSON.parse(JSON.stringify(archive));

@@ -6,6 +6,7 @@ import {
   type HistorianArchive,
 } from "@/lib/historian";
 import styles from "./HistorianHistory.module.css";
+import GrowthArchive from './GrowthArchive';
 const date = (s: string) =>
   Number.isFinite(Date.parse(s)) ? new Date(s).toLocaleDateString("en-US", {
     month: "short",
@@ -452,6 +453,10 @@ export default function HistorianHistory({
     <section className={styles.history} aria-label="Historian archive">
       <Ocean data={data} />
       <div className={styles.measurements} id="history-measurements">
+        <GrowthArchive data={data} onSelect={id => {
+          const selected = data.growthArchive?.comparisons.find(e => e.comparison.id === id);
+          if (selected) setData({ ...data, comparison: selected.comparison, snapshots: selected.snapshots });
+        }} />
         <header className={styles.measurementHeader}>
           <span className={styles.eyebrow}>
             THE SEAFLOOR / RECOVERED EVIDENCE
@@ -534,8 +539,8 @@ export default function HistorianHistory({
             )}
             {metricId === "historian_milestones" && (
               <p>
-                This metric counts the milestone files found by that census (5 →
-                6). The timeline above renders the latest website history feed,
+                This metric counts the milestone files found by the selected census.
+                The timeline above renders the latest website history feed,
                 which can include a different projection scope than the census.
               </p>
             )}

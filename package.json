@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/history-publication.cjs",
     "build": "next build",
     "start": "next start",
     "desktop:dev": "electron desktop/main.cjs",
