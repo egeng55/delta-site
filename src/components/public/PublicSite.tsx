@@ -29,6 +29,9 @@ export function PublicSite({ children }: { children: ReactNode }) {
               <Link href="/research"><span>03</span> Development</Link>
               <Link href="/security"><span>04</span> Security</Link>
               <Link href="/access"><span>05</span> Request access</Link>
+              <Link href="/ecosystem"><span>06</span> Ecosystem</Link>
+              <Link href="/about"><span>07</span> About</Link>
+              <a href="https://geng.systems">Geng Systems ↗</a>
             </nav>
           </div>
           <div className={styles.footerBottom}>

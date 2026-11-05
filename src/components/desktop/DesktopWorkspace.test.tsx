@@ -12,7 +12,7 @@ const originalFetch = global.fetch;
 beforeEach(() => { global.fetch = jest.fn(); });
 afterEach(() => { global.fetch = originalFetch; });
 const access = (role: Parameters<typeof workspaceAccessFor>[1]) => workspaceAccessFor('verified-user', role);
-function selectPage(name: string) { fireEvent.click(within(screen.getByRole('navigation')).getByRole('button', { name: new RegExp(`^${name}`) })); }
+function selectPage(name: string) { fireEvent.click(within(screen.getByRole('navigation', { name: /^(Personal|Studio|Control) navigation$/ })).getByRole('button', { name: new RegExp(`^${name}`) })); }
 function selectSpace(name: string) { fireEvent.click(within(screen.getByRole('group', { name: 'Workspaces' })).getByRole('button', { name })); }
 
 it('keeps the entire owner preview disconnected while navigating all workspaces', () => {

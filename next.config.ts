@@ -44,6 +44,13 @@ if (deltaApiOrigin && !connectSrc.includes(deltaApiOrigin)) {
 }
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      { source: '/history', destination: '/hq/history', permanent: true },
+      // The legacy dashboard remains a local-only development harness.
+      ...(process.env.NODE_ENV === 'production' ? [{ source: '/dashboard', destination: '/hq', permanent: true }] : []),
+    ];
+  },
   env: {
     DELTA_SITE_BUILD_REVISION: siteBuildRevision,
     DELTA_SITE_BUILD_BRANCH: siteBuildBranch,

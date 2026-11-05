@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import WorkspaceLinks from '@/components/WorkspaceLinks';
 import { ArrowDownLeft, ArrowRight, ArrowUpRight, AudioLines, Box, ChevronDown, CircleHelp, Command, Compass, FileText, FlaskConical, FolderGit2, Layers3, LayoutGrid, LockKeyhole, LogOut, Moon, Pause, Play, Search, Settings2, ShieldCheck, Sparkles, Sun, Waves } from 'lucide-react';
 import type { WorkspaceAccess } from '@/lib/workspaceAccess';
 import {requestJson} from '@/lib/requestJson';
@@ -89,6 +90,7 @@ export default function DesktopWorkspace({access,preview=false,initialTask=false
       <div className={styles.sidebarBottom}><div className={styles.sidebarNote}><div className={styles.miniOrbit} aria-hidden="true"/><p>A little clarity.<br/>A lot of possibility.</p></div><button className={styles.utility} onClick={()=>setHelp(v=>!v)}><CircleHelp size={17}/>Workspace guide<ArrowUpRight size={14}/></button><div className={styles.account}><span className={styles.avatar}>{owner?'O':access.role.charAt(0).toUpperCase()}</span><div><b>{owner?'Your Delta':'Private workspace'}</b><small>{owner?'Platform owner':access.role}</small></div><LockKeyhole size={14}/></div></div>
     </aside>
     <div className={styles.canvas}>
+      <WorkspaceLinks />
       <header className={styles.topbar}><div><span>Workspace</span><span className={styles.slash}>/</span><b>{spaces[space]}</b><ChevronDown size={13}/></div><div className={styles.topActions}><span className={styles.sessionBadge}><span/>{preview?'Design preview':'Authenticated workspace'}</span><button aria-label={motion?'Pause ambient motion':'Resume ambient motion'} aria-pressed={!motion} onClick={()=>setMotion(v=>!v)}>{motion?<Pause size={15}/>:<Play size={15}/>}</button><button aria-label={dark?'Use light appearance':'Use dark appearance'} onClick={()=>setDark(v=>!v)}>{dark?<Sun size={17}/>:<Moon size={17}/>}</button><button className={styles.signout} disabled={preview||signingOut} aria-label={signingOut?'Signing out':'Sign out of Delta'} onClick={()=>void signOut()}><LogOut size={15}/></button></div></header>
       {preview&&<div className={styles.previewNotice}><FlaskConical size={15}/><span>Local design preview. Simulations work here; personal data and live operations are disconnected.</span><Link href="/workspace">Open secure workspace <ArrowUpRight size={13}/></Link></div>}
       <main id="workspace-main" className={styles.main}>{signoutError&&<p className={styles.signoutError} role="alert">{signoutError}</p>}

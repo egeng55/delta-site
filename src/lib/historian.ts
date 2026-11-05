@@ -81,6 +81,9 @@ export type HistorianArchive = {
     methodology: string;
     quality: string;
     missingQualification: boolean;
+    scope?: string;
+    values?: Record<string, number | null>;
+    evidence?: { path: string; sha256: string };
   }[];
   milestones: HistorianMilestone[];
   historyFeed?: DeltaHistoryFeed;

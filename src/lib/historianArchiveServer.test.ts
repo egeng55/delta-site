@@ -61,6 +61,19 @@ function snapshot(id: string, capturedAt: string) {
   };
 }
 
+it("includes an unpaired census and only projects bounded measurements and provenance", () => {
+  writeJson("agent/measurements/organizational-observability/census/snapshots/2026-08-25/orgcensus-prior.json", snapshot("prior", "2026-08-25T12:00:00Z"));
+  writeJson("agent/measurements/organizational-observability/census/snapshots/2026-09-30/orgcensus-current.json", snapshot("current", "2026-09-30T12:00:00Z"));
+  writeJson("agent/measurements/organizational-observability/census/snapshots/2026-10-01/orgcensus-unpaired.json", {...snapshot("unpaired", "2026-10-01T12:00:00Z"), physical_scale:{unique_source_loc:42}, private_context:"never publish"});
+  writeJson("agent/measurements/organizational-observability/comparisons/latest.json", comparison("latest", "2026-09-30T12:00:00Z",297386));
+  writeJson("agent/historian/projections/current.json", {projection_type:"evolution_timeline", entries:[]});
+  const result = readHistorianArchive();
+  expect(result.growthArchive?.checkpoints).toHaveLength(3);
+  expect(result.growthArchive?.checkpoints.at(-1)?.values?.source_loc).toBe(42);
+  expect(JSON.stringify(result)).not.toContain("never publish");
+  expect(result.growthArchive?.checkpoints.at(-1)?.evidence?.sha256).toMatch(/^[a-f0-9]{64}$/);
+});
+
 function comparison(id: string, currentDate: string, currentSourceLoc: number) {
   return {
     schema_version: 1,

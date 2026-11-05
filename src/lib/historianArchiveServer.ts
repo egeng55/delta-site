@@ -157,6 +157,14 @@ function readSnapshot(agentRoot: string, relativePath: string) {
     throw new Error("invalid_census_ref");
   }
   const { raw, parsed } = readBoundedJson(agentRoot, relativePath);
+  if (parsed.snapshot_type !== "structural_census" || !dateMs(parsed.captured_at)) throw new Error("invalid_census");
+  const physical = isRecord(parsed.physical_scale) ? parsed.physical_scale : {};
+  const verification = isRecord(parsed.verification_scale) ? parsed.verification_scale : {};
+  const provenance = isRecord(parsed.provenance) ? parsed.provenance : {};
+  const sources = Array.isArray(provenance.included_sources) ? provenance.included_sources.filter(isRecord) : [];
+  const scope = sources.filter(s => s.counted_for_implementation === true)
+    .map(s => `${s.repository}:${s.source_role}`).sort().join("|");
+  const measurement = (v: unknown) => typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null;
   const organizationalScale = isRecord(parsed.organizational_scale) ? parsed.organizational_scale : {};
   const qualified = isRecord(organizationalScale.qualified_intelligent_agents)
     ? organizationalScale.qualified_intelligent_agents.value
@@ -169,6 +177,9 @@ function readSnapshot(agentRoot: string, relativePath: string) {
       methodology: stringValue(parsed.methodology_version) ?? "unknown",
       quality: isRecord(parsed.data_quality) ? stringValue(parsed.data_quality.state) ?? "unknown" : "unknown",
       missingQualification: qualified === null,
+      scope,
+      values: { source_loc: measurement(physical.unique_source_loc), test_loc: measurement(physical.test_loc), source_files: measurement(physical.source_files), unique_tests: measurement(verification.unique_tests) },
+      evidence: { path: relativePath, sha256: sha256(raw) },
     },
   };
 }
@@ -430,8 +441,15 @@ export function readHistorianArchive(): HistorianArchive {
           if (!entry) throw new Error('incomplete_growth_record');
           return { comparison: entry.comparison, snapshots: entry.snapshots };
         }).sort((a, b) => Date.parse(a.comparison.recordedAt) - Date.parse(b.comparison.recordedAt));
+        const checkpoints = listJsonFiles(agentRoot, SNAPSHOT_ROOT).map(file => readSnapshot(agentRoot, file).projected);
+        if (new Set(checkpoints.map(s => s.id)).size !== checkpoints.length) throw new Error("duplicate_census_id");
         live.growthArchive = { version: 1, comparisons: entries,
-          checkpoints: [...new Map(entries.flatMap(e => e.snapshots).map(s => [s.id, s])).values()].sort((a, b) => Date.parse(a.date) - Date.parse(b.date)) };
+          checkpoints: checkpoints.sort((a, b) => Date.parse(a.date) - Date.parse(b.date)) };
+        if (live.freshness) live.freshness.latestAcceptedSourceTime = checkpoints.at(-1)?.date ?? null;
+        live.provenance = [...new Map([...live.provenance, ...checkpoints.map(s => s.evidence)].map(p => [p.path, p])).values()];
+        // A stale local checkout must not hide a newer pinned publication.
+        const bundledLatest = Math.max(...(fallbackArchive.growthArchive?.checkpoints ?? []).map(s => dateMs(s.date)));
+        if (!process.env.DELTA_AGENT_ROOT && dateMs(checkpoints.at(-1)?.date) < bundledLatest) throw new Error("older_local_archive");
         return live;
       }
     } catch {
@@ -445,7 +463,7 @@ export function readHistorianArchive(): HistorianArchive {
     freshness: {
       state: "fallback",
       generatedAt: fallbackArchive.comparison.recordedAt,
-      latestAcceptedSourceTime: fallbackArchive.snapshots.at(-1)?.date ?? null,
+      latestAcceptedSourceTime: fallbackArchive.growthArchive?.checkpoints.at(-1)?.date ?? fallbackArchive.snapshots.at(-1)?.date ?? null,
     },
   };
 }

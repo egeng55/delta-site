@@ -1,0 +1,7 @@
+.links { display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:12px 18px; background:#f6f8f7; color:#24443b; border-bottom:1px solid #d3e0d9; font-size:12px; letter-spacing:0; }
+.links a { display:inline-flex; align-items:center; gap:7px; padding:8px 4px; min-height:36px; text-decoration:none; color:inherit; }
+.links a:hover,.links a[aria-current=page] { color:#126a4f; text-decoration:underline; text-underline-offset:5px; }
+.links a:focus-visible { outline:2px solid #318366; outline-offset:2px; }
+.compact { flex-direction:column; align-items:stretch; background:transparent; color:inherit; border:0; padding:8px 0; gap:0; }
+.compact a { font-size:12px; }
+@media(max-width:480px) { .links:not(.compact) { gap:0 12px; padding:8px 14px; } }

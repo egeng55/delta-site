@@ -74,8 +74,18 @@ function projectArchive(root,options={}){
  const archive={version:1,sourceMode:'bundled_archive',freshness:{state:'fallback',generatedAt:c.recorded_at,latestAcceptedSourceTime:snapshots.at(-1)?.date??null},sourceCommit:commit,archiveThrough:t.timeline_window.to,provenance,snapshots,milestones,historyFeed:buildHistoryFeed(t,milestones),comparison:{id:c.artifact_id,recordedAt:c.recorded_at,methodology:c.methodology_version,metrics:c.side_by_side_metrics,repositories:c.repo_breakdown,interpretation:c.growth_interpretation,limitations:c.known_limitations}};
  if(options.includeHistory!==false){
   const entries=comparisonFiles.map(file=>projectArchive(root,{ref:commit,comparisonPath:file,includeHistory:false})).sort((a,b)=>Date.parse(a.comparison.recordedAt)-Date.parse(b.comparison.recordedAt));
-  archive.growthArchive={version:1,comparisons:entries.map(e=>({comparison:e.comparison,snapshots:e.snapshots})),checkpoints:[...new Map(entries.flatMap(e=>e.snapshots).map(s=>[s.id,s])).values()].sort((a,b)=>Date.parse(a.date)-Date.parse(b.date))};
-  archive.provenance=[...new Map(entries.flatMap(e=>e.provenance).map(p=>[p.path,p])).values()];
+  const checkpoints=list('agent/measurements/organizational-observability/census/snapshots').map(file=>{
+   const s=read(file);
+   if(s.snapshot_type!=='structural_census'||typeof s.census_id!=='string'||!Number.isFinite(Date.parse(s.captured_at)))throw Error('invalid_census');
+   const measurement=v=>typeof v==='number'&&Number.isFinite(v)&&v>=0?v:null;
+   const scope=(s.provenance?.included_sources||[]).filter(x=>x.counted_for_implementation===true).map(x=>`${x.repository}:${x.source_role}`).sort().join('|');
+   return {id:s.census_id,date:s.captured_at,methodology:s.methodology_version,quality:s.data_quality?.state||'unknown',missingQualification:s.organizational_scale?.qualified_intelligent_agents?.value==null,scope,
+    values:{source_loc:measurement(s.physical_scale?.unique_source_loc),test_loc:measurement(s.physical_scale?.test_loc),source_files:measurement(s.physical_scale?.source_files),unique_tests:measurement(s.verification_scale?.unique_tests)},evidence:{path:file,sha256:createHash('sha256').update(raw(file)).digest('hex')}};
+  }).sort((a,b)=>Date.parse(a.date)-Date.parse(b.date));
+  if(new Set(checkpoints.map(s=>s.id)).size!==checkpoints.length)throw Error('duplicate_census_id');
+  archive.growthArchive={version:1,comparisons:entries.map(e=>({comparison:e.comparison,snapshots:e.snapshots})),checkpoints};
+  archive.freshness.latestAcceptedSourceTime=checkpoints.at(-1)?.date??null;
+  archive.provenance=[...new Map([...provenance,...entries.flatMap(e=>e.provenance)].map(p=>[p.path,p])).values()];
  }
  return archive;
 }

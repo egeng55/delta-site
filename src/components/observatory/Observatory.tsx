@@ -65,7 +65,7 @@ function readSection(): Section {
     hash,
   )
     ? (hash as Section)
-    : "overview";
+    : window.location.pathname.endsWith("/history") ? "history" : "overview";
 }
 function navigate(section: Section) {
   if (readSection() === section) return;
@@ -294,6 +294,9 @@ export default function Observatory({
             <LockKeyhole size={14} />
             {preview ? "Design sandbox" : "Private workspace"}
           </span>
+          <Link href="/workspace">Workspace <ArrowUpRight size={15} /></Link>
+          <Link href="/app">Delta Chat <ArrowUpRight size={15} /></Link>
+          <Link href="/command">Connections <ArrowUpRight size={15} /></Link>
           <Link href="/">
             Delta website <ArrowUpRight size={15} />
           </Link>

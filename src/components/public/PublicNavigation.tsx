@@ -12,6 +12,8 @@ const links = [
   { href: "/product", index: "02", label: "Product" },
   { href: "/research", index: "03", label: "Development" },
   { href: "/security", index: "04", label: "Security" },
+  { href: "/ecosystem", index: "05", label: "Ecosystem" },
+  { href: "/about", index: "06", label: "About" },
 ];
 
 export default function PublicNavigation() {

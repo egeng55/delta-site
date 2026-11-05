@@ -6,32 +6,32 @@
     "generatedAt": "2026-10-28T15:41:09.401Z",
     "latestAcceptedSourceTime": "2026-10-28T15:41:09.401Z"
   },
-  "sourceCommit": "a970a8233c039f0e6978596ceba2132da729910d",
+  "sourceCommit": "ffce9a62db6f6681c4a6124ea6b2d948c6db5714",
   "archiveThrough": "2026-08-08T11:06:12-04:00",
   "provenance": [
     {
-      "path": "agent/measurements/organizational-observability/comparisons/2026-08-12/canonical-numerical-progress-2026-08-07-to-2026-08-12.json",
-      "sha256": "2188eb88d6cbff0e9e58a14bb7facf7ac7c0a72b3271f28a4716611d8d10f469"
+      "path": "agent/measurements/organizational-observability/comparisons/2026-10-28/canonical-numerical-progress-2026-08-12-to-2026-10-28.json",
+      "sha256": "80ad9de1ebb5c7ed24566714315c93b794a66ec1a801ad2b99120a8751df78db"
     },
     {
       "path": "agent/historian/projections/evolution-timeline-2026-09-30-stats-origin-backfill.json",
       "sha256": "d4bd717aee194e26fa2b6b0cfe8449bff9ee1c930d8bbbf3908000f89657fa03"
     },
     {
-      "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-07/orgcensus-55895242-843e-47c2-9d63-2b336d475d2e.json",
-      "sha256": "048069f2205ab4a4f3fb3f980431fa52a51c5d564cff05ecf7510184fe80074b"
-    },
-    {
       "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-12/orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16.json",
       "sha256": "fd7ed52007aded3955c7d7e509eb46efdf852097b7503d870828214bbda90575"
     },
     {
-      "path": "agent/measurements/organizational-observability/comparisons/2026-10-28/canonical-numerical-progress-2026-08-12-to-2026-10-28.json",
-      "sha256": "80ad9de1ebb5c7ed24566714315c93b794a66ec1a801ad2b99120a8751df78db"
-    },
-    {
       "path": "agent/measurements/organizational-observability/census/snapshots/2026-10-28/orgcensus-0e15cc7c-e775-46e9-830a-c720f2e86041.json",
       "sha256": "debd10af966830729bc0060f2d3c35f762e0d2b89b2518ee59450881d13e016e"
+    },
+    {
+      "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-07/orgcensus-55895242-843e-47c2-9d63-2b336d475d2e.json",
+      "sha256": "048069f2205ab4a4f3fb3f980431fa52a51c5d564cff05ecf7510184fe80074b"
+    },
+    {
+      "path": "agent/measurements/organizational-observability/comparisons/2026-08-12/canonical-numerical-progress-2026-08-07-to-2026-08-12.json",
+      "sha256": "2188eb88d6cbff0e9e58a14bb7facf7ac7c0a72b3271f28a4716611d8d10f469"
     }
   ],
   "snapshots": [
@@ -2037,21 +2037,54 @@
         "date": "2026-08-07T20:10:30-04:00",
         "methodology": "2026-08-06.phase1",
         "quality": "complete",
-        "missingQualification": true
+        "missingQualification": true,
+        "scope": "delta-agent:canonical|delta-backend:canonical|delta-jobs:canonical|delta-mobile:canonical|delta-site:canonical",
+        "values": {
+          "source_loc": 182107,
+          "test_loc": 52307,
+          "source_files": 562,
+          "unique_tests": 365
+        },
+        "evidence": {
+          "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-07/orgcensus-55895242-843e-47c2-9d63-2b336d475d2e.json",
+          "sha256": "048069f2205ab4a4f3fb3f980431fa52a51c5d564cff05ecf7510184fe80074b"
+        }
       },
       {
         "id": "orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16",
         "date": "2026-08-12T14:15:12-04:00",
         "methodology": "2026-08-06.phase1",
         "quality": "complete",
-        "missingQualification": true
+        "missingQualification": true,
+        "scope": "delta-agent:canonical|delta-backend:canonical|delta-jobs:canonical|delta-mobile:canonical|delta-site:canonical",
+        "values": {
+          "source_loc": 186730,
+          "test_loc": 54130,
+          "source_files": 568,
+          "unique_tests": 417
+        },
+        "evidence": {
+          "path": "agent/measurements/organizational-observability/census/snapshots/2026-08-12/orgcensus-6f1391c5-601f-4a81-a602-69e84f237e16.json",
+          "sha256": "fd7ed52007aded3955c7d7e509eb46efdf852097b7503d870828214bbda90575"
+        }
       },
       {
         "id": "orgcensus-0e15cc7c-e775-46e9-830a-c720f2e86041",
         "date": "2026-10-28T15:41:09.401Z",
         "methodology": "2026-08-06.phase1",
         "quality": "complete",
-        "missingQualification": true
+        "missingQualification": true,
+        "scope": "delta-agent:canonical|delta-backend:canonical|delta-jobs:canonical|delta-mobile:canonical|delta-site:canonical",
+        "values": {
+          "source_loc": 329707,
+          "test_loc": 102364,
+          "source_files": 1220,
+          "unique_tests": 1977
+        },
+        "evidence": {
+          "path": "agent/measurements/organizational-observability/census/snapshots/2026-10-28/orgcensus-0e15cc7c-e775-46e9-830a-c720f2e86041.json",
+          "sha256": "debd10af966830729bc0060f2d3c35f762e0d2b89b2518ee59450881d13e016e"
+        }
       }
     ]
   }

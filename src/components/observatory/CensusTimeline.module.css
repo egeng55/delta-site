@@ -1,0 +1,31 @@
+.root { padding: 36px; background: #f4f7f5; color: #172c28; border-bottom: 1px solid #b8ccc4; letter-spacing: 0; }
+.heading { display:flex; gap:24px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; }
+.root h2 { font-size:32px; line-height:1.15; margin:8px 0 14px; }
+.root h3 { font-size:21px; margin:10px 0; }
+.root h4 { font-size:14px; margin:24px 0 12px; }
+.root p { line-height:1.6; font-size:14px; }
+.kicker { font-size:11px !important; font-weight:700; color:#346b59; }
+.heading label { display:grid; gap:8px; font-size:12px; }
+.heading select { min-height:42px; padding:8px 32px 8px 12px; background:white; border:1px solid #8baba0; border-radius:4px; color:#172c28; }
+.totals { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin:28px 0; padding:24px 0; border-block:1px solid #b8ccc4; }
+.totals div { display:grid; gap:10px; }
+.totals span,.totals small { font-size:12px; line-height:1.5; }
+.totals strong { font-size:28px; line-height:1.1; overflow-wrap:anywhere; }
+.timeline { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:28px; }
+.timeline ol { margin:0; padding:0; list-style:none; }
+.timeline button { display:grid; width:100%; grid-template-columns:120px minmax(40px,1fr) minmax(80px,auto); align-items:center; gap:12px; text-align:left; padding:20px 12px; border:0; border-bottom:1px solid #c3d4cb; background:transparent; color:inherit; cursor:pointer; border-radius:0; }
+.timeline button[aria-pressed=true] { background:#e0ede6; box-shadow:inset 3px 0 #286a54; }
+.timeline button:hover { background:#e8f0eb; }
+.root :focus-visible { outline:2px solid #286a54; outline-offset:3px; }
+.timeline time { font-size:13px; }
+.timeline small { grid-column:1/-1; font-size:11px; color:#46665a; }
+.track { height:8px; background:#cfdfd6; }
+.track span { display:block; height:100%; background:#347763; }
+.timeline aside { border-left:1px solid #b8ccc4; padding-left:24px; min-width:0; }
+.timeline ul { padding-left:20px; font-size:13px; }
+.timeline li p { font-size:12px; }
+.identity,.timeline details p { overflow-wrap:anywhere; font-size:11px !important; }
+.timeline summary { cursor:pointer; font-size:13px; padding:16px 0; }
+.note { margin-top:24px; max-width:1000px; font-size:12px !important; color:#46665a; }
+@media(max-width:800px) { .root { padding:24px 18px; } .timeline { grid-template-columns:1fr; } .timeline aside { border-left:0; border-top:1px solid #b8ccc4; padding:20px 0 0; } .totals { gap:16px; } .totals strong { font-size:23px; } }
+@media(max-width:440px) { .totals { grid-template-columns:1fr; } .totals div { grid-template-columns:1fr 1fr; } .totals small { grid-column:1/-1; } .timeline button { grid-template-columns:100px minmax(20px,1fr) auto; gap:8px; padding-inline:8px; } }

@@ -1,17 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import WorkspaceLinks from "@/components/WorkspaceLinks";
 import Link from "next/link";
 import {
   ArrowUp,
-  BookOpenText,
   Menu,
-  MessageSquareText,
   Plus,
-  Settings,
   ShieldCheck,
   Square,
-  UserRound,
   X,
   RefreshCw,
 } from "lucide-react";
@@ -243,25 +240,7 @@ function AccountChatWorkspace() {
         <nav className={styles.history} aria-label="Saved conversations">
           {threads.map(thread => <button key={thread.id} type="button" title={thread.title} onClick={() => void openConversation(thread.id)} aria-current={activeThread === thread.id ? 'page' : undefined}>{thread.title}</button>)}
         </nav>
-        <nav className={styles.appNav} aria-label="Delta workspace">
-          <span>Workspace</span>
-          <Link href="/app" aria-current="page">
-            <MessageSquareText size={17} />
-            Chat
-          </Link>
-          <Link href="/command">
-            <BookOpenText size={17} />
-            Connections
-          </Link>
-          <Link href="/account">
-            <UserRound size={17} />
-            Account
-          </Link>
-          <Link href="/settings">
-            <Settings size={17} />
-            Settings
-          </Link>
-        </nav>
+        <WorkspaceLinks compact />
         <div className={styles.sidebarNote}>
           <ShieldCheck size={16} />
           <p>

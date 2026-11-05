@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import CensusTimeline from "./CensusTimeline";
 import {
   historianNumber as number,
   historyTracks,
@@ -303,7 +304,7 @@ function Ocean({ data }: { data: HistorianArchive }) {
                 <>
                   <p className={styles.archiveLine}>
                     {data.milestones.length} milestones ·{" "}
-                    {data.snapshots.length} censuses · 5 repositories
+                    {data.growthArchive?.checkpoints.length ?? data.snapshots.length} retained censuses
                   </p>
                   <button className={styles.descend} onClick={() => jump(1)}>
                     Scroll to descend <span>↓</span>
@@ -451,6 +452,7 @@ export default function HistorianHistory({
     max = Math.max(metric.previous ?? 0, metric.current ?? 0, 1);
   return (
     <section className={styles.history} aria-label="Historian archive">
+      <CensusTimeline data={data} />
       <Ocean data={data} />
       <div className={styles.measurements} id="history-measurements">
         <GrowthArchive data={data} onSelect={id => {
@@ -463,8 +465,8 @@ export default function HistorianHistory({
           </span>
           <h2>What lies beneath.</h2>
           <p>
-            {data.snapshots.length} structural censuses. The latest available
-            measurements, interpretations, and source trail.
+            Selected comparison window: {snapshotPeriod(data)}. Measurements,
+            interpretations, and source trail for this window.
           </p>
           <p className={styles.footnote}>
             Feed: {data.sourceMode === "live_agent_store" ? "live agent store" : "bundled fallback archive"}
