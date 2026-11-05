@@ -1,7 +1,10 @@
 # Connected sites delivery
 
-Local implementation only. No merge, push, deployment, authentication changes,
-provider calls or canonical history writes were performed.
+Release candidate approved for publication on November 5, 2026. Based on the
+currently deployed `3295782`, with the retained-history publication prerequisite
+and this connected-sites change only. Unreleased Gmail and Organization changes
+on local main are intentionally excluded. No authentication-policy, database,
+provider-execution or canonical history changes are part of this release.
 
 ## History
 
@@ -34,20 +37,26 @@ Related isolated worktrees:
 
 ## Verification
 
-- 511 Jest assertions passed, five skipped, across 95 suites. Run the two
-  `scripts/export-*.test.cjs` files with Node's test runner, not Jest: four pass.
+- `npm test -- --runInBand --watchman=false`: 492 Jest tests passed, five skipped,
+  across 90 suites, plus two Node tests. The standard command now selects the
+  correct runner for CommonJS Node tests rather than treating them as Jest tests.
 - Typechecked production build passed with a dummy loopback backend URL and no
   production credentials. Existing webpack createRequire warnings remain.
-- Preflight and advisory safety scan completed. Repository-wide lint retains
-  14 pre-existing CommonJS import errors in three untouched script files and
-  existing effect warnings; touched-code lint is checked separately.
+- Clean dependency installation completed. Next.js and its ESLint configuration
+  are pinned to 16.4.5 to resolve the production dependency audit findings.
+  `npm audit --omit=dev --audit-level=moderate` reports zero vulnerabilities.
+- Repository-wide lint passes with zero errors and four existing effect warnings.
+  CommonJS import rules are scoped to Node script tests and the publication script.
 - Playwright checked public navigation at 390, 820, 900, 1024, 1100 and 1440px,
   mobile menu navigation, redirects, and denied unconfigured private endpoints.
 - History screenshots were rendered locally from the component and bounded
   archive, not through an authenticated production session. Interactive selection
   and metric changes are covered by component tests. No auth bypass route added.
-- Geng production build and 12 checks pass; its demo return-link test uses static
-  AST inspection only (no app, SQLite database or provider started).
+- Geng clean install, production build, 12 checks and production dependency audit
+  pass. The demo change is rebased on the current live `c3b5938`; 15 bounded demo
+  tests and 86 JavaScript tests pass. Demo tests use disposable fictional databases
+  with outbound access denied; no live database is accessed.
 
 Logs and screenshots: `/tmp/connected-*`. Portrait intentionally deferred until
-Eric supplies the selected image. Live sites are unchanged.
+Eric supplies the selected image. Deployment completion requires provider READY
+or live status, exact source-commit verification and post-release browser checks.

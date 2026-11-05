@@ -7,6 +7,10 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    files: ["scripts/*.test.cjs", "scripts/history-publication.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+  {
     plugins: {
       "react-hooks": reactHooks,
     },
