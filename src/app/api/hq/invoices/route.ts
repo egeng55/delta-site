@@ -1,6 +1,7 @@
 import {NextRequest,NextResponse} from 'next/server';
 import {observationClient} from '@/lib/hostedObservationServer';
 import {parseInvoice} from '@/lib/providerInvoices';
+import {isHqOrigin} from '@/lib/hqOrigin';
 export const dynamic='force-dynamic';
 const headers={'Cache-Control':'private, no-store',Vary:'Cookie','X-Content-Type-Options':'nosniff'};
 export async function GET(){
@@ -10,7 +11,7 @@ export async function GET(){
  try{return NextResponse.json({source:'owner_imported',verifiedByProvider:false,limit:50,invoices:(data??[]).map(row=>({invoice:parseInvoice(row.document),importedAt:row.imported_at}))},{headers});}catch{return NextResponse.json({error:'invalid_stored_invoice'},{status:503,headers});}
 }
 export async function POST(request:NextRequest){
- if(request.headers.get('origin')!==request.nextUrl.origin)return NextResponse.json({error:'same_origin_required'},{status:403,headers});
+ if(!isHqOrigin(request))return NextResponse.json({error:'same_origin_required'},{status:403,headers});
  const auth=await observationClient();if(!auth)return NextResponse.json({error:'owner_access_required'},{status:403,headers});
  try{
   if(!request.headers.get('content-type')?.startsWith('application/json')||Number(request.headers.get('content-length'))>8000)return NextResponse.json({error:'invalid_invoice_body'},{status:413,headers});

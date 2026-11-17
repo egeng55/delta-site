@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { proxy as middleware } from './src/proxy';
+import { proxy as middleware, config } from './src/proxy';
 import { accountAdmission } from './src/lib/accountAdmission';
 jest.mock('./src/lib/accountAdmission', () => ({ accountAdmission: jest.fn() }));
 
@@ -102,4 +102,57 @@ test('workspace fails closed when authentication is not configured', async () =>
   const response = await middleware(new NextRequest('https://delta.example.invalid/workspace'));
   expect(response.status).toBe(503);
   expect(createClient).not.toHaveBeenCalled();
+});
+
+describe('HQ API owner boundary', () => {
+  const owner = '11111111-2222-4333-8444-555555555555';
+  const hqApi = () => new NextRequest('https://delta.example.invalid/api/hq/workspace');
+  function sessionUser(user: Record<string, unknown> | null) {
+    createClient.mockImplementation((_url, _key, options) => ({
+      auth: { getUser: async () => {
+        options.cookies.setAll?.([{ name: 'session.0', value: 'refreshed', options: { httpOnly: true } }]);
+        return { data: { user }, error: null };
+      } },
+    } as unknown as ReturnType<typeof createServerClient>));
+  }
+
+  test('is in the middleware matcher', () => {
+    expect(config.matcher).toContain('/api/hq/:path*');
+  });
+  test('is unavailable when no owner is configured, before any auth lookup', async () => {
+    const response = await middleware(hqApi());
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: 'owner_access_required' });
+    expect(createClient).not.toHaveBeenCalled();
+  });
+  test('is unavailable without Supabase configuration', async () => {
+    process.env.DELTA_HQ_OWNER_USER_ID = owner;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    expect((await middleware(hqApi())).status).toBe(503);
+  });
+  test('rejects a signed-out request', async () => {
+    process.env.DELTA_HQ_OWNER_USER_ID = owner;
+    sessionUser(null);
+    expect((await middleware(hqApi())).status).toBe(401);
+  });
+  test.each([
+    ['another user', { id: '99999999-2222-4333-8444-555555555555', email_confirmed_at: '2026-01-01' }],
+    ['an anonymous owner session', { id: owner, is_anonymous: true, email_confirmed_at: '2026-01-01' }],
+    ['an unconfirmed owner email', { id: owner, email_confirmed_at: null }],
+  ])('rejects %s', async (_label, user) => {
+    process.env.DELTA_HQ_OWNER_USER_ID = owner;
+    sessionUser(user);
+    const response = await middleware(hqApi());
+    expect(response.status).toBe(403);
+    expect(response.headers.get('cache-control')).toContain('no-store');
+  });
+  test('admits the owner with refreshed cookies and without the page admission lookup', async () => {
+    jest.mocked(accountAdmission).mockClear();
+    process.env.DELTA_HQ_OWNER_USER_ID = owner;
+    sessionUser({ id: owner, email_confirmed_at: '2026-01-01' });
+    const response = await middleware(hqApi());
+    expect(response.status).toBe(200);
+    expect(response.cookies.get('session.0')?.value).toBe('refreshed');
+    expect(accountAdmission).not.toHaveBeenCalled();
+  });
 });

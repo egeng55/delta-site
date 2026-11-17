@@ -4,6 +4,10 @@ import { authRedirect } from './lib/authRedirect';
 import { accountAdmission } from './lib/accountAdmission';
 
 const OWNER_HQ_ROUTE = '/hq';
+// Deny-by-default boundary for owner APIs: a handler that forgets its own owner
+// check is still unreachable. Mirrors requireObservatoryOwner's status codes.
+const HQ_API_ROUTE = '/api/hq';
+const OWNER_ID = /^[a-f0-9-]{36}$/i;
 const PROTECTED_ROUTES = [
   OWNER_HQ_ROUTE,
   '/app',
@@ -23,6 +27,16 @@ function isOsConsoleRoute(pathname: string): boolean {
   return pathname === OS_CONSOLE_ROUTE || pathname.startsWith(`${OS_CONSOLE_ROUTE}/`);
 }
 
+function isHqApiRoute(pathname: string): boolean {
+  return pathname === HQ_API_ROUTE || pathname.startsWith(`${HQ_API_ROUTE}/`);
+}
+
+function hqApiDenied(status: 401 | 403 | 503): NextResponse {
+  return NextResponse.json({ error: 'owner_access_required' }, {
+    status, headers: { 'Cache-Control': 'private, no-store, max-age=0', Vary: 'Cookie' },
+  });
+}
+
 function isLocalOnlyRoute(pathname: string): boolean {
   return LOCAL_ONLY_ROUTES.some(
     route => pathname === route || pathname.startsWith(`${route}/`),
@@ -40,6 +54,8 @@ export async function proxy(request: NextRequest) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const isOsRoute = isOsConsoleRoute(pathname);
   const isInternalRoute = isLocalOnlyRoute(pathname);
+  const isHqApi = isHqApiRoute(pathname);
+  const ownerId = process.env.DELTA_HQ_OWNER_USER_ID;
 
   if (isInternalRoute && process.env.NODE_ENV === 'production') {
     return new NextResponse('Not found', {
@@ -53,6 +69,8 @@ export async function proxy(request: NextRequest) {
   if (isOsRoute || (pathname === '/workspace-preview' && process.env.NODE_ENV === 'development')) {
     return response;
   }
+
+  if (isHqApi && (!supabaseUrl || !supabaseAnonKey || !ownerId || !OWNER_ID.test(ownerId))) return hqApiDenied(503);
 
   if (!supabaseUrl || !supabaseAnonKey) {
     const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
@@ -82,6 +100,12 @@ export async function proxy(request: NextRequest) {
   let user;
   try { const result = await supabase.auth.getUser(); user = result.data.user; }
   catch { return new NextResponse('Authentication temporarily unavailable', { status: 503, headers: { 'Cache-Control': 'private, no-store' } }); }
+
+  if (isHqApi) {
+    if (!user) return hqApiDenied(401);
+    if (user.id !== ownerId || user.is_anonymous || !user.email_confirmed_at) return hqApiDenied(403);
+    return response;
+  }
 
   const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
   const isAuthRoute = AUTH_ROUTES.some(route => pathname.startsWith(route));
@@ -120,6 +144,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     '/hq/:path*',
+    '/api/hq/:path*',
     '/app/:path*',
     '/workspace/:path*',
     '/workspace-preview/:path*',
