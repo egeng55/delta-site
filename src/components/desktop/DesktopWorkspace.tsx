@@ -57,7 +57,7 @@ export default function DesktopWorkspace({access,preview=false,initialTask=false
     setSigningOut(true);
     setSignoutError('');
     try {
-      const response = await requestJson('/api/hq/signout', {method: 'POST'});
+      const response = await requestJson('/api/auth/signout', {method: 'POST'});
       if (!response.ok) throw Error();
       // Discard the authenticated document and its private in-memory state after signout.
       // eslint-disable-next-line @next/next/no-location-assign-relative-destination

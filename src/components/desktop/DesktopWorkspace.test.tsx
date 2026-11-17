@@ -127,7 +127,7 @@ it('locks a pending signout and allows one explicit retry after failure', async 
   fireEvent.click(button);
   expect(screen.getByRole('button', { name: 'Signing out' })).toBeDisabled();
   expect(fetch).toHaveBeenCalledTimes(1);
-  expect(fetch).toHaveBeenCalledWith('/api/hq/signout', expect.objectContaining({ method: 'POST' }));
+  expect(fetch).toHaveBeenCalledWith('/api/auth/signout', expect.objectContaining({ method: 'POST' }));
   await act(async () => { finish({ ok: false, status: 503 }); });
   expect(await screen.findByRole('alert')).toHaveTextContent('Sign out failed. Try again to confirm your session has ended.');
   expect(screen.getByRole('button', { name: 'Sign out of Delta' })).toBeEnabled();

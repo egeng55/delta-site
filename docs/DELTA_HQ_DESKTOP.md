@@ -55,7 +55,9 @@ analytics unless Core later publishes an authorized observability reference.
 
 ## Shared View Model
 
-HQ consumes `DeltaHqViewModel` from `src/lib/deltaHqViewModel.ts`.
+HQ renders the Observatory (`src/components/observatory/Observatory.tsx`) from
+`readObservatoryReport()` in `src/lib/observatoryServer.ts`. The earlier
+`DeltaHqViewModel` adapter was removed on 2026-11-17; only its tests used it.
 
 The adapter is presentation-facing. It does not claim to be the Core Event Bus,
 Agent Lifecycle Manager, or Organizational Observability source of truth. Fields

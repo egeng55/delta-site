@@ -9,3 +9,9 @@ beforeEach(()=>jest.clearAllMocks());
 it('denies cross-origin writes before opening the owner data connection',async()=>{expect((await POST(req('https://evil.test'))).status).toBe(403);expect(observationClient).not.toHaveBeenCalled();});
 it('denies unauthenticated reads and imports',async()=>{jest.mocked(observationClient).mockResolvedValue(null);expect((await GET()).status).toBe(403);expect((await POST(req())).status).toBe(403);});
 it('binds owner server-side and preserves duplicate protection',async()=>{const insert=jest.fn().mockResolvedValue({error:{code:'23505'}});jest.mocked(observationClient).mockResolvedValue({owner:'verified-owner',client:{from:()=>({insert})}} as never);expect((await POST(req())).status).toBe(409);expect(insert).toHaveBeenCalledWith(expect.objectContaining({owner_id:'verified-owner',invoice_id:'inv_test'}));expect((await POST(req('https://delta.test',{...invoice,owner_id:'attacker'}))).status).toBe(400);expect(insert).toHaveBeenCalledTimes(1);});
+
+it('accepts the served loopback host when Next normalizes its internal URL',async()=>{
+  const request=new NextRequest('http://localhost:3112/api/hq/invoices',{method:'POST',headers:{host:'127.0.0.1:3112',origin:'http://127.0.0.1:3112','Content-Type':'application/json'},body:JSON.stringify(invoice)});
+  // The origin gate passes; the owner check (mocked out here) decides next.
+  expect((await (await POST(request)).json()).error).not.toBe('same_origin_required');
+});
